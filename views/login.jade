@@ -1,0 +1,33 @@
+extends layout
+
+block append css
+  link(rel='stylesheet', href='stylesheets/social-buttons.css')
+
+block content
+  form.form-horizontal(action='login', method='post')
+    if errorMessage.length>0
+      .alert.alert-block.alert-error
+        h4 Login failed
+        each message in errorMessage
+          p= errorMessage
+
+    .control-group
+      label.control-label(for='user') Username
+      .controls
+        input#user(type='text', name='username', placeholder='Insert username')
+    .control-group
+      label.control-label(for='pass') Password
+      .controls
+        input#pass(type='password', name='password', placeholder='password')
+    .control-group
+      .controls
+        p: .btn-group
+          button.btn.btn-primary(type='submit') LogIn
+          a.btn(href='register') Register
+        p: .btn-group
+          a.btn.btn-facebook(href='connect/facebook')
+            i.icon-facebook-sign
+            |  | LogIn with Facebook
+          a.btn.btn-twitter(href='connect/twitter')
+            i.icon-twitter
+            |  | LogIn with Twitter

@@ -1,0 +1,25 @@
+{
+  "root": ".",
+  "glob": [
+    "./**/*.js",
+    "./*.js",
+    "README.md"
+  ],
+  "except": [
+    "./.git/**",
+    "./node_modules/**",
+    "./public/**",
+    "./logs/**",
+    "./data/**",
+    "./scripts/**",
+    "./views/**",
+    "./uploads/**",
+    "./docs/**"
+  ],
+
+  "out": "./docs",
+  "index": "README.md",
+
+  "verbose": true,
+  "very-verbose": true
+}

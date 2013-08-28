@@ -1,0 +1,29 @@
+extends layout
+
+block content
+  form.form-horizontal(action='register', method='post')
+    .control-group
+      label.control-label(for='name') Full name
+      .controls
+        input#name(type='text', name='name', placeholder='Name Surname', required)
+    //.control-group
+      label.control-label(for='bDay') Birthday
+      .controls
+        input#bDay(type='date', name='birthday', placeholder='dd/mm/yyyy')
+    .control-group
+      label.control-label(for='user') Username
+      .controls
+        input#user(type='text', name='username', placeholder='Insert username', required)
+    .control-group
+      label.control-label(for='pass') Password
+      .controls
+        input#pass(type='password', name='password', placeholder='password', required)
+    .control-group
+      label.control-label(for='mail') E-mail
+      .controls
+        input#mail(type='email', name='email', placeholder='user@host.com', required)
+    .control-group
+      .controls
+        .btn-group
+          button.btn.btn-primary(type='submit') Send
+          button.btn(type='reset') Reset

@@ -1,0 +1,14 @@
+Question
+      QuestionIdentifier= object.id + '_' + operation.id
+      DisplayName Classify this object
+      IsRequired true
+      QuestionContent
+        Text Classify the object
+      AnswerSpecification
+        SelectionAnswer
+            StyleSuggestion radiobutton
+            Selections
+              each category in operation.params.categories
+                Selection
+                  SelectionIdentifier= category
+                  Text= category

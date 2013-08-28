@@ -1,0 +1,51 @@
+!!! 5
+html(prefix="og: http://ogp.me/ns#")
+  head
+    base(href=appBase)
+    title= title
+    
+    block meta
+      include includes/metaOpenGraph
+      include includes/meta
+
+    block libCss
+      include includes/libCSS
+
+    block css
+      link(rel='stylesheet', href='stylesheets/style.css')
+
+    block libScripts
+      include includes/libJS
+      
+    block scripts
+      script(src='javascripts/script.js')
+  body
+    .navbar.navbar-fixed-top.navbar-inverse
+      .navbar-inner
+        .container-fluid
+          a.btn.btn-navbar(data-toggle='collapse', data-target='.nav-collapse')
+            span.icon-bar
+            span.icon-bar
+            span.icon-bar
+          a.brand(href=appBase)= title
+          .nav-collapse.collapse.navbar-responsive-collapse
+            ul.nav.pull-right
+              if user
+                li: a(href='account')= user.username || user.displayName
+                li.divider-vertical
+                li: a(href='logout') Logout
+              else
+                li: a(href='register') Register
+                li.divider-vertical
+                li: a(href='login') Login
+
+    .content-wrapper
+      .container-fluid
+        header.row-fluid
+          block header
+            h1=title
+        section
+          .row-fluid: .span12
+            block content
+        footer
+          include includes/footer

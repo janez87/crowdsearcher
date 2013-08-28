@@ -1,0 +1,13 @@
+.stack {
+  color: #000;
+}
+.stack .line {
+  display: block;
+  padding: 0.2em;
+}
+.stack .line:nth-child(odd) {
+  background-color: #ff8080;
+}
+.stack .line:nth-child(even) {
+  background-color: #f5f5f5;
+}

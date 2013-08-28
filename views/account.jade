@@ -1,0 +1,77 @@
+extends layout
+
+block append scripts
+  script(src='javascripts/account.js')
+
+block header
+  h1= user.username || user.fullname
+
+block content
+  .row-fluid
+    .span6
+      h3 User data
+      form.form-horizontal
+        .control-group
+          label.control-label ID:
+          .controls
+            span.uneditable-input= user.id
+        .control-group
+          label.control-label(for='username') Username:
+          .controls
+            input#Username(type='text', value=user.username, disabled)
+        .control-group
+          label.control-label(for='name') Name:
+          .controls
+            input#name(type='text', value=user.displayName, disabled)
+        if user.email
+          .control-group
+            label.control-label(for='email') E-mail:
+            .controls
+              input#email(type='email', value=user.email, disabled)
+        if user.birthday
+          .control-group
+            label.control-label(for='birthday') Birthday:
+            .controls
+              - var birthday = user.birthday.getFullYear()+'-'+( user.birthday.getMonth()+1)+'-'+user.birthday.getDate();
+                input#birthday(type='date', value=birthday, disabled)
+      h4 Add accounts
+      .well.well-small
+        .btn-group
+          a.btn(href='connect/facebook')
+            i.icon-facebook
+            |  Add facebook
+          a.btn(href='connect/twitter')
+            i.icon-twitter
+            |  Add twitter
+    .span6
+      h3 Metadata
+      if user.metadata.length>0
+        ul
+          each metadata in user.metadata
+            li= metadata
+      else
+        .alert.alert-info
+          h4 Info:
+          | no metadata present...
+
+  .row-fluid
+    .span12
+      h3 Connected accounts
+      if user.accounts.length>0
+        ul.media-list
+          each account in user.accounts
+            li.media.well.well-small
+              if account.image
+                a.pull-left
+                  img.media-object(src=account.image)
+              .media-body
+                h4.media-heading
+                  i(class="icon-#{account.provider}")
+                  |  #{account.provider}
+                p #{account.displayName} (#{account.uid})
+      else
+        .alert.alert-info
+          h4 Info:
+          | no accounts connected...
+
+  //pre= JSON.stringify( user, null, 2 )
