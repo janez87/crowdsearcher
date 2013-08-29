@@ -1,7 +1,11 @@
 
-
 // Load libraries
 var util = require('util');
+var mongo = require('mongoose');
+
+// Import Mongo Classes and Objects
+var Schema = mongo.Schema;
+var Mixed = Schema.Types.Mixed;
 
 // Create child logger
 var log = common.log.child( { component: 'ImplementationStrategy plugin' } );
@@ -13,6 +17,7 @@ var TaskStatuses = require( '../../config/constants' ).TaskStatuses;
 // ----
 var CSError = require('../../error');
 var ImplementationStrategyError = function( id, message) {
+  /* jshint camelcase: false */
   ImplementationStrategyError.super_.call( this, id, message );
 };
 
@@ -32,19 +37,14 @@ module.exports = exports = function implementationStrategyPlugin( schema ) {
   // Add the `implementationStrategy` field
   schema.add( {
     implementationStrategy: {
-      type: {
-        name: {
-          type: String,
-          required: true,
-          'default': 'RANDOM'
-        },
-
-        params: {
-          type: 'mixed',
-          'default': {}
-        }
+      name: {
+        type: String,
+        'default': 'RANDOM'
       },
-      select: false
+      params: {
+        type: Mixed,
+        'default': {}
+      }
     }
   } );
 

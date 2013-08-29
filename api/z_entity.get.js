@@ -3,9 +3,6 @@
 var _ = require( 'underscore' );
 var util = require( 'util' );
 
-var MongoError = require( 'mongoose' ).Error;
-
-
 // Use a child logger
 var log = common.log.child( { component: 'Get API' } );
 

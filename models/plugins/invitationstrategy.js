@@ -1,5 +1,11 @@
 // Load libraries
 var util = require('util');
+var mongo = require('mongoose');
+
+// Import Mongo Classes and Objects
+var Schema = mongo.Schema;
+var Mixed = Schema.Types.Mixed;
+
 
 // Create a child logger
 var log = common.log.child( { component: 'InvitationStrategy plugin' } );
@@ -13,6 +19,7 @@ var TaskStatuses = require( '../../config/constants' ).TaskStatuses;
 // ----
 var CSError = require('../../error');
 var InvitationStrategyError = function( id, message) {
+  /* jshint camelcase: false */
   InvitationStrategyError.super_.call( this, id, message);
 };
 
@@ -31,26 +38,19 @@ InvitationStrategyError.STRATEGY_NOT_FOUND = 'STRATEGY_NOT_FOUND';
 
 
 
-
-
 // Invitation strategy
 module.exports = exports = function invitationStrategyPlugin( schema ) {
 
   // Add the `invitationStrategy` field
   schema.add( {
     invitationStrategy: {
-      type: {
-        name: {
-          type: String,
-          required: false
-        },
-
-        params: {
-          type: 'mixed',
-          'default': {}
-        }
+      name:  {
+        type: String
       },
-      select: false
+      params: {
+        type: Mixed,
+        'default': {}
+      }
     }
   } );
 

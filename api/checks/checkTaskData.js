@@ -34,7 +34,7 @@ exports = module.exports = function checkTaskData( req, res, next ) {
   // Get the raw task object from the body request
   var task = req.body;
 
-  log.trace( 'Checking task: %j', task );
+  log.trace( 'Checking task' );
 
   // Check the required `name` field.
   if( _.isUndefined( task.name ) )

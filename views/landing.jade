@@ -9,6 +9,7 @@ html(prefix="og: http://ogp.me/ns#")
     include includes/libCSS
 
     link(rel='stylesheet', href='stylesheets/landing.css')
+    
     include includes/libJS
     script(src='javascripts/landing.js')
 
@@ -34,7 +35,7 @@ html(prefix="og: http://ogp.me/ns#")
             a.btn.btn-large.btn-primary(href=link) Start 
               i.icon-play
       p!= content || data.description
-      if showLink
+      if showLink==='both'
         .text-right
           if lang==='it'
             a.btn.btn-large.btn-primary(href=link) Inizia 

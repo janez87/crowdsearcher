@@ -2,6 +2,7 @@
 
 // Load libraries
 var _  = require('underscore');
+var domain = require('domain');
 var mongo = require('mongoose');
 var async = require('async');
 var log = common.log.child( { component: 'Job model' } );
@@ -18,54 +19,47 @@ var taskAssignmentStrategyPlugin = require( './plugins/taskassignmentstrategy' )
 // JobSchema
 // ------
 // The Job schema represents
-// [Name link](http://www.google.it)
 var JobSchema = new Schema( {
 
   // Job name
   name: {
-    type: 'string',
+    type: String,
     required: true
   },
 
-  description: 'string',
-  landing: 'string',
-  ending: 'string',
-  /*
+  description: String,
+  landing: String,
+  ending: String,
+
   alias: {
-    type: 'string',
+    type: String,
     lowercase: true,
     unique: true,
     index: true,
-    match: /^[a-z\-0-9]+$/
+    match: /^[a-z\-0-9]+$/,
+    'default': function() {
+      return _.slugify( this.name );
+    }
   },
-  */
 
   // List of Task associated with this Job
-  tasks: {
-    type: [{
-      type: ObjectId,
-      ref: 'task',
-      unique: true
-    }],
-    select: false
-  },
+  tasks: [ {
+    type: ObjectId,
+    ref: 'task',
+    unique: true
+  } ],
 
-
-  objects: {
-    type: [{
-      type: ObjectId,
-      ref: 'object',
-      unique: true
-    }],
-    select: false
-  }
+  objects: [ {
+    type: ObjectId,
+    ref: 'object',
+    unique: true
+  } ]
 },
-// Set the options fot this Schema
+// Set the options for this Schema
 {
   // Do not allow to add random properties to the Model
   strict: true
 } );
-
 
 
 // Use plugin
@@ -76,12 +70,6 @@ JobSchema.plugin( taskAssignmentStrategyPlugin );
 
 // Pre middlewares
 // ---
-/*
-JobSchema.pre( 'save', function( next ) {
-  log.trace( 'PRE Job save' );
-  next();
-} );
-*/
 JobSchema.pre( 'remove', function( next ) {
   log.trace( 'PRE Job remove' );
 
@@ -93,7 +81,7 @@ JobSchema.pre( 'remove', function( next ) {
 
   var removeTask = function( callback ) {
     log.trace( 'Removing all the tasks of the job' );
-
+ 
     thisJob
     .model( 'task' )
     .find()

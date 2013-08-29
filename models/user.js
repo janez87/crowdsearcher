@@ -22,42 +22,37 @@ var UserSchema = new Schema( {
 
   // Username
   username: {
-    type: 'string',
+    type: String,
     index: true
   },
 
   // Password hash, password must be set using the password virtual field.
   hashedPassword: {
-    type: 'string',
-    select: false
+    type: String
   },
   // salt of the password
   salt: {
-    type: 'string',
-    select: false
+    type: String
   },
 
   // Name of the user, use fullname for better representation
-  name: 'string',
+  name: String,
 
   // Email
   email: {
-    type: 'string',
-    lowercase: true,
-    select: false
+    type: String,
+    lowercase: true
   },
   // Birthday
   birthday: {
-    type: 'date',
-    select: false
+    type: Date
   },
   // Image
-  image: 'string',
+  image: String,
 
   // User connected accounts
   accounts: {
-    type: [AccountSchema],
-    select: false
+    type: [AccountSchema]
   },
 
   // Log related data
@@ -66,13 +61,13 @@ var UserSchema = new Schema( {
     'default': 0
   },
   _lastAccess: {
-    type: 'date',
+    type: Date,
     'default': Date.now
   },
 
 
   creationDate: {
-    type: 'date',
+    type: Date,
     'default': Date.now
   }
 } );

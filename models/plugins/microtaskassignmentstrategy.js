@@ -2,6 +2,11 @@
 
 // Load libraries
 var util = require('util');
+var mongo = require('mongoose');
+
+// Import Mongo Classes and Objects
+var Schema = mongo.Schema;
+var Mixed = Schema.Types.Mixed;
 
 // Create a child logger
 var log = common.log.child( { component: 'MicroTaskAssignmentStrategy plugin' } );
@@ -33,18 +38,14 @@ module.exports = exports = function microTaskAssignmentStrategyPlugin( schema ) 
   // Add the `microTaskAssignmentStrategy` field
   schema.add( {
     microTaskAssignmentStrategy: {
-      type: {
-        name: {
-          type: 'string',
-          required: true,
-          'default': 'DYNAMIC_ROUNDROBIN'
-        },
-
-        params: {
-          type: 'mixed',
-          'default': {}
-        }
+      name: {
+        type: String,
+        'default': 'DYNAMIC_ROUNDROBIN'
       },
+      params: {
+        type: Mixed,
+        'default': {}
+      }
     }
   } );
 

@@ -28,6 +28,7 @@ var express = require('express');
 var app = express();
 
 // Load libraries
+var _  = require('underscore');
 var fs  = require('fs');
 var url  = require('url');
 var path = require( 'path' );
@@ -63,26 +64,32 @@ app.configure( function() {
   app.use( function( req, res, next ) {
 
     var requestDomain = domain.create();
+    // Add the domain to the request, so ca be `exited` later
+    req.domain = requestDomain;
 
     // Utility function used to wrap an async call to the api domain
-    var wrapInDomain = function( fn ) {
+    var wrapInDomain = function( fn, ctx ) {
+      if( _.isString( fn ) && !_.isUndefined( ctx ) )
+        fn = ctx[ fn ];
+
+      if( ctx )
+        fn = fn.bind( ctx );
+
       return requestDomain.bind( fn );
     };
     // Can be invoked using either `req.wrap` or `req.wrapInDomain`.
     req.wrapInDomain = req.wrap = wrapInDomain;
-    // Can cause strange behaviour... better not use...
-    /*
-    res.on('close', function () {
-      // Dispose the Domain at the end of each request
-      requestDomain.dispose();
-    });
-    */
+
+    // Bind Emitters
+    requestDomain.add( req );
+    requestDomain.add( res );
 
     // On Domain error call the error middleware
     requestDomain.on( 'error', next );
 
     // Enter the domain to manage request unhandled exceptions
-    requestDomain.run( next );
+    requestDomain.enter();
+    return next();
   } );
 
   // Use icon
@@ -136,8 +143,6 @@ app.configure( function() {
 
   // Manage app routes
   app.use(app.router);
-
-
 });
 
 
@@ -184,14 +189,11 @@ config.once( 'ready', function configReady() {
   // Import the logger
   var log = common.log;
 
-
-
   var baseURL = nconf.get( 'webserver:externalAddress' );
   // Pass the application external url to all the views
   app.locals( {
     appBase: baseURL
   } );
-
 
   // Configure the API's
   try {
@@ -203,6 +205,12 @@ config.once( 'ready', function configReady() {
 
   // Error handling middleware
   app.use( errorRoutes.error );
+
+  app.use( function( req, res, next ) {
+    // Exit from the domain.
+    req.domain.exit();
+    return next();
+  } );
 
 
   // Auth middlewares

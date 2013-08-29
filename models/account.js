@@ -13,33 +13,26 @@ var metadataPlugin = require( './plugins/metadata' );
 // User schema
 var AccountSchema = new Schema( {
   provider: {
-    type: 'string',
+    type: String,
     index: true
   },
 
   uid: {
-    type: 'string',
+    type: String,
     index: true
   },
 
-  image: 'string',
-  displayName: 'string',
+  image: String,
+  displayName: String,
 
   name: {
-    familyName: 'string',
-    givenName: 'string',
-    middleName: 'string'
+    familyName: String,
+    givenName: String,
+    middleName: String
   },
 
-  token: 'string',
-  tokenSecret: 'string',
-
-  /*
-  emails: [{
-    value: 'string',
-    type: 'string'
-  }],
-  */
+  token: String,
+  tokenSecret: String,
 
   _creationDate: {
     type: 'date',

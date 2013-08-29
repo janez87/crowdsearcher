@@ -40,6 +40,7 @@ var API = {
   // ... the required parameters will be verified automatically.
   params: {
     job: false,
+    alias: false,
     task: false,
     microtask: false,
     execution: false,
@@ -173,8 +174,7 @@ API.logic = function getExecution( req, res, next ) {
   var retrieveJob = function( id, callback ) {
     Job
     .findById( id )
-    .where( 'status' )
-    .ne( 50 ) // TODO: use constant
+    .where( 'status' ).ne( 50 ) // TODO: use constant
     .exec( req.wrap( function( err, job ) {
       if( err ) return callback( err );
 
@@ -193,8 +193,7 @@ API.logic = function getExecution( req, res, next ) {
 
     Job
     .findByAlias( alias )
-    //.where( 'status' )
-    //.ne( 50 )
+    .where( 'status' ).ne( 50 ) // TODO: use constant
     .exec( req.wrap( function( err, job ) {
       if( err ) return callback( err );
 

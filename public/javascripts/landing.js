@@ -15,7 +15,9 @@
         data = qp.split('=');
         key = data[0];
         value = data[1];
-        if (key !== 'job' && key !== 'task') href += "&" + key + "=" + value;
+        if (key !== 'job' && key !== 'task' && key !== 'alias') {
+          href += "&" + key + "=" + value;
+        }
       }
       location.href = href;
       return false;

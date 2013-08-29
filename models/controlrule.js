@@ -7,6 +7,7 @@ var mongo = require('mongoose');
 
 // Import Mongo Classes and Objects
 var Schema = mongo.Schema;
+var Mixed = Schema.Types.Mixed;
 
 // User schema
 var ControlRuleSchema = new Schema( {
@@ -24,7 +25,7 @@ var ControlRuleSchema = new Schema( {
   },
 
   params: {
-    type: 'mixed'
+    type: Mixed
   }
 } );
 

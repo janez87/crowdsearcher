@@ -14,7 +14,7 @@ $ ->
       data = qp.split '='
       key = data[ 0 ]
       value = data[ 1 ]
-      if key!='job' and key!='task'
+      if key!='job' and key!='task' and key!='alias'
         href += "&#{key}=#{value}"
 
     location.href = href

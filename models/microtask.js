@@ -11,6 +11,7 @@ var MicroTaskStatuses = require( '../config/constants' ).MicroTaskStatuses;
 // Import Mongo Classes and Objects
 var Schema = mongo.Schema;
 var ObjectId = Schema.ObjectId;
+var Mixed = Schema.Types.Mixed;
 
 // Import the plugins
 var metadataPlugin = require( './plugins/metadata' );
@@ -32,11 +33,11 @@ var MicroTaskSchema = new Schema( {
   },
 
   // List of objects belonging to the `Microtask`
-  objects: [{
+  objects: [ {
     type: ObjectId,
     ref: 'object',
     unique: true
-  }],
+  } ],
 
   // Array that contains the `Operation`s
   operations: {
@@ -73,6 +74,7 @@ var MicroTaskSchema = new Schema( {
 
   status: {
     type: Number,
+    index: true,
     'default': MicroTaskStatuses.OPENED
   }
 
@@ -80,26 +82,6 @@ var MicroTaskSchema = new Schema( {
   strict: false
 } );
 
-
-// Pre middlewares
-MicroTaskSchema.pre( 'save', function( next ) {
-  log.trace( 'PRE MicroTask save' );
-  next();
-} );
-MicroTaskSchema.pre( 'remove', function( next ) {
-  log.trace( 'PRE MicroTask remove' );
-  //TODO: remove all the connected objects, metadata etc...
-  next();
-} );
-// Post middlewares
-MicroTaskSchema.post( 'save', function() {
-  log.trace( 'POST MicroTask save' );
-
-  //if( this.isNew ) return CRM.microtask( this );
-} );
-MicroTaskSchema.post( 'remove', function() {
-  log.trace( 'POST MicroTask remove' );
-} );
 
 MicroTaskSchema.plugin( metadataPlugin );
 

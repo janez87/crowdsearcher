@@ -10,7 +10,8 @@ var _ = require( "underscore" );
 var db = mongoose.connect('mongodb://localhost/Test');
 var Schema = mongoose.Schema;
 
-var TIMES = 15000;
+var TIMES = 1500;
+var values = [];
 
 var PostSchema = new Schema( {
   performer: 'string',
@@ -50,6 +51,7 @@ describe( 'Mongo test', function() {
       performer: 'volox',
       data: 15
     } );
+    values.push( 15 );
 
     post.save( done );
   } );
@@ -62,7 +64,9 @@ describe( 'Mongo test', function() {
         Post.findOne( function( err, post ) {
           if( err ) return cb( err );
 
-          post.data = _.random( -100, 100 );
+          post.data = post.data + 1;
+          values.push( post.data );
+
           post.markModified( 'data' );
 
           post.save( cb );
@@ -78,7 +82,7 @@ describe( 'Mongo test', function() {
     Post.findOne( function( err, post ) {
       if( err ) return done( err );
 
-      console.log( post.data );
+      console.log( values );
 
       done();
     } );

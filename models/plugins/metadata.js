@@ -3,13 +3,19 @@
 // Load libraries
 var _ = require('underscore');
 var util  = require('util');
+var mongo = require('mongoose');
+
+// Import Mongo Classes and Objects
+var Schema = mongo.Schema;
+var Mixed = Schema.Types.Mixed;
 
 
+// Create child logger
 var log = common.log.child( { component: 'Metadata plugin' } );
 
 
 
-// Cutom error
+// Custom error
 // ----
 var CSError = require('../../error');
 var MetadataError = function( id, message) {
@@ -32,16 +38,13 @@ MetadataError.prototype.name = 'MetadataError';
 module.exports = exports = function metadataPlugin( schema ) {
 
   schema.add( {
-    metadata: {
-      type: [{
-        key: {
-          type: 'string',
-          required: true
-        },
-        value: 'mixed'
-      } ],
-      select: false
-    }
+    metadata: [ {
+      key: {
+        type: String,
+        required: true
+      },
+      value: Mixed
+    } ]
   } );
 
 

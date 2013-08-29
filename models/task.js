@@ -29,59 +29,58 @@ var CRM = require( '../scripts/controlRuleManager' );
 // The task schema repretassents
 var TaskSchema = new Schema( {
 
+  // The name of the task.
   name: {
-    type: 'string',
+    type: String,
     required: true
   },
 
-  description: 'string',
+
+  // Markdown enabled fileds containing the descriptions
+  description: String,
   landing: {
-    type: 'string',
+    type: String,
     select: false
   },
   ending: {
-    type: 'string',
+    type: String,
     select: false
   },
 
-  // Array that contain the `Operation` list
+  // Array that contains the `Operation` list
   operations: {
     type: [{
       type: ObjectId,
       ref: 'operation'
     }],
-    required: true,
-    select: false
+    required: true
   },
 
+  // Array that contains the `Platform` list
   platforms: {
     type: [{
       type: ObjectId,
       ref: 'platform'
     }],
-    required: true,
-    select: false
+    required: true
   },
 
   // If the Task is private
   'private': {
-    type: 'boolean',
+    type: Boolean,
     'default': false
   },
 
-  // Task statuses
+  // Task status
   status: {
-    type: 'number',
+    type: Number,
     required: true,
+    index: true,
     'default': TaskStatuses.CREATED
   },
 
   // Control Rules
-  controlrules: {
-    type: [ControlRule],
-    select: false
-  },
-
+  controlrules: [ControlRule],
 
   // Job that owns this task
   job: {
@@ -91,25 +90,19 @@ var TaskSchema = new Schema( {
   },
 
   // List of objects belonging to the task
-  objects: {
-    type: [{
-      type: ObjectId,
-      ref: 'object',
-      unique: true
-    }],
-    select: false
-  },
+  objects: [ {
+    type: ObjectId,
+    ref: 'object',
+    unique: true
+  } ],
 
 
   // Microtasks
-  microtasks: {
-    type: [{
-      type: ObjectId,
-      ref: 'microtask',
-      unique: true
-    }],
-    select: false
-  },
+  microtasks: [{
+    type: ObjectId,
+    ref: 'microtask',
+    unique: true
+  } ],
 
   // Useful timed data
   creationDate: {
@@ -119,7 +112,7 @@ var TaskSchema = new Schema( {
   },
 
   closedDate: {
-    type:Date,
+    type: Date,
     'default':null
   },
 
@@ -154,16 +147,6 @@ TaskSchema.path( 'status' ).set( function( value ) {
 } );
 
 // Pre middlewares
-TaskSchema.pre( 'validate', function( next ) {
-  log.trace( 'PRE Task validate' );
-
-  next();
-});
-TaskSchema.pre( 'save', function( next ) {
-  log.trace( 'PRE Task save' );
-
-  next();
-} );
 TaskSchema.pre( 'remove', function( next ) {
   log.trace( 'PRE Task remove' );
 
@@ -232,14 +215,6 @@ TaskSchema.pre( 'remove', function( next ) {
     removeMicrotasks,
     removeExecutions
   ], next );
-} );
-// Post middlewares
-TaskSchema.post( 'save', function() {
-  log.trace( 'POST Task save' );
-
-} );
-TaskSchema.post( 'remove', function() {
-  log.trace( 'POST Task remove' );
 } );
 
 

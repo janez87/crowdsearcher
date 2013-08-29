@@ -2,6 +2,11 @@
 
 // Load libraries
 var util = require('util');
+var mongo = require('mongoose');
+
+// Import Mongo Classes and Objects
+var Schema = mongo.Schema;
+var Mixed = Schema.Types.Mixed;
 
 // Create a child logger
 var log = common.log.child( { component: 'TaskAssignmentStrategy plugin' } );
@@ -38,29 +43,21 @@ module.exports = exports = function taskAssignmentStrategyPlugin( schema ) {
   // Add the `taskAssignment` strategy field
   schema.add( {
     taskAssignmentStrategy: {
-      type: {
-        name: {
-          type: String,
-          'default': 'SEQUENCE'
-        },
-
-        params: {
-          type: 'mixed',
-          'default': {}
-        }
+      name: {
+        type: String,
+        'default': 'SEQUENCE'
       },
-      select: false
+      params:  {
+        type: Mixed,
+        'default': {}
+      }
     }
   } );
 
 
   // Pre check done before saving.
   schema.pre('save', function( next ) {
-    try {
-      this.checkTaskAssignmentStrategy( next );
-    } catch( err ) {
-      return next( err );
-    }
+    this.checkTaskAssignmentStrategy( next );
   } );
 
   schema.methods.checkTaskAssignmentStrategy = function( callback ) {

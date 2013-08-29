@@ -11,7 +11,7 @@ var Schema = mongoose.Schema;
 var PostSchema = new Schema( {
   title: {
     type: 'string',
-    //select: true
+    //select: false
   },
   text: 'string'
 } );
@@ -38,12 +38,12 @@ describe( 'Mongo test', function() {
   it( 'Should not crash', function( done ) {
     Post
     .findOne()
-    .select( '+text -title' )
+    .select( 'text' )
     .exec( function( err, post ) {
       if( err ) return done( err );
 
+      //post.should.have.property( 'title', 'TEST!!!' );
       post.should.have.property( 'text', 'lorem ispum...' );
-      post.should.have.property( 'title', 'TEST!!!' );
 
       done();
     });

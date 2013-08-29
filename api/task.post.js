@@ -98,8 +98,9 @@ API.logic = function postTask( req, res, next ) {
     var job = new Job( rawJob );
     log.trace( 'Creating job %s with alias %s', job.name, job.alias );
 
-    job
-    .save( req.wrap( function( err, job ) {
+    log.trace( 'Type of job.save', typeof job.save );
+
+    req.wrap( 'save', job )( function( err, job ) {
       if( err ) return callback( err );
 
       log.trace( 'Job %s created!', job.id );
@@ -111,7 +112,7 @@ API.logic = function postTask( req, res, next ) {
       task.job = job._id;
 
       return callback();
-    } ) );
+    } );
   };
 
   var getJob = function( callback ) {
@@ -140,7 +141,7 @@ API.logic = function postTask( req, res, next ) {
 
   var saveTask = function( callback ) {
     log.trace( 'Creating Task' );
-    task.save( req.wrap( callback ) );
+    req.wrap( 'save', task )( callback );
   };
   var addTaskToJob = function( callback ) {
     req.job.addTask( task, req.wrap( callback ) );
@@ -164,7 +165,6 @@ API.logic = function postTask( req, res, next ) {
     addObjectsToTask
   ], function( err ) {
     if( err ) return next( err );
-
 
     // Trigger the ADD_TASK event
     CRM.execute( 'ADD_TASK', { task: task }, function( err ) {

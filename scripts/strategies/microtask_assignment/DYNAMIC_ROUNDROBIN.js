@@ -48,7 +48,6 @@ var performStrategy = function( data, params, callback ) {
   var selectedMicrotask;
 
   task
-  .select( '+microtasks' )
   .populate( {
     path: 'microtasks',
     match: {

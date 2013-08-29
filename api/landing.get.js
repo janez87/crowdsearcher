@@ -48,13 +48,14 @@ var API = {
 
 
 // API core function logic. If this function is executed then each check is passed.
-API.logic = function startExecution( req, res, next ) {
-  log.trace( 'Ending page for %j', req.query );
+API.logic = function getLanding( req, res, next ) {
+  log.trace( 'Landing page for %j', req.query );
 
   var taskId = req.query.task;
   var jobId = req.query.job;
+  var alias = req.query.alias;
 
-  if( !taskId && !jobId )
+  if( !taskId && !jobId && !alias )
     return next( new GetLandingPageError( GetLandingPageError.MISSING_PARAMETERS, 'All the parameter are undefined',APIError.BAD_REQUEST ) );
 
   var showLandingPage = function( err, objModel ) {
@@ -69,16 +70,24 @@ API.logic = function startExecution( req, res, next ) {
     var url = req.query.baseUrl;
     delete req.query.baseUrl;
 
-    var showLink = req.query.show==='true';
-    delete req.query.show;
+    // Check if the buttons must be removed
+    var showLink = true;
+    if( req.query.show ) {
+      // If false set to false, otherwise pass the value as is.
+      // E.G. used when `show` is `bottom`
+      showLink = req.query.show==='false'? false : req.query.show;
+      delete req.query.show;
+    }
 
+    // If the url is not specified then retrieve the CS url from the configuration.
     if( !url || url.length===0 ) {
       url = nconf.get( 'webserver:externalAddress' )+'api/run';
     }
+    // Append the query string poarameters
     url += '?'+querystring.stringify( req.query );
 
 
-    // Generate *landing*
+    // Generate *landing* page
     if( landing )
       landing = converter.makeHtml( landing );
 
@@ -106,6 +115,8 @@ API.logic = function startExecution( req, res, next ) {
     query = Task.findById( taskId );
   } else if( jobId ) {
     query = Job.findById( jobId );
+  } else if( alias ) {
+    query = Job.findByAlias( alias );
   }
 
   query

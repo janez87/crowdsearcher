@@ -70,25 +70,26 @@ var ExecutionSchema = new Schema( {
   },
 
   closed: {
-    type: 'boolean',
+    type: Boolean,
     'default': false
   },
 
 
   // Useful timed data
   lastModified: {
-    type: 'date'
+    type: Date
   },
   creationDate: {
-    type: 'date',
+    type: Date,
     'default': Date.now
   },
   closedDate: {
-    type: 'date',
+    type: Date,
     'default': null
   }
 
 }, {
+  // Allow to add custom properties to this Entity.
   strict: false
 } );
 
@@ -108,23 +109,6 @@ ExecutionSchema.pre( 'save', function( next ) {
 
   next();
 } );
-ExecutionSchema.pre( 'remove', function( next ) {
-  log.trace( 'PRE Execution remove' );
-  //TODO: remove all the connected objects, metadata etc...
-  next();
-} );
-// Post middlewares
-ExecutionSchema.post( 'init', function() {
-  log.trace( 'POST Execution init' );
-} );
-ExecutionSchema.post( 'save', function() {
-  log.trace( 'POST Execution save' );
-} );
-ExecutionSchema.post( 'remove', function() {
-  log.trace( 'POST Execution remove' );
-} );
-
-
 
 
 

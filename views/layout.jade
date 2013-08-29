@@ -20,32 +20,30 @@ html(prefix="og: http://ogp.me/ns#")
     block scripts
       script(src='javascripts/script.js')
   body
-    .navbar.navbar-fixed-top.navbar-inverse
-      .navbar-inner
-        .container-fluid
-          a.btn.btn-navbar(data-toggle='collapse', data-target='.nav-collapse')
-            span.icon-bar
-            span.icon-bar
-            span.icon-bar
-          a.brand(href=appBase)= title
-          .nav-collapse.collapse.navbar-responsive-collapse
-            ul.nav.pull-right
-              if user
-                li: a(href='account')= user.username || user.displayName
-                li.divider-vertical
-                li: a(href='logout') Logout
-              else
-                li: a(href='register') Register
-                li.divider-vertical
-                li: a(href='login') Login
+    .navbar.navbar-default.navbar-fixed-top.navbar-inverse(role='navigation')
+      .navbar-header
+        button.navbar-toggle(data-toggle='collapse',data-target='.navbar-top-collapse')
+          span.sr-only Toggle navigation
+          span.icon-bar
+          span.icon-bar
+          span.icon-bar
+        a.navbar-brand(href=appBase)= title
 
-    .content-wrapper
-      .container-fluid
-        header.row-fluid
+      .collapse.navbar-collapse.navbar-top-collapse
+        ul.nav.navbar-nav.navbar-right
+          if user
+            li: a(href='account')= user.username || user.displayName
+            li: a(href='logout') Logout
+          else
+            li: a(href='register') Register
+            li: a(href='login') Login
+
+    .container
+      header
+        .row
           block header
             h1=title
-        section
-          .row-fluid: .span12
-            block content
-        footer
-          include includes/footer
+      section
+        block content
+      footer
+        include includes/footer

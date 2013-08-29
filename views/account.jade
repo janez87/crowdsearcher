@@ -1,5 +1,8 @@
 extends layout
 
+block append css
+  link(rel='stylesheet', href='stylesheets/social-buttons-3.css')
+
 block append scripts
   script(src='javascripts/account.js')
 
@@ -7,43 +10,42 @@ block header
   h1= user.username || user.fullname
 
 block content
-  .row-fluid
-    .span6
+  .row
+    .col-md-6
       h3 User data
       form.form-horizontal
-        .control-group
-          label.control-label ID:
-          .controls
-            span.uneditable-input= user.id
-        .control-group
-          label.control-label(for='username') Username:
-          .controls
-            input#Username(type='text', value=user.username, disabled)
-        .control-group
-          label.control-label(for='name') Name:
-          .controls
-            input#name(type='text', value=user.displayName, disabled)
+        .form-group
+          label.col-md-3.control-label ID:
+          .col-md-9
+            p.form-control-static= user.id
+        .form-group
+          label.col-md-3.control-label(for='username') Username:
+          .col-md-9
+            input#username.form-control(type='text', value=user.username, disabled)
+        .form-group
+          label.col-md-3.control-label(for='name') Name:
+          .col-md-9
+            input#name.form-control(type='text', value=user.displayName, disabled)
         if user.email
-          .control-group
-            label.control-label(for='email') E-mail:
-            .controls
-              input#email(type='email', value=user.email, disabled)
+          .form-group
+            label.col-md-3.control-label(for='email') E-mail:
+            .col-md-9
+              input#email.form-control(type='email', value=user.email, disabled)
         if user.birthday
-          .control-group
-            label.control-label(for='birthday') Birthday:
-            .controls
+          .form-group
+            label.col-md-3.control-label(for='birthday') Birthday:
+            .col-md-9
               - var birthday = user.birthday.getFullYear()+'-'+( user.birthday.getMonth()+1)+'-'+user.birthday.getDate();
-                input#birthday(type='date', value=birthday, disabled)
+                input#birthday.form-control(type='date', value=birthday, disabled)
       h4 Add accounts
-      .well.well-small
-        .btn-group
-          a.btn(href='connect/facebook')
-            i.icon-facebook
-            |  Add facebook
-          a.btn(href='connect/twitter')
-            i.icon-twitter
-            |  Add twitter
-    .span6
+      p: .btn-group
+        a.btn.btn-facebook(href='connect/facebook')
+          i.icon-facebook-sign
+          |  | Add facebook
+        a.btn.btn-twitter(href='connect/twitter')
+          i.icon-twitter
+          |  | Add twitter
+    .col-md-6
       h3 Metadata
       if user.metadata.length>0
         ul
@@ -54,10 +56,10 @@ block content
           h4 Info:
           | no metadata present...
 
-  .row-fluid
-    .span12
+  .row
+    .col-md-12
       h3 Connected accounts
-      if user.accounts.length>0
+      if user.accounts && user.accounts.length>0
         ul.media-list
           each account in user.accounts
             li.media.well.well-small

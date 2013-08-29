@@ -37,19 +37,15 @@ module.exports = exports = function splittingStrategyPlugin( schema ) {
   // Add the `splittingStrategy` field
   schema.add( {
     splittingStrategy: {
-      type: {
-        name: {
-          type: String,
-          required: true
-        },
-
-        params: {
-          type: 'mixed',
-          'default': {},
-        }
-        
+      name: {
+        type: String,
+        required: true
       },
-      select: false
+
+      params: {
+        type: 'mixed',
+        'default': {},
+      }
     }
   } );
 

@@ -6,6 +6,7 @@ var mongo = require('mongoose');
 // Import Mongo Classes and Objects
 var Schema = mongo.Schema;
 var ObjectId = Schema.ObjectId;
+var Mixed = Schema.Types.Mixed;
 
 var metadataPlugin = require( './plugins/metadata' );
 
@@ -14,7 +15,7 @@ var metadataPlugin = require( './plugins/metadata' );
 // The Annotation schema represents
 var AnnotationSchema = new Schema( {
   response: {
-    type: 'mixed',
+    type: Mixed,
     'default': null
   },
 
@@ -35,6 +36,7 @@ var AnnotationSchema = new Schema( {
     'default': Date.now
   }
 }, {
+  // Allow to add random properties to this Entity.
   strict: false
 } );
 
