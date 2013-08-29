@@ -61,8 +61,3 @@ docs
 
 # ignore override config file
 config/override.json
-
-# roba mia (andrea)
-todo.txt
-v8.log
-profile.txt
