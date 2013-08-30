@@ -88,17 +88,15 @@ UserSchema.methods.validPass = function( pass ) {
 
 UserSchema.methods.addAccount = function( accountName, data ){
 
-  log.trace('Adding an account');
+  log.trace( 'Adding an account', data );
 
+  // Create the `Account` entity
   var Account = this.model( 'account' );
-  var account = new Account();
+  var account = new Account( data );
 
   account.uid = data.id;
   account.image = data.photos? data.photos[0].value : null;
   account.provider = accountName;
-  account.token = data.token;
-  account.secretToken = data.secretToken;
-  account.email = data.email;
 
   this.accounts.push( account );
 };
@@ -124,41 +122,39 @@ UserSchema
 // Static methods
 
 // Retrieve user by username
-UserSchema.statics.findByUsername = function( username, cb ) {
+UserSchema.statics.findByUsername = function( username, callback ) {
   this
   .findOne( {
     username: username.toLowerCase()
-  })
-  .exec( cb );
+  } )
+  .exec( callback );
 };
 
-UserSchema.statics.findByAccountId = function(accountName,accountId,callback){
-
+UserSchema.statics.findByAccountId = function( accountName, accountId, callback ){
   log.trace('Searching a user with account %s (%s)', accountId, accountName );
 
   this
   .findOne()
-  .where('accounts.provider', accountName )
-  .where('accounts.uid', accountId )
-  .exec(callback);
-
+  .where( 'accounts.provider', accountName )
+  .where( 'accounts.uid', accountId )
+  .exec( callback );
 };
 
 
-UserSchema.statics.createWithAccount = function(accountName,data,callback){
-  log.trace('Creating a new user with the account %s (%s)',data.id,accountName);
+UserSchema.statics.createWithAccount = function( accountName, data ){
+  log.trace( 'Creating a new user with the account %s (%s)', data.id, accountName );
 
+  log.trace( 'Creating the user', user );
   var User = this;
-  var user = new User(data);
+  var user = new User( data );
 
   user.email = data.emails? data.emails[0].value : null;
-  user.username = user.email || data.username;
+  user.username = data.username || user.email;
+  user.name = user.displayName || data.displayName;
 
-  log.trace('Creating the user');
+  // Adding account
   user.addAccount( accountName, data );
-  log.trace('Added Account');
-  log.trace('Save User');
-  user.save( callback );
+  return user;
 };
 
 

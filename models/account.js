@@ -24,6 +24,7 @@ var AccountSchema = new Schema( {
 
   image: String,
   displayName: String,
+  profileUrl: String,
 
   name: {
     familyName: String,

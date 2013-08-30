@@ -32,15 +32,20 @@ exports.checkAuth = function( req, res, next ) {
 exports.postRegister = function( req, res, next ) {
   var rawUser = req.body;
 
-  log.trace( 'Registering new user %j', rawUser );
+  // Create the Mongoose document
+  log.trace( 'Registering new user %j', rawUser.username );
   var user = new UserSchema( rawUser );
 
-  log.error( 'REGISTER %s', req.session.from );
-  user.setMetadata( 'from', req.session.from );
-  delete req.session.from;
+  // Check if the `from` field is present in session
+  if( req.session.from ) {
+    // add the `from` information to the user.
+    user.setMetadata( 'from', req.session.from );
+    delete req.session.from;
+  }
 
+  // Save user
   log.trace( 'Saving user information' );
-  user.save( function( err, user ) {
+  req.wrap( 'save', user )( function( err, user ) {
     if( err) return next( err );
 
     log.trace( 'User saved, login' );

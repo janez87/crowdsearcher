@@ -53,27 +53,41 @@ block content
             li= metadata
       else
         .alert.alert-info
-          h4 Info:
+          strong Info: 
           | no metadata present...
 
   .row
     .col-md-12
-      h3 Connected accounts
-      if user.accounts && user.accounts.length>0
-        ul.media-list
-          each account in user.accounts
-            li.media.well.well-small
-              if account.image
-                a.pull-left
-                  img.media-object(src=account.image)
-              .media-body
-                h4.media-heading
-                  i(class="icon-#{account.provider}")
-                  |  #{account.provider}
-                p #{account.displayName} (#{account.uid})
-      else
-        .alert.alert-info
-          h4 Info:
-          | no accounts connected...
+      .panel.panel-default
+        .panel-heading
+          h3.panel-title Connected accounts
+        if user.accounts && user.accounts.length>0
+          ul.list-group
+            each account in user.accounts
+              li.list-group-item
+                .row
+                  .col-md-1
+                    - var imgUrl = account.image || 'http://placehold.it/50'
+                    img.img-responsive(src=imgUrl, title="#{account.displayName} image")
+                  .col-md-11
+                    h4.list-group-item-heading
+                      i(class='icon-#{account.provider}-sign')
+                      |  | #{account.provider}
+                      
+
+                    p #{account.displayName} (
+                      if account.profileUrl
+                        a(
+                          href=account.profileUrl,
+                          title='#{account.provider} profile',
+                          target='_blank')= account.uid
+                      else
+                        | #{account.uid}
+                      | )
+        else
+          .panel-body
+            .alert.alert-info
+              h4 Info:
+              | no accounts connected...
 
   //pre= JSON.stringify( user, null, 2 )

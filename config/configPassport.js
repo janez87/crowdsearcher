@@ -19,21 +19,24 @@ function linkAccountToUser( req, token, tokenSecret, profile, done ) {
   var User = common.models.user;
 
   log.trace( 'Connecting provider %s (%s)', profile.provider, profile.id );
-  log.trace( 'Profile data for (%s): %j', profile.username, profile );
+  //log.trace( 'Profile data for (%s): %j', profile.username, profile );
 
 
   // This function is called last to login as the specified user
   var login = function( err, user ) {
     if( err ) return done( err );
 
-    req.login( user, function( err ) {
-      if( user.hasMetadata( 'from' ) || _.isUndefined( req.session.from ) )
-        return done( err, user );
 
-      if( req.session.from ) {
+    // Log in the current user
+    req.login( user, function( err ) {
+      // If the `from` information is already present or is undefined then exit.
+      if( user.hasMetadata( 'from' ) || _.isUndefined( req.session.from ) ) {
+        return done( err, user );
+      } else {
+        // Add the `from` information to the user.
         user.setMetadata( 'from', req.session.from );
         delete req.session.from;
-        return user.save( done );
+        return req.wrap( 'save', user )( done );
       }
     } );
   };
@@ -65,19 +68,19 @@ function linkAccountToUser( req, token, tokenSecret, profile, done ) {
         } )
       );
     };
-    var createUser = function(callback){
+    var createUser = function( callback ){
 
       if( !user ) {
+        // User not present, create one from the account information
         log.trace( 'Creating user from account' );
-        User.createWithAccount(profile.provider,profile,req.wrap(function(err,createdUser){
-          if (err) return callback(err);
 
-          user = createdUser;
+        // Create the user
+        user = User.createWithAccount( profile.provider, profile );
 
-          return callback();
-        }));
-
+        // Save user
+        return req.wrap( 'save', user )( callback );
       }else{
+        // User present, go on.
         return callback();
       }
     };
@@ -85,7 +88,7 @@ function linkAccountToUser( req, token, tokenSecret, profile, done ) {
     var addAccount = function(callback){
 
       // Find the account for the user
-      log.trace( 'User: %j', user );
+      log.trace( 'User: %s', user._id );
 
       var account = _.findWhere( user.accounts, {
         provider: String( profile.provider ),
@@ -95,9 +98,13 @@ function linkAccountToUser( req, token, tokenSecret, profile, done ) {
       log.trace( 'Account found? %s', !!account );
 
       if( !account ) {
-        user.addAccount(profile.provider,profile,req.wrap(callback));
+        // Account not found for the user, add one.
+        user.addAccount( profile.provider, profile );
 
-      }else{
+        // Save user
+        return req.wrap( 'save', user )( callback );
+      } else {
+        // Account present go on.
         return callback();
       }
     };
@@ -112,19 +119,22 @@ function linkAccountToUser( req, token, tokenSecret, profile, done ) {
       if(err) return login(err);
 
       log.trace('Operations completed');
-      login(null,user);
+      return login( null, user );
     });
   };
 
   // Check if user is logged
   if( !req.isAuthenticated() ) {
     // Not logged in, search for a user with the specified account
-
     log.trace( 'Find %s, %s', profile.provider, profile.id );
-
-    User.findByAccountId(profile.provider,profile.id,req.wrap(checkAccount));
+    return User.findByAccountId(
+      profile.provider,
+      profile.id,
+      req.wrap( checkAccount )
+    );
   } else {
-    checkAccount( null, req.user );
+    // Check if the user has the account associated
+    return checkAccount( null, req.user );
   }
 }
 
