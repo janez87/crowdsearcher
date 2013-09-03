@@ -1,6 +1,6 @@
 process.title = 'CrowdSearcher';
 //TODO: remove, debug only
-//Error.stackTraceLimit = Infinity;
+Error.stackTraceLimit = Infinity;
 
 // Cluster related
 var cluster = require( 'cluster' );
