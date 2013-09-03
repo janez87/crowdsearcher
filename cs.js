@@ -221,7 +221,7 @@ config.once( 'ready', function configReady() {
     } )
   ];
 
-  // Home
+  // Home page
   app.get( '/', routes.index );
 
 
