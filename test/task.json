@@ -1,0 +1,7 @@
+{
+  "name": "Test Task",
+  "type": "LIKE",
+  "objects": [ { "name": "oggetto1", "data": { "volofield": "volovalue" } }],
+  "platforms":[
+    {"name":"FACEBOOK"}]
+}

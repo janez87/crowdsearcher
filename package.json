@@ -1,0 +1,50 @@
+{
+  "name": "CrowdSearcher",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "node cs.js | bunyan -o short",
+    "test": "mocha -c -R spec"
+  },
+  "dependencies": {
+    "express": "*",
+    
+    "coffee-script": "*",
+    "stylus": "*",
+    "jade": "*",
+    "showdown": "*",
+    "express-coffee": "*",
+    
+    "nconf": "*",
+    "bunyan": "*",
+    "underscore": "*",
+    "underscore.string": "*",
+    
+    "request": "*",
+    "async": "*",
+    "mongoose": "*",
+    
+    "passport": "*",
+    "passport-local": "*",
+    "passport-oauth": "*",
+    "passport-facebook": "*",
+    "passport-twitter": "*",
+    "connect-flash": "*",
+
+    "glob": "*",
+
+    "fb": "*",
+    "mturk": "*",
+    "twit":"*",
+    
+    "node-schedule": "*",
+
+    "nodemailer":"*"
+  },
+  "devDependencies": {
+    "supertest": "*",
+    "should": "*",
+    "mocha": "*",
+    "groc": "*"
+  }
+}

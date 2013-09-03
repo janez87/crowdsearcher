@@ -1,0 +1,28 @@
+body {
+  font: 12pt "Ubuntu", Verdana, Arial, sans-serif;
+  padding-top: 70px;
+}
+footer {
+  margin-top: 2em;
+}
+.dropzone {
+  cursor: pointer;
+  border-width: 0.5em;
+  border-style: dashed;
+  text-align: center;
+  padding: 2em 1em;
+  border-color: RoyalBlue;
+  background-color: LightCyan;
+}
+.dropzone.error {
+  border-color: #f00;
+  background-color: MistyRose;
+}
+.dropzone.active {
+  border-color: #008000;
+  background-color: PaleGreen;
+}
+.dropzone input[type='file'] {
+  width: 0;
+  height: 0;
+}

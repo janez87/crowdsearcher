@@ -1,0 +1,18 @@
+extends layout
+
+block append css
+  link(rel='stylesheet', href='stylesheets/error.css')
+
+block header
+  h1= error.name
+
+block content
+  .row
+    .col-md-9
+      .alert.alert-error= error.message
+      h3 Stack trace
+      pre.pre-scrollable.stack.text-error
+        each line in stack
+          span.line= line
+    .col-md-3.hidden-phone
+      img.img-responsive(src="img/mother-of-god.gif")

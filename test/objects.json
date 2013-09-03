@@ -1,0 +1,16 @@
+{
+  "objects": [ 
+    { 
+      "name": "oggetto2", 
+      "data": { 
+       "volofield": "volovalue2" 
+      } 
+    },
+    { 
+      "name": "oggetto3", 
+      "data": { 
+        "volofield": "volovalue3" 
+      } 
+    }
+  ]
+}

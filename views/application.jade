@@ -1,0 +1,18 @@
+form.form-horizontal(action='/application', method='post')
+    .control-group
+      label.control-label(for='name') Name
+      .controls
+        input#name(type='text', name='name', placeholder='Application name', required)
+    .control-group
+      label.control-label(for='descr') Description
+      .controls
+        textarea#descr(name='description', placeholder='Application description')
+    .control-group
+      label.control-label(for='url') Url
+      .controls
+        input#url(type='url', name='url', placeholder='http://application.com', required)
+    .control-group
+      .controls.pull-right
+        .btn-group
+          button.btn.btn-primary(type='submit') Send
+          button.btn(type='reset') Reset

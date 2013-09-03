@@ -1,0 +1,34 @@
+!!! 5
+html(prefix="og: http://ogp.me/ns#")
+  head
+    base(href=appBase)
+    title= data.name
+
+    block meta
+      include includes/metaOpenGraph
+      include includes/meta
+
+    block libCss
+      include includes/libCSS
+
+    block css
+      link(rel='stylesheet', href='stylesheets/ending.css')
+
+    block libScripts
+      include includes/libJS
+
+  body
+    .container
+      .row.header
+        .span3
+          a(href='http://crowdsearcher.search-computing.org/', target='_blank')
+            img.img-polaroid.pull-left.logos(src="img/logo-cs.png",title="CrowdSearcher platform")
+        .span6.text-center
+          h1 Completo!
+        .span3
+          a(href='http://www.polimi.it/', target='_blank')
+            img.img-polaroid.pull-right.logos(src="img/logo-polimi.png",title="Politecnico di Milano")
+      hr
+      .hero-unit
+        h1.text-success Grazie!
+        p!= content

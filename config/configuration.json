@@ -1,0 +1,56 @@
+{
+  "webserver": {
+    "hostname": "localhost",
+    "port": 2100
+  },
+  
+  "useCache": false,
+  
+  "scripts": {
+    "path": "scripts",
+    "default": "default"
+  },
+
+  "operations": {
+    "path": "operations"
+  },
+
+  "api": {
+    "urlPath": "api",
+    "path": "api"
+  },
+  
+  "mongo": {
+      "url": "mongodb://localhost/CrowdSearcher",
+      "path": "data",
+      "modelsPath": "models"
+  },
+
+
+  "platforms": {
+    "path": "platforms"
+  },
+
+  "social": {
+    "facebook": {
+      "clientID": "301234899978167",
+      "clientSecret": "c846dcb147e9366aae165c3ab59b254a"
+    },
+    "twitter": {
+      "consumerKey": "EnyAHmVRKi72S8o2vrkJw",
+      "consumerSecret": "EbKKZvBHN0ctByoD95IxdDWjUKvvWshunOBJZGmHuMA"
+    }
+  },
+  "logger": {
+    "path": "logs",
+    "streams": {
+      "console": {
+        "level": "trace"
+      },
+      "file": {
+        "level": "error",
+        "filename": "cs_volog.jlog"
+      }
+    }
+  }
+}
