@@ -7,7 +7,7 @@
 * [mongodb][mongo] 2.2+ up and running.
 
 ## Installation
-    git clone git clone http://crowdsearcher.search-computing.org/gitlab/crowdsearcher/cs.git CrowdSearcher
+    git clone http://crowdsearcher.search-computing.org/gitlab/crowdsearcher/cs.git CrowdSearcher
     cd CrowdSearcher
     npm install -d
 
