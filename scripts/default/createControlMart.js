@@ -12,14 +12,15 @@ var performRule = function( data, config, callback ) {
   domain.on('error',callback);
 
   var objects = data.task.objects;
-
+  var i  = 0;
+  
   var createControlMartTuple = function(object,callback){
 
     var rawMart = {
       name:'test',
-      data:'1',
+      data:i++,
       task:data.task._id,
-      object:object._id
+      object:object
     };
 
     log.trace('Creating the tuple %j',rawMart);

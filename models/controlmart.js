@@ -74,4 +74,5 @@ ControlMartSchema.statics.get = function(rawTuple,callback){
 
 };
 
+
 exports = module.exports = ControlMartSchema;
