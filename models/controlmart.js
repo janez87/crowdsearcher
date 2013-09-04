@@ -51,27 +51,52 @@ var ControlMartSchema = new Schema( {
   data: Schema.Types.Mixed
 } );
 
+//Return the data value of the ControlMart tuple that exactly match the input rawTuple
+ControlMartSchema.statics.select = function(rawTuple,callback){
+
+  log.trace('Retrieving the controlmart tuple of %j', rawTuple);
+
+  this.find(rawTuple,function(err,controlMartTuples){
+    if(err) return callback(err);
+    
+    log.trace('%s retrieved',controlMartTuples);
+
+    return callback(null,controlMartTuples);
+  });
+
+};
+
+//Returns all the tuples matching the condition
 ControlMartSchema.statics.get = function(rawTuple,callback){
 
   if(_.isUndefined(rawTuple.name)){
     return callback(new Error('The name is required'));
   }
 
-  log.trace('Retrieving the controlmart tuple of %j', rawTuple);
+  var tupleToSearch = {
+    job: rawTuple.job,
+    task: rawTuple.task,
+    operation: rawTuple.operation,
+    microtask: rawTuple.microtask,
+    object: rawTuple.object,
+    name:rawTuple.name,
+    platform: rawTuple.platform
+  };
 
-  this.findOne(rawTuple,function(err,controlMartTuple){
+  log.trace('Retrieving the controlmart tuple of %j', tupleToSearch);
+
+  this.findOne(tupleToSearch,function(err,controlMartTuple){
     if(err) return callback(err);
-
-    if(!controlMartTuple){
-      log.trace('No control mart tuple found');
-      return callback();
-    }
     
-    log.trace('%s retrieved',controlMartTuple.data);
+    log.trace('%s retrieved',controlMartTuple);
 
-    return callback(null,controlMartTuple.data);
+    if(controlMartTuple && !_.isUndefined(controlMartTuple)){
+      return callback(null,controlMartTuple.data);
+    }
+
+    return callback();
   });
-
+ 
 };
 
 
