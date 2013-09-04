@@ -3,7 +3,6 @@
 
 var log = common.log.child( { component: 'TestControlMart' } );
 var async = require('async');
-var _ = require('underscore');
 var ControlMart = common.models.controlmart;
 
 var performRule = function( data, config, callback ) {
@@ -18,7 +17,7 @@ var performRule = function( data, config, callback ) {
 
     var object = annotation.object;
 
-    ControlMart.get({task:data.task._id,name:'test',object:object},function(err,tuple){
+    ControlMart.select({name:'test'},function(err,tuple){
       if(err) return callback(err);
 
       log.trace('The data is %s',tuple);
