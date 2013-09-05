@@ -12,13 +12,12 @@ var performRule = function( data, config, callback ) {
   domain.on('error',callback);
 
   var objects = data.task.objects;
-  var i  = 0;
   
   var createControlMartTuple = function(object,callback){
 
     var rawMart = {
-      name:'test',
-      data:i++,
+      name:'yes',
+      data:0,
       task:data.task._id,
       object:object
     };

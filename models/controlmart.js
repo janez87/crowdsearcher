@@ -73,6 +73,7 @@ ControlMartSchema.statics.get = function(rawTuple,callback){
     return callback(new Error('The name is required'));
   }
 
+  //Need to force the undefined values
   var tupleToSearch = {
     job: rawTuple.job,
     task: rawTuple.task,
