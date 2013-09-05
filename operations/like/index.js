@@ -45,15 +45,16 @@ function checkData( data, operation ) {
 // Return an Annotation Object
 function create( data, operation, callback ) {
   log.debug( 'Creating annotation' );
-  
+
   var annotations = [];
-  // Create an annotation for each 
+  // Create an annotation for each
   _.each( data, function( obj ) {
     var annotation = new Annotation( {
       operation: operation,
-      object: obj.objectId
+      object: obj.objectId,
+      creationDate: obj.date
     } );
-    
+
     annotations.push( annotation );
   } );
 

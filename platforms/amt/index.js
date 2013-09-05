@@ -14,6 +14,7 @@ var Execution = common.models.execution;
 
 function execute( task, microtask, execution, platform, callback ) {
   log.trace('Executing the microtask %s', microtask.id);
+  // TODO fix with param url
   var url = 'https://workersandbox.mturk.com/mturk/preview?groupId=';
 
   //Retrieving the hit type id for building the url
@@ -30,7 +31,7 @@ var createAnnotation = function(execution,annotations,operation,callback){
   var opImplementation = GLOBAL.common.operations[ operation.name ];
 
   var opAnnotations = _.filter(annotations,function(annotation){
-    return operation.id == annotation.operation.id;
+    return operation._id == annotation.operation._id;
   });
 
   log.trace('Found %s answers for the operation %s',opAnnotations.length,operation.label);
@@ -83,20 +84,24 @@ function retrieve(task,microtask,platform,cronJob){
   HIT.get(hitId,jobDomain.bind(function(err,hit){
     if(err) return log.error('An error occured during the hit retrieval',err);
 
+    if( !hit ) return log.error( 'No hit retrieved' );
+
     log.trace('Hit retrieved');
     log.trace('Retrieving the assignments');
 
     hit.getAssignments({assignmentStatus:'Submitted'},jobDomain.bind(function(err,numResult,totalNumResult,pageNumber,assignments){
       if(err) return log.error('An error occured during the retrival of the assignment for the hit %s',hit.id);
 
+      if( !assignments ) return log.error( 'No assignments retrieved' );
+
       log.trace('Found %s submitted assignments',assignments.length);
 
-      if(assignments.length === 0){
-        return log.trace('No assignmetn found');
-      }
+      if(assignments.length === 0) return log.trace('No assignment found');
 
       microtask.populate('operations platforms',jobDomain.bind(function(err,microtask){
         if (err) return log.error('Error in the populate',err);
+
+        if( !microtask ) return log.error( 'No microtask retrieved' );
 
         var checkAssignment = function(assignment,callback){
           var worker = assignment.workerId;
@@ -119,13 +124,14 @@ function retrieve(task,microtask,platform,cronJob){
               };
 
               log.trace('Creating the performer with his amt account %s',worker);
-              Performer.createWithAccount('amt',data,jobDomain.bind(function(err,performer){
-                if(err) return callback(err);
+              var user = Performer.createWithAccount('amt',data );
+              jobDomain.bind( user.save.bind( user ) )( function( err, performer ) {
+                if( err ) return callback( err );
 
                 log.trace('Performer created');
                 amtPerformer = performer;
                 return callback();
-              }));
+              });
             }));
 
           };
@@ -138,7 +144,8 @@ function retrieve(task,microtask,platform,cronJob){
                 job:task.job,
                 performer:amtPerformer,
                 operations:microtask.operations,
-                platform: platform
+                platform: platform,
+                creationDate: assignment.acceptTime
               };
 
             var execution = new Execution(rawExecution);
@@ -163,43 +170,41 @@ function retrieve(task,microtask,platform,cronJob){
               }
 
               log.trace('Answer for the operation %j',operation);
+              log.trace( 'Assignment: %j', assignment );
+              var rawAnnotation = {
+                date: assignment.submitTime,
+                objectId: objectId,
+                operation: operation
+              };
+
               if(operation.name === 'like'){
                 var like = answer.SelectionIdentifier;
 
                 if(like === 'like'){
-                  var likeAnnotation = {objectId:objectId, operation:operation};
-                  annotationsToBeCreated.push(likeAnnotation);
+                  // NOOP
                 }
 
-              }else if(operation.name === 'classify'){
+              }else if(operation.name === 'classify' || operation.name==='fuzzyclassify' ){
 
                 var category = answer.SelectionIdentifier;
-                var classifyAnnotation = {objectId:objectId,value:category,operation:operation};
-                annotationsToBeCreated.push(classifyAnnotation);
+                rawAnnotation.value = category;
 
               }else if(operation.name === 'tag'){
 
                 var tags = answer.FreeText;
                 tags = tags.split(',');
-                var tagAnnotation = {objectId:objectId,value:tags,operation:operation};
-                annotationsToBeCreated.push(tagAnnotation);
+                rawAnnotation.value = tags;
 
               }else if(operation.name === 'comment'){
 
                 var comment = answer.FreeText;
-                var commentAnnotation = {objectId:objectId,value:comment,operation:operation};
-                annotationsToBeCreated.push(commentAnnotation);
+                rawAnnotation.value = comment;
 
-              }else if(operation.name === 'fuzzyclassify'){
-
-                var category = answer.SelectionIdentifier;
-                var classifyAnnotation = {objectId:objectId,value:category,operation:operation};
-                annotationsToBeCreated.push(classifyAnnotation);
-
-              }else{
+              } else{
                 return log.error('Operation %s not supported',operation.name);
               }
 
+              annotationsToBeCreated.push( rawAnnotation );
             });
 
             async.eachSeries(microtask.operations,_.partial(createAnnotation,execution,annotationsToBeCreated),function(err){
@@ -389,11 +394,6 @@ var Platform = {
   execute: execute,
   init: create,
   params : {
-    inactive: {
-      type: 'boolean',
-      'default': true
-    },
-    offline: 'boolean',
     jadeTemplate:{
       type:'string',
       'default':'customTemplate.jade'
@@ -404,11 +404,11 @@ var Platform = {
     },
     accessKeyId:{
       type:'string',
-      'default':'AKIAJGIUA2IY5DD56FRQ'
+      'default':''
     },
     secretAccessKey:{
       type:'string',
-      'default':'amJhGG4qQ+cf1rFebo+f3YzadDg33ZKWEqSidk3o'
+      'default':''
     },
     price:{
       type:'number',

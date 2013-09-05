@@ -89,7 +89,7 @@ var checkParameters = function( callback ) {
 var params = {
   agreement: ['string'],
   numberOfAnswer: ['string'],
-  spread:'numeric'
+  spread:'number'
 };
 
 module.exports.perform = exports.perform = performRule;

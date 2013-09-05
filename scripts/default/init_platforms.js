@@ -56,13 +56,11 @@ var performRule = function( data, config, callback ) {
 
 
   var initPlatform = function( microtask, platform, callback ) {
-    var params = platform.params;
-
     // Import the platform implementation
     var platformImplementation = common.platforms[ platform.name ];
 
-    // If the platform is inactive then just return
-    if( params.inactive || !platform.enabled ) return callback();
+    // If the platform is not enabled then just return
+    if( !platform.enabled ) return callback();
 
 
     // this function checks if the `platform` requires a CronJob to run in background.

@@ -2,12 +2,18 @@
 // Load libraries
 var _ = require('underscore');
 var util = require('util');
+var domain = require( 'domain' );
 
+// Create a child logger
 var log = common.log.child( { component: 'DisableHit' } );
+
+// Import models
+var Platform = common.models.platform;
 
 var CSError = require('../../error');
 // Custom error
 var DisableHitError = function( id, message) {
+  /* jshint camelcase:false */
   DisableHitError.super_.call( this, id, message);
 };
 
@@ -17,43 +23,57 @@ util.inherits( DisableHitError, CSError );
 DisableHitError.prototype.name = 'DisableHitError';
 
 
-var performRule = function( data, config, callback ) {
+var performRule = function( data, params, callback ) {
   log.trace('Performing the rule');
 
-  var domain = require( 'domain' ).create();
-
-  domain.on('error',callback);
+  var d = domain.create();
+  d.on('error',callback);
 
   var microtask = data.microtask;
-
+  // Get the hit from the microtask
   var hitId = microtask.getMetadata('hit');
 
-  if(_.isUndefined(hitId)){
+  if( _.isUndefined( hitId ) ) {
+    log.warn( 'The microtask does not have a AMT hit data' );
     return callback();
   }
 
-  var conf = {
-    url: config.url,
-    receptor: { port: 3000, host: undefined },
-    poller: { frequency_ms: 10000 },
-    accessKeyId: config.accessKeyId,
-    secretAccessKey: config.secretAccessKey,
-    amount: config.price,
-    duration: config.duration
-  };
+  microtask
+  .populate( 'platforms', d.bind( function( err, microtask ) {
+    if( err ) return callback( err );
 
-  var mturk = require('mturk')(conf);
-  var HIT = mturk.HIT;
+    var amtPlatform = _.findWhere( microtask.platforms, { name: 'amt' } );
+    log.trace( 'AMT found: %j', amtPlatform );
 
-  log.trace('Disabling the hit %s',hitId);
+    if( !amtPlatform ) {
+      log.warn( 'The microtask does not have an AMT platform' );
+      return callback();
+    }
 
-  HIT.disable(hitId,function(err){
-    if (err) return callback(err);
+    var config = amtPlatform.params;
+    var conf = {
+      url: config.url,
+      receptor: { port: 3000, host: undefined },
+      poller: { frequency_ms: 10000 },
+      accessKeyId: config.accessKeyId,
+      secretAccessKey: config.secretAccessKey,
+      amount: config.price,
+      duration: config.duration
+    };
 
-    log.trace('Hit %s successfully disabled',hitId);
+    var mturk = require('mturk')(conf);
+    var HIT = mturk.HIT;
 
-    return callback();
-  });
+    log.trace('Disabling the hit %s',hitId);
+
+    HIT.disable( hitId, function( err ) {
+      if( err ) return callback( err );
+
+      log.trace( 'Hit %s successfully disabled', hitId );
+
+      return callback();
+    });
+  } ) );
 };
 
 var checkParameters = function( callback ) {

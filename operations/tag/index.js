@@ -49,7 +49,8 @@ function create( data, operation, callback ) {
       var annotation = new Annotation( {
         response: tag,
         object: answer.objectId,
-        operation: operation
+        operation: operation,
+        creationDate: answer.date
       } );
       annotations.push( annotation );
     } );
