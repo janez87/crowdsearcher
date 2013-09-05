@@ -82,7 +82,7 @@ function invite(data, config, callback){
       if (err){
         log.error(err.message);
 
-        // I ignore the error and continue to send mails 
+        // I ignore the error and continue to send mails
         return callback();
       }
 
@@ -107,7 +107,7 @@ function create(task, microtask, config, callback){
 }
 
 var Platform = {
-  init:create,
+  init: create,
   invite: invite,
   enabled: true,
   params: {

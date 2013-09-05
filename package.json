@@ -8,22 +8,23 @@
   },
   "dependencies": {
     "express": "*",
-    
+
     "coffee-script": "*",
     "stylus": "*",
     "jade": "*",
     "showdown": "*",
     "express-coffee": "*",
-    
+
     "nconf": "*",
     "bunyan": "*",
     "underscore": "*",
     "underscore.string": "*",
-    
+
     "request": "*",
     "async": "*",
     "mongoose": "*",
-    
+    "q": "*",
+
     "passport": "*",
     "passport-local": "*",
     "passport-oauth": "*",
@@ -36,7 +37,7 @@
     "fb": "*",
     "mturk": "*",
     "twit":"*",
-    
+
     "node-schedule": "*",
 
     "nodemailer":"*"

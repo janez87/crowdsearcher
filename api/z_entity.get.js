@@ -38,6 +38,7 @@ var API = {
 // API core function logic. If this function is executed then each check is passed.
 API.logic = function setApi( req, res, next ) {
   var entity = req.params.entity;
+  entity = entity==='performer'? 'user' : entity;
   var property = req.params.property;
 
   log.trace( 'Getting %s for %s ', property, entity );
