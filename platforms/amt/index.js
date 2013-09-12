@@ -412,7 +412,7 @@ var Platform = {
     },
     price:{
       type:'number',
-      'default':0.02
+      'default':0.01
     },
     duration:{
       type:'number',
