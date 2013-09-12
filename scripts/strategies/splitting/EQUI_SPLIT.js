@@ -41,7 +41,36 @@ EquiSplitError.MISSING_PARAMETERS = 'MISSING_PARAMETERS';
 var performStrategy = function( data, params, callback ) {
   log.trace( 'Performing strategy on "%s" event', data.event );
 
+  var d = domain.create();
+  d.on( 'error', callback );
+
+  var event = data.event;
   var task = data.task;
+  if( event==='ADD_OBJECTS' ) {
+    log.trace();
+    var objects = data.objects;
+
+    var rawMicroTask = {
+      platforms: task.platforms,
+      objects: objects,
+      operations: task.operations,
+      task: task._id
+    };
+
+    var microtask = new MicroTask( rawMicroTask );
+    d.bind( microtask.save.bind( microtask ) )( function( err, microtask ) {
+      if( err ) return callback( err );
+
+      task.addMicrotasks( [ microtask ], d.bind( function( err ) {
+        if( err ) return callback( err );
+
+        return callback( null, [ microtask ] );
+      } ) );
+    } );
+
+    return;
+  }
+
 
   // Get the configuration
   var objectsPerMicroTask = params.objectsNumber;
@@ -63,7 +92,8 @@ var performStrategy = function( data, params, callback ) {
   // If we have 0 objects then we cannot perform this strategy.
   var numObjects = objects.length;
   if( numObjects===0 )
-    return callback( new EquiSplitError( EquiSplitError.NO_OBJECTS, 'The Task have 0 open objects' ) );
+    return callback( null, [] );
+    //return callback( new EquiSplitError( EquiSplitError.NO_OBJECTS, 'The Task have 0 open objects' ) );
 
   // List of microtasks to create
   var microTaskList = [];
@@ -91,9 +121,6 @@ var performStrategy = function( data, params, callback ) {
   //TODO: better manage edge cases
   //TODO: missing full control
 
-  var d = domain.create();
-  d.on( 'error', callback );
-
   var saveMicroTasks = function( callback ) {
     log.trace( 'Creating %s microtasks', microTaskList.length );
     MicroTask.create( microTaskList, d.bind( callback ) );
@@ -106,8 +133,8 @@ var performStrategy = function( data, params, callback ) {
     var callback = microtasks.pop();
 
     log.trace( 'Adding %s microtasks to the task', microtasks.length );
-    task.addMicrotasks( microtasks, d.bind( function(err){
-      if (err) return callback(err);
+    task.addMicrotasks( microtasks, d.bind  ( function(err){
+      if( err ) return callback( err );
 
       return callback(null,microtasks);
     } ) );

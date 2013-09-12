@@ -297,8 +297,30 @@ TaskSchema.methods.canAddObjects = function() {
   return this.status<TaskStatuses.FINALIZED;
 };
 // Useful method to add objects to the Task
-TaskSchema.methods.addObjects = function( objects, callback ) {
+TaskSchema.methods.addObjectsByIds = function( ids, callback ) {
+  var ObjectModel = this.model( 'object' );
+  var thisTask = this;
 
+  ObjectModel
+  .where( '_id' ).in( ids )
+  .exec( function( err, objects ) {
+    if( err ) return callback( err );
+
+    _.each( objects, function( object ) {
+      thisTask.objects.addToSet( object );
+    } );
+
+    thisTask.save( function( err, task ) {
+      if( err ) return callback( err );
+
+      return CRM.execute( 'ADD_OBJECTS', {
+        task: task,
+        objects: objects
+      }, callback );
+    });
+  } );
+};
+TaskSchema.methods.addObjects = function( objects, callback ) {
   log.trace( 'Adding objects to Task %s', this._id );
 
   // check if we can add objects to the task
@@ -349,7 +371,7 @@ TaskSchema.methods.addObjects = function( objects, callback ) {
 };
 
 // ### Useful methods
-// Perform the invitation strategy. 
+// Perform the invitation strategy.
 // If no data is passed then it performs the current strategy
 // Otherwise it will use the new strategy passed in the strategy object
 TaskSchema.methods.invite = function(strategy,callback){

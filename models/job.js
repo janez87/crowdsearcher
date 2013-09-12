@@ -81,7 +81,7 @@ JobSchema.pre( 'remove', function( next ) {
 
   var removeTask = function( callback ) {
     log.trace( 'Removing all the tasks of the job' );
- 
+
     thisJob
     .model( 'task' )
     .find()
@@ -170,13 +170,24 @@ JobSchema.methods.addObjects = function( objects, callback ) {
     } );
   };
 
-  // Add the Job property to each Object
-  _.each( objects, function( object ) {
-    object.job = thisJob;
-  } );
 
-  // Create and save multiple instance at once
-  this.model( 'object' ).create( objects, objectsCreated );
+  if( objects.length===0 )
+    return callback( null, [] );
+
+  // Check objects type
+  var tempObj = objects[ 0 ];
+  if( _.isString( tempObj ) ) {
+
+  } else {
+    // Add the Job property to each Object
+    _.each( objects, function( object ) {
+      object.job = thisJob;
+    } );
+
+    // Create and save multiple instance at once
+    return this.model( 'object' ).create( objects, objectsCreated );
+  }
+
 };
 
 
