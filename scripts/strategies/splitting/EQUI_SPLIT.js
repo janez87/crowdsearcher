@@ -31,11 +31,6 @@ EquiSplitError.ZERO_OBJECTS = 'ZERO_OBJECTS';
 EquiSplitError.CONFIGURATION_MISMATCH = 'CONFIGURATION_MISMATCH';
 EquiSplitError.MISSING_PARAMETERS = 'MISSING_PARAMETERS';
 
-
-
-
-
-
 // # Strategy logic
 // DESCRIPTION
 var performStrategy = function( data, params, callback ) {
@@ -43,111 +38,127 @@ var performStrategy = function( data, params, callback ) {
 
   var d = domain.create();
   d.on( 'error', callback );
-
-  var event = data.event;
-  var task = data.task;
-  if( event==='ADD_OBJECTS' ) {
-    log.trace();
-    var objects = data.objects;
-
-    var rawMicroTask = {
-      platforms: task.platforms,
-      objects: objects,
-      operations: task.operations,
-      task: task._id
-    };
-
-    var microtask = new MicroTask( rawMicroTask );
-    d.bind( microtask.save.bind( microtask ) )( function( err, microtask ) {
-      if( err ) return callback( err );
-
-      task.addMicrotasks( [ microtask ], d.bind( function( err ) {
-        if( err ) return callback( err );
-
-        return callback( null, [ microtask ] );
-      } ) );
-    } );
-
-    return;
-  }
-
-
+  
   // Get the configuration
   var objectsPerMicroTask = params.objectsNumber;
   var shuffle = params.shuffle;
 
+  var event = data.event;
+  var task = data.task;
+  task.populate('objects',d.bind(function(err,task){
+    if(err) return callback(err);
+    
+    var objects = [];
+    
+    if( event==='ADD_OBJECTS' ) {
+      var newObjects = data.objects;
 
-  // Get the object list as a copy.
-  var objects = _.clone( task.objects );
+      log.trace('Retrieving the array of pending objects');
+      var pendingObjects = task.getMetadata('pendingObjects');
 
-  // Select only the open objects
-  objects = _.filter(objects,function(object){
-    return object.status !== ObjectStatuses.CLOSED;
-  });
+      if(_.isUndefined(pendingObjects)){
+        pendingObjects = [];
+      }
 
-  // Shuffle objects if needed
-  if( shuffle )
-    objects = _.shuffle( objects );
+      for (var i = 0; i < newObjects.length; i++) {
+        pendingObjects.push(newObjects[i]);
+      }
 
-  // If we have 0 objects then we cannot perform this strategy.
-  var numObjects = objects.length;
-  if( numObjects===0 )
-    return callback( null, [] );
-    //return callback( new EquiSplitError( EquiSplitError.NO_OBJECTS, 'The Task have 0 open objects' ) );
+      log.trace('%s pending objects',pendingObjects.length);
 
-  // List of microtasks to create
-  var microTaskList = [];
+      if(pendingObjects.length<objectsPerMicroTask){
+        log.trace('Not enough objects');
+        
+        // Updating the metadata
+        task.setMetadata('pendingObjects',pendingObjects);
+        
+        return task.save(d.bind(function(err){
+          if(err) return callback(err);
 
-  // Cycle over the objects
-  var i;
-  for( i=0; i<objects.length; i+=objectsPerMicroTask ) {
-    var microTaskObjects = objects.slice( i, i+objectsPerMicroTask );
-    log.trace( 'Assigning objects from %s to %s to the %s microtask', i, i+objectsPerMicroTask, microTaskList.length );
+          return callback(null,[]);
+        }));
+      }
 
-    var rawMicroTask = {
-      platforms: task.platforms,
-      objects: microTaskObjects,
-      operations: task.operations,
-      task: task._id
+      objects = pendingObjects;
+      task.setMetadata('pendingObjects',[]);
+    }else if(event === 'OPEN_TASK'){
+      // Handling the OPEN_TASK event
+   
+      // Get the object list as a copy.
+      objects = _.clone( task.objects );
+   
+      // Select only the open objects
+      objects = _.filter(objects,function(object){
+        return object.status !== ObjectStatuses.CLOSED;
+      });
+   
+      // Shuffle objects if needed
+      if( shuffle ){
+        objects = _.shuffle( objects );
+      }
+    }
+
+    // If we have 0 objects then we cannot perform this strategy.
+    var numObjects = objects.length;
+    if( numObjects===0 )
+      return callback( null, [] );
+      //return callback( new EquiSplitError( EquiSplitError.NO_OBJECTS, 'The Task have 0 open objects' ) );
+
+    // List of microtasks to create
+    var microTaskList = [];
+
+    // Cycle over the objects
+    var i;
+    for( i=0; i<objects.length; i+=objectsPerMicroTask ) {
+      var microTaskObjects = objects.slice( i, i+objectsPerMicroTask );
+      log.trace( 'Assigning objects from %s to %s to the %s microtask', i, i+objectsPerMicroTask, microTaskList.length );
+
+      var rawMicroTask = {
+        platforms: task.platforms,
+        objects: microTaskObjects,
+        operations: task.operations,
+        task: task._id
+      };
+
+      // Add to the list of `MicroTask` to save
+      microTaskList.push( rawMicroTask );
+    }
+
+    var remaning = task.objects.length-i;
+    log.warn( 'Remaining %s objects', remaning );
+
+    //TODO: better manage edge cases
+    //TODO: missing full control
+
+    var saveMicroTasks = function( callback ) {
+      log.trace( 'Creating %s microtasks', microTaskList.length );
+      MicroTask.create( microTaskList, d.bind( callback ) );
     };
 
-    // Add to the list of `MicroTask` to save
-    microTaskList.push( rawMicroTask );
-  }
+    var updateTask = function( /* microtask, microtask, ..., callback */ ) {
+      // Get all the microtasks from the arguments
+      var microtasks = _.toArray( arguments );
+      // The last argument is the callback
+      var callback = microtasks.pop();
 
-  var remaning = task.objects.length-i;
-  log.warn( 'Remaining %s objects', remaning );
+      log.trace( 'Adding %s microtasks to the task', microtasks.length );
+      task.addMicrotasks( microtasks, d.bind  ( function(err){
+        if( err ) return callback( err );
 
-  //TODO: better manage edge cases
-  //TODO: missing full control
+        return callback(null,microtasks);
+      } ) );
+    };
 
-  var saveMicroTasks = function( callback ) {
-    log.trace( 'Creating %s microtasks', microTaskList.length );
-    MicroTask.create( microTaskList, d.bind( callback ) );
-  };
+    async.waterfall( [
+      saveMicroTasks,
+      updateTask
+    ], function(err,microtasks){
+        if(err) return callback(err);
 
-  var updateTask = function( /* microtask, microtask, ..., callback */ ) {
-    // Get all the microtasks from the arguments
-    var microtasks = _.toArray( arguments );
-    // The last argument is the callback
-    var callback = microtasks.pop();
-
-    log.trace( 'Adding %s microtasks to the task', microtasks.length );
-    task.addMicrotasks( microtasks, d.bind  ( function(err){
-      if( err ) return callback( err );
-
-      return callback(null,microtasks);
-    } ) );
-  };
-
-  async.waterfall( [
-    saveMicroTasks,
-    updateTask
-  ], function(err,microtasks){
-      if(err) return callback(err);
-
-      return callback(null,microtasks);
-    });
+        return callback(null,microtasks);
+      });
+  }));
+  
 };
 
 
@@ -156,7 +167,7 @@ var performStrategy = function( data, params, callback ) {
 
 var triggerOn = [
   'OPEN_TASK',
-  'ADD_OBJECT'
+  'ADD_OBJECTS'
 ];
 
 // ## Parameters
