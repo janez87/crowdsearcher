@@ -13,7 +13,7 @@ var log = common.log.child( { component: 'EquiSplit Splitting Strategy' } );
 
 // Import Models
 var MicroTask = common.models.microtask;
-
+var ObjectModel = common.models.object;
 // Custom error
 // ---
 var CSError = require('../../../error');
@@ -45,10 +45,11 @@ var performStrategy = function( data, params, callback ) {
 
   var event = data.event;
   var task = data.task;
-  task.populate('objects',d.bind(function(err,task){
-    if(err) return callback(err);
-    
-    var objects = [];
+  var objects = [];
+
+  var retrieveObjects = function(callback){
+
+    var objectIds = [];
     
     if( event==='ADD_OBJECTS' || event === 'ON_EOF') {
       var newObjects = data.objects;
@@ -64,7 +65,7 @@ var performStrategy = function( data, params, callback ) {
       }
 
       for (var i = 0; i < newObjects.length; i++) {
-        pendingObjects.push(newObjects[i]);
+        pendingObjects.push(newObjects[i]._id);
       }
 
       log.trace('%s pending objects',pendingObjects.length);
@@ -82,25 +83,40 @@ var performStrategy = function( data, params, callback ) {
         }));
       }
 
-      objects = pendingObjects;
+      objectIds = pendingObjects;
       task.setMetadata('pendingObjects',[]);
     }else if(event === 'OPEN_TASK'){
       // Handling the OPEN_TASK event
    
       // Get the object list as a copy.
-      objects = _.clone( task.objects );
-   
-      // Select only the open objects
-      objects = _.filter(objects,function(object){
-        return object.status !== ObjectStatuses.CLOSED;
-      });
-   
-      // Shuffle objects if needed
-      if( shuffle ){
-        objects = _.shuffle( objects );
-      }
+      objectIds = _.clone( task.objects );
+  
     }
 
+
+    var getObject = function(objectId,callback){
+      ObjectModel.findById(objectId,function(err,object){
+        if(err) return callback(err);
+
+        objects.push(object);
+
+        return callback();
+      });
+    };
+
+    async.each(objectIds,getObject,callback);
+  };
+
+  var createMicrotasks = function(callback){
+  
+    objects = _.filter(objects,function(object){
+      return object.status !== ObjectStatuses.CLOSED;
+    });
+
+    // Shuffle objects if needed
+    if( shuffle ){
+      objects = _.shuffle( objects );
+    }
     // If we have 0 objects then we cannot perform this strategy.
     var numObjects = objects.length;
     if( numObjects===0 )
@@ -160,7 +176,66 @@ var performStrategy = function( data, params, callback ) {
 
         return callback(null,microtasks);
       });
-  }));
+  };
+
+  
+  async.series([retrieveObjects,createMicrotasks],callback);
+    
+    /*
+    if( event==='ADD_OBJECTS' || event === 'ON_EOF') {
+      var newObjects = data.objects;
+
+      if(_.isUndefined(newObjects)){
+        newObjects = [];
+      }
+      log.trace('Retrieving the array of pending objects');
+      var pendingObjects = task.getMetadata('pendingObjects');
+
+      if(_.isUndefined(pendingObjects)){
+        pendingObjects = [];
+      }
+
+      for (var i = 0; i < newObjects.length; i++) {
+        pendingObjects.push(newObjects[i]._id);
+      }
+
+      log.trace('%s pending objects',pendingObjects.length);
+
+      if(event !== 'ON_EOF' && pendingObjects.length<objectsPerMicroTask){
+        log.trace('Not enough objects');
+        
+        // Updating the metadata
+        task.setMetadata('pendingObjects',pendingObjects);
+        
+        return task.save(d.bind(function(err){
+          if(err) return callback(err);
+
+          return callback(null,[]);
+        }));
+      }
+
+      objects = pendingObjects;
+      task.setMetadata('pendingObjects',[]);
+    }else if(event === 'OPEN_TASK'){
+      // Handling the OPEN_TASK event
+   
+      // Get the object list as a copy.
+      objects = _.clone( task.objects );
+   
+      // Select only the open objects
+      objects = _.filter(objects,function(object){
+        return object.status !== ObjectStatuses.CLOSED;
+      });
+   
+      // Shuffle objects if needed
+      if( shuffle ){
+        objects = _.shuffle( objects );
+      }
+    }*/
+
+     // Select only the open objects
+  
+
   
 };
 
