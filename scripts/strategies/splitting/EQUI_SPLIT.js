@@ -50,9 +50,12 @@ var performStrategy = function( data, params, callback ) {
     
     var objects = [];
     
-    if( event==='ADD_OBJECTS' ) {
+    if( event==='ADD_OBJECTS' || event === 'ON_EOF') {
       var newObjects = data.objects;
 
+      if(_.isUndefined(newObjects)){
+        newObjects = [];
+      }
       log.trace('Retrieving the array of pending objects');
       var pendingObjects = task.getMetadata('pendingObjects');
 
@@ -66,7 +69,7 @@ var performStrategy = function( data, params, callback ) {
 
       log.trace('%s pending objects',pendingObjects.length);
 
-      if(pendingObjects.length<objectsPerMicroTask){
+      if(event !== 'ON_EOF' && pendingObjects.length<objectsPerMicroTask){
         log.trace('Not enough objects');
         
         // Updating the metadata
@@ -167,7 +170,8 @@ var performStrategy = function( data, params, callback ) {
 
 var triggerOn = [
   'OPEN_TASK',
-  'ADD_OBJECTS'
+  'ADD_OBJECTS',
+  'ON_EOF'
 ];
 
 // ## Parameters

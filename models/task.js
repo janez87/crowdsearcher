@@ -290,6 +290,22 @@ TaskSchema.methods.closeTask = function(callback) {
   });
 };
 
+// ### Task finalize
+TaskSchema.methods.finalizeTask = function(callback) {
+  var thisTask = this;
+
+  log.trace( 'Finalizing task', this.id );
+
+  this.set( 'status', TaskStatuses.FINALIZED );
+
+  this.save( function( err ) {
+    if( err ) return callback( err );
+
+    // Trigget the `ON_EOF` event
+    CRM.execute( 'ON_EOF', { task: thisTask }, callback );
+  });
+};
+
 // ### Objects handling
 TaskSchema.methods.canAddObjects = function() {
   // If the Task is in one of these statuses then we are able to add objects,
