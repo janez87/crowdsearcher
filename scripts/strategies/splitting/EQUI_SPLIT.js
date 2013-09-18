@@ -38,7 +38,7 @@ var performStrategy = function( data, params, callback ) {
 
   var d = domain.create();
   d.on( 'error', callback );
-  
+
   // Get the configuration
   var objectsPerMicroTask = params.objectsNumber;
   var shuffle = params.shuffle;
@@ -47,9 +47,9 @@ var performStrategy = function( data, params, callback ) {
   var task = data.task;
   task.populate('objects',d.bind(function(err,task){
     if(err) return callback(err);
-    
+
     var objects = [];
-    
+
     if( event==='ADD_OBJECTS' || event === 'ON_EOF') {
       var newObjects = data.objects;
 
@@ -71,10 +71,10 @@ var performStrategy = function( data, params, callback ) {
 
       if(event !== 'ON_EOF' && pendingObjects.length<objectsPerMicroTask){
         log.trace('Not enough objects');
-        
+
         // Updating the metadata
         task.setMetadata('pendingObjects',pendingObjects);
-        
+
         return task.save(d.bind(function(err){
           if(err) return callback(err);
 
@@ -86,15 +86,15 @@ var performStrategy = function( data, params, callback ) {
       task.setMetadata('pendingObjects',[]);
     }else if(event === 'OPEN_TASK'){
       // Handling the OPEN_TASK event
-   
+
       // Get the object list as a copy.
       objects = _.clone( task.objects );
-   
+
       // Select only the open objects
       objects = _.filter(objects,function(object){
         return object.status !== ObjectStatuses.CLOSED;
       });
-   
+
       // Shuffle objects if needed
       if( shuffle ){
         objects = _.shuffle( objects );
@@ -161,7 +161,7 @@ var performStrategy = function( data, params, callback ) {
         return callback(null,microtasks);
       });
   }));
-  
+
 };
 
 
