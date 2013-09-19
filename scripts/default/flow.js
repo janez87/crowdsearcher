@@ -43,10 +43,14 @@ var performRule = function( data, config, callback ) {
       return callback( new TaskFlowError( TaskFlowError.INVALID_TASK_ID, 'Invalid Task id' ) );
 
     // Task valid
-    return callback();
+    var objects = [];
+    _.each( data.execution.annotations, function( annotation ) {
+      log.trace( 'Adding annotation', annotation );
+      objects.push( annotation.object );
+    } );
+    log.trace( 'Adding objects', objects );
+    return task2.addObjectsByIds( objects, callback );
   }) );
-
-  return callback();
 };
 
 
