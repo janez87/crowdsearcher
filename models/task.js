@@ -365,10 +365,18 @@ TaskSchema.methods.addObjects = function( objects, callback ) {
       } );
 
       thisTask.save( function( err ) {
-        // Emit the event that notifies that we added a set of new objects
-        //CRM.notify( 'ADD_OBJECTS', thisTask, objectList );
-        // Pass the list of created objects
-        return callback( err, objectList );
+        if( err ) return callback( err );
+
+        return CRM.execute( 'ADD_OBJECTS', {
+          task: thisTask,
+          objects: objectList
+        }, function(err){
+          if(err) return callback(err);
+
+          // Pass the list of created objects
+          return callback( null, objectList );
+        } );
+        
       } );
     };
 
