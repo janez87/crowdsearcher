@@ -367,15 +367,21 @@ TaskSchema.methods.addObjects = function( objects, callback ) {
       thisTask.save( function( err ) {
         if( err ) return callback( err );
 
-        return CRM.execute( 'ADD_OBJECTS', {
-          task: thisTask,
-          objects: objectList
-        }, function(err){
-          if(err) return callback(err);
+        if(thisTask.isNew){
+          // Trick to not trigger the ADD_OBJECTS on the task creation
+          return callback(null,objectList);
+        }else{
+          return CRM.execute( 'ADD_OBJECTS', {
+            task: thisTask,
+            objects: objectList
+          }, function(err){
+            if(err) return callback(err);
 
-          // Pass the list of created objects
-          return callback( null, objectList );
-        } );
+            // Pass the list of created objects
+            return callback( null, objectList );
+          } );
+          
+        }
         
       } );
     };

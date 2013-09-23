@@ -6,26 +6,26 @@ var async = require('async');
 var domain = require( 'domain' );
 
 // Create a child logger
-var log = common.log.child( { component: 'Task Flow' } );
+var log = common.log.child( { component: 'ActorToValidateBatch' } );
 
 // Models
 var Task = common.models.task;
-
+var Execution = common.models.execution;
 
 var CSError = require('../../error');
 // Custom error
-var TaskFlowError = function( id, message) {
+var ActorToValidateBatchError = function( id, message) {
   /* jshint camelcase: false */
-  TaskFlowError.super_.call( this, id, message);
+  ActorToValidateBatchError.super_.call( this, id, message);
 };
 
-util.inherits( TaskFlowError, CSError );
+util.inherits( ActorToValidateBatchError, CSError );
 
 // Error name
-TaskFlowError.prototype.name = 'TaskFlowError';
+ActorToValidateBatchError.prototype.name = 'ActorToValidateBatchError';
 
 // Error IDs
-TaskFlowError.INVALID_TASK_ID = 'INVALID_TASK_ID';
+ActorToValidateBatchError.INVALID_TASK_ID = 'INVALID_TASK_ID';
 
 var performRule = function( data, config, callback ) {
   log.trace('Performing the rule');
@@ -34,7 +34,7 @@ var performRule = function( data, config, callback ) {
   d.on( 'error', callback );
 
   var taskId = config.task;
-  var execution = data.execution;
+  var microtask = data.microtask;
 
   Task
   .findById( taskId )
@@ -42,34 +42,53 @@ var performRule = function( data, config, callback ) {
     if( err ) return callback( err );
 
     if( !task2 )
-      return callback( new TaskFlowError( TaskFlowError.INVALID_TASK_ID, 'Invalid Task id' ) );
+      return callback( new ActorToValidateBatchError( ActorToValidateBatchError.INVALID_TASK_ID, 'Invalid Task id' ) );
 
     // Task valid
-    var objects = [];
 
-    execution.populate('annotations.object',d.bind(function(err,execution){
+    var objects = [];
+    
+    Execution
+    .find()
+    .where('microtask')
+    .equals(microtask)
+    .populate('annotations.object')
+    .exec(d.bind(function(err,executions){
       if(err) return callback(err);
 
-      log.trace('Execution populated');
+      log.trace('Retrieved %s executions',executions.length);
       
-      _.each( execution.annotations, function( annotation ) {
-        log.trace( 'Adding annotation', annotation );
+      var actors = [];
+      var img = executions[0].annotations[0].object.data.path;
+
+      _.each(executions,function(execution){
+        _.each(execution.annotations,function(annotation){
+
+          actors.push(annotation.response);
+        
+        });
+
+      });
+
+      actors = _.uniq(actors);
+
+      _.each(actors,function(actor){
 
         var object = {
           name:'image',
           data:{
-            path:annotation.object.data.path,
-            actor:annotation.response
+            actor:actor,
+            path:img
           }
         };
 
-        objects.push( object );
-
-      } );
+        objects.push(object);
+      });
 
       log.trace( 'Adding objects', objects );
       return task2.addObjects( objects, callback );
     }));
+
   }) );
 };
 
