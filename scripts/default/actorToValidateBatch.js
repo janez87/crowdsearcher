@@ -36,6 +36,11 @@ var performRule = function( data, config, callback ) {
   var taskId = config.task;
   var microtask = data.microtask;
 
+  if(data.event !== 'END_MICROTASK'){
+    log.error('Wrong event');
+    return callback();
+  }
+
   Task
   .findById( taskId )
   .exec( d.bind( function( err, task2 ) {
@@ -72,6 +77,8 @@ var performRule = function( data, config, callback ) {
 
       actors = _.uniq(actors);
 
+      log.trace(actors);
+      
       _.each(actors,function(actor){
 
         var object = {
