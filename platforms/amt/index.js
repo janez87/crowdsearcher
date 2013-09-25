@@ -13,7 +13,8 @@ var log = common.log.child( { component: 'AMT' } );
 var Execution = common.models.execution;
 
 function execute( task, microtask, execution, platform, callback ) {
-  log.trace('Executing the microtask %s', microtask.id);
+  log.trace( 'Executing the microtask %s', microtask.id );
+
   // TODO fix with param url
   var url = 'https://workersandbox.mturk.com/mturk/preview?groupId=';
 
@@ -279,6 +280,7 @@ function create(task, microtask, platform, callback){
   // Create the HitType
   var createHitType = function(callback){
     log.trace('Creating the HitType');
+
     var description = 'Movie shot classification';
     if(!description){
       description =  'Movie shot classification';
@@ -399,15 +401,19 @@ var Platform = {
       'default':'customTemplate.jade'
     },
     url: {
-      type:'url',
-      'default': 'https://mechanicalturk.sandbox.amazonaws.com'
+      type:'enum',
+      values: {
+        'Mturk sandbox': 'https://mechanicalturk.sandbox.amazonaws.com',
+        'Mturk': 'https://mechanicalturk.amazonaws.com'
+      },
+      'default': 'Mturk sandbox'
     },
     accessKeyId:{
-      type:'string',
+      type:'pass',
       'default':''
     },
     secretAccessKey:{
-      type:'string',
+      type:'pass',
       'default':''
     },
     price:{

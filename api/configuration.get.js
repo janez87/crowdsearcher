@@ -57,6 +57,7 @@ API.logic = function getConfiguration( req, res ) {
     } );
   }
 
+
   // Compute and return the invitation strategies
   if( properties.invitationStrategies==='true' || force ) {
     configuration.invitationStrategies = [];
@@ -74,6 +75,18 @@ API.logic = function getConfiguration( req, res ) {
     configuration.splittingStrategies = [];
     _.each( GLOBAL.common.strategies.splitting, function( strategy, name ) {
       configuration.splittingStrategies.push( {
+        name: name,
+        params: strategy.params,
+        triggerOn: strategy.triggerOn
+      } );
+    } );
+  }
+
+  // Compute and return the Microtask assignment strategies
+  if( properties.taskAssignmentStrategies==='true' || force ) {
+    configuration.taskAssignmentStrategies = [];
+    _.each( GLOBAL.common.strategies.taskAssignment, function( strategy, name ) {
+      configuration.taskAssignmentStrategies.push( {
         name: name,
         params: strategy.params,
         triggerOn: strategy.triggerOn
