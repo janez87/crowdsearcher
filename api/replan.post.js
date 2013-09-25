@@ -45,7 +45,7 @@ var API = {
 
 // API core function logic. If this function is executed then each check is passed.
 // In the request you can pass a new splitting strategy (passing a splitting object)
-API.logic = function invite( req, res, next ) {
+API.logic = function replan( req, res, next ) {
   log.trace( 'Replan post' );
 
   // Get the new invitatin strategy from the request

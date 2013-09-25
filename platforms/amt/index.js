@@ -280,8 +280,13 @@ function create(task, microtask, platform, callback){
   // Create the HitType
   var createHitType = function(callback){
     log.trace('Creating the HitType');
+<<<<<<< HEAD
 
     var description = 'Movie shot classification';
+=======
+    var description = config.description;
+
+>>>>>>> feature/actor_flow
     if(!description){
       description =  'Movie shot classification';
     }
@@ -337,7 +342,7 @@ function create(task, microtask, platform, callback){
         questionXML = compiledTemplate({microtask:microtask,task:task});
       }
 
-      fs.writeFileSync('questionXML.xml',questionXML);
+      //fs.writeFileSync('questionXML.xml',questionXML);
       log.trace('QuestionXML for the microtask %s created',microtask.id);
 
       return callback();
@@ -349,9 +354,8 @@ function create(task, microtask, platform, callback){
   var createHit = function(callback){
     log.trace( 'Creating HIT' );
 
-    //TODO: prenderle dalla config
-    var options = {maxAssignments: 13};
-    var lifeTimeInSeconds = 3600*24*5; // 5 day
+    var options = {maxAssignments: config.maxAssignments};
+    var lifeTimeInSeconds = config.lifeTimeInSeconds;
 
     HIT.create(hitTypeId,questionXML,lifeTimeInSeconds,options,function(err,hit){
       if( err ) return callback( err );
@@ -423,6 +427,19 @@ var Platform = {
     duration:{
       type:'number',
       'default': 60
+    },
+    keywords:{
+      type:['string']
+    },
+    description:{
+      type:'string'
+    },
+    maxAssignments:{
+      type:'number'
+    },
+    lifeTimeInSeconds:{
+      type:'number',
+      'default':3600*24*5
     }
   }
 };

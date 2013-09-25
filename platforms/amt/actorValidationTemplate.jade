@@ -1,0 +1,28 @@
+QuestionForm(xmlns="http://mechanicalturk.amazonaws.com/AWSMechanicalTurkDataSchemas/2005-10-01/QuestionForm.xsd")
+  Overview
+    Title= task.name
+    Text= 'Are these actors present in the scene?'
+    Binary
+      MimeType
+        Type image
+        SubType jpg
+      DataURL= 'http://demo.search-computing.org/crowd-experiment/movies/'+microtask.objects[0].data.path
+      AltText= microtask.objects[0].data.path
+  each operation in microtask.operations
+    -if (operation.name === 'classify' && operation.label =='validate')
+      each object in microtask.objects
+        Question
+          QuestionIdentifier= object.id + '_' + operation.id
+          DisplayName= object.data.actor
+          IsRequired true
+          QuestionContent
+           Text= object.data.actor
+          AnswerSpecification
+            SelectionAnswer
+              StyleSuggestion radiobutton
+              Selections
+                each category in operation.params.categories
+                  Selection
+                    SelectionIdentifier= category
+                    Text= category
+              

@@ -33,6 +33,7 @@ var performRule = function( data, config, callback ) {
   Execution
   .find()
   .where( 'microtask', microtask._id )
+  .count()
   .exec( d.bind( function( err, count ) {
     if( err ) return callback( err );
 
