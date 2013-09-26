@@ -3,14 +3,16 @@ var _ = require('underscore');
 var async = require( 'async' );
 var domain = require( 'domain' );
 var fs = require('fs');
-var jade = require('jade');
+var nconf = require('nconf');
+var AMT = require('amt');
 
-var Performer = common.models.user;
+// Import Models
+//var Performer = common.models.user;
+//var Execution = common.models.execution;
+var Microtask = common.models.microtask;
 
-// Create a custom logger
+// Create a child logger
 var log = common.log.child( { component: 'AMT' } );
-
-var Execution = common.models.execution;
 
 function execute( task, microtask, execution, platform, callback ) {
   log.trace( 'Executing the microtask %s', microtask.id );
@@ -26,6 +28,7 @@ function execute( task, microtask, execution, platform, callback ) {
   return  callback(null,url+hitTypeMetadata);
 }
 
+/*
 var createAnnotation = function(execution,annotations,operation,callback){
 
   log.trace('Creating the annotations for the operation %s',operation.label);
@@ -45,364 +48,209 @@ var createAnnotation = function(execution,annotations,operation,callback){
   });
 
 };
+*/
 
-function retrieve(task,microtask,platform,cronJob){
-  log.trace( 'Job running' );
-  log.trace( 'Task: %s', task._id );
-  log.trace( 'Microtask: %s', microtask._id );
-  log.trace( 'Config: %j', config );
-  log.trace( 'CronJob: %j', cronJob );
 
-  var jobDomain = require('domain').createDomain();
+function createResponse( task, microstask, assignment, callback ) {
+  var accept = assignment.AcceptTime;
+  var submit = assignment.SubmitTime;
+  var answer = assignment.answer;
+  log.trace( 'Data: ', assignment );
 
-  jobDomain.on('error',function(err){
-    return log.error(err);
-  });
+  return callback();
+}
+function remote( req, res ) {
+  var task = req.task;
+  log.trace( 'Task(%s): %s', task._id, task.name );
 
-  var config = platform.params;
+  var eventType = req.query[ 'Event.1.EventType' ];
+  var hitTypeId = req.query[ 'Event.1.HITTypeId' ];
+  var hitId = req.query[ 'Event.1.HITId' ];
+  var assignmentId = req.query[ 'Event.1.AssignmentId' ];
 
-  var conf = {
-    url: config.url,
-    receptor: { port: 3000, host: undefined },
-    poller: { frequency_ms: 10000 },
-    accessKeyId: config.accessKeyId ,
-    secretAccessKey: config.secretAccessKey ,
-    amount: config.price,
-    duration: config.duration
-  };
-
-  var mturk = require('mturk')(conf);
-
-  var HIT = mturk.HIT;
-
-  var hitId = microtask.getMetadata('hit');
-
-  if(_.isUndefined(hitId)){
-    return log.error('The hit for the microtask %s is undefined',microtask.id);
+  // Check for consistency
+  var taskHitTypeId = task.getMetadata( 'hitType' );
+  if( taskHitTypeId!==hitTypeId ) {
+    log.error( 'HitTypeId mismatch (task!=notification): %s!=%s', taskHitTypeId, hitTypeId );
+    return res.send( 'HITTYPE_MISMATCH' );
   }
 
-  log.trace('Retrieving the hit %s',hitId);
-  HIT.get(hitId,jobDomain.bind(function(err,hit){
-    if(err) return log.error('An error occured during the hit retrieval',err);
+  // Search for the microtask
+  Microtask
+  .findOne()
+  .where( 'task', task._id )
+  .elemMatch( 'metadata', {
+    key: 'hit',
+    value: hitId
+  } )
+  .populate( 'platforms operations' )
+  .exec( req.wrap( function ( err, microtask ) {
+    if( err ) {
+      log.error( err );
+      return res.send( 'QUERY_ERROR' );
+    }
 
-    if( !hit ) return log.error( 'No hit retrieved' );
+    if( !microtask ) {
+      log.warn( 'No microtask selected' );
+      return res.send( 'NO_MICROTASK' );
+    }
 
-    log.trace('Hit retrieved');
-    log.trace('Retrieving the assignments');
+    var platform = _.findWhere( microtask.platforms, { name: 'amt' } );
+    if( !platform ) {
+      log.warn( 'No AMT platform present' );
+      return res.send( 'NO_PLATFORM' );
+    }
 
-    hit.getAssignments({assignmentStatus:'Submitted'},jobDomain.bind(function(err,numResult,totalNumResult,pageNumber,assignments){
-      if(err) return log.error('An error occured during the retrival of the assignment for the hit %s',hit.id);
+    var platformParameters = platform.params;
+    // Init the AMT wrapper
+    var amt = new AMT( {
+      key: platformParameters.accessKeyId,
+      secret: platformParameters.secretAccessKey,
+    } );
+    var Assignment = amt.Assignment;
 
-      if( !assignments ) return log.error( 'No assignments retrieved' );
+    // Retrieve the assignement
+    Assignment.get( assignmentId, function ( err, assignment ) {
+      if( err ) {
+        log.error( err );
+        return res.send( 'BAD_ASSIGNMENT' );
+      }
 
-      log.trace('Found %s submitted assignments',assignments.length);
+      return createResponse( task, microtask, assignment, function ( err ) {
+        if( err ) {
+          log.error( err );
+          return res.send( 'NO_RESPONSE' );
+        }
+        return res.send( 'OK' );
+      } );
 
-      if(assignments.length === 0) return log.trace('No assignment found');
-
-      microtask.populate('operations platforms',jobDomain.bind(function(err,microtask){
-        if (err) return log.error('Error in the populate',err);
-
-        if( !microtask ) return log.error( 'No microtask retrieved' );
-
-        var checkAssignment = function(assignment,callback){
-          var worker = assignment.workerId;
-          var amtPerformer;
-
-          var checkPerformer = function(callback){
-            Performer.findByAccountId('amt',worker,jobDomain.bind(function(err,performer){
-              if(err) return callback(err);
-
-              if(!_.isUndefined(performer) && performer){
-                log.trace('Performer %s found', performer._id);
-                amtPerformer = performer;
-                return callback();
-              }
-
-              log.trace('Performer not found');
-              var data = {
-                id:worker,
-                username:worker
-              };
-
-              log.trace('Creating the performer with his amt account %s',worker);
-              var user = Performer.createWithAccount('amt',data );
-              jobDomain.bind( user.save.bind( user ) )( function( err, performer ) {
-                if( err ) return callback( err );
-
-                log.trace('Performer created');
-                amtPerformer = performer;
-                return callback();
-              });
-            }));
-
-          };
-
-          var saveAssignment = function(callback){
-
-            var rawExecution = {
-                task:task,
-                microtask:microtask,
-                job:task.job,
-                performer:amtPerformer,
-                operations:microtask.operations,
-                platform: platform,
-                creationDate: assignment.acceptTime
-              };
-
-            var execution = new Execution(rawExecution);
-
-            var mTAnswers = assignment.answer.QuestionFormAnswers.Answer;
-            var annotationsToBeCreated = [];
-
-            if( !_.isArray( mTAnswers ) )
-              mTAnswers = [ mTAnswers ];
-
-            _.each(mTAnswers,function(answer){
-              var identifiers = answer.QuestionIdentifier.split('_');
-              var objectId = identifiers[0];
-              var operationId = identifiers[1];
-
-              var operation = _.find(microtask.operations,function(op){
-                return op.id === operationId;
-              });
-
-              if(_.isUndefined(operation)){
-                return log.error('Operation not found... wtf?');
-              }
-
-              log.trace('Answer for the operation %j',operation);
-              log.trace( 'Assignment: %j', assignment );
-              var rawAnnotation = {
-                date: assignment.submitTime,
-                objectId: objectId,
-                operation: operation
-              };
-
-              if(operation.name === 'like'){
-                var like = answer.SelectionIdentifier;
-
-                if(like === 'like'){
-                  // NOOP
-                }
-
-              }else if(operation.name === 'classify' || operation.name==='fuzzyclassify' ){
-
-                var category = answer.SelectionIdentifier;
-                rawAnnotation.value = category;
-
-              }else if(operation.name === 'tag'){
-
-                var tags = answer.FreeText;
-                tags = tags.split(',');
-                rawAnnotation.value = tags;
-
-              }else if(operation.name === 'comment'){
-
-                var comment = answer.FreeText;
-                rawAnnotation.value = comment;
-
-              } else{
-                return log.error('Operation %s not supported',operation.name);
-              }
-
-              annotationsToBeCreated.push( rawAnnotation );
-            });
-
-            async.eachSeries(microtask.operations,_.partial(createAnnotation,execution,annotationsToBeCreated),function(err){
-              if(err) return callback(err);
-
-              log.trace('Annotations saved for the assignment %s', assignment.id);
-              log.trace('Closing the execution');
-              execution.setMetadata('assignment',assignment.id);
-              execution.close(function(err){
-                if (err) return callback(err);
-
-                log.trace('Execution closed for the assignment %s',assignment.id);
-                return callback();
-              });
-            });
-          };
-
-          async.series([checkPerformer,saveAssignment],callback);
-        };
-
-        async.eachSeries(assignments,checkAssignment,function(err){
-          if(err) return log.error('CronJob',err);
-
-          log.trace('All done');
-        });
-      }));
-    }));
-  }));
-
+    } );
+  } ) );
 }
 
-function create(task, microtask, platform, callback){
-  log.trace( 'Creating the task inteface using AMT');
+function create( task, microtask, platform, callback ){
+  log.trace( 'Creating the task inteface using AMT' );
 
-  var executeDomain = domain.create();
+  // Creating a domain for the mongoose queries
+  var d = domain.create();
+  d.on( 'error', callback );
 
-  executeDomain.on( 'error', function( err ) {
-    log.error( 'Got error' );
-    log.error( err );
-    return callback( err );
+  var params = platform.params;
+
+  var amt = new AMT( {
+    key: params.accessKeyId,
+    secret: params.secretAccessKey,
   } );
 
-  var config = platform.params;
+  var HITType = amt.HITType;
+  var HIT = amt.HIT;
+  var Reward = amt.Reward;
+  var Notification = amt.Notification;
 
-  var conf = {
-    url: config.url,
-    receptor: { port: 3000, host: undefined },
-    poller: { frequency_ms: 10000 },
-    accessKeyId: config.accessKeyId,
-    secretAccessKey: config.secretAccessKey,
-    amount: config.price,
-    duration: config.duration
-  };
+  var hitTypeId = task.getMetadata( 'hitType' );
 
-  // MTurk stuff
-  var mturk = require('mturk')(conf);
-  var HITType = mturk.HITType;
-  var HIT = mturk.HIT;
-  var Price = mturk.Price;
+  function createHitType( cb ) {
+    log.trace( 'Creating HitType' );
+    var reward = new Reward( params.price );
+    var duration = params.duration;
 
-  var amount = config.price;
-  var price = new Price(amount, 'USD');
+    var hitType = new HITType( {
+      title: task.name,
+      description: params.description || task.description,
+      reward: reward,
+      duration: duration
+    } );
 
-  var duration = config.duration;
+    return hitType.create( cb );
+  }
+  function addNotification( hitType, cb ) {
+    log.trace( 'Setting notification to hitType' );
 
-  //TODO: prenderle dalla config - magari leggere cosa sono...
-  var options = { keywords: 'movies', autoApprovalDelayInSeconds: 3600 };
+    var destination = nconf.get( 'webserver:externalAddress' );
+    destination += 'api/'+task._id+'/notification/amt';
+    log.trace( 'Destination is: %s', destination );
 
-
-  var hitTypeId = '';
-
-  // Create the HitType
-  var createHitType = function(callback){
-    log.trace('Creating the HitType');
-<<<<<<< HEAD
-
-    var description = 'Movie shot classification';
-=======
-    var description = config.description;
-
->>>>>>> feature/actor_flow
-    if(!description){
-      description =  'Movie shot classification';
+    var notification = new Notification( {
+      destination: destination,
+      transport: 'REST',
+      events: [ 'AssignmentSubmitted' ]
+    } );
+    return hitType.setNotification( notification, function ( err ) {
+      return cb( err, hitType.id );
+    } );
+  }
+  function getQuestion( hitTypeIdPassed, cb ) {
+    if( !_.isFunction( cb ) ) {
+      cb = hitTypeIdPassed;
+      hitTypeIdPassed = hitTypeId;
     }
-    log.trace('Creating the hit type');
-    log.trace(task.name,description,price,duration,options);
-    HITType.create(task.name,description,price,duration,options,function(err,hitType){
-      if(err){
-        return callback(err);
-      }
 
-      log.trace('HitType '+ hitType.id +' created');
-      hitTypeId = hitType.id;
+    // TODO: change to something more async.. and controlled..
+    var question = fs.readFileSync( __dirname+'/'+params.questionFile, 'utf8' );
 
-      task.setMetadata('hitType', hitType.id);
+    return cb( null, hitTypeIdPassed, question );
+  }
+  function createHit( hitTypeId, question, cb ) {
+    var hit = new HIT( {
+      hitTypeId: hitTypeId,
+      question: question,
+      life: params.lifeTimeInSeconds
+    } );
 
-      task.save(executeDomain.bind(callback));
-    });
-  };
+    return hit.create( cb );
+  }
+  function saveTask( hitTypeId, cb ) {
+    log.trace( 'Saving hitTypeId metadata' );
 
-  var questionXML = '';
+    task.setMetadata( 'hitType', hitTypeId );
+    return d.bind( task.save.bind( task ) )( function ( err ) {
+      if( err ) return cb( err );
 
-  var renderQuestion = function(callback){
-    log.trace( 'Rendering question' );
+      return cb( null, hitTypeId );
+    } );
+  }
+  function saveMicroTask( hit, hitTypeId, cb ) {
+    log.trace( 'Saving hit metadata' );
 
-    var jadeTemplate = config.jadeTemplate;
-    microtask.populate('objects operations',executeDomain.bind(function(err,microtask){
-      if(err) return callback(err);
-
-      log.trace('Populate ok, got %s objects and % operations',microtask.objects.length,microtask.operations.length);
-
-      if(_.isUndefined(jadeTemplate) || jadeTemplate===''){
-
-        var templateFile = fs.readFileSync('platforms/amt/microtask.jade');
-
-        var options = {
-          filename: 'platforms/amt/microtask.jade',
-          rootpath: 'platforms/amt/'
-        };
-
-        var compiledTemplate = jade.compile(templateFile,options);
-
-        questionXML = compiledTemplate({microtask:microtask,task:task});
-
-      }else{
-        var templateFile = fs.readFileSync('platforms/amt/'+jadeTemplate);
-
-        var options = {
-          filename: 'platforms/amt/'+jadeTemplate,
-          rootpath: 'platforms/amt/'
-        };
-
-        var compiledTemplate = jade.compile(templateFile,options);
-        questionXML = compiledTemplate({microtask:microtask,task:task});
-      }
-
-      //fs.writeFileSync('questionXML.xml',questionXML);
-      log.trace('QuestionXML for the microtask %s created',microtask.id);
-
-      return callback();
-    }));
-
-  };
-
-  //Create the Hit
-  var createHit = function(callback){
-    log.trace( 'Creating HIT' );
-
-    var options = {maxAssignments: config.maxAssignments};
-    var lifeTimeInSeconds = config.lifeTimeInSeconds;
-
-    HIT.create(hitTypeId,questionXML,lifeTimeInSeconds,options,function(err,hit){
-      if( err ) return callback( err );
-
-      log.trace('created hit with id %s', hit.id);
-
-      microtask.setMetadata('hit',hit.id);
-
-      microtask.save(executeDomain.bind(callback));
-
-    });
-
-  };
-
-  var hitTypeMeta = task.getMetadata('hitType');
-  var actions = [];
-  if(_.isUndefined(hitTypeMeta)){
-    log.trace('HitType not found');
-    actions = [executeDomain.bind(createHitType),executeDomain.bind(renderQuestion),executeDomain.bind(createHit)];
-  }else{
-    hitTypeId = hitTypeMeta;
-    log.trace('HitType %s found',hitTypeId);
-    actions = [executeDomain.bind(renderQuestion),executeDomain.bind(createHit)];
+    microtask.setMetadata( 'hit', hit.id );
+    return d.bind( microtask.save.bind( microtask ) )( cb );
   }
 
-  //TODO: do it with waterfall
-  async.series(actions,function(err){
-    if(err) return callback(err);
 
-    log.trace('All HIT created');
+  var actions = [
+    getQuestion,
+    createHit,
+    saveMicroTask
+  ];
+  if( _.isUndefined( hitTypeId ) ){
+    log.trace( 'HitType not found, creating one' );
+    actions.unshift( createHitType, addNotification, saveTask );
+  }
+
+  async.waterfall( actions, function( err ) {
+    if( err ) return callback( err );
+
+    log.trace( 'HIT created');
     return callback();
-  });
+  } );
 }
 
 
 var Platform = {
   invite: undefined,
+  remote: remote,
+  /*
   timed: {
     expression: '* * * * *',
     onTick: retrieve
   },
+  */
   execute: execute,
   init: create,
   params : {
-    jadeTemplate:{
+    questionFile:{
       type:'string',
-      'default':'customTemplate.jade'
+      'default':'position.xml'
     },
     url: {
       type:'enum',

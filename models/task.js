@@ -138,6 +138,7 @@ TaskSchema.plugin( invitationStrategyPlugin );
 
 
 // Handle property change
+/*
 TaskSchema.path( 'status' ).set( function( value ) {
   if( this.status>value ) {
     return this.invalidate( 'status', 'Cannot set to a previous state' );
@@ -145,6 +146,7 @@ TaskSchema.path( 'status' ).set( function( value ) {
 
   return value;
 } );
+*/
 
 // Pre middlewares
 TaskSchema.pre( 'remove', function( next ) {
@@ -257,19 +259,10 @@ TaskSchema.methods.open = function( callback ) {
   var thisTask = this;
   log.trace( 'Opening task %s', this.id );
 
-  // Trigger the OPEN_TASK event.
-  CRM.execute( 'OPEN_TASK', { task: this }, function( err ) {
+  this.set( 'status', TaskStatuses.OPENED );
+  this.save( function ( err ) {
     if( err ) return callback( err );
-
-    // Set the task as `OPENED`.
-    thisTask.set( 'status', TaskStatuses.OPENED );
-
-    thisTask.save( function( err ) {
-      if( err ) return callback( err );
-      log.trace( 'Task opened' );
-
-      return callback();
-    } );
+    CRM.execute( 'OPEN_TASK', { task: thisTask }, callback );
   } );
 };
 
@@ -380,9 +373,9 @@ TaskSchema.methods.addObjects = function( objects, callback ) {
             // Pass the list of created objects
             return callback( null, objectList );
           } );
-          
+
         }
-        
+
       } );
     };
 

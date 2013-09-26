@@ -1,11 +1,11 @@
 {
   "webserver": {
-    "hostname": "localhost",
-    "port": 2100
+    "hostname": "131.175.59.94",
+    "port": 80
   },
-  
+
   "useCache": false,
-  
+
   "scripts": {
     "path": "scripts",
     "default": "default"
@@ -19,7 +19,7 @@
     "urlPath": "api",
     "path": "api"
   },
-  
+
   "mongo": {
       "url": "mongodb://localhost/CrowdSearcher",
       "path": "data",

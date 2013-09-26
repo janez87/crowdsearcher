@@ -7,7 +7,7 @@
     "test": "mocha -c -R spec"
   },
   "dependencies": {
-    "express": "*",
+    "express": "3.x",
 
     "coffee-script": "*",
     "stylus": "*",
@@ -22,7 +22,7 @@
 
     "request": "*",
     "async": "*",
-    "mongoose": "*",
+    "mongoose": "3.6.x",
     "q": "*",
 
     "passport": "*",
@@ -35,7 +35,7 @@
     "glob": "*",
 
     "fb": "*",
-    "mturk": "*",
+    "amt": "*",
     "twit":"*",
 
     "node-schedule": "*",

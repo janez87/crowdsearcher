@@ -57,7 +57,7 @@ API.logic = function setApi( req, res, next ) {
   // Validate the selected `property` field.
   var pathInfo = model.schema.path( property );
   var pathType = model.schema.pathType( property );
-  log.trace( 'Path info (%s): %j', pathType, pathInfo );
+  //log.trace( 'Path info (%s): %j', pathType, pathInfo );
   if( _.isUndefined( pathInfo ) && pathType!=='nested' )
     return next( new SetError( SetError.BAD_ENTITY_PROPERTY, 'The entity "'+entity+'" has no "'+property+'" property', APIError.BAD_REQUEST ) );
 
@@ -79,7 +79,7 @@ API.logic = function setApi( req, res, next ) {
     if( !doc )
       return next( new SetError( SetError.OBJECT_NOT_FOUND, 'Object not fond in the db', APIError.SERVER_ERROR ) );
 
-    doc[ property ] = value;
+    doc.set( property, value );
 
     doc.save( req.wrap( function( err ) {
       if( err ) return next( err );
