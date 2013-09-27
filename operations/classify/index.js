@@ -14,6 +14,7 @@ var Annotation = common.models.annotation;
 var CSError = require('../../error');
 // Create the ClassifyError class
 var ClassifyError = function( id, message ) {
+  /* jshint camelcase: false */
   ClassifyError.super_.call( this, id, message);
 };
 // Make it subclass Error
@@ -61,7 +62,7 @@ function checkData( data, operation ) {
   }
 }
 
-// Return an array of annotation Annotation Object
+// Return an array of Annotation Object
 function create( data, operation, callback ) {
   log.debug( 'Creating annotations' );
 

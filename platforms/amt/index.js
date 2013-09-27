@@ -8,7 +8,7 @@ var AMT = require('amt');
 
 // Import Models
 //var Performer = common.models.user;
-//var Execution = common.models.execution;
+var Execution = common.models.execution;
 var Microtask = common.models.microtask;
 
 // Create a child logger
@@ -28,42 +28,111 @@ function execute( task, microtask, execution, platform, callback ) {
   return  callback(null,url+hitTypeMetadata);
 }
 
-/*
-var createAnnotation = function(execution,annotations,operation,callback){
+function createAnnotation( data, callback ) {
+  var answerData = data[ 0 ];
+  var operation = data[ 1 ];
 
-  log.trace('Creating the annotations for the operation %s',operation.label);
-  var opImplementation = GLOBAL.common.operations[ operation.name ];
-
-  var opAnnotations = _.filter(annotations,function(annotation){
-    return operation._id == annotation.operation._id;
-  });
-
-  log.trace('Found %s answers for the operation %s',opAnnotations.length,operation.label);
-  opImplementation.create(opAnnotations,operation,function(err,annotations){
-    _.each(annotations,function(annotation){
-      execution.annotations.push(annotation);
-    });
-
+  var opImplementation = common.operations[ operation.name ];
+  if( opImplementation ) {
+    return opImplementation.create( [answerData], operation, callback );
+  } else {
+    log.warn( 'Operation %s implementation not found', operation.name );
     return callback();
-  });
+  }
+}
 
-};
-*/
-
-
-function createResponse( task, microstask, assignment, callback ) {
+function createExecution( task, microtask, platform, assignment, callback ) {
   var accept = assignment.AcceptTime;
   var submit = assignment.SubmitTime;
-  var answer = assignment.answer;
-  log.trace( 'Data: ', assignment );
+  var worker = assignment.WorkerId;
 
-  return callback();
+
+  var operations = microtask.operations;
+
+  var rawExecution = {
+    task: task,
+    microtask: microtask,
+    job: task.job,
+    //performer: amtPerformer, // TODO fix
+    operations: _.clone( operations ),
+    platform: platform,
+    creationDate: accept
+  };
+
+  var execution = new Execution( rawExecution );
+
+  // Parse each answer
+  var amtAnswers = assignment.answer.QuestionFormAnswers.Answer;
+  var dataList = [];
+
+  if( !_.isArray( amtAnswers ) )
+    amtAnswers = [ amtAnswers ];
+
+  for (var i=amtAnswers.length-1; i>=0; i-- ) {
+    var answer = amtAnswers[i];
+    // Get the objectId and operationId identifiers
+    var identifiers = answer.QuestionIdentifier.split( '_' );
+    var objectId = identifiers[0];
+    var operationId = identifiers[1];
+
+    var operation = _.find( operations, function ( op ) {
+      return op._id.equals( operationId );
+    } );
+
+    if( !operation ) {
+      log.warn( 'Invalid operation ID (%s) skipping...', operationId );
+      continue;
+    }
+
+    // Creating the data for the operation
+    var answerData = {
+      date: submit,
+      objectId: objectId,
+      operation: operationId
+    };
+
+    // retrieve the value based on the operation type
+    if( operation.name==='classify' || operation.name==='fuzzyclassify' ) {
+      var category = answer.SelectionIdentifier;
+      answerData.value = category;
+    } else if( operation.name==='tag' ) {
+      var tags = answer.FreeText;
+      tags = tags.split( ',' );
+      answerData.value = tags;
+    } else if( operation.name==='comment' ) {
+      var comment = answer.FreeText;
+      answerData.value = comment;
+    } else {
+      log.warn( 'Operation %s not supported', operation.name );
+      continue;
+    }
+
+    dataList.push( [ answerData, operation ] );
+  }
+
+  log.trace( 'Creating annotations for %s objects', dataList.length );
+
+  async.map( dataList, createAnnotation, function ( err, annotations ) {
+    if( err ) return callback( err );
+
+    annotations = _.flatten( annotations );
+
+    log.trace( '%s Annotations created', annotations.length );
+    for (var i = annotations.length - 1; i >= 0; i--) {
+      execution.annotations.push( annotations[i] );
+    }
+    execution.setMetadata( 'assignment', assignment.id );
+    execution.setMetadata( 'worker', worker );
+
+    // Closing the Execution
+    execution.close( callback );
+  } );
 }
 function remote( req, res ) {
   var task = req.task;
   log.trace( 'Task(%s): %s', task._id, task.name );
 
-  var eventType = req.query[ 'Event.1.EventType' ];
+  //var eventType = req.query[ 'Event.1.EventType' ];
   var hitTypeId = req.query[ 'Event.1.HITTypeId' ];
   var hitId = req.query[ 'Event.1.HITId' ];
   var assignmentId = req.query[ 'Event.1.AssignmentId' ];
@@ -116,14 +185,13 @@ function remote( req, res ) {
         return res.send( 'BAD_ASSIGNMENT' );
       }
 
-      return createResponse( task, microtask, assignment, function ( err ) {
+      return createExecution( task, microtask, platform, assignment, function ( err ) {
         if( err ) {
           log.error( err );
-          return res.send( 'NO_RESPONSE' );
+          return res.send( 'NO_RESPONSE_CREATED' );
         }
         return res.send( 'OK' );
       } );
-
     } );
   } ) );
 }
@@ -149,6 +217,16 @@ function create( task, microtask, platform, callback ){
 
   var hitTypeId = task.getMetadata( 'hitType' );
 
+
+  function populateMicrotask( cb ) {
+    microtask
+    .populate( 'operations objects', function ( err, popMicrotask ) {
+      if( err ) return cb( err );
+
+      microtask = popMicrotask;
+      return cb();
+    } );
+  }
   function createHitType( cb ) {
     log.trace( 'Creating HitType' );
     var reward = new Reward( params.price );
@@ -186,9 +264,24 @@ function create( task, microtask, platform, callback ){
     }
 
     // TODO: change to something more async.. and controlled..
-    var question = fs.readFileSync( __dirname+'/'+params.questionFile, 'utf8' );
+    var question;
+    try {
+      if( params.questionFile )
+        question = fs.readFileSync( __dirname+'/custom/'+params.questionFile, 'utf8' );
 
-    return cb( null, hitTypeIdPassed, question );
+    } catch( ex ) {
+      question = fs.readFileSync( __dirname+'/question.xml', 'utf8' );
+    }
+
+    // Create a renderer for the file
+    var render = _.template( question );
+    // Generate the final XML question file
+    var questionXML = render( {
+      microtask: microtask,
+      task: task
+    } );
+
+    return cb( null, hitTypeIdPassed, questionXML );
   }
   function createHit( hitTypeId, question, cb ) {
     var hit = new HIT( {
@@ -227,6 +320,8 @@ function create( task, microtask, platform, callback ){
     actions.unshift( createHitType, addNotification, saveTask );
   }
 
+  actions.unshift( populateMicrotask );
+
   async.waterfall( actions, function( err ) {
     if( err ) return callback( err );
 
@@ -250,7 +345,7 @@ var Platform = {
   params : {
     questionFile:{
       type:'string',
-      'default':'position.xml'
+      'default': 'position.xml'
     },
     url: {
       type:'enum',
@@ -262,11 +357,11 @@ var Platform = {
     },
     accessKeyId:{
       type:'pass',
-      'default':''
+      'default': ''
     },
     secretAccessKey:{
       type:'pass',
-      'default':''
+      'default': ''
     },
     price:{
       type:'number',
