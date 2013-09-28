@@ -357,11 +357,11 @@ var Platform = {
     },
     accessKeyId:{
       type:'pass',
-      'default': ''
+      'default': 'AKIAJGIUA2IY5DD56FRQ'
     },
     secretAccessKey:{
       type:'pass',
-      'default': ''
+      'default': 'amJhGG4qQ+cf1rFebo+f3YzadDg33ZKWEqSidk3o'
     },
     price:{
       type:'number',

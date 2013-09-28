@@ -64,7 +64,7 @@ var performRule = function( data, config, callback ) {
       log.trace('Retrieved %s executions',executions.length);
       
       var actors = [];
-      var img = executions[0].annotations[0].object.data.path;
+      var img = executions[0].annotations[0].object.data.scene;
 
       _.each(executions,function(execution){
         _.each(execution.annotations,function(annotation){
@@ -85,7 +85,7 @@ var performRule = function( data, config, callback ) {
           name:'image',
           data:{
             actor:actor,
-            path:img
+            scene:img
           }
         };
 

@@ -177,10 +177,11 @@ JobSchema.methods.addObjects = function( objects, callback ) {
   // Check objects type
   var tempObj = objects[ 0 ];
   if( _.isString( tempObj ) ) {
-
+    log.trace('WTF?');
   } else {
     // Add the Job property to each Object
     _.each( objects, function( object ) {
+      log.trace('Adding the job properties for the object %s',object._id);
       object.job = thisJob;
     } );
 

@@ -341,6 +341,7 @@ TaskSchema.methods.addObjects = function( objects, callback ) {
 
     // First find the job
     var retrieveJob = function( callback ) {
+      log.trace('Searching the job %s',thisTask.job);
       thisTask.model( 'job' ).findById( thisTask.job, callback );
     };
 

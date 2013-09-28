@@ -6,7 +6,7 @@ var async = require('async');
 var domain = require( 'domain' );
 
 // Create a child logger
-var log = common.log.child( { component: 'ActorToValidateStream' } );
+var log = common.log.child( { component: 'PositionToSpoilerStream' } );
 
 // Models
 var Task = common.models.task;
@@ -16,18 +16,18 @@ var ObjectModel = common.models.object;
 
 var CSError = require('../../error');
 // Custom error
-var ActorToValidateStreamError = function( id, message) {
+var PositionToSpoilerStreamError = function( id, message) {
   /* jshint camelcase: false */
-  ActorToValidateStreamError.super_.call( this, id, message);
+  PositionToSpoilerStreamError.super_.call( this, id, message);
 };
 
-util.inherits( ActorToValidateStreamError, CSError );
+util.inherits( PositionToSpoilerStreamError, CSError );
 
 // Error name
-ActorToValidateStreamError.prototype.name = 'ActorToValidateStreamError';
+PositionToSpoilerStreamError.prototype.name = 'PositionToSpoilerStreamError';
 
 // Error IDs
-ActorToValidateStreamError.INVALID_TASK_ID = 'INVALID_TASK_ID';
+PositionToSpoilerStreamError.INVALID_TASK_ID = 'INVALID_TASK_ID';
 
 var performRule = function( data, config, callback ) {
   log.trace('Performing the rule');
@@ -38,13 +38,19 @@ var performRule = function( data, config, callback ) {
   var taskId = config.task;
   var execution = data.execution;
 
+  // Continue the flow only if the end category is selected
+  var response = execution.annotations[0].response;
+  if(response!=='end'){
+    return callback();
+  }
+
   Task
   .findById( taskId )
   .exec( d.bind( function( err, task2 ) {
     if( err ) return callback( err );
 
     if( !task2 )
-      return callback( new ActorToValidateStreamError( ActorToValidateStreamError.INVALID_TASK_ID, 'Invalid Task id' ) );
+      return callback( new PositionToSpoilerStreamError( PositionToSpoilerStreamError.INVALID_TASK_ID, 'Invalid Task id' ) );
 
     // Task valid
     var objects = [];
@@ -62,8 +68,7 @@ var performRule = function( data, config, callback ) {
           name:'image',
           job:data.task.job,
           data:{
-            scene:annotation.object.data.scene,
-            actor:annotation.response
+            scene:annotation.object.data.scene
           }
         };
 
