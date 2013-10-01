@@ -3,8 +3,9 @@
     <Overview>
       <Title><%= task.name %></Title>
       <Text>
-        This image contain a spoiler?\n
-        A spoiler is ...\n\n
+        This image contain a spoiler?
+        A spoiler is...
+
         Please answer ONLY if you have seen the movie.
       </Text>
       <Binary>

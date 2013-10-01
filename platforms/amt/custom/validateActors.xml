@@ -2,7 +2,7 @@
     <Overview>
       <Title><%= task.name %></Title>
       <Text>
-        Please verify that the following actors appear in the image
+        Please verify that the following actors appear in the image:
       </Text>
       <Binary>
         <MimeType>

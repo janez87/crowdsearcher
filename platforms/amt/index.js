@@ -125,7 +125,11 @@ function createExecution( task, microtask, platform, assignment, callback ) {
     execution.setMetadata( 'worker', worker );
 
     // Closing the Execution
-    execution.close( callback );
+    execution.close( function ( err ) {
+      if( err ) return callback( err );
+      // All done, approve the assignment
+      assignment.approve( 'Thanks for your work!', callback );
+    } );
   } );
 }
 function remote( req, res ) {
@@ -357,11 +361,11 @@ var Platform = {
     },
     accessKeyId:{
       type:'pass',
-      'default': 'AKIAJGIUA2IY5DD56FRQ'
+      'default': 'AKIAIJEW5UG5SRI2TUQA'
     },
     secretAccessKey:{
       type:'pass',
-      'default': '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'
+      'default': 'T51sR9TKMlcWOdsHTzNb0QTjhiY6/UdzIft1hEMo'
     },
     price:{
       type:'number',

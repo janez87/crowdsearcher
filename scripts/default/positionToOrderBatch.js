@@ -37,7 +37,7 @@ var performRule = function( data, config, callback ) {
   var task = data.task;
 
   if(data.event !== 'END_TASK'){
-    log.error('Wrong event');
+    log.warn('Wrong event');
     return callback();
   }
 
@@ -53,21 +53,24 @@ var performRule = function( data, config, callback ) {
       if(err) return callback(err);
 
       var objects = [];
-      
-      _.each(task.objects,function(object){
 
-        var result = object.getMetadata('maj_'+task.operations[0]+'_result');
+      for (var i=0; i<task.objects.length; i++ ) {
+        var object = task.objects[i];
+        var result = object.getMetadata('maj_'+task.operations[0]._id+'_result');
+
+        if( result==='end' )
+          return callback();
 
         var newObject = {
-          name:'image',
-          data:{
-            scene:object.data.scene,
-            position:result
+          name: 'image',
+          data: {
+            scene: object.data.scene,
+            position: result
           }
         };
 
-        objects.push(newObject);  
-      });
+        objects.push(newObject);
+      }
 
       return task2.addObjects( objects, function(err){
         if(err) return callback(err);
@@ -77,7 +80,7 @@ var performRule = function( data, config, callback ) {
 
     });
 
-    
+
   }) );
 };
 

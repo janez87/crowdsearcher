@@ -52,22 +52,17 @@ var performRule = function( data, config, callback ) {
     execution.populate('annotations.object',d.bind(function(err,execution){
       if(err) return callback(err);
 
-      log.trace('Execution populated');
-      log.trace('Found %s annotations');
-
       _.each( execution.annotations, function( annotation ) {
         log.trace( 'Adding annotation', annotation );
 
         var object = {
           name:'image',
-          job:data.task.job,
+          job: data.task.job,
           data:{
-            scene:annotation.object.data.scene,
-            actor:annotation.response
+            scene: annotation.object.data.scene,
+            actor: annotation.response
           }
         };
-
-        log.trace('Objects %s',object);
 
         objects.push( object );
 
@@ -75,15 +70,15 @@ var performRule = function( data, config, callback ) {
 
 
       log.trace('Creating %s objects',objects.length);
-      
+
       ObjectModel.create(objects,d.bind(function(err){
         if(err) return callback(err);
-        
+
         var objects = _.toArray(arguments);
 
         //Removing the first element (the error object)
         objects.shift();
-        
+
         log.trace('Created %s ',objects);
 
         var rawMicroTask = {
@@ -102,7 +97,7 @@ var performRule = function( data, config, callback ) {
         }));
 
       }));
-        
+
 
     }));
 

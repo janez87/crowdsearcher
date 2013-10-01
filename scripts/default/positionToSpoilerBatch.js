@@ -37,7 +37,7 @@ var performRule = function( data, config, callback ) {
   var microtask = data.microtask;
 
   if(data.event !== 'END_MICROTASK'){
-    log.error('Wrong event');
+    log.warn('Wrong event');
     return callback();
   }
 
@@ -54,10 +54,7 @@ var performRule = function( data, config, callback ) {
 
       var object = microtask.objects[0];
 
-      log.trace('Getting the final result');
       var finalResponse = object.getMetadata('maj_'+microtask.operations[0]+'_result');
-
-      log.trace('The final result is %s',finalResponse);
 
       // Continue the flow only if the end category is selected
       if(finalResponse!=='end'){
@@ -69,14 +66,13 @@ var performRule = function( data, config, callback ) {
         data:{
           scene:object.data.scene
         }
-      }
+      };
 
-      log.trace( 'Adding object', newObject );
       return task2.addObjects( [newObject], callback );
 
     });
 
-    
+
   }) );
 };
 

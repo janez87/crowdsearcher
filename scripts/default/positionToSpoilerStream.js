@@ -40,9 +40,8 @@ var performRule = function( data, config, callback ) {
 
   // Continue the flow only if the end category is selected
   var response = execution.annotations[0].response;
-  if(response!=='end'){
+  if( response!=='end' )
     return callback();
-  }
 
   Task
   .findById( taskId )
@@ -80,15 +79,15 @@ var performRule = function( data, config, callback ) {
 
 
       log.trace('Creating %s objects',objects.length);
-      
+
       ObjectModel.create(objects,d.bind(function(err){
         if(err) return callback(err);
-        
+
         var objects = _.toArray(arguments);
 
         //Removing the first element (the error object)
         objects.shift();
-        
+
         log.trace('Created %s ',objects);
 
         var rawMicroTask = {
@@ -107,7 +106,7 @@ var performRule = function( data, config, callback ) {
         }));
 
       }));
-        
+
 
     }));
 
