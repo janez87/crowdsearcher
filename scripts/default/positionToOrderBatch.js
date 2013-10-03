@@ -2,7 +2,6 @@
 // Load libraries
 var util = require('util');
 var _ = require('underscore');
-var async = require('async');
 var domain = require( 'domain' );
 
 // Create a child logger
@@ -10,7 +9,6 @@ var log = common.log.child( { component: 'PositionToOrderBatch' } );
 
 // Models
 var Task = common.models.task;
-var Microtask = common.models.microtask;
 
 var CSError = require('../../error');
 // Custom error
@@ -58,15 +56,19 @@ var performRule = function( data, config, callback ) {
 
         var result = object.getMetadata('maj_'+task.operations[0]+'_result');
 
-        var newObject = {
-          name:'image',
-          data:{
-            scene:object.data.scene,
-            position:result
-          }
-        };
+        if(result!=='end'){
 
-        objects.push(newObject);  
+          var newObject = {
+            name:'image',
+            data:{
+              scene:object.data.scene,
+              position:result
+            }
+          };
+
+          objects.push(newObject);
+        }
+        
       });
 
       return task2.addObjects( objects, function(err){
