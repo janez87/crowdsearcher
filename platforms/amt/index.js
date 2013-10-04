@@ -212,7 +212,10 @@ function create( task, microtask, platform, callback ){
 
   var params = platform.params;
 
+  log.trace( 'Use sandbox? %s', params.url );
+
   var amt = new AMT( {
+    //sandbox: params.url,
     key: params.accessKeyId,
     secret: params.secretAccessKey,
   } );
@@ -352,13 +355,13 @@ var Platform = {
   params : {
     questionFile:{
       type:'string',
-      'default': 'position.xml'
+      'default': 'question.xml'
     },
     url: {
       type:'enum',
       values: {
-        'Mturk sandbox': 'https://mechanicalturk.sandbox.amazonaws.com',
-        'Mturk': 'https://mechanicalturk.amazonaws.com'
+        'Mturk sandbox': true,
+        'Mturk': false
       },
       'default': 'Mturk sandbox'
     },

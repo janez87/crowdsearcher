@@ -9,6 +9,8 @@ var log = common.log.child( { component: 'ActorToValidateBatch' } );
 
 // Models
 var Task = common.models.task;
+var Microtask = common.models.microtask;
+var ObjectModel = common.models.object;
 var Execution = common.models.execution;
 
 var CSError = require('../../error');
@@ -50,8 +52,8 @@ var performRule = function( data, config, callback ) {
 
     // Task valid
 
-    var objects = [];
-    
+    var rawObjects = [];
+
     Execution
     .find()
     .where('microtask')
@@ -61,7 +63,7 @@ var performRule = function( data, config, callback ) {
       if(err) return callback(err);
 
       log.trace('Retrieved %s executions',executions.length);
-      
+
       var actors = [];
       var img = executions[0].annotations[0].object.data.scene;
 
@@ -69,7 +71,7 @@ var performRule = function( data, config, callback ) {
         _.each(execution.annotations,function(annotation){
 
           actors.push(annotation.response);
-        
+
         });
 
       });
@@ -77,25 +79,43 @@ var performRule = function( data, config, callback ) {
       actors = _.uniq(actors);
 
       log.trace(actors);
-      
+
       _.each(actors,function(actor){
 
         var object = {
           name:'image',
+          job: data.task.job,
           data:{
             actor:actor,
             scene:img
           }
         };
 
-        objects.push(object);
-      });
+        rawObjects.push( object );
+      } );
 
-      log.trace( 'Adding objects', objects );
-      return task2.addObjects( objects, callback );
-    }));
 
-  }) );
+      task2.addObjects( rawObjects, d.bind( function ( err, objects ) {
+        if( err ) return callback( err );
+
+        var microtaskToCreate = new Microtask( {
+          task: task2,
+          objects: objects,
+          operations: task2.operations,
+          platforms: task2.platforms
+        } );
+
+
+        d.bind( microtaskToCreate.save.bind( microtaskToCreate ) )( function ( err, m ) {
+          if( err ) return callback( err );
+
+          return task2.addMicrotasks( m, d.bind( callback ) );
+        } );
+      } ) );
+
+    } ) );
+
+  } ) );
 };
 
 

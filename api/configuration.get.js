@@ -184,15 +184,11 @@ API.logic = function getConfiguration( req, res ) {
       params: {
         agreement: {
           type: 'number',
-          'default': 2
+          'default': 3
         },
         numberOfAnswer: {
           type: 'number',
           'default': 2
-        },
-        replanPlatform: {
-          type: 'platform',
-          'default': 'amt'
         }
       }
     } );
@@ -203,6 +199,7 @@ API.logic = function getConfiguration( req, res ) {
     configuration.performerControlStrategies = [];
 
     //TODO: FIx temp hack
+    /*
     configuration.performerControlStrategies.push( {
       name: 'Check spammer',
       actions: [
@@ -224,6 +221,7 @@ API.logic = function getConfiguration( req, res ) {
         minAnswers: 'number'
       }
     } );
+    */
   }
 
   // Compute and return the task control strategies
@@ -231,6 +229,7 @@ API.logic = function getConfiguration( req, res ) {
     configuration.taskControlStrategies = [];
 
     //TODO: FIx temp hack
+    /*
     configuration.taskControlStrategies.push( {
       name: 'Check Microtask',
       actions: [
@@ -243,6 +242,7 @@ API.logic = function getConfiguration( req, res ) {
         percentage: 'number'
       }
     } );
+    */
   }
 
 

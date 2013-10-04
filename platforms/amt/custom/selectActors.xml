@@ -2,9 +2,6 @@
   <% _.each( microtask.objects, function( object ) { %>
     <Overview>
       <Title><%= task.name %></Title>
-      <Text>
-        Plase select all the actors that appear in this image
-      </Text>
       <Binary>
         <MimeType>
           <Type>image</Type>
@@ -20,7 +17,9 @@
           <QuestionIdentifier><%= object._id+'_'+operation._id %></QuestionIdentifier>
           <IsRequired>true</IsRequired>
           <QuestionContent>
-            <Text>Spoiler?</Text>
+            <Text>
+              Please select all the actors that appear in this scene.
+            </Text>
           </QuestionContent>
           <AnswerSpecification>
             <SelectionAnswer>

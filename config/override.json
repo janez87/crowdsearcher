@@ -1,4 +1,8 @@
 {
+  "webserver": {
+    "hostname": "131.175.59.94",
+    "port": 80
+  },
   "social": {
     "facebook": {
       "clientID": "301234899978167",
