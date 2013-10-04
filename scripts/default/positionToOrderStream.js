@@ -74,7 +74,7 @@ var performRule = function( data, config, callback ) {
 
     });
 
-    
+
   }) );
 };
 

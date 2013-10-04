@@ -72,8 +72,12 @@ function createExecution( task, microtask, platform, assignment, callback ) {
     var answer = amtAnswers[i];
     // Get the objectId and operationId identifiers
     var identifiers = answer.QuestionIdentifier.split( '_' );
-    var objectId = identifiers[0];
+    var objectId = identifiers[ 0 ];
     var operationId = identifiers[1];
+    if( identifiers.length===1 ) {
+      operationId = objectId;
+      objectId = null;
+    }
 
     var operation = _.find( operations, function ( op ) {
       return op._id.equals( operationId );
@@ -102,6 +106,9 @@ function createExecution( task, microtask, platform, assignment, callback ) {
     } else if( operation.name==='comment' ) {
       var comment = answer.FreeText;
       answerData.value = comment;
+    } else if( operation.name==='like' ) {
+      var like = answer.SelectionIdentifier;
+      answerData.objectId = like;
     } else {
       log.warn( 'Operation %s not supported', operation.name );
       continue;

@@ -1,51 +1,52 @@
 <QuestionForm xmlns="http://mechanicalturk.amazonaws.com/AWSMechanicalTurkDataSchemas/2005-10-01/QuestionForm.xsd">
-  <% _.each( microtask.objects, function( object ) { %>
-    <Overview>
-      <Title><%= task.name %></Title>
-      <Text>
-        Which of these scenes appears first in the movie?
+  <Overview>
+    <Title><%= task.name %></Title>
+    <Text>
+      Which of these scenes appears first in the movie?
 
-        Please answer ONLY if you have seen the movie.
-      </Text>
-    </Overview>
-    <% _.each( microtask.operations, function( operation ) { %>
-      <% if( operation.name==='classify' && operation.label==='order' ) { %>
-        <Question>
-          <QuestionIdentifier><%= object._id+'_'+operation._id %></QuestionIdentifier>
-          <IsRequired>true</IsRequired>
-          <QuestionContent>
-            <FormattedContent><![CDATA[
-              <table>
-                <thead>
-                  <tr>
-                    <th><h1>SCENE 1</h1></th>
-                    <th><h1>SCENE 2</h1></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td><img src="http://demo.search-computing.org/crowd-experiment/movies/<%= object.data.scene %>" width="500" alt="SCENE 1"/></td>
-                    <td><img src="http://demo.search-computing.org/crowd-experiment/movies/<%= object.data.other_scene %>" width="500" alt="SCENE 2"/></td>
-                  </tr>
-                </tbody>
-              </table>
-            ]]></FormattedContent>
-          </QuestionContent>
-          <AnswerSpecification>
-            <SelectionAnswer>
-              <StyleSuggestion>radiobutton</StyleSuggestion>
-              <Selections>
-              <% _.each( operation.params.categories, function( category, index ) { %>
-                <Selection>
-                  <SelectionIdentifier><%=category%></SelectionIdentifier>
-                  <Text>SCENE <%=index+1%></Text>
-                </Selection>
-              <% } ) %>
-              </Selections>
-            </SelectionAnswer>
-          </AnswerSpecification>
-        </Question>
-      <% } %>
-    <% } ) %>
+      Please answer ONLY if you have seen the movie.
+    </Text>
+    <FormattedContent><![CDATA[
+      <table>
+        <thead>
+          <tr>
+            <th><h1>SCENE 1</h1></th>
+            <th><h1>SCENE 2</h1></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><img src="http://demo.search-computing.org/crowd-experiment/movies/<%= microtask.objects[0].data.scene %>" width="500" alt="SCENE 1"/></td>
+            <td><img src="http://demo.search-computing.org/crowd-experiment/movies/<%= microtask.objects[1].data.scene %>" width="500" alt="SCENE 2"/></td>
+          </tr>
+        </tbody>
+      </table>
+    ]]></FormattedContent>
+  </Overview>
+  <% _.each( microtask.operations, function( operation ) { %>
+    <% if( operation.name==='like' && operation.label==='order' ) { %>
+      <Question>
+        <QuestionIdentifier><%= operation._id %></QuestionIdentifier>
+        <IsRequired>true</IsRequired>
+        <QuestionContent>
+          <Text>Which of these scenes appears first in the movie?</Text>
+        </QuestionContent>
+        <AnswerSpecification>
+          <SelectionAnswer>
+            <StyleSuggestion>radiobutton</StyleSuggestion>
+            <Selections>
+              <Selection>
+                <SelectionIdentifier><%= microtask.objects[0]._id %></SelectionIdentifier>
+                <Text>SCENE 1</Text>
+              </Selection>
+              <Selection>
+                <SelectionIdentifier><%= microtask.objects[1]._id %></SelectionIdentifier>
+                <Text>SCENE 2</Text>
+              </Selection>
+            </Selections>
+          </SelectionAnswer>
+        </AnswerSpecification>
+      </Question>
+    <% } %>
   <% } ) %>
 </QuestionForm>
