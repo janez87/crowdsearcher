@@ -125,11 +125,14 @@ function createExecution( task, microtask, platform, assignment, callback ) {
     execution.setMetadata( 'worker', worker );
 
     // Closing the Execution
+    execution.close( callback );
+    /*
     execution.close( function ( err ) {
       if( err ) return callback( err );
       // All done, approve the assignment
       assignment.approve( 'Thanks for your work!', callback );
     } );
+    */
   } );
 }
 function remote( req, res ) {

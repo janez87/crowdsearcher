@@ -2,7 +2,6 @@
 // Load libraries
 var util = require('util');
 var _ = require('underscore');
-var async = require('async');
 var domain = require( 'domain' );
 
 // Create a child logger

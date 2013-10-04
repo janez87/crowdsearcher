@@ -4,25 +4,25 @@ var util = require('util');
 var domain = require( 'domain' );
 
 // Create a child logger
-var log = common.log.child( { component: 'PositionToSpoilerBatch' } );
+var log = common.log.child( { component: 'PositionToOrderStream' } );
 
 // Models
 var Task = common.models.task;
 
 var CSError = require('../../error');
 // Custom error
-var PositionToSpoilerBatchError = function( id, message) {
+var PositionToOrderStreamError = function( id, message) {
   /* jshint camelcase: false */
-  PositionToSpoilerBatchError.super_.call( this, id, message);
+  PositionToOrderStreamError.super_.call( this, id, message);
 };
 
-util.inherits( PositionToSpoilerBatchError, CSError );
+util.inherits( PositionToOrderStreamError, CSError );
 
 // Error name
-PositionToSpoilerBatchError.prototype.name = 'PositionToSpoilerBatchError';
+PositionToOrderStreamError.prototype.name = 'PositionToOrderStreamError';
 
 // Error IDs
-PositionToSpoilerBatchError.INVALID_TASK_ID = 'INVALID_TASK_ID';
+PositionToOrderStreamError.INVALID_TASK_ID = 'INVALID_TASK_ID';
 
 var performRule = function( data, config, callback ) {
   log.trace('Performing the rule');
@@ -34,7 +34,7 @@ var performRule = function( data, config, callback ) {
   var microtask = data.microtask;
 
   if(data.event !== 'END_MICROTASK'){
-    log.warn('Wrong event');
+    log.error('Wrong event');
     return callback();
   }
 
@@ -44,32 +44,37 @@ var performRule = function( data, config, callback ) {
     if( err ) return callback( err );
 
     if( !task2 )
-      return callback( new PositionToSpoilerBatchError( PositionToSpoilerBatchError.INVALID_TASK_ID, 'Invalid Task id' ) );
+      return callback( new PositionToOrderStreamError( PositionToOrderStreamError.INVALID_TASK_ID, 'Invalid Task id' ) );
 
     microtask.populate('objects',function(err,microtask){
       if(err) return callback(err);
 
       var object = microtask.objects[0];
 
+      log.trace('Getting the final result');
       var finalResponse = object.getMetadata('maj_'+microtask.operations[0]+'_result');
 
-      // Continue the flow only if the end category is selected
-      if(finalResponse!=='end'){
+      log.trace('The final result is %s',finalResponse);
+
+      // Continue the flow only if the end category is not selected
+      if(finalResponse==='end'){
         return callback();
       }
 
       var newObject = {
         name:'image',
         data:{
-          scene:object.data.scene
+          scene:object.data.scene,
+          position:finalResponse
         }
       };
 
+      log.trace( 'Adding object', newObject );
       return task2.addObjects( [newObject], callback );
 
     });
 
-
+    
   }) );
 };
 

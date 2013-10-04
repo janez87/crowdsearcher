@@ -80,6 +80,15 @@ var performStrategy = function( data, params, callback ) {
       objects = pendingObjects;
     }
 
+    // Select only the open objects
+    objects = _.filter(objects,function(object){
+      return object.status !== ObjectStatuses.CLOSED;
+    });
+
+    if(shuffle){
+      objects = _.shuffle( objects );
+    }
+    
     var groupedObjects = _.groupBy(objects,function(object){
       return object.data[groupingAttribute];
     });

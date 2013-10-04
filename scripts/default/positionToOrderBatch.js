@@ -1,8 +1,6 @@
 
 // Load libraries
 var util = require('util');
-var _ = require('underscore');
-var async = require('async');
 var domain = require( 'domain' );
 
 // Create a child logger
@@ -10,7 +8,6 @@ var log = common.log.child( { component: 'PositionToOrderBatch' } );
 
 // Models
 var Task = common.models.task;
-var Microtask = common.models.microtask;
 
 var CSError = require('../../error');
 // Custom error
