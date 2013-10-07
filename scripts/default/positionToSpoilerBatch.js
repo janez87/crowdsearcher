@@ -31,6 +31,7 @@ var performRule = function( data, config, callback ) {
   d.on( 'error', callback );
 
   var taskId = config.task;
+  var task = data.task;
   var microtask = data.microtask;
 
   if(data.event !== 'END_MICROTASK'){
@@ -50,27 +51,37 @@ var performRule = function( data, config, callback ) {
       if(err) return callback(err);
 
       var object = microtask.objects[0];
-
       var finalResponse = object.getMetadata('maj_'+microtask.operations[0]+'_result');
 
       // Continue the flow only if the end category is selected
-      if(finalResponse!=='end'){
+      if( finalResponse!=='end' )
         return callback();
+
+      // Check if already fired
+      var scene = object.data.scene;
+      var firedObjects = task.getMetadata( 'firedObjects' ) || {};
+      if( firedObjects[ scene ] ) {
+        // Already fired, continue
+        return callback();
+      } else {
+        firedObjects[ scene ] = true;
+        task.setMetadata( 'firedObjects', firedObjects );
+
+        // Save the metadata
+        task.save( function ( err ) {
+          if( err ) return callback( err );
+
+          var newObject = {
+            name: 'image',
+            data: {
+              scene: scene
+            }
+          };
+          return task2.addObjects( [ newObject ], callback );
+        } );
       }
-
-      var newObject = {
-        name:'image',
-        data:{
-          scene:object.data.scene
-        }
-      };
-
-      return task2.addObjects( [newObject], callback );
-
-    });
-
-
-  }) );
+    } );
+  } ) );
 };
 
 

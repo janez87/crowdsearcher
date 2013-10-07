@@ -34,6 +34,7 @@ var performRule = function( data, config, callback ) {
 
   var taskId = config.task;
   var microtask = data.microtask;
+  var task = data.task;
 
   if(data.event !== 'END_MICROTASK'){
     log.error('Wrong event');
@@ -71,6 +72,12 @@ var performRule = function( data, config, callback ) {
 
       var scene = microtask.objects[0].data.scene;
 
+      var triggered = task.getMetadata( 'triggered_'+scene ) || 0;
+      triggered = parseInt( triggered, 10 );
+      if( triggered>3 )
+        return callback();
+
+
       var newObject = {
           name:'image',
           data:{
@@ -78,7 +85,12 @@ var performRule = function( data, config, callback ) {
           }
         };
 
-      return task2.addObjects([newObject],callback);
+      return task2.addObjects([newObject], d.bind( function ( err ) {
+        if( err ) return callback( err );
+
+        task.setMetadata( 'triggered_'+scene, triggered+1 );
+        d.bind( task.save.bind( task ) )( callback );
+      } ) );
     });
 
   }));

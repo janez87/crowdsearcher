@@ -37,12 +37,12 @@ var performRule = function( data, config, callback ) {
   .exec( d.bind( function( err, count ) {
     if( err ) return callback( err );
 
-    // No problem, go ahead
-    if( count<maxExecution )
-      return callback();
-
     // Max reached, close Microtask
-    microtask.closeMicroTask( d.bind( callback ) );
+    if( count===maxExecution )
+      return microtask.closeMicroTask( d.bind( callback ) );
+
+    // No problem, go ahead
+    return callback();
   }) );
 };
 

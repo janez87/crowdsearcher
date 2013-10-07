@@ -55,8 +55,7 @@ var performRule = function( data, config, callback ) {
         var object = task.objects[i];
         var result = object.getMetadata('maj_'+task.operations[0]._id+'_result');
 
-        if( result==='end' )
-          return callback();
+        if( result==='end' ) continue;
 
         var newObject = {
           name: 'image',
@@ -69,16 +68,9 @@ var performRule = function( data, config, callback ) {
         objects.push(newObject);
       }
 
-      return task2.addObjects( objects, function(err){
-        if(err) return callback(err);
-
-        return task2.finalizeTask(callback);
-      } );
-
-    });
-
-
-  }) );
+      return task2.addObjects( objects, callback );
+    } );
+  } ) );
 };
 
 

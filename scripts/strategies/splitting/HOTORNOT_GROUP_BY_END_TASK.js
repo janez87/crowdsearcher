@@ -5,7 +5,7 @@ var async = require( 'async' );
 
 var ObjectStatuses = require('../../../config/constants.js').ObjectStatuses;
 
-var log = common.log.child( { component: 'HOTORNOT_GROUP_BYSplittingStrategy' } );
+var log = common.log.child( { component: 'HOTORNOT_GROUP_BY END TASK' } );
 
 
 // Import Models
@@ -49,32 +49,11 @@ var performStrategy = function( data, params, callback ) {
     if(err) return callback(err);
 
     objects = _.clone( task.objects );
-    if(event==='ADD_OBJECTS' || event === 'ON_EOF'){
-      var newObjects = data.objects;
-
-      if(_.isUndefined(newObjects)){
-        newObjects = [];
-      }
-
-      log.trace('Retrieving the array of pending objects');
-      pendingObjects = task.getMetadata('pendingObjects');
-
-      if(_.isUndefined(pendingObjects)){
-        pendingObjects = [];
-      }
-
-      for (var i = 0; i < newObjects.length; i++) {
-        pendingObjects.push(newObjects[i]);
-      }
-
-      log.trace('%s pending objects',pendingObjects.length);
-
-    }
 
     // Select only the open objects
     objects = _.filter(objects,function(object){
       return object.status !== ObjectStatuses.CLOSED;
-    });
+    } );
 
     var groupedObjects = _.groupBy(objects,function(object){
       return object.data[groupingAttribute];
@@ -82,7 +61,6 @@ var performStrategy = function( data, params, callback ) {
 
     // Creating the raw microtasks
     var microTaskList = [];
-    var stillPendingObjects = [];
 
     var createRawMicroTask = function(object1,object2){
       log.trace('Generating the comparison for the object %s with %s',object1,object2);
@@ -99,43 +77,13 @@ var performStrategy = function( data, params, callback ) {
       microTaskList.push(rawMicroTask);
     };
 
-    _.each(groupedObjects,function(objects,group){
-      if(event === 'OPEN_TASK'){
-
-        for (var i = 0; i < objects.length; i++) {
-          for (var k = i+1; k < objects.length; k++) {
-            createRawMicroTask(objects[i],objects[k]);
-          }
-        }
-      }else if(event === 'ADD_OBJECTS'){
-
-        log.trace('Retrieving the pending objects belonging to the group %s',group);
-        var groupPendingObjects = _.filter(pendingObjects,function(object){
-          return object.data.position === group;
-        });
-
-        if(groupPendingObjects.length + objects.length > 1){
-          for (var i = 0; i < groupPendingObjects.length; i++) {
-            var object1 = groupPendingObjects[i];
-
-            log.trace('Generating the comparison with the objects already present in the task');
-            for (var j = 0; j < objects.length; j++) {
-              var object2 = objects[j];
-
-              if(!object2._id.equals(object1._id)){
-                createRawMicroTask(object1,object2);
-              }
-
-            }
-
-          }
-        }else{
-          stillPendingObjects = _.union( stillPendingObjects,groupPendingObjects);
+    _.each( groupedObjects, function( objects ){
+      for (var i = 0; i < objects.length; i++) {
+        for (var k = i+1; k < objects.length; k++) {
+          createRawMicroTask(objects[i],objects[k]);
         }
       }
     });
-
-    task.setMetadata('pendingObjects',stillPendingObjects);
 
     var saveMicroTasks = function( callback ) {
       log.trace( 'Creating %s microtasks', microTaskList.length );
@@ -167,7 +115,6 @@ var performStrategy = function( data, params, callback ) {
 // This strategy will be triggered on these CS events
 
 var triggerOn = [
-  'OPEN_TASK',
   'ADD_OBJECTS'
 ];
 

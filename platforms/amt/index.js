@@ -133,20 +133,17 @@ function createExecution( task, microtask, platform, assignment, callback ) {
 
     // Closing the Execution
     execution.close( callback );
-    /*
-    execution.close( function ( err ) {
-      if( err ) return callback( err );
-      // All done, approve the assignment
-      assignment.approve( 'Thanks for your work!', callback );
-    } );
-    */
   } );
 }
 function remote( req, res ) {
   var task = req.task;
   log.trace( 'Task(%s): %s', task._id, task.name );
 
-  //var eventType = req.query[ 'Event.1.EventType' ];
+  var eventType = req.query[ 'Event.1.EventType' ];
+  // Skip if not supported
+  if( eventType!=='AssignmentSubmitted' )
+    return res.send( 'LOVE U' );
+
   var hitTypeId = req.query[ 'Event.1.HITTypeId' ];
   var hitId = req.query[ 'Event.1.HITId' ];
   var assignmentId = req.query[ 'Event.1.AssignmentId' ];
@@ -187,6 +184,7 @@ function remote( req, res ) {
     var platformParameters = platform.params;
     // Init the AMT wrapper
     var amt = new AMT( {
+      sandbox: platformParameters.sandbox,
       key: platformParameters.accessKeyId,
       secret: platformParameters.secretAccessKey,
     } );
@@ -219,10 +217,8 @@ function create( task, microtask, platform, callback ){
 
   var params = platform.params;
 
-  log.trace( 'Use sandbox? %s', params.url );
-
   var amt = new AMT( {
-    //sandbox: params.url,
+    sandbox: params.sandbox,
     key: params.accessKeyId,
     secret: params.secretAccessKey,
   } );
@@ -252,6 +248,7 @@ function create( task, microtask, platform, callback ){
     var hitType = new HITType( {
       title: task.name,
       description: params.description || task.description,
+      Keywords: params.keywords.join( ',' ),
       reward: reward,
       duration: duration
     } );
@@ -304,7 +301,8 @@ function create( task, microtask, platform, callback ){
     var hit = new HIT( {
       hitTypeId: hitTypeId,
       question: question,
-      life: params.lifeTimeInSeconds
+      life: params.lifeTimeInSeconds,
+      MaxAssignments: params.maxAssignments
     } );
 
     return hit.create( cb );
@@ -364,13 +362,9 @@ var Platform = {
       type:'string',
       'default': 'question.xml'
     },
-    url: {
-      type:'enum',
-      values: {
-        'Mturk sandbox': true,
-        'Mturk': false
-      },
-      'default': 'Mturk sandbox'
+    sandbox: {
+      type: 'boolean',
+      'default': true
     },
     accessKeyId:{
       type:'pass',

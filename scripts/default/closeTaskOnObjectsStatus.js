@@ -3,6 +3,7 @@
 var _ = require('underscore');
 
 var ObjectStatuses = require('../../config/constants.js').ObjectStatuses;
+var TaskStatuses = require('../../config/constants.js').TaskStatuses;
 
 var log = common.log.child( { component: 'Close Task' } );
 
@@ -16,6 +17,9 @@ var performRule = function( data, config, callback ) {
   domain.on('error',callback);
 
   var task = data.task;
+
+  if( task.status===TaskStatuses.CLOSED )
+    return callback();
 
   task.populate('objects',function(err,task){
     if (err) callback(err);

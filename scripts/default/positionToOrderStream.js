@@ -32,6 +32,7 @@ var performRule = function( data, config, callback ) {
 
   var taskId = config.task;
   var microtask = data.microtask;
+  var task = data.task;
 
   if(data.event !== 'END_MICROTASK'){
     log.error('Wrong event');
@@ -50,32 +51,38 @@ var performRule = function( data, config, callback ) {
       if(err) return callback(err);
 
       var object = microtask.objects[0];
-
-      log.trace('Getting the final result');
       var finalResponse = object.getMetadata('maj_'+microtask.operations[0]+'_result');
 
-      log.trace('The final result is %s',finalResponse);
-
-      // Continue the flow only if the end category is not selected
-      if(finalResponse==='end'){
+      // Continue the flow only if the end category is selected
+      if( finalResponse==='end' )
         return callback();
+
+      // Check if already fired
+      var scene = object.data.scene;
+      var firedObjects = task.getMetadata( 'firedObjects' ) || {};
+      if( firedObjects[ scene ] ) {
+        // Already fired, continue
+        return callback();
+      } else {
+        firedObjects[ scene ] = true;
+        task.setMetadata( 'firedObjects', firedObjects );
+
+        // Save the metadata
+        task.save( function ( err ) {
+          if( err ) return callback( err );
+
+          var newObject = {
+            name: 'image',
+            data: {
+              scene: scene,
+              position: finalResponse
+            }
+          };
+          return task2.addObjects( [ newObject ], callback );
+        } );
       }
-
-      var newObject = {
-        name:'image',
-        data:{
-          scene:object.data.scene,
-          position:finalResponse
-        }
-      };
-
-      log.trace( 'Adding object', newObject );
-      return task2.addObjects( [newObject], callback );
-
-    });
-
-
-  }) );
+    } );
+  } ) );
 };
 
 
