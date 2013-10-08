@@ -37,6 +37,8 @@ var performRule = function( data, config, callback ) {
   .exec( d.bind( function( err, count ) {
     if( err ) return callback( err );
 
+    log.trace( 'Found %s executions of %s max', count, maxExecution );
+
     // Max reached, close Microtask
     if( count===maxExecution )
       return microtask.closeMicroTask( d.bind( callback ) );
