@@ -3,396 +3,463 @@ var _  = require('underscore');
 var mongo = require('mongoose');
 var async = require('async');
 var domain = require('domain');
-var schedule = require('node-schedule');
+var MongoError = mongo.Error;
 
+// Create a child logger
 var log = common.log.child( { component: 'Task model' } );
 
-// Import Mongo Classes and Objects
+// Import Mongoose Classes and Objects
 var Schema = mongo.Schema;
 var ObjectId = Schema.ObjectId;
+
+// Import mongoose schemata.
 var ControlRule = require( './controlrule' );
-var TaskStatuses = require( '../config/constants' ).TaskStatuses;
+var ObjectModel = require( './object' );
+var Microtask = require( './microtask' );
 
-// Plugins to load
-var splittingStrategyPlugin = require( './plugins/splittingstrategy' );
-var microTaskAssignmentStrategyPlugin = require( './plugins/microtaskassignmentstrategy' );
-var implementationStrategyPlugin = require( './plugins/implementationstrategy' );
-var invitationStrategyPlugin = require( './plugins/invitationstrategy' );
-var metadataPlugin = require( './plugins/metadata' );
-
-
-// Import the CRM
+// Import the CRM for handling task events
 var CRM = require( '../scripts/controlRuleManager' );
 
-// TaskSchema
-// ------
-// The task schema repretassents
-var TaskSchema = new Schema( {
+// # Task definition
+// The task is the core component of the CS.
 
+// ## Schema
+//
+// Mongoose schema for the Task entity.
+var TaskSchema = new Schema( {
+  // ### General data
+  //
   // The name of the task.
   name: {
     type: String,
-    required: true
+    required: true,
+    trim: true
   },
-
-
-  // Markdown enabled fileds containing the descriptions
-  description: String,
-  landing: {
-    type: String,
-    select: false
-  },
-  ending: {
-    type: String,
-    select: false
-  },
-
-  // Array that contains the `Operation` list
-  operations: {
-    type: [{
-      type: ObjectId,
-      ref: 'operation'
-    }],
-    required: true
-  },
-
-  // Array that contains the `Platform` list
-  platforms: {
-    type: [{
-      type: ObjectId,
-      ref: 'platform'
-    }],
-    required: true
-  },
-
-  // If the Task is private
+  // The `private` attribute is a flag that states if a user **must** be present for each `Execution`.
   'private': {
     type: Boolean,
     'default': false
   },
 
-  // Task status
-  status: {
-    type: Number,
-    required: true,
-    index: true,
-    'default': TaskStatuses.CREATED
+
+  // ### Markdown-enabled fileds that contains text abount the task.
+  //
+  // The description of the Task.
+  description: {
+    type: String
+  },
+  // The landing page of the Task, will be rendered using markdown.
+  landing: {
+    type: String
+  },
+  // The ending page of the Task, will be rendered using markdown.
+  ending: {
+    type: String
   },
 
-  // Control Rules
-  controlrules: [ControlRule],
 
-  // Job that owns this task
+  // ### Status
+  //
+  // Current status of the Task.
+  // The status changes how the Task behave to some events/requests.
+  status: {
+    type: String,
+    required: true,
+    index: true,
+    uppercase: true,
+    'enum': [
+      // The Task has been posted to the CS, no event/rule will be triggered in this state
+      'CREATED',
+
+      // The Task has been **activated**, this means that all the events can now be triggered.
+      // Setting the state to `OPENED` will trigger the `OPEN_TASK` event.
+      'OPENED',
+
+      // The Task will no longer accept incoming objects from any source.
+      // Setting the state to `FINALIZED` will trigger the `EOF_TASK` event.
+      'FINALIZED',
+
+      //'WAIT',
+      //'SUSPENDED',
+
+      // The Task has been closed, it will not accept any `Object`/`Microtask` and `Execution`s.
+      // Setting the state to `CLOSED` will trigger the `END_TASK` event and set the `closedDate`
+      // field to the current date.
+      'CLOSED'
+    ],
+    'default': 'CREATED'
+  },
+
+  // Ordered list of control rules for the Task.
+  // See `ControlRule` model.
+  controlrules: [ ControlRule ],
+
+
+  // ### References
+  //
+  // Reference to the `Job` container for this Task.
   job: {
     required: true,
     type: ObjectId,
     ref: 'job'
   },
 
-  // List of objects belonging to the task
-  objects: [ {
-    type: ObjectId,
-    ref: 'object',
-    unique: true
-  } ],
+  // List of `Operation`s of the Task. Each operation is a *reference* to an Operation model.
+  operations: {
+    type: [ {
+      type: ObjectId,
+      ref: 'operation'
+    } ],
+    'default': []
+  },
+
+  // List of `Platform`s of the Task. Each platform is a *reference* to a Platform model.
+  platforms: {
+    type: [ {
+      type: ObjectId,
+      ref: 'platform'
+    } ],
+    'default': []
+  },
+
+  // Unique list of `Object`s of the Task.
+  objects: {
+    type: [ {
+      type: ObjectId,
+      ref: 'object'
+    } ],
+    'default': []
+  },
 
 
-  // Microtasks
-  microtasks: [{
-    type: ObjectId,
-    ref: 'microtask',
-    unique: true
-  } ],
+  // Unique list of `Microtask`s of the Task. Each microtask is a *reference* to a `Microtask` model.
+  microtasks: {
+    type: [ {
+      type: ObjectId,
+      ref: 'microtask'
+    } ],
+    'default': []
+  },
 
-  // Useful timed data
+
+  // ### Time data
+  //
+  // Creation date of the object. By default it will be the first save of the object.
   creationDate: {
     required: true,
     type: Date,
     'default': Date.now
   },
 
+  // Closed date of the object. Will be available only after **closing** the task.
   closedDate: {
     type: Date,
     'default':null
-  },
-
-  lastResponse: {
-    type: Date
   }
+},
 
-},// Set the options for this Schema
+/// ## Schema options
+//
 {
-  // Do not allow to add random properties to the Model
-  strict: true
-} );
-
-
-// Use plugins
-TaskSchema.plugin( metadataPlugin );
-TaskSchema.plugin( splittingStrategyPlugin );
-TaskSchema.plugin( microTaskAssignmentStrategyPlugin );
-TaskSchema.plugin( implementationStrategyPlugin );
-TaskSchema.plugin( invitationStrategyPlugin );
-
-
-
-
-// Handle property change
-/*
-TaskSchema.path( 'status' ).set( function( value ) {
-  if( this.status>value ) {
-    return this.invalidate( 'status', 'Cannot set to a previous state' );
-  }
-
-  return value;
-} );
-*/
-
-// Pre middlewares
-TaskSchema.pre( 'remove', function( next ) {
-  log.trace( 'PRE Task remove' );
-
-  var thisTask = this;
-
-  var removeObj = function( obj, callback ) {
-    obj.remove( callback );
-  };
-
-  var removePlatforms = function( callback ) {
-    thisTask
-    .model( 'platform' )
-    .find()
-    .where( '_id' )['in']( thisTask.platforms )
-    .exec( function( err, platforms ) {
-      if( err ) return callback( err );
-
-      async.each( platforms, removeObj, callback );
-    } );
-  };
-  var removeOperations = function( callback ) {
-    log.debug( 'Removing %s operations from the task', thisTask.operations.length );
-
-    thisTask
-    .model( 'operation' )
-    .find()
-    .where( '_id' )['in']( thisTask.operations )
-    .exec( function( err, operations ) {
-      if( err ) return callback( err );
-
-      async.each( operations, removeObj, callback );
-    } );
-  };
-
-  var removeMicrotasks = function( callback ) {
-    log.debug( 'Removing %s microtasks from the task', thisTask.microtasks.length );
-
-    thisTask
-    .model( 'microtask' )
-    .find()
-    .where( '_id' )['in']( thisTask.microtasks )
-    .exec( function( err, microtasks ) {
-      if( err ) return callback( err );
-
-      async.each( microtasks, removeObj, callback );
-    } );
-  };
-
-  var removeExecutions = function( callback ) {
-    log.debug( 'Removing all executions of the task' );
-
-    thisTask
-    .model( 'execution' )
-    .find()
-    .where( 'task', thisTask._id )
-    .exec( function( err, executions ) {
-      if( err ) return callback( err );
-
-      async.each( executions, removeObj, callback );
-    } );
-  };
-
-  async.series( [
-    removePlatforms,
-    removeOperations,
-    removeMicrotasks,
-    removeExecutions
-  ], next );
+  // Do not allow to add random properties to the model.
+  strict: true,
+  // Disable index check in production.
+  autoIndex: process.env.PRODUCTION? false : true
 } );
 
 
 
 
-// Methods
-// ---
-TaskSchema.methods.isPrivate = function() {
-  return this.private;
+
+
+
+// ## Plugins to add to the Task model.
+//
+// Load the plugin for handling differest strategies
+TaskSchema.plugin( require( './plugins/strategy' )( 'splitting' ) );
+TaskSchema.plugin( require( './plugins/strategy' )( 'assignment' ) );
+TaskSchema.plugin( require( './plugins/strategy' )( 'implementation' ) );
+TaskSchema.plugin( require( './plugins/strategy' )( 'invitation' ) );
+
+// Add the `metadata` fileld to the entity.
+TaskSchema.plugin( require( './plugins/metadata' ) );
+
+
+
+
+
+
+
+// # Task calculated fields
+//
+// Boolean indicating if the task is opened.
+TaskSchema.virtual( 'opened' ).get( function() {
+  return this.status==='OPENED';
+} );
+// Boolean indicating if the task is finalized.
+TaskSchema.virtual( 'finalized' ).get( function() {
+  return this.status==='FINALIZED';
+} );
+// Boolean indicating if the task is closed.
+TaskSchema.virtual( 'closed' ).get( function() {
+  return this.status==='CLOSED';
+} );
+
+
+
+
+
+
+
+
+// # Task instance methods
+//
+// ## Checks
+//
+// Checks if the current task can be opened.
+TaskSchema.methods.canOpen = function( callback ) {
+  // The Task can be opened only if is in the `CREATED` state.
+  if( this.status!=='CREATED' )
+    return callback( new MongoError( 'Status is not "CREATED"' ) );
+
+  // Must have at least a `Platform`.
+  if( this.platforms.length===0 )
+    return callback( new MongoError( 'No platforms specified' ) );
+
+  // Must have at least an `Operation`.
+  if( this.operations.length===0 )
+    return callback( new MongoError( 'No operations specified' ) );
+
+  // Everything ok
+  return callback();
 };
 
-TaskSchema.methods.addMicrotasks = function( microtasks, callback ) {
-  // Transform into array in case of single object (normalize behaviour).
-  if( !_.isArray( microtasks ) )
-    microtasks = [ microtasks ];
+// Checks if the current task accepts new `Object`s.
+TaskSchema.methods.canAddObjects = function( callback ) {
+  // Objects cannot be added in `CLOSED` and `FINALIZED` states.
+  if( this.closed || this.finalized )
+    return callback( new MongoError( 'Status is "'+this.status+'"' ) );
 
-  log.trace( 'Adding %s microtasks to the task', microtasks.length );
+  // Everything ok
+  return callback();
+};
 
-  var thisTask = this;
+// ## Events
+//
+// Shortcut for triggering events using the given data as payload.
+// The payload **always** have a `task` key containing the id of the current task.
+TaskSchema.methods.fire = function( event, data, callback ) {
+  if( !_.isFunction( callback ) ) {
+    callback = data;
+    data = {};
+  }
+  return CRM.trigger( event, _.defaults( {
+    task: this._id
+  }, data ), callback );
+};
 
-  _.each( microtasks, function( microtask ) {
-    thisTask.microtasks.addToSet( microtask );
+// Opens the current task. The `OPEN_TASK` event will be triggered **after** setting the
+// status field to `OPENED`.
+TaskSchema.methods.open = function( callback ) {
+  // Skip if already opened.
+  if( this.opened || this.finalized || this.closed )
+    return callback( new MongoError( 'Already opened' ) );
+
+  // Checks if the task can be opened.
+  this.canOpen( function ( err ) {
+    if( err ) return callback( err );
+
+    log.debug( 'Opening task %s', this._id );
+
+    this.set( 'status', 'OPENED' );
+    this.save( function ( err, task ) {
+      if( err ) return callback( err );
+
+      task.fire( 'OPEN_TASK', callback );
+    } );
   } );
+};
+
+// Closes the current task. The `EOF_TASK` event will be triggered **after** setting the
+// status field to `FINALIZED`.
+TaskSchema.methods.finalize = function( callback ) {
+  // Skip if already finalized or closed.
+  if( this.finalized || this.closed )
+    return callback( new MongoError( 'Already finalized' ) );
+
+  log.debug( 'Finalizing task', this._id );
+
+  this.set( 'status', 'FINALIZED' );
+  this.save( function( err, task ) {
+    if( err ) return callback( err );
+
+    task.fire( 'EOF_TASK', callback );
+  } );
+};
+
+// Closes the current task. The `END_TASK` event will be triggered **after** setting the
+// status field to `CLOSED`.
+TaskSchema.methods.close = function( callback ) {
+  // Skip if already closed.
+  if( this.closed )
+    return callback( new MongoError( 'Already closed' ) );
+
+  log.debug( 'Closing task', this._id );
+
+  this.set( 'status', 'CLOSED' );
+  this.set( 'closedDate', Date.now() );
 
   this.save( function( err, task ) {
     if( err ) return callback( err );
 
-    // Trigger the `ADD_MICROTASK` event
-    CRM.execute( 'ADD_MICROTASK', {
-      task: task,
-      microtasks: microtasks
-    }, callback );
+    task.fire( 'END_TASK', callback );
   } );
 };
 
 
 
-// ### Task open
-TaskSchema.methods.open = function( callback ) {
-  var thisTask = this;
-  log.trace( 'Opening task %s', this.id );
 
-  this.set( 'status', TaskStatuses.OPENED );
-  this.save( function ( err ) {
-    if( err ) return callback( err );
-    CRM.execute( 'OPEN_TASK', { task: thisTask }, callback );
-  } );
-};
+// ## Object
+//
 
-// ### Task close
-TaskSchema.methods.closeTask = function(callback) {
-  var thisTask = this;
+// Handy method for adding objects to the task.
+// The objects can be either instances of the `Object` entity or plain JS objects.
+// After calling this method the `ADD_OBJECTS` event will be triggered.
+TaskSchema.methods.addObjects = function( objects, callback ) {
+  var _this = this;
 
-  log.trace( 'Closing task', this.id );
-
-  this.set( 'status', TaskStatuses.CLOSED );
-  this.set('closedDate', Date.now());
-
-  this.save( function( err ) {
+  // Check if the task can accept new objects.
+  this.canAddObjects( function ( err ) {
     if( err ) return callback( err );
 
-    // Trigget the `END_TASK` event
-    CRM.execute( 'END_TASK', { task: thisTask }, callback );
-  });
-};
+    // Normalize behaviour.
+    if( !_.isArray( objects ) )
+      objects = [ objects ];
 
-// ### Task finalize
-TaskSchema.methods.finalizeTask = function(callback) {
-  var thisTask = this;
-
-  log.trace( 'Finalizing task', this.id );
-
-  this.set( 'status', TaskStatuses.FINALIZED );
-
-  this.save( function( err ) {
-    if( err ) return callback( err );
-
-    // Trigget the `ON_EOF` event
-    CRM.execute( 'ON_EOF', { task: thisTask }, callback );
-  });
-};
-
-// ### Objects handling
-TaskSchema.methods.canAddObjects = function() {
-  // If the Task is in one of these statuses then we are able to add objects,
-  // otherwise we cannot
-  return this.status<TaskStatuses.FINALIZED;
-};
-// Useful method to add objects to the Task
-TaskSchema.methods.addObjectsByIds = function( ids, callback ) {
-  var ObjectModel = this.model( 'object' );
-  var thisTask = this;
-
-  ObjectModel
-  .where( '_id' ).in( ids )
-  .exec( function( err, objects ) {
-    if( err ) return callback( err );
-
-    _.each( objects, function( object ) {
-      thisTask.objects.addToSet( object );
+    // Filter invalid object and add the task parameter to all the elements in
+    // the array, so they became valid `Object` entities.
+    var objects = _.filter( objects, function ( object ) {
+      if( object instanceof ObjectModel || _.isObject( object ) ) {
+        object.task = _this._id;
+        return true;
+      } else {
+        return false;
+      }
     } );
 
-    thisTask.save( function( err, task ) {
+    // If no object will be added then exit.
+    if( objects.length===0 )
+      return callback();
+
+    log.debug( 'Adding %s objects to the task %s', objects.length, _this._id );
+
+    // Bulk create `Object` entities using mongoose create method.
+    ObjectModel.create( objects, function( err ) {
       if( err ) return callback( err );
 
-      return CRM.execute( 'ADD_OBJECTS', {
-        task: task,
-        objects: objects
-      }, callback );
-    });
-  } );
-};
-TaskSchema.methods.addObjects = function( objects, callback ) {
-  log.trace( 'Adding objects to Task %s', this._id );
+      // Convert into plain array.
+      var args = _.toArray( arguments );
+      // Remove the `err` param and get all the created objects.
+      args.shift();
 
-  // check if we can add objects to the task
-  if( this.canAddObjects() ) {
-    log.trace( 'Can add objects' );
+      // Add all the objects to the current task.
+      _this.objects.addToSet.apply( _this.objects, args );
 
-    // Keep a pointer to the task document, to use later
-    var thisTask = this;
-
-    // First find the job
-    var retrieveJob = function( callback ) {
-      log.trace('Searching the job %s',thisTask.job);
-      thisTask.model( 'job' ).findById( thisTask.job, callback );
-    };
-
-    // then add the objects to the job
-    var addObjectsToJob = function( job, callback ) {
-      if( !job ) return callback( new Error( 'Unable to find the job' ) );
-
-      job.addObjects( objects, callback );
-    };
-
-    // eventually add the objects to the task
-    var addObjectsToTask = function( objectList, callback ) {
-      _.each( objectList, function( object ) {
-        thisTask.objects.addToSet( object );
-      } );
-
-      thisTask.save( function( err ) {
+      // Persist the changes.
+      _this.save( function( err ) {
         if( err ) return callback( err );
 
-        if(thisTask.isNew){
-          // Trick to not trigger the ADD_OBJECTS on the task creation
-          return callback(null,objectList);
-        }else{
-          return CRM.execute( 'ADD_OBJECTS', {
-            task: thisTask,
-            objects: objectList
-          }, function(err){
-            if(err) return callback(err);
-
-            // Pass the list of created objects
-            return callback( null, objectList );
-          } );
-
-        }
-
+        // Once all the changes are saved trigger the `ADD_OBJECTS`.
+        _this.fire( 'ADD_OBJECTS', { objects: args }, callback );
       } );
-    };
+    } );
 
-    // Execute the function list
-    async.waterfall( [
-      retrieveJob,
-      addObjectsToJob,
-      addObjectsToTask
-    ], callback );
-
-  } else {
-    // The task has already recieved the `EOF` signal, no more objects can be added
-    log.debug( 'Unable to add objects to the task with status "%s"', this.status );
-    return callback( new Error( 'Unable add objects to the task' ) );
-  }
+  } );
 };
+
+
+
+
+// ## Microtask
+//
+
+// Handy method for adding microtasks to the task.
+// After calling this method the `ADD_MICROTASKS` event will be triggered.
+TaskSchema.methods.addMicrotasks = function( microtasks, callback ) {
+  var _this = this;
+
+  // Check if the task can accept new microtasks.
+  if( this.closed || this.finalized )
+    return callback( new MongoError( 'Status is "'+this.status+'"' ) );
+
+  // Normalize behaviour.
+  if( !_.isArray( microtasks ) )
+    microtasks = [ microtasks ];
+
+  log.debug( 'Adding %s microtasks to the task %s', microtasks.length, this._id );
+
+  // Bulk create the tasks
+  Microtask.create( microtasks, function( err ) {
+    if( err ) return callback( err );
+
+    // Convert into plain array.
+    var args = _.toArray( arguments );
+    // Remove the `err` param and get all the created microtasks.
+    args.shift();
+
+    // Add all the microtasks to the current task.
+    _this.microtasks.addToSet.apply( _this.microtasks, args );
+
+    // Persist the changes
+    _this.save( function( err ) {
+      if( err ) return callback( err );
+
+      _this.fire( 'ADD_MICROTASKS', { microtasks: args }, callback );
+    } );
+  } );
+};
+
+
+
+// # Middlewares
+//
+// ## Pre-remove middleware
+// Removes all the data associated with this task, including microtasks, objects and executions.
+TaskSchema.pre( 'remove', function( next ) {
+  next();
+} );
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// OLD METHODS, rewrite
 
 // ### Useful methods
 // Perform the invitation strategy.

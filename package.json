@@ -8,39 +8,31 @@
   },
   "dependencies": {
     "express": "3.x",
-
-    "coffee-script": "*",
-    "stylus": "*",
-    "jade": "*",
-    "showdown": "*",
+    "coffee-script": "1.6.x",
+    "stylus": "0.x",
+    "jade": "0.x",
+    "showdown": "0.3.x",
     "express-coffee": "*",
-
-    "nconf": "*",
-    "bunyan": "*",
-    "underscore": "*",
-    "underscore.string": "*",
-
-    "request": "*",
-    "async": "*",
+    "nconf": "0.6.x",
+    "bunyan": "0.21.x",
+    "underscore": "1.5.x",
+    "underscore.string": "2.3.x",
+    "request": "2.x",
+    "async": "0.2.x",
     "mongoose": "3.6.x",
-    "q": "*",
-
-    "passport": "*",
+    "passport": "0.1.x",
     "passport-local": "*",
     "passport-oauth": "*",
     "passport-facebook": "*",
     "passport-twitter": "*",
     "connect-flash": "*",
-
-    "glob": "*",
-
-    "fb": "*",
-    "amt": "*",
-    "twit":"*",
-
+    "glob": "3.2.x",
+    "fb": "0.6.x",
+    "amt": "0.1.x",
+    "twit": "1.1.x",
     "node-schedule": "*",
-
-    "nodemailer":"*"
+    "nodemailer": "0.5.x",
+    "mongoose-utilities": "0.1.x"
   },
   "devDependencies": {
     "supertest": "*",

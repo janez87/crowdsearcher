@@ -76,7 +76,7 @@ var performRule = function( data, config, callback ) {
         return [ scene, _.uniq( array ) ];
       } );
 
-      function createMicrotask( data ) {
+      function createMicrotask( data, cb ) {
         // Create objects for microtask
         var scene = data[0];
         var actors = data[1];
@@ -93,7 +93,7 @@ var performRule = function( data, config, callback ) {
         } );
 
         task2.addObjects( rawObjects, d.bind( function ( err, objects ) {
-          if( err ) return callback( err );
+          if( err ) return cb( err );
 
           var microtaskToCreate = new Microtask( {
             task: task2,
@@ -103,9 +103,9 @@ var performRule = function( data, config, callback ) {
           } );
 
           d.bind( microtaskToCreate.save.bind( microtaskToCreate ) )( function ( err, m ) {
-            if( err ) return callback( err );
+            if( err ) return cb( err );
 
-            return task2.addMicrotasks( m, d.bind( callback ) );
+            return task2.addMicrotasks( m, d.bind( cb ) );
           } );
         } ) );
       }
