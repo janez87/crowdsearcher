@@ -2,7 +2,6 @@
 
 // Load libraries
 var mongo = require('mongoose');
-var log = common.log.child( { component: 'ControlMart model' } );
 var _ = require('underscore');
 
 // Import Mongo Classes and Objects
@@ -54,12 +53,12 @@ var ControlMartSchema = new Schema( {
 //Return all the control mart tuples matching the input
 ControlMartSchema.statics.select = function(rawTuple,callback){
 
-  log.trace('Retrieving the controlmart tuple of %j', rawTuple);
+  console.log('Retrieving the controlmart tuple of %j', rawTuple);
 
   this.find(rawTuple,function(err,controlMartTuples){
     if(err) return callback(err);
     
-    log.trace('%s retrieved',controlMartTuples);
+    console.log('%s retrieved',controlMartTuples);
 
     return callback(null,controlMartTuples);
   });
@@ -84,12 +83,12 @@ ControlMartSchema.statics.get = function(rawTuple,callback){
     platform: rawTuple.platform
   };
 
-  log.trace('Retrieving the controlmart tuple of %j', tupleToSearch);
+  console.log('Retrieving the controlmart tuple of %j', tupleToSearch);
 
   this.findOne(tupleToSearch,function(err,controlMartTuple){
     if(err) return callback(err);
     
-    log.trace('%s retrieved',controlMartTuple);
+    console.log('%s retrieved',controlMartTuple);
 
     if(controlMartTuple && !_.isUndefined(controlMartTuple)){
       return callback(null,controlMartTuple.data);
@@ -102,7 +101,7 @@ ControlMartSchema.statics.get = function(rawTuple,callback){
 //Create a new ControlMart tuple
 ControlMartSchema.statics.insert = function(rawTuple,callback){
 
-  log.trace('Trying to insert the tuple %s', rawTuple);
+  console.log('Trying to insert the tuple %s', rawTuple);
 
   var thisSchema = this;
 
@@ -121,20 +120,21 @@ ControlMartSchema.statics.insert = function(rawTuple,callback){
 
     var tupleToCreate = {};
     if(tuple){
-      log.trace('The tuple already exists');
+      console.log('The tuple already exists');
       tuple.data = rawTuple.data;
-      log.trace('Updating the value');
+      console.log('Updating the value');
       tupleToCreate = tuple;
     }else{
-      log.trace('Creating the new tuple');
+      console.log('Creating the new tuple');
       var ControlMart = thisSchema.model('controlmart');
       tupleToCreate = new ControlMart(rawTuple);
     }
 
-    log.trace('Saving the tuple');
+    console.log('Saving the tuple');
     return tupleToCreate.save(callback);
   });
  
 };
- 
+
+
 exports = module.exports = ControlMartSchema;
