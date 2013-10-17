@@ -1,28 +1,70 @@
-// Control Rule Manager
-// ---
-// Is in charge of reacting to the control rules for each Task.
+// Load libraries.
+//var _ = require('underscore');
+var async = require( 'async' );
+var domain = require( 'domain' );
+
+// Create a child logger.
+var log = common.log.child( { component: 'CRM' } );
 
 
-// Load the `EventEmitter` class
-var EventEmitter = require('events').EventEmitter;
+// # Control Rule Manager
+//
+// Create the CRM object.
+var ControlRuleManager = {};
 
-// Add shortcuts to the libraries.
-var _ = require('underscore');
-var util = require('util');
-var async = require('async');
-var TaskStatuses = require( '../config/constants' ).TaskStatuses;
+// ## Methods
+//
+// ### Trigger
+// This method is in charge of triggering the `event` in the system and
+// calling `callback` when the event is completed.
+// **Note**:
+// Only task with status either `OPENED` or `FINALIZED` can trigger events.
+ControlRuleManager.trigger = function( event, data, callback ) {
+  // The task id must be available in the data object.
+  var taskId = data.task;
 
-var log = common.log.child( { component: 'ControlRuleManager' } );
+  // Import the Task mongoose model.
+  var Task = common.models.task;
 
-function ControlRuleManager() {
-  // Call the constructor of the parent.
-  EventEmitter.call( this );
-}
-// Inherith from `EventEmitter` class.
-util.inherits( ControlRuleManager, EventEmitter );
+  // Create a domain to wrap the function calls
+  var d = domain.create();
+  d.on( 'error', function ( err ) {
+    // Log the error
+    log.error( err );
+
+    // Clean exit.
+    return callback();
+  } );
 
 
-// ## Methods for the `ControlRuleManager` class
+  // Function that wraps each function into a 'secure' context.
+  function w( fn ) {
+    // First wrap into a domain.
+    fn = d.bind( fn );
+  }
+
+  // Populate the task, this object will be passed to each 'listener'.
+  Task
+  .findById( taskId )
+  // Populate all the refs, exclude objects for performance.
+  .populate( 'job platforms operations microtasks' )
+  .exec( function( err, task ) {
+    if( err ) return callback( err );
+
+    // Check if a task was found.
+    if( !task )
+      return callback( new Error( 'No task found for '+taskId ) );
+
+    // Check if the task can trigger events.
+    if( task.status==='CREATED' || task.status==='CLOSED' )
+      return callback( new Error( 'Task cannot trigger events, status is '+task.status ) );
+
+    log.trace( 'CRM will trigger %s', event );
+    return callback();
+  } );
+};
+
+/*
 ControlRuleManager.prototype.execute = function( event, data, callback ) {
   try {
 
@@ -118,6 +160,7 @@ ControlRuleManager.prototype.execute = function( event, data, callback ) {
     return callback( err );
   }
 };
+*/
 
-// Export as a Singletone
-module.exports = exports = new ControlRuleManager();
+// Export the CRM.
+module.exports = exports = ControlRuleManager;

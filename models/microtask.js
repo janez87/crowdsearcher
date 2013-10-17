@@ -1,7 +1,6 @@
 // Load libraries
 var _  = require('underscore');
 var mongo = require('mongoose');
-var async = require('async');
 var MongoError = mongo.Error;
 
 // Create a child logger
@@ -10,9 +9,6 @@ var log = common.log.child( { component: 'Microtask model' } );
 // Import Mongoose Classes and Objects
 var Schema = mongo.Schema;
 var ObjectId = Schema.ObjectId;
-
-// Import mongoose schemata.
-var ObjectModel = require( './object' );
 
 // Import the CRM for handling microtask events.
 var CRM = require( '../scripts/controlRuleManager' );
@@ -24,7 +20,6 @@ var CRM = require( '../scripts/controlRuleManager' );
 //
 // Mongoose schema for the Microtask entity.
 var MicrotaskSchema = new Schema( {
-
   // ### Status
   //
   // Current status of the Microtask.
@@ -48,20 +43,11 @@ var MicrotaskSchema = new Schema( {
 
   // ### References
   //
-  // Task that "owns" this `Microtask`
+  // Tha parent Task of this Microtask.
   task: {
     required: true,
     type: ObjectId,
     ref: 'task'
-  },
-
-  // List of `Operation`s of the Microtask. Each operation is a *reference* to an Operation model.
-  operations: {
-    type: [ {
-      type: ObjectId,
-      ref: 'operation'
-    } ],
-    'default': []
   },
 
   // List of `Platform`s of the Microtask. Each platform is a *reference* to a Platform model.
@@ -119,10 +105,16 @@ var MicrotaskSchema = new Schema( {
 
 
 
-// ## Plugins to add to the Task model.
+// ## Plugins to add to the Microtask model.
 //
 // Add the `metadata` fileld to the entity.
-MicrotaskSchema.plugin( require( './plugins/metadata' ) );
+MicrotaskSchema.plugin( require( './plugins/metadataPlugin' ) );
+// Add the `accessKey` plugin.
+MicrotaskSchema.plugin( require( './plugins/accessKeyPlugin' ) );
+// Add the `operations` plugin.
+MicrotaskSchema.plugin( require( './plugins/operationsPlugin' ) );
+// Add the `platforms` plugin.
+MicrotaskSchema.plugin( require( './plugins/platformsPlugin' ) );
 
 
 
@@ -131,8 +123,7 @@ MicrotaskSchema.plugin( require( './plugins/metadata' ) );
 
 
 
-
-// # Task calculated fields
+// # Microtask calculated fields
 //
 // Boolean indicating if the microtask is created.
 MicrotaskSchema.virtual( 'created' ).get( function() {
@@ -150,7 +141,7 @@ MicrotaskSchema.virtual( 'closed' ).get( function() {
 
 
 
-// # Task instance methods
+// # Microtask instance methods
 //
 
 // ## Events
@@ -172,6 +163,7 @@ MicrotaskSchema.methods.fire = function( event, data, callback ) {
 // Closes the current microtask. The `END_MICROTASK` event will be triggered **after** setting the
 // status field to `CLOSED`.
 MicrotaskSchema.methods.close = function( callback ) {
+  var _this = this;
   // Skip if already closed.
   if( this.closed )
     return callback( new MongoError( 'Already closed' ) );
@@ -181,10 +173,10 @@ MicrotaskSchema.methods.close = function( callback ) {
   this.set( 'status', 'CLOSED' );
   this.set( 'closedDate', Date.now() );
 
-  this.save( function( err, microtask ) {
+  this.save( function( err ) {
     if( err ) return callback( err );
 
-    microtask.fire( 'END_MICROTASK', callback );
+    _this.fire( 'END_MICROTASK', callback );
   } );
 };
 

@@ -104,14 +104,6 @@ var TaskSchema = new Schema( {
     ref: 'job'
   },
 
-  // List of `Operation`s of the Task. Each operation is a *reference* to an Operation model.
-  operations: {
-    type: [ {
-      type: ObjectId,
-      ref: 'operation'
-    } ],
-    'default': []
-  },
 
   // List of `Platform`s of the Task. Each platform is a *reference* to a Platform model.
   platforms: {
@@ -173,21 +165,37 @@ var TaskSchema = new Schema( {
 
 
 
+
+
+
 // ## Plugins to add to the Task model.
 //
-// Load the plugin for handling differest strategies
-TaskSchema.plugin( require( './plugins/strategy' )( 'splitting' ) );
-TaskSchema.plugin( require( './plugins/strategy' )( 'assignment' ) );
-TaskSchema.plugin( require( './plugins/strategy' )( 'implementation' ) );
-TaskSchema.plugin( require( './plugins/strategy' )( 'invitation' ) );
-
 // Add the `metadata` fileld to the entity.
-TaskSchema.plugin( require( './plugins/metadata' ) );
+TaskSchema.plugin( require( './plugins/metadataPlugin' ) );
+// Add the `accessKey` plugin.
+TaskSchema.plugin( require( './plugins/accessKeyPlugin' ) );
+// Add the `operations` plugin.
+TaskSchema.plugin( require( './plugins/operationsPlugin' ) );
+// Add the `platforms` plugin.
+TaskSchema.plugin( require( './plugins/platformsPlugin' ) );
+// Load the plugin for handling different strategies
+TaskSchema.plugin( require( './plugins/strategyPlugin' ), { strategy: 'splitting' } );
+TaskSchema.plugin( require( './plugins/strategyPlugin' ), { strategy: 'assignment' } );
+TaskSchema.plugin( require( './plugins/strategyPlugin' ), { strategy: 'IMPLEMENTATION' } );
+TaskSchema.plugin( require( './plugins/strategyPlugin' ), { strategy: 'invitation' } );
 
 
 
 
 
+/*
+// # Setters
+//
+// When setting the platforms and the operations.
+TaskSchema.path( 'platforms' ).set( function ( platforms ) {
+
+} );
+*/
 
 
 // # Task calculated fields
@@ -261,6 +269,7 @@ TaskSchema.methods.fire = function( event, data, callback ) {
 // Opens the current task. The `OPEN_TASK` event will be triggered **after** setting the
 // status field to `OPENED`.
 TaskSchema.methods.open = function( callback ) {
+  var _this = this;
   // Skip if already opened.
   if( this.opened || this.finalized || this.closed )
     return callback( new MongoError( 'Already opened' ) );
@@ -269,13 +278,13 @@ TaskSchema.methods.open = function( callback ) {
   this.canOpen( function ( err ) {
     if( err ) return callback( err );
 
-    log.debug( 'Opening task %s', this._id );
+    log.debug( 'Opening task %s', _this._id );
 
-    this.set( 'status', 'OPENED' );
-    this.save( function ( err, task ) {
+    _this.set( 'status', 'OPENED' );
+    _this.save( function ( err ) {
       if( err ) return callback( err );
 
-      task.fire( 'OPEN_TASK', callback );
+      _this.fire( 'OPEN_TASK', callback );
     } );
   } );
 };
@@ -283,6 +292,8 @@ TaskSchema.methods.open = function( callback ) {
 // Closes the current task. The `EOF_TASK` event will be triggered **after** setting the
 // status field to `FINALIZED`.
 TaskSchema.methods.finalize = function( callback ) {
+  var _this = this;
+
   // Skip if already finalized or closed.
   if( this.finalized || this.closed )
     return callback( new MongoError( 'Already finalized' ) );
@@ -290,29 +301,43 @@ TaskSchema.methods.finalize = function( callback ) {
   log.debug( 'Finalizing task', this._id );
 
   this.set( 'status', 'FINALIZED' );
-  this.save( function( err, task ) {
+  this.save( function( err ) {
     if( err ) return callback( err );
 
-    task.fire( 'EOF_TASK', callback );
+    _this.fire( 'EOF_TASK', callback );
   } );
 };
 
 // Closes the current task. The `END_TASK` event will be triggered **after** setting the
 // status field to `CLOSED`.
+// **Note*:**
+// This function ensures that the task is first finalized. If not the function will first call
+// the `finalize` method and then the actual close method.
 TaskSchema.methods.close = function( callback ) {
+  var _this = this;
+
   // Skip if already closed.
   if( this.closed )
     return callback( new MongoError( 'Already closed' ) );
 
+  // If the task is not finalized, then first finalize it.
+  if( !this.finalized ) {
+    return this.finalize( function( err ) {
+      if( err ) return callback( err );
+      _this.close( callback );
+    } );
+  }
+
+  // Close the task.
   log.debug( 'Closing task', this._id );
 
   this.set( 'status', 'CLOSED' );
   this.set( 'closedDate', Date.now() );
 
-  this.save( function( err, task ) {
+  this.save( function( err ) {
     if( err ) return callback( err );
 
-    task.fire( 'END_TASK', callback );
+    _this.fire( 'END_TASK', callback );
   } );
 };
 
@@ -382,7 +407,6 @@ TaskSchema.methods.addObjects = function( objects, callback ) {
 
 // ## Microtask
 //
-
 // Handy method for adding microtasks to the task.
 // After calling this method the `ADD_MICROTASKS` event will be triggered.
 TaskSchema.methods.addMicrotasks = function( microtasks, callback ) {
@@ -397,6 +421,11 @@ TaskSchema.methods.addMicrotasks = function( microtasks, callback ) {
     microtasks = [ microtasks ];
 
   log.debug( 'Adding %s microtasks to the task %s', microtasks.length, this._id );
+
+  // Add the application key to each microtask.
+  _.each( microtasks, function ( microtask ) {
+    microtask.applicationKey = _this.applicationKey;
+  } );
 
   // Bulk create the tasks
   Microtask.create( microtasks, function( err ) {
@@ -614,4 +643,5 @@ TaskSchema.methods.replan = function(strategy,platformName,callback){
 };
 
 
+// Export the schema.
 exports = module.exports = TaskSchema;

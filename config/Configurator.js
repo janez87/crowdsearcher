@@ -54,7 +54,6 @@ Configurator.prototype.load = function() {
     _.bind( this.configLogger, this ),
     _.bind( this.configMongo, this ),
     _.bind( this.configPassport, this ),
-    _.bind( this.configCommonFunctions, this ),
     _.bind( this.configOperations, this ),
     _.bind( this.configPlatforms, this ),
     _.bind( this.configStrategies, this )
@@ -80,7 +79,6 @@ Configurator.prototype.configUnderscore = function( callback ) {
   _.str = require('underscore.string');
   _.mixin(_.str.exports());
 
-
   _.mixin( {
     isError: util.isError
   } );
@@ -91,13 +89,14 @@ Configurator.prototype.configUnderscore = function( callback ) {
 Configurator.prototype.configNconf = function( callback ) {
   var CONFIGURATION_FILE = path.join( __dirname, this.FILE );
   var OVERRIDE_FILE = path.join( __dirname, this.OVERRIDE );
+
   try {
     console.log( 'Configuring nconf' );
     // Load configuration with nconf
-    nconf.argv();
-    nconf.env();
-    nconf.file( 'user', OVERRIDE_FILE );
-    nconf.file( 'global', CONFIGURATION_FILE );
+    nconf.argv()
+    .env()
+    .file( 'user', OVERRIDE_FILE )
+    .file( 'global', CONFIGURATION_FILE );
 
     // Fix external Applicaiton address
     var externalAddress = nconf.get( 'webserver:externalAddress' );
@@ -110,57 +109,13 @@ Configurator.prototype.configNconf = function( callback ) {
     console.log( 'External address:', nconf.get( 'webserver:externalAddress' ) );
 
 
-    callback();
+    return callback();
   } catch( err ) {
     console.error( 'Nconf configuration error', err );
-    callback( err );
+    return callback( err );
   }
 };
 
-Configurator.prototype.configCommonFunctions = function( callback ) {
-  var log = common.log;
-  var scriptConfig = nconf.get( 'scripts' );
-  var scriptPath = path.join( __dirname, '..', scriptConfig.path );
-  var defaultPath = path.join( scriptPath, scriptConfig[ 'default' ] );
-  var userPath = path.join( scriptPath, scriptConfig.user || '' );
-
-  common.getScript = function( name, user, callback ) {
-    log.trace( 'Getting the script "%s"', name );
-
-    log.trace( 'Try user (%s) script "%s"', user, name );
-
-      // Try user
-    var file = path.join( userPath, user, name )+'.js';
-    log.trace( file );
-    fs.readFile( file, function( err, data ) {
-      if( err ) {
-        log.debug( 'User script not found "%s", getting in default', name );
-
-        // Fallback to default
-        file = path.join( defaultPath, name )+'.js';
-        log.trace( file );
-        fs.readFile( file, callback );
-      } else {
-        log.trace( 'Returning user script' );
-        callback( err, data );
-      }
-    } );
-  };
-
-  // Default script list
-  common.getDefaultScripts = function( callback ) {
-    var path = defaultPath;
-    fs.readdir( path, callback );
-  };
-
-  // User script list
-  common.getUserScripts = function( user, callback ) {
-    var path = path.join( userPath, user );
-    fs.readdir( path, callback );
-  };
-
-  callback();
-};
 
 // Load Configuration functions
 Configurator.prototype.configLogger = require( './configLogger' );

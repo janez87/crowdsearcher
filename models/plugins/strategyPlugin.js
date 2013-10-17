@@ -14,32 +14,33 @@ var log = common.log.child( { component: 'Strategy plugin' } );
 // # Strategy plugin
 //
 // The strategy plugins implementa all the logic needed to set/check/run the task strategies.
-module.exports = exports = function ( strategy, required ) {
-  required = required || false;
+module.exports = exports = function ( schema, options ) {
+  var strategy = options.strategy;
+  var required = options.required || false;
 
-  return function ( schema ) {
-    // Create an empty JS object to hold the strategy field definition.
-    var field = {};
+  // Create an empty JS object to hold the strategy field definition.
+  var field = {};
 
-    // The field name is composed by the passed strategy and 'Strategy'
-    // (like splittingStrategy, assignmentStrategy, etc).
-    field[ strategy+'Strategy' ] = {
-      type: {
-        name: {
-          type: String,
-          required: required,
-          trim: true
-        },
-        params: {
-          type: Mixed,
-          'default': {}
-        }
+  // The field name is composed by the passed strategy and 'Strategy'
+  // (like splittingStrategy, assignmentStrategy, etc).
+  field[ strategy+'Strategy' ] = {
+    type: {
+      name: {
+        type: String,
+        required: required,
+        trim: true
       },
-      required: required
-    };
+      params: {
+        type: Mixed,
+        'default': {}
+      }
+    },
+    required: required
+  };
 
-    // Add the field to the schema.
-    schema.add( field );
+  // Add the field to the schema.
+  schema.add( field );
+};
     /*
 
 
@@ -93,5 +94,3 @@ module.exports = exports = function ( strategy, required ) {
       };
     };
     */
-  };
-};

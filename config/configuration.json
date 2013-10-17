@@ -4,17 +4,6 @@
     "port": 8100
   },
 
-  "useCache": false,
-
-  "scripts": {
-    "path": "scripts",
-    "default": "default"
-  },
-
-  "operations": {
-    "path": "operations"
-  },
-
   "api": {
     "urlPath": "api",
     "path": "api"
@@ -26,21 +15,26 @@
       "modelsPath": "models"
   },
 
+  "rules": {
+    "path": "rules"
+  },
 
+  "strategies": {
+    "path": "strategies",
+    "splitting": "splitting",
+    "taskAssignment": "task_assignment",
+    "assignment": "assignment",
+    "implementation": "implementation",
+    "invitation": "invitation"
+  },
+
+  "operations": {
+    "path": "operations"
+  },
   "platforms": {
     "path": "platforms"
   },
 
-  "social": {
-    "facebook": {
-      "clientID": "301234899978167",
-      "clientSecret": "c846dcb147e9366aae165c3ab59b254a"
-    },
-    "twitter": {
-      "consumerKey": "EnyAHmVRKi72S8o2vrkJw",
-      "consumerSecret": "EbKKZvBHN0ctByoD95IxdDWjUKvvWshunOBJZGmHuMA"
-    }
-  },
   "logger": {
     "path": "logs",
     "streams": {
