@@ -33,12 +33,12 @@
 
   "social": {
     "facebook": {
-      "clientID": "301234899978167",
-      "clientSecret": "c846dcb147e9366aae165c3ab59b254a"
+      "clientID": "",
+      "clientSecret": ""
     },
     "twitter": {
-      "consumerKey": "EnyAHmVRKi72S8o2vrkJw",
-      "consumerSecret": "EbKKZvBHN0ctByoD95IxdDWjUKvvWshunOBJZGmHuMA"
+      "consumerKey": "",
+      "consumerSecret": ""
     }
   },
   "logger": {

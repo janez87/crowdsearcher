@@ -368,11 +368,11 @@ var Platform = {
     },
     accessKeyId:{
       type:'pass',
-      'default': 'AKIAIJEW5UG5SRI2TUQA'
+      'default': ''
     },
     secretAccessKey:{
       type:'pass',
-      'default': 'T51sR9TKMlcWOdsHTzNb0QTjhiY6/UdzIft1hEMo'
+      'default': ''
     },
     price:{
       type:'number',
