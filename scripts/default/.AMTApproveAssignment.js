@@ -21,7 +21,7 @@ util.inherits( AMTApproveAssignmentError, CSError );
 AMTApproveAssignmentError.prototype.name = 'AMTApproveAssignmentError';
 
 
-var performRule = function( data, config, callback ) {
+var performRule = function( data, params, callback ) {
   log.trace('Performing the rule');
 
   var domain = require( 'domain' ).create();
@@ -76,7 +76,7 @@ var performRule = function( data, config, callback ) {
       };
 
       log.trace('Retrieving the assignment for the hit %s', hit.id);
-      hit.getAssignments({status:'Submitted'},function(err,numResult,totalNumResult,pageNumber,assignments){
+      hit.getAssignments({assignmentStatus:'Submitted'},function(err,numResult,totalNumResult,pageNumber,assignments){
 
         log.trace('Found %s submitted assignments',assignments.length);
         return async.eachSeries(assignments, approveAssignment,callback);

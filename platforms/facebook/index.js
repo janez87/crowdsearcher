@@ -84,15 +84,11 @@ var Platform = {
   execute: execute,
   create: create,
   params : {
-    inactive:{
-      type:'boolean',
-      'default':true
-    },
     clientID:'string',
     clientSecret:'string',
     token: {
       type: 'string',
-      'default': 'CAAERZBLc1B7cBAJkCmz1qZCMOw3so8OLAhl9SQH6BZCZAfQSFeAnnZByLLfGJEboNzg0hCeZB4t1EoDh6UK9AmLWr3OFyJMJptDIa3OV4JhivQkrdDIr24tkDMWtHk8ccHg2o4GUKZB3jyhlOpgyC3aMg31OnSjaysZD'
+      'default': ''
     }
   }
 };

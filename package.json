@@ -7,23 +7,24 @@
     "test": "mocha -c -R spec"
   },
   "dependencies": {
-    "express": "*",
-    
+    "express": "3.x",
+
     "coffee-script": "*",
     "stylus": "*",
     "jade": "*",
     "showdown": "*",
     "express-coffee": "*",
-    
+
     "nconf": "*",
     "bunyan": "*",
     "underscore": "*",
     "underscore.string": "*",
-    
+
     "request": "*",
     "async": "*",
-    "mongoose": "*",
-    
+    "mongoose": "3.6.x",
+    "q": "*",
+
     "passport": "*",
     "passport-local": "*",
     "passport-oauth": "*",
@@ -34,9 +35,9 @@
     "glob": "*",
 
     "fb": "*",
-    "mturk": "*",
+    "amt": "*",
     "twit":"*",
-    
+
     "node-schedule": "*",
 
     "nodemailer":"*"

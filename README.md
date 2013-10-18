@@ -4,10 +4,11 @@
 * [Documentation][cs-doc]
 
 ## Requirements
+* [node][node] 0.6+
 * [mongodb][mongo] 2.2+ up and running.
 
 ## Installation
-    git clone git clone http://crowdsearcher.search-computing.org/gitlab/crowdsearcher/cs.git CrowdSearcher
+    git clone http://crowdsearcher.search-computing.org/gitlab/crowdsearcher/cs.git CrowdSearcher
     cd CrowdSearcher
     npm install -d
 
@@ -33,5 +34,6 @@ Contatc us!
 [cs]: http://crowdsearcher.search-computing.org/ "CrowdSearcher"
 [cs-doc]: http://crowdsearcher.search-computing.org/software "CrowdSearcher documentation"
 [mongo]: http://www.mongodb.org "MongoDB"
+[node]: http://nodejs.org "NodeJS"
 [volox]: <mailto:riccardo.volonterio@polimi.it> "Riccardo Volonterio"
 [janez]: <mailto:andrea.mauri@polimi.it> "Andrea Mauri"

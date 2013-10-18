@@ -1,0 +1,33 @@
+<QuestionForm xmlns="http://mechanicalturk.amazonaws.com/AWSMechanicalTurkDataSchemas/2005-10-01/QuestionForm.xsd">
+  <% _.each( microtask.objects, function( object ) { %>
+    <Overview>
+      <Title><%= task.name %></Title>
+      <Text><%= task.description %></Text>
+    </Overview>
+    <% _.each( microtask.operations, function( operation ) { %>
+      <% if( operation.name==='classify' ) { %>
+        <Question>
+          <QuestionIdentifier><%= object._id+'_'+operation._id %></QuestionIdentifier>
+          <DisplayName>Test DisplayName</DisplayName>
+          <IsRequired>true</IsRequired>
+          <QuestionContent>
+            <Text>Select the position</Text>
+          </QuestionContent>
+          <AnswerSpecification>
+            <SelectionAnswer>
+              <StyleSuggestion>checkbox</StyleSuggestion>
+              <Selections>
+              <% _.each( operation.params.categories, function( category ) { %>
+                <Selection>
+                  <SelectionIdentifier><%=category%></SelectionIdentifier>
+                  <Text><%=category%></Text>
+                </Selection>
+              <% } ) %>
+              </Selections>
+            </SelectionAnswer>
+          </AnswerSpecification>
+        </Question>
+      <% } %>
+    <% } ) %>
+  <% } ) %>
+</QuestionForm>

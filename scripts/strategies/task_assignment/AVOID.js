@@ -108,6 +108,5 @@ var checkParameters = function( task, params, callback ) {
   return callback();
 };
 
-
 module.exports.perform = exports.perform = performStrategy;
 module.exports.check = exports.check = checkParameters;

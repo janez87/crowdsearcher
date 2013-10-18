@@ -8,7 +8,7 @@ var domain = require( 'domain' );
 
 var ObjectStatuses = require('../../../config/constants.js').ObjectStatuses;
 
-var log = common.log.child( { component: 'EquiSplit Splitting Strategy' } );
+var log = common.log.child( { component: 'EquiSplitGroupBy Splitting Strategy' } );
 
 
 // Import Models
@@ -17,19 +17,19 @@ var MicroTask = common.models.microtask;
 // Custom error
 // ---
 var CSError = require('../../../error');
-var EquiSplitError = function( id, message ) {
-    EquiSplitError.super_.call( this, id, message);
+var EquiSplitGroupByError = function( id, message ) {
+    EquiSplitGroupByError.super_.call( this, id, message);
 };
 
-util.inherits( EquiSplitError, CSError );
+util.inherits( EquiSplitGroupByError, CSError );
 
 // Error name
-EquiSplitError.prototype.name = 'EquiSplitError';
+EquiSplitGroupByError.prototype.name = 'EquiSplitGroupByError';
 
 // Custom error IDs
-EquiSplitError.ZERO_OBJECTS = 'ZERO_OBJECTS';
-EquiSplitError.CONFIGURATION_MISMATCH = 'CONFIGURATION_MISMATCH';
-EquiSplitError.MISSING_PARAMETERS = 'MISSING_PARAMETERS';
+EquiSplitGroupByError.ZERO_OBJECTS = 'ZERO_OBJECTS';
+EquiSplitGroupByError.CONFIGURATION_MISMATCH = 'CONFIGURATION_MISMATCH';
+EquiSplitGroupByError.MISSING_PARAMETERS = 'MISSING_PARAMETERS';
 
 // # Strategy logic
 // DESCRIPTION
@@ -39,25 +39,33 @@ var performStrategy = function( data, params, callback ) {
   var d = domain.create();
   d.on( 'error', callback );
 
-  // Get the configuration
-  var objectsPerMicroTask = params.objectsNumber;
+  var objectsNumber = params.objectsNumber;
   var shuffle = params.shuffle;
-
+  var groupingAttribute = params.groupingAttribute;
+  
   var event = data.event;
   var task = data.task;
+
+  var objects = [];
+  var pendingObjects = [];
+
   task.populate('objects',d.bind(function(err,task){
     if(err) return callback(err);
 
-    var objects = [];
+    if(event === 'OPEN_TASK'){
+      
+      objects = _.clone(task.objects);
 
-    if( event==='ADD_OBJECTS' || event === 'ON_EOF') {
+    }else if(event === 'ADD_OBJECTS' || event === 'ON_EOF'){
+
       var newObjects = data.objects;
 
       if(_.isUndefined(newObjects)){
         newObjects = [];
       }
+
       log.trace('Retrieving the array of pending objects');
-      var pendingObjects = task.getMetadata('pendingObjects');
+      pendingObjects = task.getMetadata('pendingObjects');
 
       if(_.isUndefined(pendingObjects)){
         pendingObjects = [];
@@ -69,70 +77,50 @@ var performStrategy = function( data, params, callback ) {
 
       log.trace('%s pending objects',pendingObjects.length);
 
-      if(event !== 'ON_EOF' && pendingObjects.length<objectsPerMicroTask){
-        log.trace('Not enough objects');
-
-        // Updating the metadata
-        task.setMetadata('pendingObjects',pendingObjects);
-
-        return task.save(d.bind(function(err){
-          if(err) return callback(err);
-
-          return callback(null,[]);
-        }));
-      }
-
       objects = pendingObjects;
-      task.setMetadata('pendingObjects',[]);
-    }else if(event === 'OPEN_TASK'){
-      // Handling the OPEN_TASK event
-
-      // Get the object list as a copy.
-      objects = _.clone( task.objects );
-
-
-      // Shuffle objects if needed
-      if( shuffle ){
-        objects = _.shuffle( objects );
-      }
     }
 
     // Select only the open objects
     objects = _.filter(objects,function(object){
       return object.status !== ObjectStatuses.CLOSED;
     });
-    
-    // If we have 0 objects then we cannot perform this strategy.
-    var numObjects = objects.length;
-    if( numObjects===0 )
-      return callback( null, [] );
-      //return callback( new EquiSplitError( EquiSplitError.NO_OBJECTS, 'The Task have 0 open objects' ) );
 
-    // List of microtasks to create
-    var microTaskList = [];
-
-    // Cycle over the objects
-    var i;
-    for( i=0; i<objects.length; i+=objectsPerMicroTask ) {
-      var microTaskObjects = objects.slice( i, i+objectsPerMicroTask );
-      log.trace( 'Assigning objects from %s to %s to the %s microtask', i, i+objectsPerMicroTask, microTaskList.length );
-
-      var rawMicroTask = {
-        platforms: task.platforms,
-        objects: microTaskObjects,
-        operations: task.operations,
-        task: task._id
-      };
-
-      // Add to the list of `MicroTask` to save
-      microTaskList.push( rawMicroTask );
+    if(shuffle){
+      objects = _.shuffle( objects );
     }
+    
+    var groupedObjects = _.groupBy(objects,function(object){
+      return object.data[groupingAttribute];
+    });
 
-    var remaning = task.objects.length-i;
-    log.warn( 'Remaining %s objects', remaning );
+    var microTaskList = [];
+    pendingObjects = [];
+    
+    _.each(groupedObjects,function(objects){
+      if(objects.length >= objectsNumber || event !== 'ADD_OBJECTS'){
 
-    //TODO: better manage edge cases
-    //TODO: missing full control
+        for(var i=0; i<objects.length; i+=objectsNumber ) {
+          var microTaskObjects = objects.slice( i, i+objectsNumber );
+          log.trace( 'Assigning objects from %s to %s to the %s microtask', i, i+objectsNumber, microTaskList.length );
+
+          var rawMicroTask = {
+            platforms: task.platforms,
+            objects: microTaskObjects,
+            operations: task.operations,
+            task: task._id
+          };
+
+          // Add to the list of `MicroTask` to save
+          microTaskList.push( rawMicroTask );
+        }
+
+      }else{
+
+        pendingObjects = _.union(pendingObjects,objects);
+      }
+    });
+
+    task.setMetadata('pendingObjects',pendingObjects);
 
     var saveMicroTasks = function( callback ) {
       log.trace( 'Creating %s microtasks', microTaskList.length );
@@ -153,6 +141,7 @@ var performStrategy = function( data, params, callback ) {
       } ) );
     };
 
+
     async.waterfall( [
       saveMicroTasks,
       updateTask
@@ -161,8 +150,9 @@ var performStrategy = function( data, params, callback ) {
 
         return callback(null,microtasks);
       });
-  }));
 
+  }));
+ 
 };
 
 
@@ -180,6 +170,7 @@ var triggerOn = [
 // Parameters needed by the strategy
 var params = {
   objectsNumber: 'number',
+  groupingAttribute: 'string',
   shuffle: 'boolean'
 };
 
@@ -191,10 +182,10 @@ var checkParameters = function( task, params, callback ) {
   log.trace( 'Data:', params );
 
   if( !_.isNumber( params.objectsNumber ) )
-    return callback( new EquiSplitError( EquiSplitError.MISSING_PARAMETERS, 'Missing parameter objectsNumber' ) );
+    return callback( new EquiSplitGroupByError( EquiSplitGroupByError.MISSING_PARAMETERS, 'Missing parameter objectsNumber' ) );
 
   if( params.objectsNumber<=0 )
-    return callback( new EquiSplitError( EquiSplitError.CONFIGURATION_MISMATCH, 'Parameter objectsNumber is empty' ) );
+    return callback( new EquiSplitGroupByError( EquiSplitGroupByError.CONFIGURATION_MISMATCH, 'Parameter objectsNumber is empty' ) );
 
   // Everything went better then expected...
   return callback();

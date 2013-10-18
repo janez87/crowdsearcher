@@ -10,6 +10,7 @@ var EventEmitter = require('events').EventEmitter;
 var _ = require('underscore');
 var util = require('util');
 var async = require('async');
+var TaskStatuses = require( '../config/constants' ).TaskStatuses;
 
 var log = common.log.child( { component: 'ControlRuleManager' } );
 
@@ -31,6 +32,8 @@ ControlRuleManager.prototype.execute = function( event, data, callback ) {
     data.event = event;
 
     var task = data.task;
+    if( task.status<TaskStatuses.OPENED )
+      return callback();
 
 
     var matchingRules = _.where( task.controlrules, { 'event': event } );

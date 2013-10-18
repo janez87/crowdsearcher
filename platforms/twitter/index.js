@@ -80,25 +80,21 @@ var Platform = {
   execute: execute,
   create: create,
   params : {
-    inactive:{
-      type:'boolean',
-      'default':true
-    },
     clientID:{
       type:'string',
-      'default':'IcgS6kxkAI6LAXqmQTAQA'
+      'default':''
     },
     clientSecret:{
       type:'string',
-      'default':'ahXcBSCaRvcNfG6MclJL5JS6XprX8fdL8v64YzQhE'
+      'default':''
     },
     token: {
       type: 'string',
-      'default': '1583197976-DCxVlOKk0NcFEEdp4CJsldM15F1QctyjNPeeGin'
+      'default': ''
     },
     tokenSecret:{
       type:'string',
-      'default':'KXt3MUA6c8Ix6GBkru6T7OMMvNIHzItYQytwMI4uuRw'
+      'default':''
     }
   }
 };

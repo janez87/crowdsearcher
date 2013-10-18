@@ -138,6 +138,7 @@ TaskSchema.plugin( invitationStrategyPlugin );
 
 
 // Handle property change
+/*
 TaskSchema.path( 'status' ).set( function( value ) {
   if( this.status>value ) {
     return this.invalidate( 'status', 'Cannot set to a previous state' );
@@ -145,6 +146,7 @@ TaskSchema.path( 'status' ).set( function( value ) {
 
   return value;
 } );
+*/
 
 // Pre middlewares
 TaskSchema.pre( 'remove', function( next ) {
@@ -257,19 +259,10 @@ TaskSchema.methods.open = function( callback ) {
   var thisTask = this;
   log.trace( 'Opening task %s', this.id );
 
-  // Trigger the OPEN_TASK event.
-  CRM.execute( 'OPEN_TASK', { task: this }, function( err ) {
+  this.set( 'status', TaskStatuses.OPENED );
+  this.save( function ( err ) {
     if( err ) return callback( err );
-
-    // Set the task as `OPENED`.
-    thisTask.set( 'status', TaskStatuses.OPENED );
-
-    thisTask.save( function( err ) {
-      if( err ) return callback( err );
-      log.trace( 'Task opened' );
-
-      return callback();
-    } );
+    CRM.execute( 'OPEN_TASK', { task: thisTask }, callback );
   } );
 };
 
@@ -290,6 +283,22 @@ TaskSchema.methods.closeTask = function(callback) {
   });
 };
 
+// ### Task finalize
+TaskSchema.methods.finalizeTask = function(callback) {
+  var thisTask = this;
+
+  log.trace( 'Finalizing task', this.id );
+
+  this.set( 'status', TaskStatuses.FINALIZED );
+
+  this.save( function( err ) {
+    if( err ) return callback( err );
+
+    // Trigget the `ON_EOF` event
+    CRM.execute( 'ON_EOF', { task: thisTask }, callback );
+  });
+};
+
 // ### Objects handling
 TaskSchema.methods.canAddObjects = function() {
   // If the Task is in one of these statuses then we are able to add objects,
@@ -297,8 +306,30 @@ TaskSchema.methods.canAddObjects = function() {
   return this.status<TaskStatuses.FINALIZED;
 };
 // Useful method to add objects to the Task
-TaskSchema.methods.addObjects = function( objects, callback ) {
+TaskSchema.methods.addObjectsByIds = function( ids, callback ) {
+  var ObjectModel = this.model( 'object' );
+  var thisTask = this;
 
+  ObjectModel
+  .where( '_id' ).in( ids )
+  .exec( function( err, objects ) {
+    if( err ) return callback( err );
+
+    _.each( objects, function( object ) {
+      thisTask.objects.addToSet( object );
+    } );
+
+    thisTask.save( function( err, task ) {
+      if( err ) return callback( err );
+
+      return CRM.execute( 'ADD_OBJECTS', {
+        task: task,
+        objects: objects
+      }, callback );
+    });
+  } );
+};
+TaskSchema.methods.addObjects = function( objects, callback ) {
   log.trace( 'Adding objects to Task %s', this._id );
 
   // check if we can add objects to the task
@@ -310,6 +341,7 @@ TaskSchema.methods.addObjects = function( objects, callback ) {
 
     // First find the job
     var retrieveJob = function( callback ) {
+      log.trace('Searching the job %s',thisTask.job);
       thisTask.model( 'job' ).findById( thisTask.job, callback );
     };
 
@@ -327,10 +359,24 @@ TaskSchema.methods.addObjects = function( objects, callback ) {
       } );
 
       thisTask.save( function( err ) {
-        // Emit the event that notifies that we added a set of new objects
-        //CRM.notify( 'ADD_OBJECTS', thisTask, objectList );
-        // Pass the list of created objects
-        return callback( err, objectList );
+        if( err ) return callback( err );
+
+        if(thisTask.isNew){
+          // Trick to not trigger the ADD_OBJECTS on the task creation
+          return callback(null,objectList);
+        }else{
+          return CRM.execute( 'ADD_OBJECTS', {
+            task: thisTask,
+            objects: objectList
+          }, function(err){
+            if(err) return callback(err);
+
+            // Pass the list of created objects
+            return callback( null, objectList );
+          } );
+
+        }
+
       } );
     };
 
@@ -349,7 +395,7 @@ TaskSchema.methods.addObjects = function( objects, callback ) {
 };
 
 // ### Useful methods
-// Perform the invitation strategy. 
+// Perform the invitation strategy.
 // If no data is passed then it performs the current strategy
 // Otherwise it will use the new strategy passed in the strategy object
 TaskSchema.methods.invite = function(strategy,callback){

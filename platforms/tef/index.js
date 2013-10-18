@@ -76,7 +76,7 @@ var Platform = {
       type: 'url',
       'default': '$baseUrl$'
     },
-    interface: 'string'
+    'interface': 'string'
   }
 };
 

@@ -57,6 +57,7 @@ API.logic = function getConfiguration( req, res ) {
     } );
   }
 
+
   // Compute and return the invitation strategies
   if( properties.invitationStrategies==='true' || force ) {
     configuration.invitationStrategies = [];
@@ -74,6 +75,18 @@ API.logic = function getConfiguration( req, res ) {
     configuration.splittingStrategies = [];
     _.each( GLOBAL.common.strategies.splitting, function( strategy, name ) {
       configuration.splittingStrategies.push( {
+        name: name,
+        params: strategy.params,
+        triggerOn: strategy.triggerOn
+      } );
+    } );
+  }
+
+  // Compute and return the Microtask assignment strategies
+  if( properties.taskAssignmentStrategies==='true' || force ) {
+    configuration.taskAssignmentStrategies = [];
+    _.each( GLOBAL.common.strategies.taskAssignment, function( strategy, name ) {
+      configuration.taskAssignmentStrategies.push( {
         name: name,
         params: strategy.params,
         triggerOn: strategy.triggerOn
@@ -141,7 +154,7 @@ API.logic = function getConfiguration( req, res ) {
       name: 'Majority',
       actions: [
         {
-          action: 'majority',
+          action: 'loopMajority',
           mapping: {
             agreement: 'agreement',
             numberOfAnswer: 'numberOfAnswer'
@@ -149,39 +162,37 @@ API.logic = function getConfiguration( req, res ) {
           events: [ 'END_EXECUTION' ]
         },
         {
-          action: 'closeMicroTaskAfterExecution',
-          events: [ 'END_EXECUTION' ]
-        },
-        {
-          action: 'replan',
+          action: 'aggregateMajority',
           mapping: {
-            replanPlatform: 'platform'
+            mode: 'mode',
+            operation: 'operation'
           },
           events: [ 'END_EXECUTION' ]
         },
+      ],
+      params: {
+        agreement: [ 'string' ],
+        numberOfAnswer: [ 'string' ],
+        mode:{
+          type: 'enum',
+          values: ['ALL','ONE','SPECIFIC']
+        },
+        operation: ['string']
+      }
+    } );
+
+    configuration.objectControlStrategies.push( {
+      name: 'Check object status',
+      actions: [
         {
-          action: 'closeTask',
-          events: [ 'END_MICROTASK' ]
+          action: 'closeMicroTaskOnObjectStatus',
+          events: [ 'END_EXECUTION' ]
         },
         {
           action: 'closeTaskOnObjectsStatus',
-          events: [ 'END_MICROTASK' ]
-        }
-      ],
-      params: {
-        agreement: {
-          type: 'number',
-          'default': 2
+          events: [ 'END_EXECUTION' ]
         },
-        numberOfAnswer: {
-          type: 'number',
-          'default': 2
-        },
-        replanPlatform: {
-          type: 'platform',
-          'default': 'amt'
-        }
-      }
+      ]
     } );
   }
 
@@ -190,6 +201,7 @@ API.logic = function getConfiguration( req, res ) {
     configuration.performerControlStrategies = [];
 
     //TODO: FIx temp hack
+    /*
     configuration.performerControlStrategies.push( {
       name: 'Check spammer',
       actions: [
@@ -211,6 +223,7 @@ API.logic = function getConfiguration( req, res ) {
         minAnswers: 'number'
       }
     } );
+    */
   }
 
   // Compute and return the task control strategies
@@ -218,6 +231,7 @@ API.logic = function getConfiguration( req, res ) {
     configuration.taskControlStrategies = [];
 
     //TODO: FIx temp hack
+    /*
     configuration.taskControlStrategies.push( {
       name: 'Check Microtask',
       actions: [
@@ -230,6 +244,7 @@ API.logic = function getConfiguration( req, res ) {
         percentage: 'number'
       }
     } );
+    */
   }
 
 

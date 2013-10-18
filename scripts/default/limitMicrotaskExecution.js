@@ -33,15 +33,18 @@ var performRule = function( data, config, callback ) {
   Execution
   .find()
   .where( 'microtask', microtask._id )
+  .count()
   .exec( d.bind( function( err, count ) {
     if( err ) return callback( err );
 
-    // No problem, go ahead
-    if( count<maxExecution )
-      return callback();
+    log.trace( 'Found %s executions of %s max', count, maxExecution );
 
     // Max reached, close Microtask
-    microtask.closeMicroTask( d.bind( callback ) );
+    if( count===maxExecution )
+      return microtask.closeMicroTask( d.bind( callback ) );
+
+    // No problem, go ahead
+    return callback();
   }) );
 };
 

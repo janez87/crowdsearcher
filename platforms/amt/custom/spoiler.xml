@@ -1,0 +1,45 @@
+<QuestionForm xmlns="http://mechanicalturk.amazonaws.com/AWSMechanicalTurkDataSchemas/2005-10-01/QuestionForm.xsd">
+  <% _.each( microtask.objects, function( object ) { %>
+    <Overview>
+      <Title><%= task.name %></Title>
+      <Text>
+        This image contain a spoiler?
+        A spoiler is a piece of information that divulges a surprise, such as a plot twist in a movie.
+
+        Please answer ONLY if you have seen the movie.
+      </Text>
+      <Binary>
+        <MimeType>
+          <Type>image</Type>
+          <SubType>jpg</SubType>
+        </MimeType>
+        <DataURL>http://demo.search-computing.org/crowd-experiment/movies/<%= object.data.scene %></DataURL>
+        <AltText>Image</AltText>
+      </Binary>
+    </Overview>
+    <% _.each( microtask.operations, function( operation ) { %>
+      <% if( operation.name==='classify' && operation.label==='spoiler' ) { %>
+        <Question>
+          <QuestionIdentifier><%= object._id+'_'+operation._id %></QuestionIdentifier>
+          <IsRequired>true</IsRequired>
+          <QuestionContent>
+            <Text>Spoiler?</Text>
+          </QuestionContent>
+          <AnswerSpecification>
+            <SelectionAnswer>
+              <StyleSuggestion>radiobutton</StyleSuggestion>
+              <Selections>
+              <% _.each( operation.params.categories, function( category ) { %>
+                <Selection>
+                  <SelectionIdentifier><%=category%></SelectionIdentifier>
+                  <Text><%=category%></Text>
+                </Selection>
+              <% } ) %>
+              </Selections>
+            </SelectionAnswer>
+          </AnswerSpecification>
+        </Question>
+      <% } %>
+    <% } ) %>
+  <% } ) %>
+</QuestionForm>

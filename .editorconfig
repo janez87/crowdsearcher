@@ -14,3 +14,9 @@ trim_trailing_whitespace = true
 [*.js]
 indent_style = space
 indent_size = 2
+
+# Keep trailing whitespace
+[*.jade]
+trim_trailing_whitespace = false
+[*.md]
+trim_trailing_whitespace = false

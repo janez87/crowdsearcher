@@ -112,10 +112,10 @@ var checkParameters = function( callback ) {
 // So che non esiste questo tipo.. tu pero volevi un esempio.
 var params = {
   mode:{
-    type:'enum',
+    type: 'enum',
     values: ['ALL','ONE','SPECIFIC']
   },
-  operation:['string']
+  operation: ['string']
 };
 
 module.exports.perform = exports.perform = performRule;
