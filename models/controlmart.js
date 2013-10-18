@@ -43,6 +43,11 @@ var ControlMartSchema = new Schema( {
     ref:'platform'
   },
 
+  performer:{
+    type:ObjectId,
+    ref:'platform'
+  },
+
   object:{
     type:ObjectId,
     ref:'object'
