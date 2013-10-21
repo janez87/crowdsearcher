@@ -31,65 +31,74 @@ var performRule = function( data, config, callback ) {
   domain.on('error',callback);
 
   var task = data.task;
-  var operation = _.findWhere(task.operations,{label:config.operation});
+  
 
-  var categories = operation.params.categories;
-  var rawControlMarts = [];
+  task.populate('operations',function(err,task){
+    if( err ) return callback( err );
 
-  var objects  = task.objects;
+    log.trace('Searching for the operation %s',config.operation);
+    var operation = _.findWhere(task.operations,{label:config.operation});
 
-  _.each(objects,function(object){
-      
-      // Status of the single operation
-      var status = {
-        object:object,
-        task:task._id,
-        name:'status',
-        data:ObjectStatuses.OPEN,
-        operation:operation._id
-      };
+    var categories = operation.params.categories;
+    var rawControlMarts = [];
 
-      rawControlMarts.push(status);
+    var objects  = task.objects;
 
-      // Count of each category
-      _.each(categories,function(category){
-          var cat = {
-            object:object,
-            task:task._id,
-            name:category,
-            data:0,
-            operation:operation._id
-          };
+    _.each(objects,function(object){
+        
+        // Status of the single operation
+        var status = {
+          object:object,
+          task:task._id,
+          name:'status',
+          data:ObjectStatuses.OPEN,
+          operation:operation._id
+        };
 
-          rawControlMarts.push(cat);
-        });
+        rawControlMarts.push(status);
 
-      //Evaluation count
+        // Count of each category
+        _.each(categories,function(category){
+            var cat = {
+              object:object,
+              task:task._id,
+              name:category,
+              data:0,
+              operation:operation._id
+            };
 
-      var evaluations = {
-        object:object,
-        task:task._id,
-        name:'evaluations',
-        data:0,
-        operation:operation._id
-      };
+            rawControlMarts.push(cat);
+          });
 
-      rawControlMarts.push(evaluations);
+        //Evaluation count
 
-      //Needed evaluations to close the object
-      var neededEvaluations = {
-        object:object,
-        task:task._id,
-        name:'neededEvaluations',
-        data:0,
-        operation:operation._id
-      };
+        var evaluations = {
+          object:object,
+          task:task._id,
+          name:'evaluations',
+          data:0,
+          operation:operation._id
+        };
 
-      rawControlMarts.push(neededEvaluations);
+        rawControlMarts.push(evaluations);
 
-    });
+        //Needed evaluations to close the object
+        var neededEvaluations = {
+          object:object,
+          task:task._id,
+          name:'neededEvaluations',
+          data:0,
+          operation:operation._id
+        };
 
-  ControlMart.create(rawControlMarts,callback);
+        rawControlMarts.push(neededEvaluations);
+
+      });
+
+    return ControlMart.create(rawControlMarts,callback);
+    
+    
+  });
 };
 
 var checkParameters = function( callback ) {

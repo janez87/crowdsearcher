@@ -4,6 +4,7 @@
 var mongo = require('mongoose');
 var log = common.log.child( { component: 'ControlMart model' } );
 var _ = require('underscore');
+var async = require('async');
 
 // Import Mongo Classes and Objects
 var Schema = mongo.Schema;
@@ -64,7 +65,44 @@ ControlMartSchema.statics.select = function(rawTuple,callback){
   this.find(rawTuple,function(err,controlMartTuples){
     if(err) return callback(err);
     
-    log.trace('%s retrieved',controlMartTuples);
+    log.trace('%s tuples retrieved',controlMartTuples.length);
+
+    var output = {};
+    
+    var keys = [
+      'name',
+      'job',
+      'task',
+      'microtask',
+      'performer',
+      'object',
+      'platform',
+      'data'
+    ];
+
+    _.each(controlMartTuples,function(tuple){
+      var path = {};
+      var existing = [];
+
+      _.each(keys,function(key){
+        if(tuple[key]){
+          existing.push(key);
+        }
+      });
+
+      var temp = path;
+      _.each(existing,function(key){
+        if(key==='data'){
+          temp[key] = tuple[key];
+        }else{
+          temp[tuple[key]] = {};
+          temp = temp[tuple[key]]
+        }
+      });
+
+      //TODO: mergia il path della singola tupla con quello globale
+
+    });
 
     return callback(null,controlMartTuples);
   });
@@ -103,6 +141,30 @@ ControlMartSchema.statics.get = function(rawTuple,callback){
     return callback();
   });
  
+};
+
+ControlMartSchema.statics.insert = function(rawTuples,callback){
+
+  var _this = this;
+  var insertOrUpdate = function(tuple,callback){
+    _this.findOne(tuple,function(err,controlmart){
+      if( err ) return callback( err );
+      
+      if(controlmart){
+        log.trace('The tuple already exists');
+        controlmart.data = tuple.data;
+      }else{
+        log.trace('New tuple');
+        var ControlMart = _this.model('controlmart');
+        controlmart = new ControlMart(tuple);
+      }
+
+      log.trace('Saving the tuple');
+      return controlmart.save(callback);
+    });
+  };
+
+  return async.eachSeries(rawTuples,insertOrUpdate,callback);
 };
 
 

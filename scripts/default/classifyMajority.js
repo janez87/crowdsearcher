@@ -38,10 +38,10 @@ var performRule = function( data, config, callback ) {
     if (err) return callback(err);
 
     var annotations = execution.annotations;
-    var operationId = _.findWhere(task.operations,{label:operationLabel});
+    var operation = _.findWhere(task.operations,{label:operationLabel});
     
     annotations = _.filter(annotations, function(annotation){
-      return annotation.operation.equals(operationId);
+      return annotation.operation.equals(operation._id);
     });
 
     if(annotations.length === 0){
@@ -53,14 +53,21 @@ var performRule = function( data, config, callback ) {
       var category = annotation.response;
 
       ControlMart.select({
-        task:task._id,
         object:objectId,
         operation:annotation.operation
 
       },function(err,controlmart){
         if( err ) return callback( err );
          
-         
+        var result = controlmart['result'];
+        var evaluations = controlmart['evaluations'];
+
+        var categoriesCount = {};
+        _.each(operation.params.categories,function(category){
+          var count = controlmart[category];
+        });
+
+
       });
     };
 
