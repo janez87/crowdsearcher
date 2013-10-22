@@ -12,7 +12,8 @@ var rule = {
   // ## Perform rule
   //
   // Description of what the perform rule does.
-  perform: function performRule( task, controlRule, callback ) {
+  perform: function performRule( event, params, task, data, callback ) {
+    log.trace( 'Performing' );
     return callback();
   },
 };

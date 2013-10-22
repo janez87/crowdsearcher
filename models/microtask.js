@@ -133,6 +133,10 @@ MicrotaskSchema.virtual( 'created' ).get( function() {
 MicrotaskSchema.virtual( 'closed' ).get( function() {
   return this.status==='CLOSED';
 } );
+// Boolean indicating if the microtask is editable.
+MicrotaskSchema.virtual( 'editable' ).get( function() {
+  return this.created;
+} );
 
 
 

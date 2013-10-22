@@ -31,10 +31,7 @@ var JobSchema = new Schema( {
     trim: true,
     unique: true,
     index: true,
-    match: /^[a-z\-0-9]+$/,
-    'default': function() {
-      return _.slugify( this.name );
-    }
+    match: /^[a-z\-0-9]+$/
   },
 
   // ### Markdown-enabled fileds that contains text about the job.
@@ -91,9 +88,27 @@ JobSchema.plugin( require( './plugins/strategyPlugin' ), { strategy: 'taskAssign
 
 
 
+
+
+
+
+
+
+
 // ## Middlewares
 //
 // Handle job removal, remove all tasks and microtasks.
+JobSchema.pre( 'save', function ( next ) {
+  // If not preset add the alias
+  if( !this.alias )
+    this.alias = _.slugify( this.name );
+
+  return next();
+} );
 JobSchema.pre( 'remove', function ( next ) {
   return next();
 } );
+
+
+// Export the schema.
+exports = module.exports = JobSchema;

@@ -1,5 +1,5 @@
 // Load libraries.
-//var _ = require('underscore');
+var _ = require('underscore');
 var async = require( 'async' );
 var domain = require( 'domain' );
 
@@ -28,6 +28,7 @@ ControlRuleManager.trigger = function( event, data, callback ) {
 
   // Create a domain to wrap the function calls
   var d = domain.create();
+  // Catch any strange error, log it and exit.
   d.on( 'error', function ( err ) {
     // Log the error
     log.error( err );
@@ -36,12 +37,6 @@ ControlRuleManager.trigger = function( event, data, callback ) {
     return callback();
   } );
 
-
-  // Function that wraps each function into a 'secure' context.
-  function w( fn ) {
-    // First wrap into a domain.
-    fn = d.bind( fn );
-  }
 
   // Populate the task, this object will be passed to each 'listener'.
   Task
@@ -56,11 +51,41 @@ ControlRuleManager.trigger = function( event, data, callback ) {
       return callback( new Error( 'No task found for '+taskId ) );
 
     // Check if the task can trigger events.
-    if( task.status==='CREATED' || task.status==='CLOSED' )
-      return callback( new Error( 'Task cannot trigger events, status is '+task.status ) );
+    if( task.status==='CREATED' || ( task.status==='CLOSED' && event!=='END_TASK' ) ) {
+      log.warn( 'Task cannot trigger events, status is %s', task.status );
+      return callback();
+    }
 
     log.trace( 'CRM will trigger %s', event );
-    return callback();
+
+    // Find all rules that
+    var rules = _.where( task.controlrules, { event: event } );
+
+    log.trace( 'Found %s rules to run', rules.length );
+
+    // Exit in case of no rules.
+    if( rules.length===0 )
+      return callback();
+
+    // Function that wraps each function into a 'secure' context.
+    function executeRule( rule, cb ) {
+      // First wrap into a domain.
+      var run = rule.run;
+
+      run = d.bind( run.bind( rule ) );
+      return run( event, task, data, cb );
+    }
+
+    async.mapSeries( rules, executeRule, function ( err, results ) {
+      // In case of error log it and exit.
+      if( err ) {
+        log.warn( 'Some error occurred during %s', event, err );
+        return callback();
+      }
+
+      log.debug( '%s completed, no error were rised', event );
+      return callback( null, results );
+    } );
   } );
 };
 

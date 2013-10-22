@@ -34,13 +34,7 @@ var API = {
 
 
 // API core function logic. If this function is executed then each check is passed.
-API.logic = function ( req, res ) {
-  log.trace( 'asd' );
-
-  var rawJob = {
-    name: 'Job'
-  };
-  var job = new Job( rawJob );
+API.logic = function ( req, res, next ) {
   var platforms = [ {
     name: 'tef',
     enabled: true,
@@ -53,34 +47,46 @@ API.logic = function ( req, res ) {
   };
   var controlrules = [
     {
+      event: 'OPEN_TASK',
       action: 'testParam',
       type: 'CUSTOM',
       params: {
-        name: 'a'
+        name: 'as',
+        number: 1
       }
     },
     {
+      event: 'OPEN_TASK',
+      action: 'test',
+      type: 'CUSTOM'
+    },
+    {
+      event: 'END_TASK',
       action: 'test',
       type: 'CUSTOM'
     }
   ];
   var rawTask = {
     name: 'Test',
-    job: job,
-    //operations: operations,
-    //platforms: platforms,
+    job: '52654aca6b976e1403000007',
     controlrules: controlrules
   };
   var task = new Task( rawTask );
+
   task.addPlatforms( platforms, function( err ) {
-    if( err ) return res.send( 500, err );
+    if( err ) return next( err );
 
     task.addOperations( operations, function( err ) {
-      if( err ) return res.send( 500, err );
+      if( err ) return next( err );
 
       task.open( function( err ) {
-        if( err ) return res.send( 500, err );
-        res.send( 'ok' );
+        if( err ) return next( err );
+
+        task.close( function( err ) {
+          if( err ) return next( err );
+
+          res.send( 'ok' );
+        } );
       });
     } );
   });

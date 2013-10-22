@@ -32,7 +32,8 @@
     "twit": "1.1.x",
     "node-schedule": "*",
     "nodemailer": "0.5.x",
-    "mongoose-utilities": "0.1.x"
+    "markdown": "0.5.x",
+    "moment": "~2.3.1"
   },
   "devDependencies": {
     "supertest": "*",

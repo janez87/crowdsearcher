@@ -31,6 +31,7 @@ var TaskSchema = new Schema( {
   //
   // The name of the task.
   name: {
+    index: true,
     type: String,
     required: true,
     trim: true
@@ -99,6 +100,7 @@ var TaskSchema = new Schema( {
   //
   // Reference to the `Job` container for this Task.
   job: {
+    index: true,
     required: true,
     type: ObjectId,
     ref: 'job'
@@ -181,21 +183,12 @@ TaskSchema.plugin( require( './plugins/platformsPlugin' ) );
 // Load the plugin for handling different strategies
 TaskSchema.plugin( require( './plugins/strategyPlugin' ), { strategy: 'splitting' } );
 TaskSchema.plugin( require( './plugins/strategyPlugin' ), { strategy: 'assignment' } );
-TaskSchema.plugin( require( './plugins/strategyPlugin' ), { strategy: 'IMPLEMENTATION' } );
+TaskSchema.plugin( require( './plugins/strategyPlugin' ), { strategy: 'implementation' } );
 TaskSchema.plugin( require( './plugins/strategyPlugin' ), { strategy: 'invitation' } );
 
 
 
 
-
-/*
-// # Setters
-//
-// When setting the platforms and the operations.
-TaskSchema.path( 'platforms' ).set( function ( platforms ) {
-
-} );
-*/
 
 
 // # Task calculated fields
@@ -212,7 +205,10 @@ TaskSchema.virtual( 'finalized' ).get( function() {
 TaskSchema.virtual( 'closed' ).get( function() {
   return this.status==='CLOSED';
 } );
-
+// Boolean indicating if the task is editable.
+TaskSchema.virtual( 'editable' ).get( function() {
+  return this.opened || ( this.status==='CREATED' );
+} );
 
 
 

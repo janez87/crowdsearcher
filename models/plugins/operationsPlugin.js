@@ -5,6 +5,7 @@ var mongo = require('mongoose');
 // Import Mongo Classes and Objects
 var Schema = mongo.Schema;
 var ObjectId = Schema.Types.ObjectId;
+var MongoError = mongo.Error;
 
 
 // Create child logger
@@ -36,6 +37,10 @@ module.exports = exports = function ( schema ) {
   schema.methods.addOperations = function ( operations, callback ) {
     var _this = this;
 
+    // Check if the document is editable.
+    if( !this.editable )
+      return callback( new MongoError( 'Not editable, status: '+this.status ) );
+
     // Convert into array.
     if( !_.isArray( operations ) )
       operations = [ operations ];
@@ -52,7 +57,6 @@ module.exports = exports = function ( schema ) {
       // Add the operation to the list, unique
       _this.operations.addToSet.apply( _this.operations, operations );
 
-      // Save the document.
       return _this.save( callback );
     } );
   };

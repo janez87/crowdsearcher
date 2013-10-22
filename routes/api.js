@@ -133,11 +133,6 @@ var checkParams = function( req, res, next ) {
 var apiOperations = function( req, res, next ) {
   var query = req.queryObject;
 
-  query.setOptions( {
-    // Since we are going to return it as a plain object we dont need any mongoose function
-    lean: true
-  } );
-
   // Must populate something?
   if( req.query.populate ) {
     log.trace( 'Adding field population' );
@@ -194,7 +189,7 @@ var apiOperations = function( req, res, next ) {
     }
 
     // Return
-    res.json( data );
+    res.json( data.toObject( { getters: true } ) );
   } ) );
 };
 

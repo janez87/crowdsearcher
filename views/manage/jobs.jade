@@ -1,0 +1,43 @@
+extends layout
+
+
+block append libScripts
+  script(src='libs/markdown.js')
+  script(src='libs/moment.min.js')
+
+block append scripts
+  script(src='javascripts/manager.js')
+
+block header
+  h1 Job list
+
+block content
+  //pre= JSON.stringify( jobs, null, 2 )
+  if jobs.length===0
+    blockquote
+      p No Jobs found in the database.
+  else
+    #accordion.panel-group
+      for job in jobs
+        .panel.panel-default
+          .panel-heading
+            a.accordion-toggle(
+              href='#'+job._id,
+              data-toggle='collapse',
+              data-parent='accordion')= job.name
+            if job.alias
+              code= job.alias
+            .btn-group.pull-right
+              button.btn.btn-sm.btn-danger
+                i.icon-trash
+                |  Remove
+              a.btn.btn-sm.btn-default(href='manage/job/'+job._id)
+                i.icon-folder-open
+                |  Details
+            .clearfix
+          div(id=job._id).panel-collapse.collapse
+            .panel-body
+              .pull-right
+                p Created:
+                  code= moment( job.creationDate ).format( 'YYYY-MM-DD HH:mm' )
+              div!= md( job.description )

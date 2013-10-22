@@ -5,6 +5,7 @@ var mongo = require('mongoose');
 // Import Mongo Classes and Objects
 var Schema = mongo.Schema;
 var ObjectId = Schema.Types.ObjectId;
+var MongoError = mongo.Error;
 
 // Create child logger
 var log = common.log.child( { component: 'Platforms plugin' } );
@@ -29,6 +30,9 @@ module.exports = exports = function ( schema ) {
   } );
 
 
+
+
+
   // ## Methods
   //
   // ### Setters
@@ -36,6 +40,10 @@ module.exports = exports = function ( schema ) {
   // Add a platform to the document.
   schema.methods.addPlatforms = function( platforms, callback ) {
     var _this = this;
+
+    // Check if the document is editable.
+    if( !this.editable )
+      return callback( new MongoError( 'Not editable, status: '+this.status ) );
 
     // Convert into array
     if( !_.isArray( platforms ) )
@@ -53,7 +61,6 @@ module.exports = exports = function ( schema ) {
       // Add the platform to the list, unique
       _this.platforms.addToSet.apply( _this.platforms, platforms );
 
-      // Save the document.
       return _this.save( callback );
     } );
   };

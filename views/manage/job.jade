@@ -1,0 +1,59 @@
+extends layout
+
+include ../includes/metadata
+include ../includes/status
+
+block append libScripts
+  script(src='libs/markdown.js')
+  script(src='libs/moment.min.js')
+
+block append scripts
+  script(src='javascripts/manager.js')
+
+block header
+  .pull-right
+    code= job._id
+
+  h1 #{job.name} 
+    if job.alias
+      small: a(href='#', title='Run')= job.alias
+    small  (#{ moment( job.creationDate ).format( 'YYYY-MM-DD HH:mm' ) })
+
+block content
+  .row
+    .col-md-6
+      .well.well-sm.md= job.description
+    .col-md-6
+      mixin printMetadata( job.metadata )
+  .row
+    .col-md-12
+      if tasks.length==0
+        .alert.alert-info No tasks for this job.
+      else
+        H2 Task list
+        - var classMap = { 'CREATED': 'success', 'OPENED': 'info', 'FINALIZED': 'warning', 'CLOSED': 'danger' };
+        
+        table.table.table-striped.table-condensed.table-bordered.table-hover
+          thead
+            tr
+              th ID
+              th Name
+              th Status
+              th Actions
+          tbody
+            for task in tasks
+              tr(class=classMap[ task.status ])
+                td.text-center(title=task._id)
+                  if task.private
+                    i.icon-lock
+                  else
+                    i.icon-unlock
+                td= task.name
+                td: +printStatus( task.status )
+                td
+                  .btn-group
+                    a.btn.btn-sm.btn-default(href='manage/task/'+task._id)
+                      i.icon-folder-open
+                      |  Details
+
+  //pre= JSON.stringify( job, null, 2 )

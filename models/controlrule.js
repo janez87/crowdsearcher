@@ -105,24 +105,22 @@ ControlRuleSchema.plugin( require( './plugins/accessKeyPlugin' ) );
 ControlRuleSchema.path( 'action' ).validate( function validateAction( action ) {
   var action = this.rule;
   return !!action;
-}, 'Not present' );
+}, 'Invalid action' );
 
 // Validate control rule parameters.
 ControlRuleSchema.path( 'params' ).validate( function validateParams( params, done ) {
   var rule = this.rule;
 
-  // Create an empty function to use in case of missing check function
-  function empty( p, d ) { return d( true ); }
+  // No rule specified, continue.
+  if( !rule ) return done( true );
 
-  // If the `check` function is available then use it, otherwise retur true.
-  var check = rule? rule.check : empty;
-
-  // use default check function if not available.
-  check = check || empty;
+  // No check specified, continue.
+  if( !rule.check ) return done( true );
 
   // If the rule is available then call its check function.
-  return check( params, done );
-}, 'Not valid' );
+  return rule.check( params, done );
+}, 'Invalid parameters' );
+
 
 
 
@@ -152,9 +150,13 @@ ControlRuleSchema.virtual( 'rule' ).get( function() {
 // # ControlRule instance methods
 //
 // Run the selected rule.
-ControlRuleSchema.methods.run = function ( task, callback ) {
+ControlRuleSchema.methods.run = function ( event, task, data, callback ) {
+  var rule = this.rule;
+  if( !rule || !rule.perform )
+    return callback( new Error( 'No '+this.type+' rule with name '+this.action+' to run' ) );
 
-}
+  return rule.perform( event, this.params, task, data, callback );
+};
 
 
 // Export the schema.

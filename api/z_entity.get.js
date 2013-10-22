@@ -52,7 +52,6 @@ API.logic = function setApi( req, res, next ) {
   if( !_.isUndefined( property ) ) {
     var pathInfo = model.schema.path( property );
     var pathType = model.schema.pathType( property );
-    log.trace( 'Path info (%s): %j', pathType, pathInfo );
     if( _.isUndefined( pathInfo ) && pathType!=='nested' )
       return next( new GetError( GetError.BAD_ENTITY_PROPERTY, 'The entity "'+entity+'" has no "'+property+'" property', APIError.BAD_REQUEST ) );
   }

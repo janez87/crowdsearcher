@@ -1,0 +1,3 @@
+mixin printStatus( status )
+  - var classMap = { 'CREATED': 'success', 'OPENED': 'info', 'FINALIZED': 'warning', 'CLOSED': 'danger' };
+  span.label(class='label-'+classMap[ status ] )= status

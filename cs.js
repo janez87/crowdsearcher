@@ -36,6 +36,8 @@ var flash = require('connect-flash');
 var nconf = require( 'nconf' );
 var domain = require( 'domain' );
 var passport = require( 'passport' );
+var moment = require( 'moment' );
+var markdown = require( 'markdown' ).markdown;
 
 // Configure the Express app
 // ---
@@ -56,7 +58,9 @@ app.configure( function() {
   // Export some properities to the views
   app.locals( {
     // Like the title
-    title: 'CrowdSearcher'
+    title: 'CrowdSearcher',
+    md: markdown.toHTML,
+    moment: moment
   } );
 
 
@@ -223,6 +227,17 @@ config.once( 'ready', function configReady() {
 
   // Home page
   app.get( '/', routes.index );
+
+  // CS Manager
+  var manager = require( './routes/manager' );
+  app.get( '/manage', manager.index );
+  // Jobs
+  app.get( '/manage/jobs', manager.jobs );
+  app.get( '/manage/job/new', manager.newJob );
+  app.get( '/manage/job/:id', manager.job );
+  // Tasks
+  app.get( '/manage/task/new', manager.newTask );
+  app.get( '/manage/task/:id', manager.task );
 
 
   var accountRedirect = function( req, res ) {

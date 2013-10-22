@@ -15,18 +15,31 @@ var rule = {
     // Parameter description
     name: 'string',
     // Parameter description
-    surname: 'string'
+    number: 'number'
   },
+
   // ## Perform rule
   //
   // Description of what the perform rule does.
-  perform: function performRule( task, controlRule, callback ) {
+  perform: function performRule( event, params, task, data, callback ) {
+    log.trace( 'Performing' );
     return callback();
   },
+
   // ## Check rule
   //
   // Description of the constraints of the rule parameters.
   check: function checkParams( params, done ) {
+
+    log.trace( 'Checking name' );
+    if( params.name==='asd' )
+      return done( false );
+
+    log.trace( 'Checking number' );
+    if( params.number<0 )
+      return done( false );
+
+    log.trace( 'All good' );
     return done( true );
   },
 };
