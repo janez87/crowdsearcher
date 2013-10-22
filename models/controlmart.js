@@ -80,6 +80,7 @@ ControlMartSchema.statics.select = function(rawTuple,callback){
       'data'
     ];
 
+    var transformedTuples = [];
     _.each(controlMartTuples,function(tuple){
       var path = {};
       var existing = [];
@@ -90,21 +91,45 @@ ControlMartSchema.statics.select = function(rawTuple,callback){
         }
       });
 
+      // Pointer FTW!!!!!
       var temp = path;
       _.each(existing,function(key){
         if(key==='data'){
           temp[key] = tuple[key];
         }else{
           temp[tuple[key]] = {};
-          temp = temp[tuple[key]]
+          temp = temp[tuple[key]];
         }
       });
 
-      //TODO: mergia il path della singola tupla con quello globale
+      transformedTuples.push(path);
 
     });
 
-    return callback(null,controlMartTuples);
+    var merge = function (obj1,obj2){
+      var result = {};
+      
+      for(var i in obj1){
+        result[i] = obj1[i];
+        if((i in obj2) && (typeof obj1[i] === "object") && (i !== null)){
+          result[i] = merge(obj1[i],obj2[i]);    
+        }
+      }
+
+      for(var i in obj2){
+        if(i in result){ //conflict
+          continue;
+        }
+        result[i] = obj2[i];
+      }
+      return result;
+    };
+
+    _.each(transformedTuples,function(tuple){
+      output = merge(output,tuple);
+    });
+
+    return callback(null,output);
   });
 
 };

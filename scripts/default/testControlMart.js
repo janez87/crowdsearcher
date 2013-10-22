@@ -2,7 +2,7 @@
 // Load libraries
 
 var log = common.log.child( { component: 'TestControlMart' } );
-var async = require('async');
+var _ = require('underscore');
 var ControlMart = common.models.controlmart;
 
 var performRule = function( data, config, callback ) {
@@ -13,21 +13,42 @@ var performRule = function( data, config, callback ) {
 
   var annotations = data.execution.annotations;
 
-  var printControlMart = function(annotation,callback){
+  var mart = [];
 
-    var object = annotation.object;
-
-    ControlMart.select({name:'test'},function(err,tuple){
-      if(err) return callback(err);
-
-      log.trace('The data is %s',tuple);
-
-      return callback();
-    });
-    
+  var taskMart = {
+    task:data.task._id,
+    name:'eval',
+    data:3
   };
 
-  async.eachSeries(annotations,printControlMart,callback);
+  mart.push(taskMart);
+
+
+  _.each(annotations,function(annotation){
+      var object = annotation.object;
+
+      var objectMart = {
+        task:data.task._id,
+        object:object,
+        name:'eval',
+        data:1
+      };
+
+      mart.push(objectMart);
+
+    });
+
+  ControlMart.insert(mart,function(err){
+    if( err ) return callback( err );
+  
+    ControlMart.select({task:data.task._id},function(err,mart){
+      if( err ) return callback( err );
+      
+      log.trace(mart);
+      return callback();
+    });
+  });
+    
 };
 
 var checkParameters = function( callback ) {

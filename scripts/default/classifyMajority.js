@@ -60,8 +60,11 @@ var performRule = function( data, config, callback ) {
         if( err ) return callback( err );
          
         var result = controlmart['result'];
-        var evaluations = controlmart['evaluations'];
 
+        var evaluations = controlmart['evaluations'];
+        if(!evaluations){
+          evaluations = 0;
+        }else
         var categoriesCount = {};
         _.each(operation.params.categories,function(category){
           var count = controlmart[category];
