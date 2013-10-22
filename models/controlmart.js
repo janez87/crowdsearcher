@@ -62,7 +62,10 @@ ControlMartSchema.statics.select = function(rawTuple,callback){
 
   log.trace('Retrieving the controlmart tuple of %j', rawTuple);
 
-  this.find(rawTuple,function(err,controlMartTuples){
+  this
+  .find(rawTuple)
+  .lean()
+  .exec(function(err,controlMartTuples){
     if(err) return callback(err);
     
     log.trace('%s tuples retrieved',controlMartTuples.length);
@@ -75,6 +78,7 @@ ControlMartSchema.statics.select = function(rawTuple,callback){
       'task',
       'microtask',
       'performer',
+      'operation',
       'object',
       'platform',
       'data'
@@ -86,7 +90,7 @@ ControlMartSchema.statics.select = function(rawTuple,callback){
       var existing = [];
 
       _.each(keys,function(key){
-        if(tuple[key]){
+        if(!_.isUndefined(tuple[key])){
           existing.push(key);
         }
       });
@@ -102,6 +106,8 @@ ControlMartSchema.statics.select = function(rawTuple,callback){
         }
       });
 
+      log.trace('%j',tuple);
+      log.trace('%j',path);
       transformedTuples.push(path);
 
     });
@@ -134,45 +140,16 @@ ControlMartSchema.statics.select = function(rawTuple,callback){
 
 };
 
-//Returns all the tuples matching the condition
-ControlMartSchema.statics.get = function(rawTuple,callback){
-
-  if(_.isUndefined(rawTuple.name)){
-    return callback(new Error('The name is required'));
-  }
-
-  //Need to force the undefined values
-  var tupleToSearch = {
-    job: rawTuple.job,
-    task: rawTuple.task,
-    operation: rawTuple.operation,
-    microtask: rawTuple.microtask,
-    object: rawTuple.object,
-    name:rawTuple.name,
-    platform: rawTuple.platform
-  };
-
-  log.trace('Retrieving the controlmart tuple of %j', tupleToSearch);
-
-  this.findOne(tupleToSearch,function(err,controlMartTuple){
-    if(err) return callback(err);
-    
-    log.trace('%s retrieved',controlMartTuple);
-
-    if(controlMartTuple && !_.isUndefined(controlMartTuple)){
-      return callback(null,controlMartTuple.data);
-    }
-
-    return callback();
-  });
- 
-};
-
 ControlMartSchema.statics.insert = function(rawTuples,callback){
 
   var _this = this;
   var insertOrUpdate = function(tuple,callback){
-    _this.findOne(tuple,function(err,controlmart){
+    
+    var tupleToSearch = _.clone(tuple);
+    
+    delete tupleToSearch['data'];
+
+    _this.findOne(tupleToSearch,function(err,controlmart){
       if( err ) return callback( err );
       
       if(controlmart){

@@ -7,7 +7,6 @@ var util = require('util');
 var log = common.log.child( { component: 'Classify Majority' } );
 
 // Models
-var ObjectStatuses = require( '../../config/constants' ).ObjectStatuses;
 var ControlMart = common.models.controlmart;
 
 var CSError = require('../../error');
@@ -25,6 +24,7 @@ ClassifyMajorityError.BAD_PARAMETER = 'BAD_PARAMETER';
 
 var performRule = function( data, config, callback ) {
   log.trace('Performing the rule');
+  log.trace('%s',config.params);
 
   var domain = require( 'domain' ).create();
 
@@ -59,22 +59,110 @@ var performRule = function( data, config, callback ) {
       },function(err,controlmart){
         if( err ) return callback( err );
          
-        var result = controlmart['result'];
+        var result;
+        if(_.has(controlmart,'result')){
+          result = controlmart['result'][task._id][operation._id][objectId].data;
+        }
 
-        var evaluations = controlmart['evaluations'];
-        if(!evaluations){
-          evaluations = 0;
-        }else
-        var categoriesCount = {};
+        var evaluations = 0;
+        if(_.has(controlmart,'evaluations')){
+          evaluations = controlmart['evaluations'][task._id][operation._id][objectId].data;
+        }
+
+        var categoryCount = {};
         _.each(operation.params.categories,function(category){
-          var count = controlmart[category];
+          if(_.has(controlmart,category)){
+            categoryCount[category] = controlmart[category][task._id][operation._id][objectId].data;
+          }else{
+            categoryCount[category] = 0;
+          }
         });
 
+        var status = 'open';
+        if(_.has(controlmart,'status')){
+          status = controlmart['status'][task._id][operation._id][objectId].data;
+        }
 
+        if(status === 'closed'){
+          log.trace('Object already closed');
+          return callback();
+        }
+
+        log.trace('Updating the count');
+        categoryCount[category] = categoryCount[category]+1;
+        evaluations++;
+
+        log.trace('Checking the majority');
+        if(evaluations>=config.answers){
+          var maxCount = _.max(_.pairs(categoryCount),function(p){
+            return p[1];
+          });
+
+          log.trace('The most selected category is %s',maxCount);
+          
+          var otherMax = _.where(_.pairs(categoryCount),function(p){
+            return p[1] === maxCount[1];
+          });
+
+          if(otherMax.length > 1){
+            result = undefined;
+          }else{
+            result = maxCount[0];
+          }
+
+          if(maxCount[1] >= config.agreement){
+            status = 'closed';
+          }
+
+        }
+
+        var updatedMart = [];
+
+        var resultMart = {
+          task:task._id,
+          object:objectId,
+          name:'result',
+          data:result,
+          operation:operation._id
+        };
+        updatedMart.push(resultMart);
+
+        var statustMart = {
+          task:task._id,
+          object:objectId,
+          name:'status',
+          data:status,
+          operation:operation._id
+        };
+        updatedMart.push(statustMart);
+
+        var evaluationtMart = {
+          task:task._id,
+          object:objectId,
+          name:'evaluations',
+          data:evaluations,
+          operation:operation._id
+        };
+        updatedMart.push(evaluationtMart);
+
+        _.each(operation.params.categories,function(category){
+          log.trace('category %s',category);
+          log.trace('count %s',categoryCount[category]);
+          var categorytMart = {
+            task:task._id,
+            object:objectId,
+            name:category,
+            data:categoryCount[category],
+            operation:operation._id
+          };
+          updatedMart.push(categorytMart);
+        });
+
+        return ControlMart.insert(updatedMart,callback);
       });
     };
 
-
+    return async.each(execution.annotations,checkMajority,callback);
   }));
 
 };
@@ -88,7 +176,9 @@ var checkParameters = function( callback ) {
 
 // So che non esiste questo tipo.. tu pero volevi un esempio.
 var params = {
-  operation: 'string'
+  operation: 'string',
+  answers:'number',
+  agreement:'number'
 };
 
 module.exports.perform = exports.perform = performRule;

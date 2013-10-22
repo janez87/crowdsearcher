@@ -1,3 +1,4 @@
+
 /* jshint camelcase: false */
 
 // Load libraries
@@ -41,7 +42,7 @@ function invite(data, config, callback){
   var strategyName = config.strategyName;
 
 
-  // Task url
+  // Task url 
   var url = nconf.get('webserver:externalAddress') + nconf.get('api:urlPath') + '/landing?task='+task._id;
 
   var message = 'I just posted a task on CrowdSearcher\n'+url;
