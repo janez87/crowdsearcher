@@ -106,8 +106,6 @@ ControlMartSchema.statics.select = function(rawTuple,callback){
         }
       });
 
-      log.trace('%j',tuple);
-      log.trace('%j',path);
       transformedTuples.push(path);
 
     });
@@ -138,6 +136,22 @@ ControlMartSchema.statics.select = function(rawTuple,callback){
     return callback(null,output);
   });
 
+};
+
+ControlMartSchema.statics.get = function(rawTuple,callback){
+  log.trace('Retrieving the controlmart tuple of %j', rawTuple);
+
+  this
+  .find(rawTuple)
+  .lean()
+  .exec(function(err,controlmart){
+    if( err ) return callback( err );
+    
+    log.trace('%s tuples retrieved',controlmart.length);
+
+    return(null,controlmart);
+  });
+  
 };
 
 ControlMartSchema.statics.insert = function(rawTuples,callback){

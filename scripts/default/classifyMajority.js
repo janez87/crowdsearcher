@@ -40,11 +40,14 @@ var performRule = function( data, config, callback ) {
     var annotations = execution.annotations;
     var operation = _.findWhere(task.operations,{label:operationLabel});
     
+    log.trace('Performing the rule for the operation %s',operation.label);
+
     annotations = _.filter(annotations, function(annotation){
       return annotation.operation.equals(operation._id);
     });
 
     if(annotations.length === 0){
+      log.trace('No annotations for this operation');
       return callback();
     }
 
@@ -60,31 +63,35 @@ var performRule = function( data, config, callback ) {
         if( err ) return callback( err );
          
         var result;
-        if(_.has(controlmart,'result')){
-          result = controlmart['result'][task._id][operation._id][objectId].data;
+        if(_.has(controlmart,'result') && !_.isUndefined(controlmart['result'][operation._id]) && !_.isUndefined(controlmart['result'][operation._id][objectId]) ){
+          result = controlmart['result'][operation._id][objectId].data;
+          log.trace('Reading the result information from the controlmart ( %s )',result);
         }
 
         var evaluations = 0;
-        if(_.has(controlmart,'evaluations')){
-          evaluations = controlmart['evaluations'][task._id][operation._id][objectId].data;
+        if(_.has(controlmart,'evaluations') && !_.isUndefined(controlmart['evaluations'][operation._id]) && !_.isUndefined(controlmart['evaluations'][operation._id][objectId])){
+          evaluations = controlmart['evaluations'][operation._id][objectId].data;
+          log.trace('Reading the evaluations information from the controlmart ( %s )',evaluations);
         }
 
         var categoryCount = {};
         _.each(operation.params.categories,function(category){
-          if(_.has(controlmart,category)){
-            categoryCount[category] = controlmart[category][task._id][operation._id][objectId].data;
+          if(_.has(controlmart,category) && !_.isUndefined(controlmart[category][operation._id]) && !_.isUndefined(controlmart[category][operation._id][objectId])){
+            categoryCount[category] = controlmart[category][operation._id][objectId].data;
+            log.trace('Reading the category information from the controlmart ( %s )',categoryCount[category]);
           }else{
             categoryCount[category] = 0;
           }
         });
 
         var status = 'open';
-        if(_.has(controlmart,'status')){
-          status = controlmart['status'][task._id][operation._id][objectId].data;
+        if(_.has(controlmart,'status') && !_.isUndefined(controlmart['status'][operation._id]) && !_.isUndefined(controlmart['status'][operation._id][objectId])){
+          status = controlmart['status'][operation._id][objectId].data;
+          log.trace('Reading the status information from the controlmart ( %s )',status);
         }
 
         if(status === 'closed'){
-          log.trace('Object already closed');
+          log.trace('Object already closed for this operation');
           return callback();
         }
 
@@ -119,7 +126,6 @@ var performRule = function( data, config, callback ) {
         var updatedMart = [];
 
         var resultMart = {
-          task:task._id,
           object:objectId,
           name:'result',
           data:result,
@@ -128,7 +134,6 @@ var performRule = function( data, config, callback ) {
         updatedMart.push(resultMart);
 
         var statustMart = {
-          task:task._id,
           object:objectId,
           name:'status',
           data:status,
@@ -137,7 +142,6 @@ var performRule = function( data, config, callback ) {
         updatedMart.push(statustMart);
 
         var evaluationtMart = {
-          task:task._id,
           object:objectId,
           name:'evaluations',
           data:evaluations,
@@ -149,7 +153,6 @@ var performRule = function( data, config, callback ) {
           log.trace('category %s',category);
           log.trace('count %s',categoryCount[category]);
           var categorytMart = {
-            task:task._id,
             object:objectId,
             name:category,
             data:categoryCount[category],
@@ -162,7 +165,7 @@ var performRule = function( data, config, callback ) {
       });
     };
 
-    return async.each(execution.annotations,checkMajority,callback);
+    return async.each(annotations,checkMajority,callback);
   }));
 
 };
