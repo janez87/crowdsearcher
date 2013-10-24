@@ -1,3 +1,7 @@
+// ClassifyMajority rule
+// ---
+// Rule that implements the majority for a single classify operation
+
 
 // Load libraries
 var _ = require('underscore');
@@ -26,6 +30,7 @@ var performRule = function( data, config, callback ) {
   log.trace('Performing the rule');
   log.trace('%s',config.params);
 
+  // Error handler
   var domain = require( 'domain' ).create();
 
   domain.on('error',callback);
@@ -34,6 +39,7 @@ var performRule = function( data, config, callback ) {
   var execution = data.execution;
   var operationLabel = config.operation;
 
+  // Populate the operations
   task.populate('operations',domain.bind(function(err,task){
     if (err) return callback(err);
 
@@ -42,6 +48,7 @@ var performRule = function( data, config, callback ) {
     
     log.trace('Performing the rule for the operation %s',operation.label);
 
+    // Select only annotations of the current operation
     annotations = _.filter(annotations, function(annotation){
       return annotation.operation.equals(operation._id);
     });
@@ -51,10 +58,12 @@ var performRule = function( data, config, callback ) {
       return callback();
     }
 
+    // For each annotation (and objects) it checks the majority
     var checkMajority = function(annotation,callback){
       var objectId = annotation.object;
       var category = annotation.response;
 
+      // Retrieves the control mart related to the object and operation
       ControlMart.select({
         object:objectId,
         operation:annotation.operation
@@ -62,6 +71,7 @@ var performRule = function( data, config, callback ) {
       },function(err,controlmart){
         if( err ) return callback( err );
          
+        // Stuff that will be thrown away asap 
         var result;
         if(_.has(controlmart,'result') && !_.isUndefined(controlmart['result'][operation._id]) && !_.isUndefined(controlmart['result'][operation._id][objectId]) ){
           result = controlmart['result'][operation._id][objectId].data;
@@ -95,28 +105,36 @@ var performRule = function( data, config, callback ) {
           return callback();
         }
 
+        // Updating the various counters
         log.trace('Updating the count');
         categoryCount[category] = categoryCount[category]+1;
         evaluations++;
 
+        // If the number of evaluations is equal to the required ones
         log.trace('Checking the majority');
         if(evaluations>=config.answers){
+
+          // Get the category with the maximum count
           var maxCount = _.max(_.pairs(categoryCount),function(p){
             return p[1];
           });
 
           log.trace('The most selected category is %s',maxCount);
           
+          // Verify if the maximum is unique
           var otherMax = _.where(_.pairs(categoryCount),function(p){
             return p[1] === maxCount[1];
           });
 
+          // If it's unique it set the result
           if(otherMax.length > 1){
             result = undefined;
           }else{
             result = maxCount[0];
           }
 
+
+          // If the max is greated or equal the agreement needed it close the object for this operation
           if(maxCount[1] >= config.agreement){
             status = 'closed';
           }
@@ -125,6 +143,7 @@ var performRule = function( data, config, callback ) {
 
         var updatedMart = [];
 
+        // Update the control mart
         var resultMart = {
           object:objectId,
           name:'result',
@@ -177,7 +196,6 @@ var checkParameters = function( callback ) {
   return callback();
 };
 
-// So che non esiste questo tipo.. tu pero volevi un esempio.
 var params = {
   operation: 'string',
   answers:'number',

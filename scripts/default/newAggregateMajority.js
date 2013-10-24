@@ -1,3 +1,6 @@
+// AggregateMajorty rule
+// ---
+// Rule that aggregate the results of the majorities in order to close the object
 
 // Load libraries
 var _ = require('underscore');
@@ -26,6 +29,7 @@ AggregateMajorityError.BAD_PARAMETER = 'BAD_PARAMETER';
 var performRule = function( data, config, callback ) {
   log.trace('Performing the rule');
 
+  // Error handler
   var domain = require( 'domain' ).create();
 
   domain.on('error',callback);
@@ -34,23 +38,30 @@ var performRule = function( data, config, callback ) {
 
   var mode = config.mode;
 
+  // For each object it evaluate the status of the majorities
   var evaluateMajority = function(object,callback){
 
+    // If the object is already close do nothing
     log.trace('Evaluating the majority');
     if(object.status === ObjectStatuses.CLOSED){
       log.trace('Object %s already closed',object._id);
       return callback();
     }
 
+    // Retrieve the control mart related to the status of the object
     ControlMart
     .get({object:object._id,name:'status'},function(err,controlmart){
       if( err ) return callback( err );
       
+      log.trace('controlmart: %j',controlmart);
+
+      // Select only the closed operations
       var closed = _.where(controlmart,{data:'closed'});
 
       log.trace('%s operations are closed',closed.length);
       log.trace('%s mode selected',mode);
       if(mode==='ONE'){
+        // Close the object if at least 1 operation is closed
         if(closed.length >= 1){
           log.trace('Closing object %s',object._id);
           return object.close(callback);
@@ -59,39 +70,42 @@ var performRule = function( data, config, callback ) {
         }
       }
       if(mode==='ALL'){
+        // Close the object if all the operation are closed
         if(closed.length === microtask.operations.length){
           log.trace('Closing object %s',object._id);
           return object.close(callback);
         }else{
-          return callback;
+          return callback();
         }
       }
       if(mode==='SPECIFIC'){
+        // Close the object if the specified operation are closed
         var ops = config.operations;
 
         if(!_.isArray(ops)){
           ops = [ops];
         }
 
-        var closed = 0;
+        log.trace('The operations required to the close are: [%s]', ops);
+        var completed = true;
 
-        _.each(ops,function(op){
-          var opId = _.where(microtask.operations,{label:op});
-          opId = opId._id;
 
-          var statusMart = _.filter(controlmart,function(mart){
-            mart.operation.equals(opId);
+        for(var i=0;i<ops.length;i++){
+
+          var opId = _.findWhere(microtask.operations,{label:ops[i]});
+          var mart = _.filter(closed,function(mart){
+            return opId._id.equals(mart.operation);
           });
 
-          statusMart = statusMart[0];
-
-          if(statusMart.data === 'closed'){
-            closed++;
+          // If at least 1 operation of the required one is not closed it sets  completed to false
+          if(_.isUndefined(mart) || mart.length === 0){
+            completed = false;
+            break;
           }
+        }
 
-        });
-
-        if(closed === ops.length){
+        // If it's completed, close the object
+        if(completed){
           return object.close(callback);
         }else{
           return callback();
