@@ -64,7 +64,7 @@ var performRule = function( data, config, callback ) {
       var category = annotation.response;
 
       // Retrieves the control mart related to the object and operation
-      ControlMart.select({
+      ControlMart.get({
         object:objectId,
         operation:annotation.operation
 
@@ -73,21 +73,38 @@ var performRule = function( data, config, callback ) {
          
         // Stuff that will be thrown away asap 
         var result;
-        if(_.has(controlmart,'result') && !_.isUndefined(controlmart['result'][operation._id]) && !_.isUndefined(controlmart['result'][operation._id][objectId]) ){
+        /*if(_.has(controlmart,'result') && !_.isUndefined(controlmart['result'][operation._id]) && !_.isUndefined(controlmart['result'][operation._id][objectId]) ){
           result = controlmart['result'][operation._id][objectId].data;
+        }*/
+
+        result = _.findWhere(controlmart,{name:'result'});
+        if(!_.isUndefined(result)){
+          result = result.data;
           log.trace('Reading the result information from the controlmart ( %s )',result);
         }
 
-        var evaluations = 0;
-        if(_.has(controlmart,'evaluations') && !_.isUndefined(controlmart['evaluations'][operation._id]) && !_.isUndefined(controlmart['evaluations'][operation._id][objectId])){
+        /*if(_.has(controlmart,'evaluations') && !_.isUndefined(controlmart['evaluations'][operation._id]) && !_.isUndefined(controlmart['evaluations'][operation._id][objectId])){
           evaluations = controlmart['evaluations'][operation._id][objectId].data;
+        }*/
+
+        var evaluations = _.findWhere(controlmart,{name:'evaluations'});
+        if(!_.isUndefined(evaluations)){
+          evaluations = evaluations.data;
           log.trace('Reading the evaluations information from the controlmart ( %s )',evaluations);
+        }else{
+          evaluations = 0;
         }
 
         var categoryCount = {};
         _.each(operation.params.categories,function(category){
-          if(_.has(controlmart,category) && !_.isUndefined(controlmart[category][operation._id]) && !_.isUndefined(controlmart[category][operation._id][objectId])){
+          /*if(_.has(controlmart,category) && !_.isUndefined(controlmart[category][operation._id]) && !_.isUndefined(controlmart[category][operation._id][objectId])){
             categoryCount[category] = controlmart[category][operation._id][objectId].data;
+          }else{
+            categoryCount[category] = 0;
+          }*/
+          var count = _.findWhere(controlmart,{name:category});
+          if(!_.isUndefined(count)){
+            categoryCount[category] = count.data;
             log.trace('Reading the category information from the controlmart ( %s )',categoryCount[category]);
           }else{
             categoryCount[category] = 0;
@@ -95,15 +112,21 @@ var performRule = function( data, config, callback ) {
         });
 
         var status = 'open';
-        if(_.has(controlmart,'status') && !_.isUndefined(controlmart['status'][operation._id]) && !_.isUndefined(controlmart['status'][operation._id][objectId])){
+        /*if(_.has(controlmart,'status') && !_.isUndefined(controlmart['status'][operation._id]) && !_.isUndefined(controlmart['status'][operation._id][objectId])){
           status = controlmart['status'][operation._id][objectId].data;
+        }*/
+
+        status = _.findWhere(controlmart,{name:'status'});
+        if(!_.isUndefined(status)){
+          status = status.data;
           log.trace('Reading the status information from the controlmart ( %s )',status);
+         
+          if(status === 'closed'){
+            log.trace('Object already closed for this operation');
+            return callback();
+          }
         }
 
-        if(status === 'closed'){
-          log.trace('Object already closed for this operation');
-          return callback();
-        }
 
         // Updating the various counters
         log.trace('Updating the count');
