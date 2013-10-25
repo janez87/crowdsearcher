@@ -7,23 +7,22 @@ block append libScripts
   script(src='libs/markdown.js')
   script(src='libs/moment.min.js')
 
-block append scripts
-  script(src='javascripts/manager.js')
-
 block header
-  .pull-right
-    code= job._id
-
-  h1 #{job.name} 
-    if job.alias
-      small: a(href='#', title='Run')= job.alias
-    small  (#{ moment( job.creationDate ).format( 'YYYY-MM-DD HH:mm' ) })
+  .row
+    .col-md-6
+      h1 #{job.name} 
+        if job.alias
+          small: a(href='#', title='Run')= job.alias
+    .col-md-6.text-right
+      p: code= job._id
+      p: small= moment( job.creationDate ).format( 'YYYY-MM-DD HH:mm' )
 
 block content
   .row
     .col-md-6
       .well.well-sm.md= job.description
     .col-md-6
+      h3 Metadata
       mixin printMetadata( job.metadata )
   .row
     .col-md-12
@@ -31,29 +30,30 @@ block content
         .alert.alert-info No tasks for this job.
       else
         H2 Task list
-        - var classMap = { 'CREATED': 'success', 'OPENED': 'info', 'FINALIZED': 'warning', 'CLOSED': 'danger' };
+        - var classMap = { 'CREATED': 'info', 'OPENED': 'success', 'FINALIZED': 'warning', 'CLOSED': 'danger' };
         
         table.table.table-striped.table-condensed.table-bordered.table-hover
           thead
             tr
-              th ID
-              th Name
-              th Status
-              th Actions
+              th(style='width: 10%') ID
+              th(style='width: 60%') Name
+              th(style='width: 10%') Status
+              th(style='width: 20%') Actions
           tbody
             for task in tasks
               tr(class=classMap[ task.status ])
                 td.text-center(title=task._id)
                   if task.private
-                    i.icon-lock
+                    i.fa.fa-lock
                   else
-                    i.icon-unlock
+                    i.fa.fa-unlock
                 td= task.name
                 td: +printStatus( task.status )
-                td
+                td.text-right
                   .btn-group
-                    a.btn.btn-sm.btn-default(href='manage/task/'+task._id)
-                      i.icon-folder-open
+                    a.btn.btn-xs.btn-default(href='manage/task/'+task._id)
+                      i.fa.fa-folder-open
                       |  Details
-
-  //pre= JSON.stringify( job, null, 2 )
+                    a.btn.btn-xs.btn-danger(href='manage/task/'+task._id+'/delete')
+                      i.fa.fa-trash-o
+                      |  Remove

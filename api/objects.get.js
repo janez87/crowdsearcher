@@ -39,7 +39,7 @@ var API = {
 
   // The API endpoint. The final endpoint will be:
   //    /api/**endpointUrl**
-  url: 'object',
+  url: 'objects',
 
   // The API method to implement.
   method: 'GET'

@@ -116,13 +116,6 @@ app.configure( function() {
   // Used with PassportJS to create *request scoped* messages
   app.use( flash() );
 
-  // Complie on the fly coffeescripts files
-  app.use(require('express-coffee')({
-    path: publicPath,
-    live: !process.env.PRODUCTION,
-    uglify: process.env.PRODUCTION
-  }));
-
   // Complie on the fly stylus files
   app.use( require('stylus').middleware( publicPath ) );
 
@@ -238,6 +231,10 @@ config.once( 'ready', function configReady() {
   // Tasks
   app.get( '/manage/task/new', manager.newTask );
   app.get( '/manage/task/:id', manager.task );
+  // Microtasks
+  app.get( '/manage/microtask/:id', manager.microtask );
+  // Objects
+  app.get( '/manage/object/:id', manager.object );
 
 
   var accountRedirect = function( req, res ) {

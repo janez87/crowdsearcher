@@ -1,6 +1,7 @@
 // Load libraries
 var _  = require('underscore');
-var util  = require('util');
+var util = require( 'util' );
+var async = require( 'async' );
 
 // Import a child Logger
 var log = common.log.child( { component: 'Test' } );
@@ -35,16 +36,26 @@ var API = {
 
 // API core function logic. If this function is executed then each check is passed.
 API.logic = function ( req, res, next ) {
-  var platforms = [ {
-    name: 'tef',
-    enabled: true,
-    invitation: false,
-    execution: true
-  } ];
-  var operations = {
-    name: 'like',
-    label: 'asderf'
-  };
+  var platforms = [
+    {
+      name: 'tef',
+      enabled: true,
+      invitation: false,
+      execution: true
+    }
+  ];
+  var operations = [
+    {
+      name: 'like',
+      label: 'asderf'
+    },{
+      name: 'classify',
+      label: 'asde',
+      params: {
+        categories: [ 'reb', 'green', 'blue' ]
+      }
+    }
+  ];
   var controlrules = [
     {
       event: 'OPEN_TASK',
@@ -57,8 +68,12 @@ API.logic = function ( req, res, next ) {
     },
     {
       event: 'OPEN_TASK',
-      action: 'test',
-      type: 'CUSTOM'
+      action: 'EQUI_SPLIT',
+      type: 'SPLITTING',
+      params: {
+        objectsNumber: 2,
+        shuffle: true
+      }
     },
     {
       event: 'END_TASK',
@@ -66,30 +81,66 @@ API.logic = function ( req, res, next ) {
       type: 'CUSTOM'
     }
   ];
+  var objects = [
+    { data: 'Numero: '+Math.random() },
+    { data: 'Numero: '+Math.random() },
+    { data: 'Numero: '+Math.random() },
+    { data: 'Numero: '+Math.random() },
+    { data: 'Numero: '+Math.random() },
+    { data: 'Numero: '+Math.random() },
+    { data: 'Numero: '+Math.random() },
+    { data: 'Numero: '+Math.random() },
+    { data: 'Numero: '+Math.random() },
+    { data: 'Numero: '+Math.random() },
+    { data: 'Numero: '+Math.random() },
+    { data: 'Numero: '+Math.random() },
+    { data: 'Numero: '+Math.random() },
+    { data: 'Numero: '+Math.random() },
+    { data: 'Numero: '+Math.random() },
+    { data: 'Numero: '+Math.random() },
+    { data: 'Numero: '+Math.random() },
+    { data: 'Numero: '+Math.random() }
+  ];
+
+  /*
+  var job = new Job( {
+    name: 'Test Job',
+    description: '# Hello\n ## moto\n`var volo=culo`'
+  } );
+  job.save();
+  */
+
   var rawTask = {
     name: 'Test',
-    job: '52654aca6b976e1403000007',
-    controlrules: controlrules
+    job: '526903f7c67e801c0c00000a',
+    //job: job,
+    controlrules: controlrules,
+    /*
+    splittingStrategy: {
+      name: 'EQUI_SPLIT',
+      params: {
+        objectsNumber: 2,
+        shuffle: true
+      }
+    }
+    */
   };
   var task = new Task( rawTask );
 
-  task.addPlatforms( platforms, function( err ) {
+  var actions = [
+    _.bind( task.addPlatforms, task, platforms ),
+    _.bind( task.addOperations, task, operations ),
+    _.bind( task.addObjects, task, objects ),
+    _.bind( task.open, task ),
+    _.bind( task.addObjects, task, objects ),
+  ];
+
+  async.series( actions, function ( err, results ) {
     if( err ) return next( err );
 
-    task.addOperations( operations, function( err ) {
-      if( err ) return next( err );
-
-      task.open( function( err ) {
-        if( err ) return next( err );
-
-        task.close( function( err ) {
-          if( err ) return next( err );
-
-          res.send( 'ok' );
-        } );
-      });
-    } );
-  });
+    log.trace( 'Results are: %j', results );
+    res.send( 'ok' );
+  } );
 };
 
 

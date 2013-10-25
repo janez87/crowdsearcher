@@ -1,0 +1,79 @@
+extends layout
+
+include ../includes/metadata
+include ../includes/status
+
+block append libScripts
+  script(src='libs/markdown.js')
+  script(src='libs/moment.min.js')
+
+
+block header
+  h1 Create Job
+  
+block content
+  form(role='form',action='manager/job/new', method='POST')
+    .row
+      .col-md-6
+          .form-group
+            label(for='name') Insert job name:
+            input#name.form-control(type='text', placeholder='Job name')
+          .form-group
+            label(for='alias') Insert job alias:
+            input#alias.form-control(type='text', placeholder='Job alias')
+            p.help-block The alias will be slugified.
+          .form-group
+            label(for='description') Insert description:
+            textarea#description.form-control(rows='5')
+            p.help-block Insert 
+              a(href='http://daringfireball.net/projects/markdown/syntax', target='_blank') markdown 
+              | here
+      .col-md-6
+        .list-controller
+          .form-group
+            label(for="task_assignment_strategy_name") Strategy: 
+            select.list-controller-name.form-control#task_assignment_strategy_name
+              option(selected) None
+              if taskAssignmentStrategies.length>0
+                each strategy in taskAssignmentStrategies
+                  option(
+                    data-name=strategy.name,
+                    data-type='strategy',
+                    data-params=JSON.stringify( strategy.params )
+                    )= strategy.name
+          .param-container
+            h4 Parameters
+            .param-list
+    .row
+      .col-md-6
+        .form-group
+          label(for='landing') Insert landing page:
+          textarea#landing.form-control(rows='7')
+          p.help-block Insert 
+            a(href='http://daringfireball.net/projects/markdown/syntax', target='_blank') markdown 
+            | here
+      .col-md-6
+        .form-group
+          label(for='description') Insert ending:
+          textarea#ending.form-control(rows='7')
+          p.help-block Insert 
+            a(href='http://daringfireball.net/projects/markdown/syntax', target='_blank') markdown 
+            | here
+    .row
+      .col-md-12.text-right
+        .btn-group
+          button.btn.btn-warning(type='reset')
+            i.fa.fa-undo
+            |  Reset
+          button#send.btn.btn-success(type='button')
+            i.fa.fa-envelope-o
+            |  Send
+
+  #save_modal.modal.fade(data-backdrop='static')
+    .modal-dialog
+      .modal-content
+        .modal-header
+          h4.modal-title Post result
+        .modal-body
+        .modal-footer
+  //pre= JSON.stringify( taskAssignmentStrategies, null, 2)

@@ -1,10 +1,14 @@
-(function() {
-  var md;
+/* global $, markdown */
 
-  md = $('.md');
-
-  md.each(function() {
-    return this.innerHTML = markdown.toHTML(this.innerHTML);
-  });
-
-}).call(this);
+// Compile elements with the md class
+$( '.md' ).each( function() {
+  this.innerHTML = markdown.toHTML( this.innerHTML );
+} );
+/*
+$( function() {
+  // instance DataTables on dt tables elements
+  $( 'table.dt' ).dataTable( {
+    sDom: 'ipt'
+  } );
+});
+*/

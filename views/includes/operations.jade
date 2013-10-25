@@ -1,0 +1,15 @@
+include params
+
+mixin printOperations( operations )
+  if operations.length==0
+    .alert.alert-info Sorry, no operations specified.
+  else
+    .list-group
+      for operation in operations
+        - var operationId = 'op_'+operation._id;
+        .list-group-item
+          .list-group-item-heading
+            code.pull-right= operation.name
+            a(data-toggle='collapse',href='#'+operationId)= operation.label
+          .list-group-item-text.collapse(id=operationId)
+            +printParams( operation.params )

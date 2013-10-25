@@ -2,32 +2,43 @@ extends layout
 
 include ../includes/metadata
 include ../includes/status
+include ../includes/objects
+include ../includes/operations
+include ../includes/platforms
+include ../includes/params
+
+block append libCSS
+  script(src='stylesheets/jquery.dataTables.css')
+  script(src='stylesheets/datatables.css')
 
 block append libScripts
   script(src='libs/markdown.js')
   script(src='libs/moment.min.js')
-
-block append scripts
-  script(src='javascripts/manager.js')
+  script(src='libs/jquery.dataTables.min.js')
+  script(src='libs/datatables.js')
 
 block header
   .row
     .col-md-4
       h1
         if task.private
-          i.icon-lock
+          i.fa.fa-lock
         else
-          i.icon-unlock
+          i.fa.fa-unlock
         |  #{task.name} 
     .col-md-4.text-center
-      h1: +printStatus( task.status )
+      h3: +printStatus( task.status )
     .col-md-4.text-right
       p: code= task._id
       p
-        if !task.closed
-          small (#{ moment( task.creationDate ).format( 'YYYY-MM-DD HH:mm' ) })
+        small= moment( task.creationDate ).format( 'YYYY-MM-DD HH:mm' )
+        |  
+        i.fa.fa-angle-double-right
+        |  
+        if task.closed
+          small= moment( task.closedDate ).format( 'YYYY-MM-DD HH:mm' )
         else
-          small (#{ moment( task.creationDate ).format( 'YYYY-MM-DD HH:mm' ) })
+          small Task not closed
   hr
 
 block content
@@ -35,7 +46,7 @@ block content
     .col-md-4
       .btn-group
         a.btn.btn-sm.btn-default(href='manage/job/'+task.job)
-          i.icon-folder-open
+          i.fa.fa-folder-open
           |  Job
     .col-md-4.text-center
       if !task.closed
@@ -48,7 +59,7 @@ block content
             a.btn.btn-sm.btn-danger(href='manage/task/'+task._id+'/close') Close
     .col-md-4.text-right
       a.btn.btn-sm.btn-danger(href='manage/task/'+task._id+'/delete')
-        i.icon-trash
+        i.fa.fa-trash-o
         |  Delete
   hr
   .row
@@ -57,7 +68,7 @@ block content
       if task.controlrules.length==0
         .alert.alert-info Sorry, no control rules found.
       else
-        .list-group#controlrules
+        .list-group
           for controlrule in task.controlrules
             - var ruleId = 'rule_'+controlrule._id;
             .list-group-item
@@ -66,8 +77,43 @@ block content
                 code= controlrule.type
                 a(data-toggle='collapse',href='#'+ruleId)= controlrule.action
               .list-group-item-text.collapse(id=ruleId)
-                pre= JSON.stringify( controlrule.params, null, 2 )
+                +printParams( controlrule.params )
 
     .col-md-6
+      h3 Metadata
       +printMetadata( task.metadata )
-  pre= JSON.stringify( task, null, 2 )
+  .row
+    .col-md-6
+      h3 Operations
+      +printOperations( task.operations )
+    .col-md-6
+      h3 Platforms
+      +printPlatforms( task.platforms )
+  hr
+  .row
+    .col-md-6
+      h3 Microtask list
+      if task.microtasks.length==0
+        .alert.alert-info No microtasks available.
+      else
+        - var classMap = { 'CREATED': 'info', 'OPENED': 'success', 'FINALIZED': 'warning', 'CLOSED': 'danger' };
+        
+        table.table.table-striped.table-condensed.table-bordered.table-hover.dt#microtasks
+          thead
+            tr
+              th(style='width: 10%') Status
+              th(style='width: 60%') Creation/Closed date
+              th(style='width: 20%') Actions
+          tbody
+            for microtask in task.microtasks
+              tr(class=classMap[ microtask.status ])
+                td(title=microtask._id): +printStatus( microtask.status )
+                td= moment( microtask.closedDate || microtask.creationDate ).format( 'YYYY-MM-DD HH:mm' )
+                td.text-right
+                  a.btn.btn-xs.btn-default(href='manage/microtask/'+microtask._id)
+                    i.fa.fa-folder-open
+                    |  Details
+    .col-md-6
+      h3 Objects
+      +printObjects( task.objects )
+  //pre= JSON.stringify( task, null, 2 )

@@ -1,12 +1,12 @@
 // Load libraries
 var _  = require('underscore');
 var mongo = require('mongoose');
-var MongoError = mongo.Error;
 
 // Create a child logger
 var log = common.log.child( { component: 'Microtask model' } );
 
 // Import Mongoose Classes and Objects
+var MongoError = mongo.Error;
 var Schema = mongo.Schema;
 var ObjectId = Schema.ObjectId;
 
@@ -50,15 +50,6 @@ var MicrotaskSchema = new Schema( {
     ref: 'task'
   },
 
-  // List of `Platform`s of the Microtask. Each platform is a *reference* to a Platform model.
-  platforms: {
-    type: [ {
-      type: ObjectId,
-      ref: 'platform'
-    } ],
-    'default': []
-  },
-
   // Unique list of `Object`s of the Microtask.
   objects: {
     type: [ {
@@ -71,17 +62,17 @@ var MicrotaskSchema = new Schema( {
 
   // ### Time data
   //
-  // Creation date of the object. By default it will be the first save of the object.
+  // Creation date of the entity. By default it will be the first save of the object.
   creationDate: {
     required: true,
     type: Date,
     'default': Date.now
   },
 
-  // Closed date of the object. Will be available only after **closing** the microtask.
+  // Closed date of the entity. Will be available only after **closing** the microtask.
   closedDate: {
     type: Date,
-    'default':null
+    'default': null
   }
 
 },

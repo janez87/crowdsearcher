@@ -1,0 +1,51 @@
+extends layout
+
+include ../includes/metadata
+include ../includes/status
+include ../includes/objects
+include ../includes/operations
+include ../includes/platforms
+
+block append libScripts
+  script(src='libs/markdown.js')
+  script(src='libs/moment.min.js')
+
+block header
+  .text-center
+    h1 Microtask details
+  hr
+  .row
+    .col-md-4
+      a.btn.btn-sm.btn-default(href='manage/task/'+microtask.task)
+          i.fa.fa-folder-open
+          |  Task
+    .col-md-4.text-center
+      h3: +printStatus( microtask.status )
+    .col-md-4.text-right
+      p: code= microtask._id
+      p
+        small= moment( microtask.creationDate ).format( 'YYYY-MM-DD HH:mm' )
+        |  
+        i.fa.fa-angle-double-right
+        |  
+        if microtask.closed
+          small= moment( microtask.closedDate ).format( 'YYYY-MM-DD HH:mm' )
+        else
+          small Microtask not closed
+  hr
+block content
+  .row
+    .col-md-6
+      h3 Operations
+      +printOperations( microtask.operations )
+    .col-md-6
+      h3 Metadata
+      +printMetadata( microtask.metadata )
+  .row
+    .col-md-6
+      h3 Platforms
+      +printPlatforms( microtask.platforms )
+    .col-md-6
+      h3 Objects
+      +printObjects( microtask.objects )
+  //pre= JSON.stringify( microtask, null, 2 )

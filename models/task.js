@@ -14,8 +14,6 @@ var ObjectId = Schema.ObjectId;
 
 // Import mongoose schemata.
 var ControlRule = require( './controlrule' );
-var ObjectModel = require( './object' );
-var Microtask = require( './microtask' );
 
 // Import the CRM for handling task events
 var CRM = require( '../scripts/controlRuleManager' );
@@ -238,15 +236,6 @@ TaskSchema.methods.canOpen = function( callback ) {
   return callback();
 };
 
-// Checks if the current task accepts new `Object`s.
-TaskSchema.methods.canAddObjects = function( callback ) {
-  // Objects cannot be added in `CLOSED` and `FINALIZED` states.
-  if( this.closed || this.finalized )
-    return callback( new MongoError( 'Status is "'+this.status+'"' ) );
-
-  // Everything ok
-  return callback();
-};
 
 // ## Events
 //
@@ -349,52 +338,52 @@ TaskSchema.methods.close = function( callback ) {
 TaskSchema.methods.addObjects = function( objects, callback ) {
   var _this = this;
 
+  var ObjectModel = this.model( 'object' );
+
   // Check if the task can accept new objects.
-  this.canAddObjects( function ( err ) {
+  if( !this.editable )
+    return callback(  new MongoError( 'Task not editable, status: '+this.status ) );
+
+  // Normalize behaviour.
+  if( !_.isArray( objects ) )
+    objects = [ objects ];
+
+  // Filter invalid object and add the task parameter to all the elements in
+  // the array, so they became valid `Object` entities.
+  var objects = _.filter( objects, function ( object ) {
+    if( ( object instanceof ObjectModel ) || _.isObject( object ) ) {
+      object.task = _this._id;
+      return true;
+    } else {
+      return false;
+    }
+  } );
+
+  // If no object will be added then exit.
+  if( objects.length===0 )
+    return callback();
+
+  log.debug( 'Adding %s objects to the task %s', objects.length, _this._id );
+
+  // Bulk create `Object` entities using mongoose create method.
+  ObjectModel.create( objects, function( err ) {
     if( err ) return callback( err );
 
-    // Normalize behaviour.
-    if( !_.isArray( objects ) )
-      objects = [ objects ];
+    // Convert into plain array.
+    var args = _.toArray( arguments );
+    // Remove the `err` param and get all the created objects.
+    args.shift();
 
-    // Filter invalid object and add the task parameter to all the elements in
-    // the array, so they became valid `Object` entities.
-    var objects = _.filter( objects, function ( object ) {
-      if( object instanceof ObjectModel || _.isObject( object ) ) {
-        object.task = _this._id;
-        return true;
-      } else {
-        return false;
-      }
-    } );
+    // Add all the objects to the current task.
+    _this.objects.addToSet.apply( _this.objects, args );
 
-    // If no object will be added then exit.
-    if( objects.length===0 )
-      return callback();
-
-    log.debug( 'Adding %s objects to the task %s', objects.length, _this._id );
-
-    // Bulk create `Object` entities using mongoose create method.
-    ObjectModel.create( objects, function( err ) {
+    // Persist the changes.
+    _this.save( function( err ) {
       if( err ) return callback( err );
 
-      // Convert into plain array.
-      var args = _.toArray( arguments );
-      // Remove the `err` param and get all the created objects.
-      args.shift();
-
-      // Add all the objects to the current task.
-      _this.objects.addToSet.apply( _this.objects, args );
-
-      // Persist the changes.
-      _this.save( function( err ) {
-        if( err ) return callback( err );
-
-        // Once all the changes are saved trigger the `ADD_OBJECTS`.
-        _this.fire( 'ADD_OBJECTS', { objects: args }, callback );
-      } );
+      // Once all the changes are saved trigger the `ADD_OBJECTS`.
+      _this.fire( 'ADD_OBJECTS', { objects: args }, callback );
     } );
-
   } );
 };
 
@@ -408,6 +397,8 @@ TaskSchema.methods.addObjects = function( objects, callback ) {
 TaskSchema.methods.addMicrotasks = function( microtasks, callback ) {
   var _this = this;
 
+  var Microtask = this.model( 'microtask' );
+
   // Check if the task can accept new microtasks.
   if( this.closed || this.finalized )
     return callback( new MongoError( 'Status is "'+this.status+'"' ) );
@@ -418,9 +409,10 @@ TaskSchema.methods.addMicrotasks = function( microtasks, callback ) {
 
   log.debug( 'Adding %s microtasks to the task %s', microtasks.length, this._id );
 
-  // Add the application key to each microtask.
+  // Add the application key and the Task reference to each microtask.
   _.each( microtasks, function ( microtask ) {
     microtask.applicationKey = _this.applicationKey;
+    microtask.task = _this._id;
   } );
 
   // Bulk create the tasks

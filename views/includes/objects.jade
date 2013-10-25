@@ -1,0 +1,22 @@
+mixin printObjects( objects )
+  if objects.length==0
+    .alert.alert-info No objects available.
+  else
+    - var classMap = { 'CREATED': '', 'CLOSED': 'danger' };
+    
+    table.table.table-striped.table-condensed.table-bordered.table-hover.dt#objects
+      thead
+        tr
+          th Status
+          th Creation/Closed date
+          th Actions
+      tbody
+        for object in objects
+          tr(class=classMap[ object.status ])
+            td(title=object._id): +printStatus( object.status )
+            td= moment( object.closedDate || object.creationDate ).format( 'YYYY-MM-DD HH:mm' )
+            td.text-right
+              .btn-group
+                a.btn.btn-xs.btn-default(href='manage/object/'+object._id)
+                  i.fa.fa-folder-open
+                  |  Details

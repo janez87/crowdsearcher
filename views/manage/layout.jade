@@ -18,6 +18,7 @@ html(prefix="og: http://ogp.me/ns#")
 
     block libScripts
       include ../includes/libJS
+      script(src='javascripts/manager.js')
 
   body
     .navbar.navbar-default.navbar-fixed-top.navbar-inverse(role='navigation')
@@ -39,12 +40,12 @@ html(prefix="og: http://ogp.me/ns#")
             li: a(href='login') Login
 
     .container
-      header.row: .col-md12
+      header.row: .col-md-12
         block header
           h1=title
-      section.row: .col-md12
+      section.row: .col-md-12
         block content
-      footer.row: .col-md12
+      footer.row: .col-md-12
         include ../includes/footer
     
     script(src='javascripts/manager.js')
