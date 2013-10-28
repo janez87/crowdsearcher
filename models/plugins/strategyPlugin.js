@@ -5,6 +5,7 @@ var mongo = require('mongoose');
 // Import Mongo Classes and Objects
 var Schema = mongo.Schema;
 var Mixed = Schema.Types.Mixed;
+var MongoError = mongo.Error;
 
 // Create child logger
 var log = common.log.child( { component: 'Strategy plugin' } );
@@ -16,6 +17,7 @@ var log = common.log.child( { component: 'Strategy plugin' } );
 // The strategy plugins implementa all the logic needed to set/check/run the task strategies.
 module.exports = exports = function ( schema, options ) {
   var strategy = options.strategy;
+  var method = options.method;
   var required = options.required || false;
 
   // Create an empty JS object to hold the strategy field definition.
@@ -40,6 +42,32 @@ module.exports = exports = function ( schema, options ) {
 
   // Add the field to the schema.
   schema.add( field );
+
+
+  // Add the field to the schema.
+  schema.virtual( strategy+'StrategyScript' ).get( function() {
+    var container = common[ strategy ];
+    var field = this[ strategy+'Strategy' ];
+
+    if( !container || !field )
+      return null;
+
+    return container[ field.name ];
+  } );
+
+  // ## Schema methods
+  schema.methods[ method ] = function executeStrategy( data, callback ) {
+    data = data || {};
+    var strategyName = this[ strategy+'Strategy' ].name;
+    log.trace( 'Performing %s strategy %s', strategy, strategyName );
+
+    var script = this[ strategy+'StrategyScript' ];
+    if( !script || !script.perform )
+      return callback( new MongoError( 'Strategy not found' ) );
+
+    var params = this[ strategy+'Strategy' ].params;
+    return script.perform( data.event, params, this, data, callback );
+  };
 };
     /*
 

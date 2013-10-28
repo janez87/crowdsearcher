@@ -24,7 +24,7 @@ var CRM = require( '../scripts/controlRuleManager' );
 var ObjectSchema = new Schema( {
   // ### General data.
   //
-  // the Object data.
+  // The Object data.
   data: {
     type: 'mixed',
     //required: true
@@ -32,6 +32,7 @@ var ObjectSchema = new Schema( {
 
   // ### References
   //
+  // The parent Task of this object
   task: {
     index: true,
     required: true,
@@ -63,7 +64,7 @@ var ObjectSchema = new Schema( {
   // ### Time data
   //
   // Creation date of the entity. By default it will be the first save of the object.
-  creationDate: {
+  createdDate: {
     required: true,
     type: Date,
     'default': Date.now

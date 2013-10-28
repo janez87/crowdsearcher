@@ -36,12 +36,12 @@ var API = {
 
 
 // API core function logic. If this function is executed then each check is passed.
-API.logic = function setApi( req, res, next ) {
+API.logic = function getApi( req, res, next ) {
   var entity = req.params.entity;
   entity = entity==='performer'? 'user' : entity;
   var property = req.params.property;
 
-  log.trace( 'Getting %s for %s ', property, entity );
+  log.trace( 'Getting %s for %s ', property || 'all properties', entity );
 
   // Get the model based on the `entity` parameter.
   var model = common.models[ entity ];

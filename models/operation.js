@@ -40,7 +40,7 @@ var OperationSchema = new Schema( {
   // ### Time data
   //
   // Creation date of the entity. By default it will be the first save of the object.
-  creationDate: {
+  createdDate: {
     required: true,
     type: Date,
     'default': Date.now

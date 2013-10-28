@@ -52,7 +52,7 @@ module.exports = exports = function ( schema ) {
       // Convert to plain Array.
       var operations = _.toArray( arguments );
       // Remove the error argument.
-      operations.unshift();
+      operations.shift();
 
       // Add the operation to the list, unique
       _this.operations.addToSet.apply( _this.operations, operations );

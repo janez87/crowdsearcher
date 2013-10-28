@@ -51,7 +51,7 @@ API.logic = function startExecution( req, res, next ) {
     var query = req.queryObject;
 
     query
-    .populate( 'task microtask operations platform' )
+    .populate( 'task microtask platform' )
     .exec( req.wrap( callback ) );
   };
 
@@ -61,7 +61,7 @@ API.logic = function startExecution( req, res, next ) {
 
     var platform = execution.platform;
     // Import the platform implementation
-    var platformImplementation = common.platforms[ platform.name ];
+    var platformImplementation = platform.implementation;
 
     try {
       platformImplementation.execute(

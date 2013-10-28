@@ -23,6 +23,9 @@ ControlRuleManager.trigger = function( event, data, callback ) {
   // The task id must be available in the data object.
   var taskId = data.task;
 
+  // Remove task data.
+  delete data.task;
+
   // Import the Task mongoose model.
   var Task = common.models.task;
 

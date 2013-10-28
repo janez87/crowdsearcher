@@ -124,15 +124,17 @@ app.configure( function() {
 
 
   // ### PassportJS
-  app.use(passport.initialize());
-  app.use(passport.session());
+  app.use( passport.initialize() );
+  app.use( passport.session() );
 
   // Pass user to the views
   app.use( function( req, res, next ) {
-    // Add th user to the views object
-    app.locals( {
-      user: req.user
-    } );
+    if( req.path.split( '/' )[1]!=='api' ) {
+      // Add th user to the views object
+      app.locals( {
+        user: req.user
+      } );
+    }
 
     return next();
   } );
@@ -223,18 +225,18 @@ config.once( 'ready', function configReady() {
 
   // CS Manager
   var manager = require( './routes/manager' );
-  app.get( '/manage', manager.index );
+  app.get( '/manage', routes.checkAuth, manager.index );
   // Jobs
-  app.get( '/manage/jobs', manager.jobs );
-  app.get( '/manage/job/new', manager.newJob );
-  app.get( '/manage/job/:id', manager.job );
+  app.get( '/manage/jobs', routes.checkAuth, manager.jobs );
+  app.get( '/manage/job/new', routes.checkAuth, manager.newJob );
+  app.get( '/manage/job/:id', routes.checkAuth, manager.job );
   // Tasks
-  app.get( '/manage/task/new', manager.newTask );
-  app.get( '/manage/task/:id', manager.task );
+  app.get( '/manage/task/new', routes.checkAuth, manager.newTask );
+  app.get( '/manage/task/:id', routes.checkAuth, manager.task );
   // Microtasks
-  app.get( '/manage/microtask/:id', manager.microtask );
+  app.get( '/manage/microtask/:id', routes.checkAuth, manager.microtask );
   // Objects
-  app.get( '/manage/object/:id', manager.object );
+  app.get( '/manage/object/:id', routes.checkAuth, manager.object );
 
 
   var accountRedirect = function( req, res ) {

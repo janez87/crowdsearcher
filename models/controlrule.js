@@ -16,6 +16,7 @@ var Mixed = Schema.Types.Mixed;
 //
 // Mongoose schema for the controlrule entity.
 var ControlRuleSchema = new Schema( {
+  // ### Rule data
   // The event that will trigger this rule.
   'event': {
     type: String,

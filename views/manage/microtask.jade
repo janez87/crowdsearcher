@@ -21,17 +21,9 @@ block header
           |  Task
     .col-md-4.text-center
       h3: +printStatus( microtask.status )
+      code= moment( microtask[ microtask.status.toLowerCase()+'Date' ] ).format( 'YYYY-MM-DD HH:mm' )
     .col-md-4.text-right
-      p: code= microtask._id
-      p
-        small= moment( microtask.creationDate ).format( 'YYYY-MM-DD HH:mm' )
-        |  
-        i.fa.fa-angle-double-right
-        |  
-        if microtask.closed
-          small= moment( microtask.closedDate ).format( 'YYYY-MM-DD HH:mm' )
-        else
-          small Microtask not closed
+      code= microtask._id
   hr
 block content
   .row

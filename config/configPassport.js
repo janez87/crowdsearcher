@@ -156,7 +156,11 @@ function configPassport( callback ) {
       log.trace( 'Deserializing (%s)', id );
       User
       .findById( id )
-      .exec( done );
+      .exec( function( err, user ) {
+        if( err ) return done( err );
+
+        return done( null, user );
+      } );
     } );
 
     // Local

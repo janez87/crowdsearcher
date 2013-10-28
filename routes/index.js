@@ -23,9 +23,12 @@ exports.checkAuth = function( req, res, next ) {
   log.trace( 'Checking if user is authenticated' );
   if( !req.isAuthenticated() ) {
     var baseURL = nconf.get( 'webserver:externalAddress' );
+
+    req.session.destination = req.path;
+
     return res.redirect( baseURL+'login' );
   } else {
-    next();
+    return next();
   }
 };
 // Handler for registering a new user

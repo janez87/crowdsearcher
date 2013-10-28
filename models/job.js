@@ -52,7 +52,7 @@ var JobSchema = new Schema( {
   // ### Time data
   //
   // Creation date of the job. By default it will be the first save of the job.
-  creationDate: {
+  createdDate: {
     required: true,
     type: Date,
     'default': Date.now

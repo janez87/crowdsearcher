@@ -67,9 +67,6 @@ function check( config, callback ) {
 var Platform = {
   execute: execute,
   check: check,
-  init: create,
-
-  enabled: true,
 
   params: {
     url: {

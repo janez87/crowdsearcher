@@ -57,7 +57,7 @@ function configStrategies( callback ) {
 
         log.trace( '%s have %s strategies in %s: %j', container, _.size( strategies ), folder, strategies );
         // Add to the corresponding container in the `common` global variable.
-        common[ container ] = strategies;
+        common[ container.toLowerCase() ] = strategies;
 
         return cb();
       } );
@@ -71,6 +71,7 @@ function configStrategies( callback ) {
 
       // Make the rules public, under the `rules` key.
       common.rules = mapping;
+      log.trace( 'Rules: %j', mapping );
 
       return cb();
     } );

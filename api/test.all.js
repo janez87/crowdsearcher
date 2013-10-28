@@ -41,7 +41,10 @@ API.logic = function ( req, res, next ) {
       name: 'tef',
       enabled: true,
       invitation: false,
-      execution: true
+      execution: true,
+      params: {
+        url: 'http://localhost:8100/'
+      }
     }
   ];
   var operations = [
@@ -105,25 +108,23 @@ API.logic = function ( req, res, next ) {
   /*
   var job = new Job( {
     name: 'Test Job',
-    description: '# Hello\n ## moto\n`var volo=culo`'
+    description: '# Hello\n## moto\n`var volo=culo`'
   } );
   job.save();
   */
 
   var rawTask = {
     name: 'Test',
-    job: '526903f7c67e801c0c00000a',
+    description: '# Hello\n## description\n`var volo=figo`',
+    job: '526e8a2d1e671c641a000010',
     //job: job,
     controlrules: controlrules,
-    /*
-    splittingStrategy: {
-      name: 'EQUI_SPLIT',
-      params: {
-        objectsNumber: 2,
-        shuffle: true
-      }
+    assignmentStrategy: {
+      name: 'ROUND_ROBIN'
+    },
+    implementationStrategy: {
+      name: 'RANDOM'
     }
-    */
   };
   var task = new Task( rawTask );
 

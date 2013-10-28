@@ -81,12 +81,10 @@ API.logic = function getExecution( req, res, next ) {
 
     // Create execution
     var rawExecution = {
-      job: data.task.job,
-      task: data.task,
-      microtask: data.microtask,
+      task: data.task._id,
+      microtask: data.microtask._id,
       platform: data.platform,
-      performer: data.performer,
-      operations: data.microtask.operations
+      performer: data.performer
     };
 
     // Create and save execution
@@ -123,8 +121,7 @@ API.logic = function getExecution( req, res, next ) {
     var performer = data.performer;
 
     task
-    .performMicroTaskAssigmentStrategy( {
-      task: task,
+    .assign( {
       performer: performer
     }, req.wrap( function( err, microtask ) {
       // Add the microtask to the data object.
@@ -217,8 +214,7 @@ API.logic = function getExecution( req, res, next ) {
     var performer = data.performer;
 
     task
-    .performImplementationStrategy( {
-      task: task,
+    .implementation( {
       microtask: microtask,
       performer: performer
     }, req.wrap( function( err, platform ) {
@@ -236,7 +232,7 @@ API.logic = function getExecution( req, res, next ) {
     var task = data.task;
 
     // If task is public then skip `performer` check.
-    if( !task.isPrivate() )
+    if( !task.private )
       return callback( null, data );
 
     // User already logged, pass the id..

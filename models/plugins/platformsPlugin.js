@@ -39,6 +39,7 @@ module.exports = exports = function ( schema ) {
   //
   // Add a platform to the document.
   schema.methods.addPlatforms = function( platforms, callback ) {
+    log.trace( 'Adding platforms: %j', platforms );
     var _this = this;
 
     // Check if the document is editable.
@@ -56,7 +57,8 @@ module.exports = exports = function ( schema ) {
       // Convert to plain Array.
       var platforms = _.toArray( arguments );
       // Remove the error argument.
-      platforms.unshift();
+      platforms.shift();
+      log.trace( 'Added platforms: %j', platforms );
 
       // Add the platform to the list, unique
       _this.platforms.addToSet.apply( _this.platforms, platforms );

@@ -137,16 +137,28 @@ var TaskSchema = new Schema( {
   // ### Time data
   //
   // Creation date of the object. By default it will be the first save of the object.
-  creationDate: {
+  createdDate: {
     required: true,
     type: Date,
     'default': Date.now
   },
 
   // Closed date of the object. Will be available only after **closing** the task.
+  openedDate: {
+    type: Date,
+    'default': null
+  },
+
+  // Closed date of the object. Will be available only after **closing** the task.
+  finalizedDate: {
+    type: Date,
+    'default': null
+  },
+
+  // Closed date of the object. Will be available only after **closing** the task.
   closedDate: {
     type: Date,
-    'default':null
+    'default': null
   }
 },
 
@@ -179,10 +191,22 @@ TaskSchema.plugin( require( './plugins/operationsPlugin' ) );
 // Add the `platforms` plugin.
 TaskSchema.plugin( require( './plugins/platformsPlugin' ) );
 // Load the plugin for handling different strategies
-TaskSchema.plugin( require( './plugins/strategyPlugin' ), { strategy: 'splitting' } );
-TaskSchema.plugin( require( './plugins/strategyPlugin' ), { strategy: 'assignment' } );
-TaskSchema.plugin( require( './plugins/strategyPlugin' ), { strategy: 'implementation' } );
-TaskSchema.plugin( require( './plugins/strategyPlugin' ), { strategy: 'invitation' } );
+TaskSchema.plugin( require( './plugins/strategyPlugin' ), {
+  strategy: 'splitting',
+  method: 'split'
+} );
+TaskSchema.plugin( require( './plugins/strategyPlugin' ), {
+  strategy: 'assignment',
+  method: 'assign'
+} );
+TaskSchema.plugin( require( './plugins/strategyPlugin' ), {
+  strategy: 'implementation',
+  method: 'implementation'
+} );
+TaskSchema.plugin( require( './plugins/strategyPlugin' ), {
+  strategy: 'invitation',
+  method: 'invite'
+} );
 
 
 
@@ -266,6 +290,8 @@ TaskSchema.methods.open = function( callback ) {
     log.debug( 'Opening task %s', _this._id );
 
     _this.set( 'status', 'OPENED' );
+    _this.set( 'openedDate', Date.now() );
+
     _this.save( function ( err ) {
       if( err ) return callback( err );
 
@@ -286,6 +312,8 @@ TaskSchema.methods.finalize = function( callback ) {
   log.debug( 'Finalizing task', this._id );
 
   this.set( 'status', 'FINALIZED' );
+  this.set( 'finalizedDate', Date.now() );
+
   this.save( function( err ) {
     if( err ) return callback( err );
 
