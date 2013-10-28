@@ -1,24 +1,10 @@
 
 // Load libraries
 var request = require( 'request' );
-var util = require('util');
 var domain = require('domain');
 var _ = require('underscore');
 
 var log = common.log.child( { component: 'Notify rule' } );
-
-// Error
-var CSError = require('../../error');
-// Custom error
-var NotifyError = function( id, message) {
-  /* jshint camelcase:false */
-  NotifyError.super_.call( this, id, message);
-};
-
-util.inherits( NotifyError, CSError );
-
-// Error name
-NotifyError.prototype.name = 'NotifyError';
 
 
 var performRule = function( event, config, task, data, callback ) {

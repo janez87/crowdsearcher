@@ -2,9 +2,6 @@
 // Load libraries
 var _ = require('underscore');
 
-var ObjectStatuses = require('../../config/constants.js').ObjectStatuses;
-var TaskStatuses = require('../../config/constants.js').TaskStatuses;
-
 var log = common.log.child( { component: 'Close Task' } );
 
 
@@ -16,7 +13,7 @@ var performRule = function( event, config, task, data, callback  ) {
 
   domain.on('error',callback);
 
-  if( task.status===TaskStatuses.CLOSED )
+  if( task.status==='CLOSED' )
     return callback();
 
   task.populate('objects',function(err,task){
@@ -24,7 +21,7 @@ var performRule = function( event, config, task, data, callback  ) {
 
     var objects = task.objects;
 
-    var closedObjects = _.where(objects,{status:ObjectStatuses.CLOSED});
+    var closedObjects = _.where(objects,{status:'CLOSED'});
 
     log.trace('found %s closed objects',closedObjects.length);
 

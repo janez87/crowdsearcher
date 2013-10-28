@@ -1,6 +1,5 @@
 
 // Load libraries
-var util = require('util');
 var domain = require( 'domain' );
 var _ = require('underscore');
 
@@ -8,19 +7,6 @@ var log = common.log.child( { component: 'Limit Task Execution' } );
 
 // Models
 var Execution = common.models.execution;
-
-var CSError = require('../../error');
-// Custom error
-var LimitTaskExecutionError = function( id, message) {
-  LimitTaskExecutionError.super_.call( this, id, message);
-};
-
-util.inherits( LimitTaskExecutionError, CSError );
-
-// Error name
-LimitTaskExecutionError.prototype.name = 'LimitTaskExecutionError';
-// Error id list
-LimitTaskExecutionError.BAD_PARAMETER = 'BAD_PARAMETER';
 
 var performRule = function( event, config, task, data, callback ) {
   log.trace('Performing the rule');

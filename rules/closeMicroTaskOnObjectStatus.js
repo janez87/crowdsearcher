@@ -1,26 +1,11 @@
 
 // Load libraries
 var _ = require('underscore');
-var util = require('util');
 
 var log = common.log.child( { component: 'Close MicroTask' } );
 
 // Models
 var Microtask = common.models.microtask;
-
-var ObjectStatuses = require( '../../config/constants' ).ObjectStatuses;
-var CSError = require('../../error');
-// Custom error
-var CloseMicroTaskError = function( id, message) {
-  CloseMicroTaskError.super_.call( this, id, message);
-};
-
-util.inherits( CloseMicroTaskError, CSError );
-
-// Error name
-CloseMicroTaskError.prototype.name = 'CloseMicroTaskError';
-
-CloseMicroTaskError.BAD_PARAMETER = 'BAD_PARAMETER';
 
 var performRule = function( event, config, task, data, callback ) {
   log.trace('Performing the rule');
@@ -56,7 +41,7 @@ var performRule = function( event, config, task, data, callback ) {
 
         var status = object.status;
 
-        if(status === ObjectStatuses.CLOSED){
+        if(status === 'CLOSED'){
           log.trace('Object %s is closed',object.id);
           closed++;
         }

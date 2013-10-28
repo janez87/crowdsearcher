@@ -1,6 +1,5 @@
 
 // Load libraries
-var util = require('util');
 var domain = require( 'domain' );
 var _ = require('underscore');
 
@@ -8,19 +7,6 @@ var log = common.log.child( { component: 'Limit MicroTask Execution' } );
 
 // Models
 var Execution = common.models.execution;
-
-var CSError = require('../../error');
-// Custom error
-var LimitMicrotaskExecutionError = function( id, message) {
-  LimitMicrotaskExecutionError.super_.call( this, id, message);
-};
-
-util.inherits( LimitMicrotaskExecutionError, CSError );
-
-// Error name
-LimitMicrotaskExecutionError.prototype.name = 'LimitMicrotaskExecutionError';
-// Error id list
-LimitMicrotaskExecutionError.BAD_PARAMETER = 'BAD_PARAMETER';
 
 var performRule = function( event, config, task, data, callback ) {
   log.trace('Performing the rule');

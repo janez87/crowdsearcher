@@ -5,26 +5,12 @@
 // Load libraries
 var _ = require('underscore');
 var async = require( 'async' );
-var util = require('util');
 
 var log = common.log.child( { component: 'Aggregate Majority' } );
 
 // Models
-var ObjectStatuses = require( '../../config/constants' ).ObjectStatuses;
+//var ObjectStatuses = require( '../../config/constants' ).ObjectStatuses;
 var ControlMart = common.models.controlmart;
-var CSError = require('../../error');
-
-// Custom error
-var AggregateMajorityError = function( id, message) {
-  AggregateMajorityError.super_.call( this, id, message);
-};
-
-util.inherits( AggregateMajorityError, CSError );
-
-// Error name
-AggregateMajorityError.prototype.name = 'AggregateMajorityError';
-
-AggregateMajorityError.BAD_PARAMETER = 'BAD_PARAMETER';
 
 var performRule = function(event, config, task, data, callback ) {
   log.trace('Performing the rule');
@@ -43,7 +29,7 @@ var performRule = function(event, config, task, data, callback ) {
 
     // If the object is already close do nothing
     log.trace('Evaluating the majority');
-    if(object.status === ObjectStatuses.CLOSED){
+    if(object.status === 'CLOSED'){
       log.trace('Object %s already closed',object._id);
       return callback();
     }

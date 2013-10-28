@@ -6,25 +6,12 @@
 // Load libraries
 var _ = require('underscore');
 var async = require( 'async' );
-var util = require('util');
 
 var log = common.log.child( { component: 'Classify Majority' } );
 
 // Models
 var ControlMart = common.models.controlmart;
 
-var CSError = require('../../error');
-// Custom error
-var ClassifyMajorityError = function( id, message) {
-  ClassifyMajorityError.super_.call( this, id, message);
-};
-
-util.inherits( ClassifyMajorityError, CSError );
-
-// Error name
-ClassifyMajorityError.prototype.name = 'ClassifyMajorityError';
-
-ClassifyMajorityError.BAD_PARAMETER = 'BAD_PARAMETER';
 
 var performRule = function( event, config,task, data, callback ) {
   log.trace('Performing the rule');
@@ -166,6 +153,7 @@ var performRule = function( event, config,task, data, callback ) {
 
         // Update the control mart
         var resultMart = {
+          task:task._id,
           object:objectId,
           name:'result',
           data:result,
@@ -174,6 +162,7 @@ var performRule = function( event, config,task, data, callback ) {
         updatedMart.push(resultMart);
 
         var statustMart = {
+          task:task._id,
           object:objectId,
           name:'status',
           data:status,
@@ -182,6 +171,7 @@ var performRule = function( event, config,task, data, callback ) {
         updatedMart.push(statustMart);
 
         var evaluationtMart = {
+          task:task._id,
           object:objectId,
           name:'evaluations',
           data:evaluations,
@@ -193,6 +183,7 @@ var performRule = function( event, config,task, data, callback ) {
           log.trace('category %s',category);
           log.trace('count %s',categoryCount[category]);
           var categorytMart = {
+            task:task._id,
             object:objectId,
             name:category,
             data:categoryCount[category],
