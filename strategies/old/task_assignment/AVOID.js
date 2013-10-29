@@ -7,12 +7,12 @@ var TaskStatuses = require('../../../config/constants').TaskStatuses;
 
 
 // Child logger
-var log = common.log.child( { component: 'AvoidTaskAssignmentStrategy' } );
+var log = CS.log.child( { component: 'AvoidTaskAssignmentStrategy' } );
 
 
 // Import Models
-var Task = common.models.task;
-var User = common.models.user;
+var Task = CS.models.task;
+var User = CS.models.user;
 
 // Custom error
 // ---

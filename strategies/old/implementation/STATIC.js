@@ -4,7 +4,7 @@ var util = require( 'util' );
 var domain = require( 'domain' );
 
 // Child logger
-var log = common.log.child( { component: 'STATIC implementation' } );
+var log = CS.log.child( { component: 'STATIC implementation' } );
 
 
 // Custom error

@@ -5,10 +5,10 @@ var async = require( 'async' );
 var util = require('util');
 var mongo = require('mongoose');
 
-var log = common.log.child( { component: 'TagMajority rule' } );
+var log = CS.log.child( { component: 'TagMajority rule' } );
 
 // Import the model
-var ObjectModel = common.models.object;
+var ObjectModel = CS.models.object;
 var ObjectStatuses = require( '../../../config/constants' ).ObjectStatuses;
 
 

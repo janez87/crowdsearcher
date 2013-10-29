@@ -1,5 +1,3 @@
-
-
 // Load libraries
 var _  = require('underscore');
 var fs  = require('fs');
@@ -8,9 +6,10 @@ var path = require( 'path' );
 var MongoError = require( 'mongoose' ).Error;
 var nconf = require( 'nconf' );
 var glob = require( 'glob' );
+var CS = require( '../core' );
 
 // Create a child logger
-var log = common.log.child( { component: 'API Routes' } );
+var log = CS.log.child( { component: 'API Routes' } );
 
 // Import the `APIError` Class to generate errors
 var APIError = require( '../api/error' );
@@ -162,6 +161,9 @@ var apiOperations = function( req, res, next ) {
     .select( '+'+selectedFields.join( ' +' ) );
   }
 
+  if( req.bulk )
+    query.lean();
+
   query.exec( req.wrap( function( err, data ) {
     if( err ) return next( err );
 
@@ -170,7 +172,7 @@ var apiOperations = function( req, res, next ) {
 
 
     // The suffling is not a mongoose operation so it must be done when the data is available.
-    if( req.query.shuffle ) {
+    if( req.query.shuffle && !req.bulk ) {
       log.trace( 'Shuffling data' );
       var shuffleFields = String( req.query.shuffle );
 
@@ -188,8 +190,11 @@ var apiOperations = function( req, res, next ) {
       } );
     }
 
-    // Return
-    res.json( data.toObject( { getters: true } ) );
+    if( req.bulk ) {
+      res.json( data );
+    } else {
+      res.json( data.toObject( { getters: true } ) );
+    }
   } ) );
 };
 

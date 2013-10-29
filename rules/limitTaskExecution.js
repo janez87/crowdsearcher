@@ -2,11 +2,13 @@
 // Load libraries
 var domain = require( 'domain' );
 var _ = require('underscore');
+var CS = require( '../core' );
 
-var log = common.log.child( { component: 'Limit Task Execution' } );
+// Create a child logger
+var log = CS.log.child( { component: 'Limit Task Execution' } );
 
 // Models
-var Execution = common.models.execution;
+var Execution = CS.models.execution;
 
 var performRule = function( event, config, task, data, callback ) {
   log.trace('Performing the rule');

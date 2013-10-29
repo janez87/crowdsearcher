@@ -2,12 +2,15 @@
 // Load libraries
 var _ = require( 'underscore' );
 var util = require( 'util' );
+var mongo = require( 'mongoose' );
+var CS = require( '../core' );
 
-var MongoError = require( 'mongoose' ).Error;
+// Import Mongo classed
+var MongoError = mongo.Error;
 
 
 // Use a child logger
-var log = common.log.child( { component: 'Set API' } );
+var log = CS.log.child( { component: 'Set API' } );
 
 // Generate custom error `SetError` that inherits
 // from `APIError`
@@ -47,7 +50,7 @@ API.logic = function setApi( req, res, next ) {
   log.trace( 'Setting %s for %s ', property, entity );
 
   // Get the model based on the `entity` parameter.
-  var model = common.models[ entity ];
+  var model = CS.models[ entity ];
 
 
   // Validate the selected `entity`.

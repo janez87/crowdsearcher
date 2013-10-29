@@ -8,7 +8,7 @@ var MicroTaskStatuses = require('../../../config/constants').MicroTaskStatuses;
 
 
 // Child logger
-var log = common.log.child( { component: 'DynamicRoundrobinMicrotaskAssignmentStrategy' } );
+var log = CS.log.child( { component: 'DynamicRoundrobinMicrotaskAssignmentStrategy' } );
 
 
 // Custom error

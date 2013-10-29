@@ -4,9 +4,10 @@ var _ = require( 'underscore' );
 var url = require( 'url' );
 var util = require( 'util' );
 var async = require( 'async' );
+var CS = require( '../core' );
 
 // Use a child logger
-var log = common.log.child( { component: 'Start Execution' } );
+var log = CS.log.child( { component: 'Start Execution' } );
 
 // Import other APIs
 var getExecutionAPI = require( './execution.get' );

@@ -4,18 +4,19 @@
 var _ = require( 'underscore' );
 var util = require( 'util' );
 var async = require( 'async' );
+var CS = require( '../core' );
 
 // Import the CRM
-var CRM = require( '../scripts/controlRuleManager' );
+var CRM = require( '../core/CRM' );
 
 // Import the required Models
-var Task = common.models.task;
-var Job = common.models.job;
-var Operation = common.models.operation;
-var Platform = common.models.platform;
+var Task = CS.models.task;
+var Job = CS.models.job;
+var Operation = CS.models.operation;
+var Platform = CS.models.platform;
 
 // Use a child logger
-var log = common.log.child( { component: 'Post Task' } );
+var log = CS.log.child( { component: 'Post Task' } );
 
 // Generate custom error `PostTaskError` that inherits
 // from `APIError`

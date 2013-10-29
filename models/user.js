@@ -2,9 +2,10 @@
 var _  = require('underscore');
 var mongo = require('mongoose');
 var crypto = require('crypto');
+var CS = require( '../core' );
 
 // Create a child logger
-var log = common.log.child( { component: 'User model' } );
+var log = CS.log.child( { component: 'User model' } );
 
 // Import Mongoose Classes and Objects
 var MongoError = mongo.Error;
@@ -260,7 +261,7 @@ exports = module.exports = UserSchema;
 // aLoad libraries
 var mongo = require('mongoose');
 var crypto = require('crypto');
-var log = common.log.child( { component: 'User model' } );
+var log = CS.log.child( { component: 'User model' } );
 
 // Import Mongo Classes and Objects
 var Schema = mongo.Schema;

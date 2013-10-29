@@ -2,6 +2,7 @@
 var _ = require('underscore');
 var util  = require('util');
 var mongo = require('mongoose');
+var CS = require( '../../core' );
 
 // Import Mongo Classes and Objects
 var Schema = mongo.Schema;
@@ -9,7 +10,7 @@ var Mixed = Schema.Types.Mixed;
 
 
 // Create child logger
-var log = common.log.child( { component: 'Metadata plugin' } );
+var log = CS.log.child( { component: 'Metadata plugin' } );
 
 
 

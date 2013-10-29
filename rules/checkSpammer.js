@@ -6,11 +6,13 @@
 // Load libraries
 var _ = require('underscore');
 var async = require( 'async' );
+var CS = require( '../core' );
 
-var log = common.log.child( { component: 'CheckSpammer' } );
+// Create a child logger
+var log = CS.log.child( { component: 'CheckSpammer' } );
 
 // Models
-var ControlMart = common.models.controlmart;
+var ControlMart = CS.models.controlmart;
 
 
 var performRule = function( event, config,task, data, callback ) {
@@ -48,7 +50,7 @@ var performRule = function( event, config,task, data, callback ) {
     ControlMart
     .get({task:task._id,performer:performer,operation:operationId},function(err,controlmart){
       if( err ) return callback( err );
-      
+
       var spammer = _.findWhere(controlmart,{name:'spammer'});
       if(_.isUndefined(spammer)){
         spammer = false;
@@ -78,7 +80,7 @@ var performRule = function( event, config,task, data, callback ) {
       if(_.isUndefined(ratio)){
         ratio = 0;
       }
-      
+
       _.each(annotations, function(annotation){
         var gt = annotation.object.getMetadata(config.groundtruth);
 
@@ -163,7 +165,7 @@ var performRule = function( event, config,task, data, callback ) {
 
   });
 
- 
+
 
 };
 

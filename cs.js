@@ -38,6 +38,7 @@ var domain = require( 'domain' );
 var passport = require( 'passport' );
 var moment = require( 'moment' );
 var markdown = require( 'markdown' ).markdown;
+var CS = require( './core' );
 
 // Configure the Express app
 // ---
@@ -148,7 +149,7 @@ app.configure( function() {
 // Server
 var serverError = function( error ) {
   // Import the logger
-  var log = common.log;
+  var log = CS.log;
 
   log.error( error );
   if( error.code==='EADDRINUSE' ) {
@@ -186,7 +187,7 @@ config.once( 'ready', function configReady() {
   var accountRoutes = require('./routes/account');
 
   // Import the logger
-  var log = common.log;
+  var log = CS.log;
 
   var baseURL = nconf.get( 'webserver:externalAddress' );
   // Pass the application external url to all the views
@@ -237,6 +238,8 @@ config.once( 'ready', function configReady() {
   app.get( '/manage/microtask/:id', routes.checkAuth, manager.microtask );
   // Objects
   app.get( '/manage/object/:id', routes.checkAuth, manager.object );
+  // Answers
+  app.get( '/manage/answers', routes.checkAuth, manager.answers );
 
 
   var accountRedirect = function( req, res ) {
@@ -285,7 +288,7 @@ config.once( 'ready', function configReady() {
 
   // Handle random request
   app.all('*', function randomUrlHandler( req, res ) {
-    log.trace( 'Requested "%s %s" by %s', req.method, req.originalUrl, req.ip );
+    log.warn( 'Requested "%s %s" by %s', req.method, req.originalUrl, req.ip );
     res.status( 404 );
     res.format( {
       html: function() {

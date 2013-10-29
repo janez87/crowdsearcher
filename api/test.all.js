@@ -2,15 +2,16 @@
 var _  = require('underscore');
 var util = require( 'util' );
 var async = require( 'async' );
+var CS = require( '../core' );
 
 // Import a child Logger
-var log = common.log.child( { component: 'Test' } );
+var log = CS.log.child( { component: 'Test' } );
 
 // Import Models
-var Execution = common.models.execution;
-var Job = common.models.job;
-var Task = common.models.task;
-var Microtask = common.models.microtask;
+var Execution = CS.models.execution;
+var Job = CS.models.job;
+var Task = CS.models.task;
+var Microtask = CS.models.microtask;
 
 // Generate custom error `GetAnswersError` that inherits
 // from `APIError`

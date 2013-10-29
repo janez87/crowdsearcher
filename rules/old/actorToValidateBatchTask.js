@@ -6,13 +6,13 @@ var _ = require('underscore');
 var domain = require( 'domain' );
 
 // Create a child logger
-var log = common.log.child( { component: 'ActorToValidateBatchTask' } );
+var log = CS.log.child( { component: 'ActorToValidateBatchTask' } );
 
 // Models
-var Task = common.models.task;
-var Microtask = common.models.microtask;
-var ObjectModel = common.models.object;
-var Execution = common.models.execution;
+var Task = CS.models.task;
+var Microtask = CS.models.microtask;
+var ObjectModel = CS.models.object;
+var Execution = CS.models.execution;
 
 var CSError = require('../../error');
 // Custom error

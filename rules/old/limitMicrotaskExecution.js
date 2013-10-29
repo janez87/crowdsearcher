@@ -3,10 +3,10 @@
 var util = require('util');
 var domain = require( 'domain' );
 
-var log = common.log.child( { component: 'Limit MicroTask Execution' } );
+var log = CS.log.child( { component: 'Limit MicroTask Execution' } );
 
 // Models
-var Execution = common.models.execution;
+var Execution = CS.models.execution;
 
 var CSError = require('../../error');
 // Custom error

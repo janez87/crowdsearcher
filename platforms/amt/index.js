@@ -5,14 +5,15 @@ var domain = require( 'domain' );
 var fs = require('fs');
 var nconf = require('nconf');
 var AMT = require('amt');
+var CS = require( '../../core' );
 
 // Import Models
-//var Performer = common.models.user;
-var Execution = common.models.execution;
-var Microtask = common.models.microtask;
+//var Performer = CS.models.user;
+var Execution = CS.models.execution;
+var Microtask = CS.models.microtask;
 
 // Create a child logger
-var log = common.log.child( { component: 'AMT' } );
+var log = CS.log.child( { component: 'AMT' } );
 
 function execute( task, microtask, execution, platform, callback ) {
   log.trace( 'Executing the microtask %s', microtask.id );
@@ -32,7 +33,7 @@ function createAnnotation( data, callback ) {
   var answerData = data[ 0 ];
   var operation = data[ 1 ];
 
-  var opImplementation = common.operations[ operation.name ];
+  var opImplementation = CS.operations[ operation.name ];
   if( opImplementation ) {
     return opImplementation.create( [answerData], operation, callback );
   } else {

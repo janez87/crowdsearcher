@@ -1,9 +1,10 @@
 // Load libraries
 var _  = require('underscore');
 var util  = require('util');
+var CS = require( '../core' );
 
 // Import a child Logger
-var log = common.log.child( { component: 'Get Configuration' } );
+var log = CS.log.child( { component: 'Get Configuration' } );
 
 
 
@@ -46,7 +47,7 @@ API.logic = function getConfiguration( req, res ) {
   // Compute and return the platforms
   if( properties.platforms==='true' || force ) {
     configuration.platforms = [];
-    _.each( GLOBAL.common.platforms, function( platform, name ) {
+    _.each( CS.platforms, function( platform, name ) {
       configuration.platforms.push( {
         name: name,
         params: platform.params,
@@ -61,7 +62,7 @@ API.logic = function getConfiguration( req, res ) {
   // Compute and return the invitation strategies
   if( properties.invitationStrategies==='true' || force ) {
     configuration.invitationStrategies = [];
-    _.each( GLOBAL.common.invitation, function( strategy, name ) {
+    _.each( CS.invitation, function( strategy, name ) {
       configuration.invitationStrategies.push( {
         name: name,
         params: strategy.params,
@@ -73,7 +74,7 @@ API.logic = function getConfiguration( req, res ) {
   // Compute and return the splitting strategies
   if( properties.splittingStrategies==='true' || force ) {
     configuration.splittingStrategies = [];
-    _.each( GLOBAL.common.splitting, function( strategy, name ) {
+    _.each( CS.splitting, function( strategy, name ) {
       configuration.splittingStrategies.push( {
         name: name,
         params: strategy.params,
@@ -85,7 +86,7 @@ API.logic = function getConfiguration( req, res ) {
   // Compute and return the Microtask assignment strategies
   if( properties.taskAssignmentStrategies==='true' || force ) {
     configuration.taskAssignmentStrategies = [];
-    _.each( GLOBAL.common.taskAssignment, function( strategy, name ) {
+    _.each( CS.taskAssignment, function( strategy, name ) {
       configuration.taskAssignmentStrategies.push( {
         name: name,
         params: strategy.params,
@@ -97,7 +98,7 @@ API.logic = function getConfiguration( req, res ) {
   // Compute and return the Microtask assignment strategies
   if( properties.assignmentStrategies==='true' || force ) {
     configuration.assignmentStrategies = [];
-    _.each( GLOBAL.common.assignment, function( strategy, name ) {
+    _.each( CS.assignment, function( strategy, name ) {
       configuration.assignmentStrategies.push( {
         name: name,
         params: strategy.params,
@@ -109,7 +110,7 @@ API.logic = function getConfiguration( req, res ) {
   // Compute and return the implementation strategies
   if( properties.executionStrategies==='true' || force ) {
     configuration.executionStrategies = [];
-    _.each( GLOBAL.common.implementation, function( strategy, name ) {
+    _.each( CS.implementation, function( strategy, name ) {
       configuration.executionStrategies.push( {
         name: name,
         params: strategy.params,
@@ -136,7 +137,7 @@ API.logic = function getConfiguration( req, res ) {
   // Compute and return the task types
   if( properties.taskTypes==='true' || force ) {
     configuration.taskTypes = [];
-    _.each( GLOBAL.common.operations, function( operation, name ) {
+    _.each( CS.operations, function( operation, name ) {
       configuration.taskTypes.push( {
         name: name,
         params: operation.params
@@ -270,7 +271,7 @@ API.logic = function getConfiguration( req, res ) {
   // Compute and return the list of available custom control rules
   if( properties.eventScripts==='true' || force ) {
     configuration.eventScripts = [];
-    _.each( GLOBAL.common.rules, function( customRule, name ) {
+    _.each( CS.rules, function( customRule, name ) {
       configuration.eventScripts.push( {
         name: name,
         params: customRule.params

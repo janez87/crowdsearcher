@@ -2,13 +2,13 @@
 var _  = require('underscore');
 var nconf = require( 'nconf' );
 var glob = require( 'glob' );
-
+var CS = require( '../core' );
 
 // Configure Operations
 // ---
 function configOperations( callback ) {
   // Import the log, cannot be imported before because is not available
-  var log = common.log;
+  var log = CS.log;
 
   // Wrap into a `try catch` to handle all errors
   try {
@@ -45,7 +45,7 @@ function configOperations( callback ) {
         operations[ operation ] = require( file );
       } );
 
-      GLOBAL.common.operations = operations;
+      CS.operations = operations;
       return callback();
     });
 

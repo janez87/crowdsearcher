@@ -2,9 +2,10 @@
 // Load libraries
 var _ = require( 'underscore' );
 var util = require( 'util' );
+var CS = require( '../core' );
 
 // Use a child logger
-var log = common.log.child( { component: 'Get API' } );
+var log = CS.log.child( { component: 'Get API' } );
 
 // Generate custom error `GetError` that inherits
 // from `APIError`
@@ -44,7 +45,7 @@ API.logic = function getApi( req, res, next ) {
   log.trace( 'Getting %s for %s ', property || 'all properties', entity );
 
   // Get the model based on the `entity` parameter.
-  var model = common.models[ entity ];
+  var model = CS.models[ entity ];
 
   if( _.isUndefined( model ) )
     return next( new GetError( GetError.BAD_ENTITY_NAME, 'Unable to retrieve the entity "'+entity+'"', APIError.BAD_REQUEST ) );

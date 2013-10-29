@@ -8,7 +8,7 @@ var MongoError = require( 'mongoose' ).Error;
 
 
 // Use a child logger
-var log = common.log.child( { component: 'Put SplittingStrategy' } );
+var log = CS.log.child( { component: 'Put SplittingStrategy' } );
 
 // Generate custom error `PutSplittingStrategyError` that inherits
 // from `APIError`

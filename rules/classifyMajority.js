@@ -6,11 +6,13 @@
 // Load libraries
 var _ = require('underscore');
 var async = require( 'async' );
+var CS = require( '../core' );
 
-var log = common.log.child( { component: 'Classify Majority' } );
+// Create a child logger
+var log = CS.log.child( { component: 'Classify Majority' } );
 
 // Models
-var ControlMart = common.models.controlmart;
+var ControlMart = CS.models.controlmart;
 
 
 var performRule = function( event, config,task, data, callback ) {
@@ -30,7 +32,7 @@ var performRule = function( event, config,task, data, callback ) {
 
     var annotations = execution.annotations;
     var operation = _.findWhere(task.operations,{label:operationLabel});
-    
+
     log.trace('Performing the rule for the operation %s',operation.label);
 
     // Select only annotations of the current operation
@@ -55,8 +57,8 @@ var performRule = function( event, config,task, data, callback ) {
 
       },function(err,controlmart){
         if( err ) return callback( err );
-         
-        // Stuff that will be thrown away asap 
+
+        // Stuff that will be thrown away asap
         var result;
         /*if(_.has(controlmart,'result') && !_.isUndefined(controlmart['result'][operation._id]) && !_.isUndefined(controlmart['result'][operation._id][objectId]) ){
           result = controlmart['result'][operation._id][objectId].data;
@@ -105,7 +107,7 @@ var performRule = function( event, config,task, data, callback ) {
         if(!_.isUndefined(status)){
           status = status.data;
           log.trace('Reading the status information from the controlmart ( %s )',status);
-         
+
           if(status === 'closed'){
             log.trace('Object already closed for this operation');
             return callback();
@@ -128,7 +130,7 @@ var performRule = function( event, config,task, data, callback ) {
           });
 
           log.trace('The most selected category is %s',maxCount);
-          
+
           // Verify if the maximum is unique
           var otherMax = _.where(_.pairs(categoryCount),function(p){
             return p[1] === maxCount[1];

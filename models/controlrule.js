@@ -1,9 +1,10 @@
 // Load libraries
 var _  = require('underscore');
 var mongo = require('mongoose');
+var CS = require( '../core' );
 
 // Create a child logger
-var log = common.log.child( { component: 'ControlRule model' } );
+var log = CS.log.child( { component: 'ControlRule model' } );
 
 // Import Mongoose Classes and Objects
 var Schema = mongo.Schema;
@@ -138,7 +139,7 @@ ControlRuleSchema.virtual( 'rule' ).get( function() {
   } else {
     container = this.type.toLowerCase();
   }
-  return common[ container ][ this.action ];
+  return CS[ container ][ this.action ];
 } );
 
 

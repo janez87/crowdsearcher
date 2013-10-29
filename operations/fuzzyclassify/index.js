@@ -2,16 +2,17 @@
 // Load libraries
 var _ = require('underscore');
 var util = require('util');
+var CS = require( '../../core' );
 
 // Import a child logger
-var log = common.log.child( { component: 'Fuzzy Classify operation' } );
+var log = CS.log.child( { component: 'Fuzzy Classify operation' } );
 
 
 // Import the Annotation model
-var Annotation = common.models.annotation;
+var Annotation = CS.models.annotation;
 
 // Create the FuzzyClassifyError class
-var CSError = require('../../error');
+var CSError = require('../../core/error');
 // Create the FuzzyClassifyError class
 var FuzzyClassifyError = function( id, message ) {
   FuzzyClassifyError.super_.call( this, id, message);

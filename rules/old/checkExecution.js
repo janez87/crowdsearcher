@@ -4,10 +4,10 @@ var _ = require('underscore');
 var async = require( 'async' );
 var util = require('util');
 
-var log = common.log.child( { component: 'CheckExecution' } );
+var log = CS.log.child( { component: 'CheckExecution' } );
 
 // Models
-var User = common.models.user;
+var User = CS.models.user;
 
 var CSError = require('../../error');
 // Custom error

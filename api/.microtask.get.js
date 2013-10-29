@@ -4,7 +4,7 @@
 var util  = require('util');
 
 // Import a child Logger
-//var log = common.log.child( { component: 'Get MicroTask' } );
+//var log = CS.log.child( { component: 'Get MicroTask' } );
 
 // Generate custom error `GetMicroTaskError` that inherits
 // from `APIError`
@@ -60,7 +60,7 @@ API.logic = function getMicroTask( req, res, next ) {
     log.trace( 'Shuffle the objects? %s', shuffle );
     if( shuffle )
       microtaskObject.objects = _.shuffle( microtaskObject.objects );
-    
+
     // Return the object
     res.json( microtaskObject );
   };
@@ -72,7 +72,7 @@ API.logic = function getMicroTask( req, res, next ) {
       populate = [ populate ];
 
     log.trace( 'Populate: %j', populate );
-    
+
     microtask
     .populate( {
       path: populate.join( ' ' ),

@@ -1,5 +1,6 @@
 // Load libraries
 var mongo = require('mongoose');
+var CS = require( '../../core' );
 
 // Import Mongo Classes and Objects
 var Schema = mongo.Schema;
@@ -7,7 +8,7 @@ var ObjectId = Schema.Types.ObjectId;
 
 
 // Create child logger
-var log = common.log.child( { component: 'AccessKey plugin' } );
+var log = CS.log.child( { component: 'AccessKey plugin' } );
 
 
 

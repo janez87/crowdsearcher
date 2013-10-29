@@ -5,10 +5,10 @@ var util = require('util');
 var domain = require( 'domain' );
 
 // Create a child logger
-var log = common.log.child( { component: 'DisableHit' } );
+var log = CS.log.child( { component: 'DisableHit' } );
 
 // Import models
-var Platform = common.models.platform;
+var Platform = CS.models.platform;
 
 var CSError = require('../../error');
 // Custom error

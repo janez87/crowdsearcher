@@ -1,11 +1,13 @@
 
 // Load libraries
 var _ = require('underscore');
+var CS = require( '../core' );
 
-var log = common.log.child( { component: 'Close MicroTask' } );
+// Create a child logger
+var log = CS.log.child( { component: 'Close MicroTask' } );
 
 // Models
-var Microtask = common.models.microtask;
+var Microtask = CS.models.microtask;
 
 var performRule = function( event, config, task, data, callback ) {
   log.trace('Performing the rule');

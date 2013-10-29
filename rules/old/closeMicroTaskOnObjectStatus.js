@@ -3,10 +3,10 @@
 var _ = require('underscore');
 var util = require('util');
 
-var log = common.log.child( { component: 'Close MicroTask' } );
+var log = CS.log.child( { component: 'Close MicroTask' } );
 
 // Models
-var Microtask = common.models.microtask;
+var Microtask = CS.models.microtask;
 
 var ObjectStatuses = require( '../../config/constants' ).ObjectStatuses;
 var CSError = require('../../error');

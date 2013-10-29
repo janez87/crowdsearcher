@@ -4,8 +4,10 @@
 var _ = require( 'underscore' );
 var util = require( 'util' );
 var schedule = require('node-schedule');
+var CS = require( '../core' );
+
 // Use a child logger
-var log = common.log.child( { component: 'Start AMT Job' } );
+var log = CS.log.child( { component: 'Start AMT Job' } );
 
 // Generate custom error `StartAMTJobError` that inherits
 // from `APIError`
@@ -65,7 +67,7 @@ API.logic = function StartAMTJob( req, res, next ) {
       return next(new StartAMTJobError(StartAMTJobError.AMT_NOT_CONFIGURED,'The task selected does not have the amt platform configured',APIError.BAD_REQUEST));
     }
 
-    var platformImplementation = common.platforms[amt.name];
+    var platformImplementation = CS.platforms[amt.name];
 
     var microtasks = task. microtasks;
 

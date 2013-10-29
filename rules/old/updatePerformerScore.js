@@ -3,7 +3,7 @@ var async = require('async');
 var util = require('util');
 var _ = require('underscore');
 
-var log = common.log.child( { component: 'UpdatePerformerScore' } );
+var log = CS.log.child( { component: 'UpdatePerformerScore' } );
 
 // Models
 
@@ -114,7 +114,7 @@ var performRule = function( data, config, callback ) {
 
     async.series( actions, function( err ) {
       if( err ) return callback( err );
-      
+
       return callback( null, {
         correct: correctNum,
         performerScore: performerScore,

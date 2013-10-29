@@ -3,12 +3,13 @@
 // Load libraries
 var _ = require( 'underscore' );
 var util = require( 'util' );
+var CS = require( '../core' );
 
 // Import the required Models
-var Job = common.models.job;
+var Job = CS.models.job;
 
 // Use a child logger
-var log = common.log.child( { component: 'Post Job' } );
+var log = CS.log.child( { component: 'Post Job' } );
 
 // Generate custom error `PostJobError` that inherits
 // from `APIError`

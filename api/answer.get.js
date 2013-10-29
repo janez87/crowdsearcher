@@ -1,12 +1,13 @@
 // Load libraries
 var _  = require('underscore');
 var util  = require('util');
+var CS = require( '../core' );
 
 // Import a child Logger
-var log = common.log.child( { component: 'Get Answer' } );
+var log = CS.log.child( { component: 'Get Answer' } );
 
 // Import Models
-var Execution = common.models.execution;
+var Execution = CS.models.execution;
 
 // Generate custom error `GetAnswersError` that inherits
 // from `APIError`
@@ -27,7 +28,6 @@ var API = {
   //      name: required
   // ... the required parameters will be verified automatically.
   params: {
-    job: false,
     task: false,
     microtask: false,
     execution: false
@@ -48,7 +48,7 @@ API.logic = function getAnswer( req, res, next ) {
   log.trace( 'Get answer' );
 
   // At least one the parameters must be passed
-  if( _.isUndefined(req.query.job) && _.isUndefined(req.query.task) && _.isUndefined(req.query.microtask) && _.isUndefined(req.query.execution) ){
+  if( _.isUndefined(req.query.task) && _.isUndefined(req.query.microtask) && _.isUndefined(req.query.execution) ){
     log.error('At least one parameter must be specified');
     return next( new GetAnswersError(
       GetAnswersError.MISSING_PARAMETERS,
@@ -62,29 +62,13 @@ API.logic = function getAnswer( req, res, next ) {
     filter.task = req.query.task;
   if( req.query.microtask )
     filter.microtask = req.query.microtask;
-  if( req.query.job )
-    filter.job = req.query.job;
   if( req.query.execution )
     filter._id = req.query.execution;
 
-  req.queryObject = Execution.find( filter ).sort( 'creationDate' );
+  req.bulk = true;
+  req.queryObject = Execution.find( filter ).sort( 'createdDate' );
   //.populate( 'performer platform annotations.operation' )
   return next();
-
-  /*
-  .exec( req.wrap( function( err, executions ) {
-    if( err ) return next( err );
-
-    log.trace( 'Found %s executions', executions.length );
-
-    //var annotations = _.pluck( executions, 'annotations' );
-    //annotations = _.flatten( annotations, true );
-    //log.trace( 'Returning %s annotations', annotations.length );
-
-
-    return res.json( executions );
-  } ) );
-  */
 };
 
 

@@ -1,8 +1,10 @@
 
 // Load libraries
 var _ = require('underscore');
+var CS = require( '../core' );
 
-var log = common.log.child( { component: 'Close Task' } );
+// Create a child logger
+var log = CS.log.child( { component: 'Close Task' } );
 
 
 

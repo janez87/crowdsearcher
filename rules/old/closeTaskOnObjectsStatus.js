@@ -5,7 +5,7 @@ var _ = require('underscore');
 var ObjectStatuses = require('../../config/constants.js').ObjectStatuses;
 var TaskStatuses = require('../../config/constants.js').TaskStatuses;
 
-var log = common.log.child( { component: 'Close Task' } );
+var log = CS.log.child( { component: 'Close Task' } );
 
 
 

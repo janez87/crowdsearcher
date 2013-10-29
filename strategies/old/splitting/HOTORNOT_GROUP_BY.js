@@ -5,11 +5,11 @@ var async = require( 'async' );
 
 var ObjectStatuses = require('../../../config/constants.js').ObjectStatuses;
 
-var log = common.log.child( { component: 'HOTORNOT_GROUP_BYSplittingStrategy' } );
+var log = CS.log.child( { component: 'HOTORNOT_GROUP_BYSplittingStrategy' } );
 
 
 // Import Models
-var MicroTask = common.models.microtask;
+var MicroTask = CS.models.microtask;
 
 // Custom error
 // ---

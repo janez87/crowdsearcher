@@ -1,11 +1,13 @@
 // Load libraries.
 var nconf = require( 'nconf' );
+var _ = require( 'underscore' );
 var mongo = require( 'mongoose' );
+var querystring = require( 'querystring' );
 var request = require( 'request' );
-
+var CS = require( '../../core' );
 
 // Create a child logger
-var log = common.log.child( { component: 'Manger route' } );
+var log = CS.log.child( { component: 'Manger route' } );
 
 
 // Create a general requester
@@ -110,6 +112,23 @@ exports.object = function( req, res, next ) {
     res.render( 'manage/object', {
       title: 'Object '+object._id,
       object: object
+    });
+  } );
+};
+
+
+// ## Answers handler
+//
+exports.answers = function( req, res, next ) {
+  var qs = querystring.stringify( _.defaults( {
+    populate: [ 'platform', 'performer' ]
+  }, req.query ) );
+  r( baseUrl+'answer?'+qs, function ( err, resp, answers ) {
+    if( err ) return next( err );
+
+    res.render( 'manage/answers', {
+      title: 'Answers',
+      answers: answers
     });
   } );
 };

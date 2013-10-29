@@ -4,14 +4,15 @@ var path = require( 'path' );
 var nconf = require( 'nconf' );
 var async = require( 'async' );
 var glob = require('glob');
+var CS = require( '../core' );
 
 
 // # Configure the strategies and custom rules
 //
-// This configurator loads all the rules/strategies and expose them in the `common` global variable.
+// This configurator loads all the rules/strategies and expose them in the `CS` global variable.
 function configStrategies( callback ) {
   // Import the log, cannot be imported before because is not available.
-  var log = common.log;
+  var log = CS.log;
 
   function loadFromFolder( folder, cb ) {
     var options = {
@@ -56,8 +57,8 @@ function configStrategies( callback ) {
 
 
         log.trace( '%s have %s strategies in %s: %j', container, _.size( strategies ), folder, strategies );
-        // Add to the corresponding container in the `common` global variable.
-        common[ container.toLowerCase() ] = strategies;
+        // Add to the corresponding container in the `CS` global variable.
+        CS[ container.toLowerCase() ] = strategies;
 
         return cb();
       } );
@@ -70,7 +71,7 @@ function configStrategies( callback ) {
       if( err ) return cb( err );
 
       // Make the rules public, under the `rules` key.
-      common.rules = mapping;
+      CS.rules = mapping;
       log.trace( 'Rules: %j', mapping );
 
       return cb();

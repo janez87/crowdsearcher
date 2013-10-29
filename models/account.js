@@ -1,13 +1,13 @@
 // Load libraries
 var _  = require('underscore');
 var mongo = require('mongoose');
+var CS = require( '../core' );
 
 // Create a child logger
-var log = common.log.child( { component: 'Account model' } );
+var log = CS.log.child( { component: 'Account model' } );
 
 // Import Mongoose Classes and Objects
 var Schema = mongo.Schema;
-var Mixed = Schema.Types.Mixed;
 
 // # Account definition
 // The Account represent a User account on some social network.

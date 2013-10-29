@@ -2,9 +2,10 @@
 
 // Load libraries
 var util = require( 'util' );
+var CS = require( '../core' );
 
 // Use a child logger
-var log = common.log.child( { component: 'Post OpenTask' } );
+var log = CS.log.child( { component: 'Post OpenTask' } );
 
 // Generate custom error `PostOpenTaskError` that inherits
 // from `APIError`

@@ -1,8 +1,9 @@
 // Load libraries
 var mongo = require('mongoose');
+var CS = require( '../core' );
 
 // Create a child logger
-var log = common.log.child( { component: 'Platform model' } );
+var log = CS.log.child( { component: 'Platform model' } );
 
 // Import Mongoose Classes and Objects
 var Schema = mongo.Schema;
@@ -76,7 +77,7 @@ var PlatformSchema = new Schema( {
 //
 // Validate the platform name, must be a platform present in the **CS**.
 PlatformSchema.path( 'name' ).validate( function validateName( name ) {
-  return !!(common.platforms[ name ]);
+  return !!(CS.platforms[ name ]);
 }, 'Not present' );
 
 
@@ -88,7 +89,7 @@ PlatformSchema.path( 'name' ).validate( function validateName( name ) {
 //
 // Get the implementation of the platform.
 PlatformSchema.virtual( 'implementation' ).get( function() {
-  var platformImplementation = common.platforms[ this.name ];
+  var platformImplementation = CS.platforms[ this.name ];
   return platformImplementation;
 } );
 

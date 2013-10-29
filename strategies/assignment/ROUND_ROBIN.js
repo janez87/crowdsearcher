@@ -4,15 +4,15 @@ var _ = require('underscore');
 var util = require('util');
 var async = require( 'async' );
 var domain = require( 'domain' );
-
+var CS = require( '../../core' );
 
 // Create a child logger
-var log = common.log.child( { component: 'RoundRobin assignment' } );
+var log = CS.log.child( { component: 'RoundRobin assignment' } );
 
 
 // # Custom error
 //
-var CSError = require('../../error');
+var CSError = require('../../core/error');
 var RoundRobinError = function( id, message ) {
   /* jshint camelcase: false */
   RoundRobinError.super_.call( this, id, message);
@@ -67,7 +67,7 @@ var MicroTaskStatuses = require('../../../config/constants').MicroTaskStatuses;
 
 
 // Child logger
-var log = common.log.child( { component: 'DynamicRoundrobinMicrotaskAssignmentStrategy' } );
+var log = CS.log.child( { component: 'DynamicRoundrobinMicrotaskAssignmentStrategy' } );
 
 
 // Custom error

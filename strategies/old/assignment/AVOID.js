@@ -7,12 +7,12 @@ var MicroTaskStatuses = require('../../../config/constants').MicroTaskStatuses;
 
 
 // Child logger
-var log = common.log.child( { component: 'AvoidMicroTaskAssignmentStrategy' } );
+var log = CS.log.child( { component: 'AvoidMicroTaskAssignmentStrategy' } );
 
 
 // Import Models
-var Microtask = common.models.microtask;
-var User = common.models.user;
+var Microtask = CS.models.microtask;
+var User = CS.models.user;
 
 // Custom error
 // ---

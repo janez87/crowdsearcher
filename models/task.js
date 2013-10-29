@@ -3,12 +3,13 @@ var _  = require('underscore');
 var mongo = require('mongoose');
 var async = require('async');
 var domain = require('domain');
-var MongoError = mongo.Error;
+var CS = require( '../core' );
 
 // Create a child logger
-var log = common.log.child( { component: 'Task model' } );
+var log = CS.log.child( { component: 'Task model' } );
 
 // Import Mongoose Classes and Objects
+var MongoError = mongo.Error;
 var Schema = mongo.Schema;
 var ObjectId = Schema.ObjectId;
 
@@ -16,7 +17,7 @@ var ObjectId = Schema.ObjectId;
 var ControlRule = require( './controlrule' );
 
 // Import the CRM for handling task events
-var CRM = require( '../scripts/controlRuleManager' );
+var CRM = require( '../core/CRM' );
 
 // # Task definition
 // The task is the core component of the CS.
@@ -563,7 +564,7 @@ TaskSchema.methods.replan = function(strategy,platformName,callback){
     } );
 
     // Import the platform implementation
-    var platformImplementation = common.platforms[ platform.name ];
+    var platformImplementation = CS.platforms[ platform.name ];
 
     var cronJob;
     var tickFunction = function() {
@@ -632,7 +633,7 @@ TaskSchema.methods.replan = function(strategy,platformName,callback){
         return callback(new Error('The selected platform was not configured'));
       }
 
-      var platformImpl = common.platforms[platformName];
+      var platformImpl = CS.platforms[platformName];
 
       var postMicroTask = function(microtask,callback){
         log.trace('Initalazing the platform for the microtask %s',microtask.id);

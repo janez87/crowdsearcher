@@ -3,11 +3,11 @@
 // Load libraries
 var domain = require( 'domain' );
 var nconf = require('nconf');
-
 var Twit = require('twit');
+var CS = require( '../../core' );
 
 // Create a custom logger
-var log = common.log.child( { component: 'Facebook' } );
+var log = CS.log.child( { component: 'Facebook' } );
 
 function execute( task, microtask, execution, config, callback ) {
   return callback( new Error( 'Not implemented' ) );

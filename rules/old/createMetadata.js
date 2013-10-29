@@ -4,11 +4,11 @@ var _ = require('underscore');
 var async = require( 'async' );
 var util = require('util');
 
-var log = common.log.child( { component: 'CreateMetadata rule' } );
+var log = CS.log.child( { component: 'CreateMetadata rule' } );
 
 // Import the model
-var ObjectModel = common.models.object;
-var Metadata = common.models.metadata;
+var ObjectModel = CS.models.object;
+var Metadata = CS.models.metadata;
 
 var CSError = require('../../error');
 // Custom error

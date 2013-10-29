@@ -5,10 +5,10 @@ var async = require( 'async' );
 var util = require('util');
 var domain = require( 'domain' );
 
-var log = common.log.child( { component: 'avoid RULE' } );
+var log = CS.log.child( { component: 'avoid RULE' } );
 
 // Models
-var User = common.models.user;
+var User = CS.models.user;
 
 var CSError = require('../../error');
 // Custom error

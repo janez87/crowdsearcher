@@ -1,6 +1,6 @@
 
 // Load libraries
-var log = common.log.child( { component: 'NONE Splitting Strategy' } );
+var log = CS.log.child( { component: 'NONE Splitting Strategy' } );
 
 
 // # Strategy logic

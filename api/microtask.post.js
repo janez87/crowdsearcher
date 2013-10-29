@@ -2,14 +2,15 @@
 
 // Load libraries
 var util = require( 'util' );
+var CS = require( '../core' );
 var async = require( 'async' );
 
 // Use a child logger
-var log = common.log.child( { component: 'Post MicroTask' } );
+var log = CS.log.child( { component: 'Post MicroTask' } );
 
 
 // Import the required Models
-var MicroTask = common.models.microtask;
+var MicroTask = CS.models.microtask;
 
 // Generate custom error `PostMicroTaskError` that inherits
 // from `APIError`

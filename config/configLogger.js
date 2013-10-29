@@ -5,6 +5,7 @@ var _  = require('underscore');
 var nconf = require( 'nconf' );
 var Logger = require('bunyan');
 var cluster = require( 'cluster' );
+var CS = require( '../core' );
 
 function configLogger( callback ) {
   // Configure logger
@@ -48,8 +49,8 @@ function configLogger( callback ) {
 
 
     log.debug( 'Logger started' );
-    // Add the logger to the common shortcuts
-    common.log = log;
+    // Add the logger to the CS shortcuts
+    CS.log = log;
 
     callback();
   } catch( err ) {

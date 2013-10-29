@@ -4,7 +4,7 @@ var async = require( 'async' );
 var util = require('util');
 var _ = require('underscore');
 
-var log = common.log.child( { component: 'MajorityLoop rule' } );
+var log = CS.log.child( { component: 'MajorityLoop rule' } );
 
 // Import the model
 

@@ -8,11 +8,11 @@ var domain = require( 'domain' );
 
 var ObjectStatuses = require('../../../config/constants.js').ObjectStatuses;
 
-var log = common.log.child( { component: 'EquiSplitGroupBy Splitting Strategy' } );
+var log = CS.log.child( { component: 'EquiSplitGroupBy Splitting Strategy' } );
 
 
 // Import Models
-var MicroTask = common.models.microtask;
+var MicroTask = CS.models.microtask;
 
 // Custom error
 // ---
@@ -42,7 +42,7 @@ var performStrategy = function( data, params, callback ) {
   var objectsNumber = params.objectsNumber;
   var shuffle = params.shuffle;
   var groupingAttribute = params.groupingAttribute;
-  
+
   var event = data.event;
   var task = data.task;
 
@@ -53,7 +53,7 @@ var performStrategy = function( data, params, callback ) {
     if(err) return callback(err);
 
     if(event === 'OPEN_TASK'){
-      
+
       objects = _.clone(task.objects);
 
     }else if(event === 'ADD_OBJECTS' || event === 'ON_EOF'){
@@ -88,14 +88,14 @@ var performStrategy = function( data, params, callback ) {
     if(shuffle){
       objects = _.shuffle( objects );
     }
-    
+
     var groupedObjects = _.groupBy(objects,function(object){
       return object.data[groupingAttribute];
     });
 
     var microTaskList = [];
     pendingObjects = [];
-    
+
     _.each(groupedObjects,function(objects){
       if(objects.length >= objectsNumber || event !== 'ADD_OBJECTS'){
 
@@ -152,7 +152,7 @@ var performStrategy = function( data, params, callback ) {
       });
 
   }));
- 
+
 };
 
 

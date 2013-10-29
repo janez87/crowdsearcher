@@ -8,11 +8,11 @@ var domain = require( 'domain' );
 
 var ObjectStatuses = require('../../../config/constants.js').ObjectStatuses;
 
-var log = common.log.child( { component: 'EquiSplit Splitting Strategy' } );
+var log = CS.log.child( { component: 'EquiSplit Splitting Strategy' } );
 
 
 // Import Models
-var MicroTask = common.models.microtask;
+var MicroTask = CS.models.microtask;
 
 // Custom error
 // ---
@@ -101,7 +101,7 @@ var performStrategy = function( data, params, callback ) {
     objects = _.filter(objects,function(object){
       return object.status !== ObjectStatuses.CLOSED;
     });
-    
+
     // If we have 0 objects then we cannot perform this strategy.
     var numObjects = objects.length;
     if( numObjects===0 )

@@ -6,7 +6,7 @@ var AMT = require( 'amt' );
 var domain = require( 'domain' );
 
 // Create a child logger
-var log = common.log.child( { component: 'Expire HIT' } );
+var log = CS.log.child( { component: 'Expire HIT' } );
 
 var CSError = require('../../error');
 // Custom error

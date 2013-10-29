@@ -3,9 +3,9 @@ var _ = require('underscore');
 var domain = require( 'domain' );
 var async = require('async');
 
-var Performer = common.models.user;
+var Performer = CS.models.user;
 
-var log = common.log.child( { component: 'Invitation Strategy ALL' } );
+var log = CS.log.child( { component: 'Invitation Strategy ALL' } );
 
 var performStrategy = function( data, config, callback ) {
   log.debug( 'Running strategy' );
@@ -29,7 +29,7 @@ var performStrategy = function( data, config, callback ) {
 
     var platformConfig = platform.params;
     // Retrieving the platform implementation
-    var platformImpl = GLOBAL.common.platforms[ platformName ];
+    var platformImpl = CS.platforms[ platformName ];
 
     // The platform need to now wich strategy is called
     platformConfig.strategyName = 'ALL';

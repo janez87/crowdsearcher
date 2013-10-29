@@ -1,8 +1,9 @@
 // Load libraries
 var _ = require( 'underscore' );
+var CS = require( '../core' );
 
 // Create a child logger
-var log = common.log.child( { component: 'Test rule with params' } );
+var log = CS.log.child( { component: 'Test rule with params' } );
 
 
 // # Rule definition

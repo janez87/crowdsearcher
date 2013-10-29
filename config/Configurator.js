@@ -1,5 +1,3 @@
-/* global -common */
-
 // Module loading
 var _  = require('underscore');
 var fs  = require('fs');
@@ -29,11 +27,6 @@ hotswap.on( 'swap', function( file ) {
 
 */
 var EventEmitter = require( 'events' ).EventEmitter;
-
-// Export global shortcuts
-var common = {};
-GLOBAL.common = common;
-
 
 var Configurator = function( app ) {
   console.log( 'Called Configurator' );

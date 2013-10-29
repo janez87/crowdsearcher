@@ -1,8 +1,8 @@
 
 // Load libraries
 
-var Microtask = common.models.microtask;
-var log = common.log.child( { component: 'Close  MicroTask after execution' } );
+var Microtask = CS.models.microtask;
+var log = CS.log.child( { component: 'Close  MicroTask after execution' } );
 
 
 

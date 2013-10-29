@@ -4,16 +4,17 @@ var _ = require( 'underscore' );
 var util = require( 'util' );
 var async = require( 'async' );
 var nconf = require( 'nconf' );
+var CS = require( '../core' );
 
 // Use a child logger
-var log = common.log.child( { component: 'Get Execution' } );
+var log = CS.log.child( { component: 'Get Execution' } );
 
 // Import models
-var Job = common.models.job;
-var Task = common.models.task;
-var Microtask = common.models.microtask;
-var Execution = common.models.execution;
-var Performer = common.models.user;
+var Job = CS.models.job;
+var Task = CS.models.task;
+var Microtask = CS.models.microtask;
+var Execution = CS.models.execution;
+var Performer = CS.models.user;
 
 // Generate custom error `GetExecutionError` that inherits
 // from `APIError`

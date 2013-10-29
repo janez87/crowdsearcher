@@ -5,11 +5,11 @@ var async = require( 'async' );
 var request = require( 'request' );
 var util = require('util');
 
-var log = common.log.child( { component: 'Majority rule' } );
+var log = CS.log.child( { component: 'Majority rule' } );
 
 // Import the model
-var ObjectModel = common.models.object;
-var Metadata = common.models.metadata;
+var ObjectModel = CS.models.object;
+var Metadata = CS.models.metadata;
 var ObjectStatuses = require( '../../config/constants' ).ObjectStatuses;
 
 var CSError = require('../../error');

@@ -1,21 +1,24 @@
-// Control Mart
-// ---
-// It contains all the control parameters needed by the control rules
-
 // Load libraries
 var mongo = require('mongoose');
-var log = common.log.child( { component: 'ControlMart model' } );
 var _ = require('underscore');
 var async = require('async');
+var CS = require( '../core' );
+
+// Create a child logger
+var log = CS.log.child( { component: 'ControlMart model' } );
 
 // Import Mongo Classes and Objects
 var Schema = mongo.Schema;
 var ObjectId = Schema.ObjectId;
 
+// Control Mart
+// ---
+// It contains all the control parameters needed by the control rules
+
 // ControlMart schema
 var ControlMartSchema = new Schema( {
-  
-  
+
+
   name:{
     type:String,
     required:true
@@ -59,7 +62,7 @@ var ControlMartSchema = new Schema( {
   data: Schema.Types.Mixed
 } );
 
-// ## methods for the `ControlMart` class
+// ## Static methods for the `ControlMart` class
 // ---
 // Return the tuple matching the condition in a 'user friendly' format
 ControlMartSchema.statics.select = function(rawTuple,callback){
@@ -73,12 +76,12 @@ ControlMartSchema.statics.select = function(rawTuple,callback){
   .lean()
   .exec(function(err,controlMartTuples){
     if(err) return callback(err);
-    
+
     log.trace('%s tuples retrieved',controlMartTuples.length);
 
     // Output variable
     var output = {};
-    
+
     // Keys in hierarchical order
     var keys = [
       'name',
@@ -93,7 +96,7 @@ ControlMartSchema.statics.select = function(rawTuple,callback){
     ];
 
     var transformedTuples = [];
-    // Transform each tuple in a javascript object organized in a hiearchy imposed by the order of the `keys` array 
+    // Transform each tuple in a javascript object organized in a hiearchy imposed by the order of the `keys` array
     _.each(controlMartTuples,function(tuple){
       var path = {};
       var existing = [];
@@ -124,7 +127,7 @@ ControlMartSchema.statics.select = function(rawTuple,callback){
     // It recursively merge all the transformed tuple
     var merge = function (obj1,obj2){
       var result = {};
-      
+
       for(var i in obj1){
         result[i] = obj1[i];
         if((i in obj2) && (typeof obj1[i] === 'object') && (i !== null)){
@@ -160,7 +163,7 @@ ControlMartSchema.statics.get = function(rawTuple,callback){
   .lean()
   .exec(function(err,controlmart){
     if( err ) return callback( err );
-    
+
     log.trace('%s tuples retrieved',controlmart.length);
 
     return callback(null,controlmart);
@@ -173,15 +176,15 @@ ControlMartSchema.statics.insert = function(rawTuples,callback){
 
   var _this = this;
   var insertOrUpdate = function(tuple,callback){
-    
+
     var tupleToSearch = _.clone(tuple);
-    
+
     delete tupleToSearch['data'];
 
     // Verify if the tuple already exists
     _this.findOne(tupleToSearch,function(err,controlmart){
       if( err ) return callback( err );
-      
+
       if(controlmart){
         // Update the data
         log.trace('The tuple already exists');

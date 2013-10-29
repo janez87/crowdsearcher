@@ -3,8 +3,10 @@
 var request = require( 'request' );
 var domain = require('domain');
 var _ = require('underscore');
+var CS = require( '../core' );
 
-var log = common.log.child( { component: 'Notify rule' } );
+// Create a child logger
+var log = CS.log.child( { component: 'Notify rule' } );
 
 
 var performRule = function( event, config, task, data, callback ) {
@@ -32,7 +34,7 @@ var performRule = function( event, config, task, data, callback ) {
 
 var checkParameters = function( params, done ) {
   log.trace( 'Checking parameters' );
-   
+
   var url = params.url;
 
 

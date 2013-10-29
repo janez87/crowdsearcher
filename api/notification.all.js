@@ -2,12 +2,13 @@
 // Load libraries
 var _ = require( 'underscore' );
 var util = require( 'util' );
+var CS = require( '../core' );
 
 // Use a child logger
-var log = common.log.child( { component: 'Notification API' } );
+var log = CS.log.child( { component: 'Notification API' } );
 
 // Import models
-var Task = common.models.task;
+var Task = CS.models.task;
 
 // Generate custom error `NotificationError` that inherits
 // from `APIError`
@@ -42,7 +43,7 @@ API.logic = function notificationAPI( req, res, next ) {
 
   log.trace( 'Got notification for %s task %s', platform, taskId );
 
-  var platform = common.platforms[ platform ];
+  var platform = CS.platforms[ platform ];
   if( !platform ) {
     log.warn( 'Platform not implemented' );
     return res.send( 'BAD_PLATFORM' );

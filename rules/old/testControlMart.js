@@ -1,9 +1,9 @@
 
 // Load libraries
 
-var log = common.log.child( { component: 'TestControlMart' } );
+var log = CS.log.child( { component: 'TestControlMart' } );
 var async = require('async');
-var ControlMart = common.models.controlmart;
+var ControlMart = CS.models.controlmart;
 
 var performRule = function( data, config, callback ) {
 
@@ -24,7 +24,7 @@ var performRule = function( data, config, callback ) {
 
       return callback();
     });
-    
+
   };
 
   async.eachSeries(annotations,printControlMart,callback);

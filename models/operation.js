@@ -1,8 +1,9 @@
 // Load libraries
 var mongo = require('mongoose');
+var CS = require( '../core' );
 
 // Create a child logger
-var log = common.log.child( { component: 'Operation model' } );
+var log = CS.log.child( { component: 'Operation model' } );
 
 // Import Mongoose Classes and Objects
 var Schema = mongo.Schema;
@@ -64,7 +65,7 @@ var OperationSchema = new Schema( {
 //
 // Validate the operation name, must be a operation present in the **CS**.
 OperationSchema.path( 'name' ).validate( function validateName( name ) {
-  return !!(common.operations[ name ]);
+  return !!(CS.operations[ name ]);
 }, 'Not present' );
 
 
@@ -76,7 +77,7 @@ OperationSchema.path( 'name' ).validate( function validateName( name ) {
 //
 // Get the implementation of the operation.
 OperationSchema.virtual( 'implementation' ).get( function() {
-  var operationImplementation = common.operations[ this.name ];
+  var operationImplementation = CS.operations[ this.name ];
   return operationImplementation;
 } );
 
@@ -110,7 +111,7 @@ exports = module.exports = OperationSchema;
 /*
 // Load libraries
 var mongo = require('mongoose');
-var log = common.log.child( { component: 'Operation model' } );
+var log = CS.log.child( { component: 'Operation model' } );
 
 // Import Mongo Classes and Objects
 var Schema = mongo.Schema;

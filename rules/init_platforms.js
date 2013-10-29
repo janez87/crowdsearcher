@@ -4,11 +4,13 @@ var _ = require('underscore');
 var async = require( 'async' );
 var domain = require( 'domain' );
 var schedule = require('node-schedule');
+var CS = require( '../core' );
 
-var log = common.log.child( { component: 'Init platforms' } );
+// Create a child logger
+var log = CS.log.child( { component: 'Init platforms' } );
 
 
-var Microtask = common.models.microtask;
+var Microtask = CS.models.microtask;
 
 
 var performRule = function( event, config, task, data, callback  ) {
@@ -30,7 +32,7 @@ var performRule = function( event, config, task, data, callback  ) {
     } );
 
     // Import the platform implementation
-    var platformImplementation = common.platforms[ platform.name ];
+    var platformImplementation = CS.platforms[ platform.name ];
 
     var cronJob;
     var tickFunction = function() {
@@ -56,7 +58,7 @@ var performRule = function( event, config, task, data, callback  ) {
 
   var initPlatform = function( microtask, platform, callback ) {
     // Import the platform implementation
-    var platformImplementation = common.platforms[ platform.name ];
+    var platformImplementation = CS.platforms[ platform.name ];
 
     // If the platform is not enabled then just return
     if( !platform.enabled ) return callback();

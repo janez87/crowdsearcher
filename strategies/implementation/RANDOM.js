@@ -3,16 +3,15 @@
 var _ = require('underscore');
 var util = require('util');
 var async = require( 'async' );
-var domain = require( 'domain' );
-
+var CS = require( '../../core' );
 
 // Create a child logger
-var log = common.log.child( { component: 'Random implementation' } );
+var log = CS.log.child( { component: 'Random implementation' } );
 
 
 // # Custom error
 //
-var CSError = require('../../error');
+var CSError = require('../../core/error');
 var RandomError = function( id, message ) {
   /* jshint camelcase: false */
   RandomError.super_.call( this, id, message);
@@ -57,7 +56,7 @@ var MicroTaskStatuses = require('../../../config/constants').MicroTaskStatuses;
 
 
 // Child logger
-var log = common.log.child( { component: 'DynamicRandomMicrotaskAssignmentStrategy' } );
+var log = CS.log.child( { component: 'DynamicRandomMicrotaskAssignmentStrategy' } );
 
 
 // Custom error

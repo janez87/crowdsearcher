@@ -6,10 +6,10 @@ var async = require('async');
 var domain = require( 'domain' );
 
 // Create a child logger
-var log = common.log.child( { component: 'Task Flow' } );
+var log = CS.log.child( { component: 'Task Flow' } );
 
 // Models
-var Task = common.models.task;
+var Task = CS.models.task;
 
 
 var CSError = require('../../error');

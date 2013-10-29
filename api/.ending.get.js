@@ -4,11 +4,11 @@ var Showdown = require('showdown');
 var converter = new Showdown.converter();
 
 // Use a child logger
-var log = common.log.child( { component: 'Ending page' } );
+var log = CS.log.child( { component: 'Ending page' } );
 
 // Import Models
-var Task = common.models.task;
-var Job = common.models.job;
+var Task = CS.models.task;
+var Job = CS.models.job;
 
 // Generate custom error `GetEndingPageError` that inherits
 // from `APIError`

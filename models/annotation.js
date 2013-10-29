@@ -1,9 +1,10 @@
 // Load libraries
 var _  = require('underscore');
 var mongo = require('mongoose');
+var CS = require( '../core' );
 
 // Create a child logger
-var log = common.log.child( { component: 'Annotation model' } );
+var log = CS.log.child( { component: 'Annotation model' } );
 
 // Import Mongoose Classes and Objects
 var MongoError = mongo.Error;

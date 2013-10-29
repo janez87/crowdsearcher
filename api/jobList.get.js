@@ -2,9 +2,10 @@
 
 // Load libraries
 var util = require( 'util' );
+var CS = require( '../core' );
 
 // Use a child logger
-var log = common.log.child( { component: 'Get Job List' } );
+var log = CS.log.child( { component: 'Get Job List' } );
 
 // Generate custom error `GetJobListError` that inherits
 // from `APIError`
@@ -34,7 +35,7 @@ var API = {
 // API core function logic. If this function is executed then each check is passed.
 API.logic = function getJob( req, res, next ) {
   log.trace( 'Getting all the Jobs' );
-  var Job = common.models.job;
+  var Job = CS.models.job;
   Job.find().lean().exec( req.wrap( function( err, jobs ) {
     if( err ) return next( err );
     res.json( jobs );

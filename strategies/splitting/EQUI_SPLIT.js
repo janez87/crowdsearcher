@@ -2,20 +2,18 @@
 // Load libraries
 var _ = require('underscore');
 var util = require('util');
-var async = require( 'async' );
-var domain = require( 'domain' );
-
+var CS = require( '../../core' );
 
 // Create a child logger
-var log = common.log.child( { component: 'EquiSplit Splitting' } );
+var log = CS.log.child( { component: 'EquiSplit Splitting' } );
 
 
 // Import Models.
-var ObjectModel = common.models.object;
+var ObjectModel = CS.models.object;
 
 // # Custom error
 //
-var CSError = require('../../error');
+var CSError = require('../../core/error');
 var EquiSplitError = function( id, message ) {
   /* jshint camelcase: false */
   EquiSplitError.super_.call( this, id, message);

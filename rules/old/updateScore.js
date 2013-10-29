@@ -4,7 +4,7 @@ var _ = require('underscore');
 var async = require( 'async' );
 var util = require('util');
 
-var log = common.log.child( { component: 'UpdateScore' } );
+var log = CS.log.child( { component: 'UpdateScore' } );
 
 // Models
 

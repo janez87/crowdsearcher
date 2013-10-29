@@ -7,7 +7,7 @@ var TaskStatuses = require('../../../config/constants').TaskStatuses;
 
 
 // Child logger
-var log = common.log.child( { component: 'SequenceTaskAssignmentStrategy' } );
+var log = CS.log.child( { component: 'SequenceTaskAssignmentStrategy' } );
 
 
 // Custom error

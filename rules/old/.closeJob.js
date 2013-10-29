@@ -3,13 +3,13 @@
 var util = require('util');
 var domain = require('domain');
 
-var log = common.log.child( { component: 'Close MicroTask' } );
+var log = CS.log.child( { component: 'Close MicroTask' } );
 
 var JobStatuses = require( '../../config/constants' ).JobStatuses;
 var TaskStatuses = require( '../../config/constants' ).TaskStatuses;
 
 // Import Models
-var Task = common.models.task;
+var Task = CS.models.task;
 
 
 

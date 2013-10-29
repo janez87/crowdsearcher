@@ -1,6 +1,7 @@
 // Load libraries
 var util = require('util');
 var mongo = require('mongoose');
+var CS = require( '../../core' );
 
 // Import Mongo Classes and Objects
 var Schema = mongo.Schema;
@@ -8,7 +9,7 @@ var Mixed = Schema.Types.Mixed;
 var MongoError = mongo.Error;
 
 // Create child logger
-var log = common.log.child( { component: 'Strategy plugin' } );
+var log = CS.log.child( { component: 'Strategy plugin' } );
 
 
 
@@ -46,7 +47,7 @@ module.exports = exports = function ( schema, options ) {
 
   // Add the field to the schema.
   schema.virtual( strategy+'StrategyScript' ).get( function() {
-    var container = common[ strategy ];
+    var container = CS[ strategy ];
     var field = this[ strategy+'Strategy' ];
 
     if( !container || !field )
@@ -82,7 +83,7 @@ module.exports = exports = function ( schema, options ) {
         var params = this.implementationStrategy.params;
 
         // Load strategy to perform the check
-        var strategy = common.strategies.implementation[ name ];
+        var strategy = CS.strategies.implementation[ name ];
 
         // Wrap the call to the strategy into a try catch to get possible errors in the strategy
         if( !strategy )
@@ -112,7 +113,7 @@ module.exports = exports = function ( schema, options ) {
         var params = this.implementationStrategy.params;
         log.trace( 'Performing Implementation Strategy %s', name );
 
-        var strategy = common.strategies.implementation[ name ];
+        var strategy = CS.strategies.implementation[ name ];
 
         // Wrap the call to the strategy into a try catch to get possible errors in the strategy
         if( !strategy )

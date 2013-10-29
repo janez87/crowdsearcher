@@ -1,9 +1,10 @@
 // Load libraries
 var _  = require('underscore');
 var mongo = require('mongoose');
+var CS = require( '../core' );
 
 // Create a child logger
-var log = common.log.child( { component: 'Execution model' } );
+var log = CS.log.child( { component: 'Execution model' } );
 
 // Import Mongoose Classes and Objects
 var MongoError = mongo.Error;
@@ -12,7 +13,7 @@ var ObjectId = Schema.ObjectId;
 var Annotation = require( './annotation' );
 
 // Import the CRM for handling Execution events.
-var CRM = require( '../scripts/controlRuleManager' );
+var CRM = require( '../core/CRM' );
 
 // # Execution definition
 // The Execution is an instance of the Microtask for a Performer.
@@ -104,7 +105,7 @@ var ExecutionSchema = new Schema( {
   },
 
   // Closed date of the entity. Will be available only after **closing** the Execution.
-  invalidateDate: {
+  invalidDate: {
     type: Date,
     'default': null
   }

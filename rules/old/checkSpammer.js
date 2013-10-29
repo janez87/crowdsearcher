@@ -3,7 +3,7 @@
 var util = require('util');
 var _ = require('underscore');
 
-var log = common.log.child( { component: 'Aggregate Majority' } );
+var log = CS.log.child( { component: 'Aggregate Majority' } );
 
 // Models
 var CSError = require('../../error');

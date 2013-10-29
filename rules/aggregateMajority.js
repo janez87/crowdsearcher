@@ -5,12 +5,13 @@
 // Load libraries
 var _ = require('underscore');
 var async = require( 'async' );
+var CS = require( '../core' );
 
-var log = common.log.child( { component: 'Aggregate Majority' } );
+// Create a child logger
+var log = CS.log.child( { component: 'Aggregate Majority' } );
 
 // Models
-//var ObjectStatuses = require( '../../config/constants' ).ObjectStatuses;
-var ControlMart = common.models.controlmart;
+var ControlMart = CS.models.controlmart;
 
 var performRule = function(event, config, task, data, callback ) {
   log.trace('Performing the rule');
@@ -38,7 +39,7 @@ var performRule = function(event, config, task, data, callback ) {
     ControlMart
     .get({object:object._id,name:'status'},function(err,controlmart){
       if( err ) return callback( err );
-      
+
       log.trace('controlmart: %j',controlmart);
 
       // Select only the closed operations

@@ -4,7 +4,7 @@
 var util = require( 'util' );
 
 // Use a child logger
-//var log = common.log.child( { component: 'Get Job' } );
+//var log = CS.log.child( { component: 'Get Job' } );
 
 // Generate custom error `GetJobError` that inherits
 // from `APIError`
@@ -58,7 +58,7 @@ API.logic = function getJob( req, res, next ) {
 
     if( shuffle )
       jobObject.objects = _.shuffle( jobObject.objects );
-    
+
     // Return the object
     res.json( jobObject );
   };
@@ -70,7 +70,7 @@ API.logic = function getJob( req, res, next ) {
       populate = [ populate ];
 
     log.trace( 'Populate: %j', populate );
-    
+
     job
     .populate( {
       path: populate.join( ' ' ),

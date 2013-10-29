@@ -3,17 +3,18 @@
 var _ = require('underscore');
 var util = require('util');
 var domain = require('domain');
+var CS = require( '../../core' );
 
 // Import a child logger
-var log = common.log.child( { component: 'Like operation' } );
+var log = CS.log.child( { component: 'Like operation' } );
 
 
 // Import the Annotation model
-var Annotation = GLOBAL.common.models.annotation;
-var MicroTask = GLOBAL.common.models.microtask;
+var Annotation = CS.models.annotation;
+var MicroTask = CS.models.microtask;
 
 // Create the LikeError class
-var CSError = require('../../error');
+var CSError = require('../../core/error');
 // Create the LikeError class
 var LikeError = function( id, message ) {
   LikeError.super_.call( this, id, message);

@@ -4,10 +4,10 @@ var _ = require('underscore');
 var async = require( 'async' );
 var util = require('util');
 
-var log = common.log.child( { component: 'FuzzyClassifyMajority rule' } );
+var log = CS.log.child( { component: 'FuzzyClassifyMajority rule' } );
 
 // Import the model
-var ObjectModel = common.models.object;
+var ObjectModel = CS.models.object;
 var ObjectStatuses = require( '../../../config/constants' ).ObjectStatuses;
 
 

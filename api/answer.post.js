@@ -4,9 +4,10 @@
 var _ = require( 'underscore' );
 var util = require( 'util' );
 var async = require( 'async' );
+var CS = require( '../core' );
 
 // Use a child logger
-var log = common.log.child( { component: 'Post Answer' } );
+var log = CS.log.child( { component: 'Post Answer' } );
 
 // Generate custom error `PostAnswerError` that inherits
 // from `APIError`
@@ -121,7 +122,7 @@ API.logic = function postAnswer( req, res, next ) {
     log.trace( 'Creating Answer for %s with data %j', operation.label, answer );
 
     // Import `Operation` implementation
-    var opImplementation = common.operations[ operation.name ];
+    var opImplementation = CS.operations[ operation.name ];
 
     // Check if there is an error in the data sent.
     var error = opImplementation.checkData( answer, operation );

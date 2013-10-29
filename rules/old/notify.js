@@ -4,7 +4,7 @@ var request = require( 'request' );
 var util = require('util');
 var domain = require('domain');
 
-var log = common.log.child( { component: 'Notify rule' } );
+var log = CS.log.child( { component: 'Notify rule' } );
 
 // Error
 var CSError = require('../../error');

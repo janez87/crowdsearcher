@@ -3,12 +3,13 @@
 // Load libraries
 var _  = require('underscore');
 var util  = require('util');
+var CS = require( '../../core' );
 
 // Import a child Logger
-//var log = common.log.child( { component: 'Check Execution' } );
+//var log = CS.log.child( { component: 'Check Execution' } );
 
 // Import the Execution
-var Execution = common.models.execution;
+var Execution = CS.models.execution;
 
 // Generate custom error `CheckExecutionError` that inherits
 // from `APIError`
@@ -49,7 +50,7 @@ exports = module.exports = function checkExecution( req, res, next ) {
 
     if( !execution )
       return next( new CheckExecutionError( CheckExecutionError.EXECUTION_NOT_FOUND, 'Execution not found', APIError.NOT_FOUND ) );
-    
+
     log.trace( 'Execution %s ok', id );
 
     // Pass the retrieved Execution

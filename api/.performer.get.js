@@ -4,7 +4,7 @@
 var util = require( 'util' );
 
 // Use a child logger
-//var log = common.log.child( { component: 'Get Task' } );
+//var log = CS.log.child( { component: 'Get Task' } );
 
 // Generate custom error `GetPerformerError` that inherits
 // from `APIError`

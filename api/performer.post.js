@@ -3,12 +3,13 @@
 // Load libraries
 var _ = require( 'underscore' );
 var util = require( 'util' );
+var CS = require( '../core' );
 
 // Import the required Models
-var Performer = common.models.user;
+var Performer = CS.models.user;
 
 // Use a child logger
-var log = common.log.child( { component: 'Post Performer' } );
+var log = CS.log.child( { component: 'Post Performer' } );
 
 // Generate custom error `PostPerformerError` that inherits
 // from `APIError`

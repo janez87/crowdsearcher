@@ -4,10 +4,10 @@ var util = require('util');
 var domain = require( 'domain' );
 
 // Create a child logger
-var log = common.log.child( { component: 'PositionToOrderBatch' } );
+var log = CS.log.child( { component: 'PositionToOrderBatch' } );
 
 // Models
-var Task = common.models.task;
+var Task = CS.models.task;
 
 var CSError = require('../../error');
 // Custom error

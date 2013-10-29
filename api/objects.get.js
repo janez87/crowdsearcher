@@ -3,13 +3,14 @@
 // Load libraries
 var _  = require('underscore');
 var util  = require('util');
+var CS = require( '../core' );
 
 // Import a child Logger
-var log = common.log.child( { component: 'Get Object' } );
+var log = CS.log.child( { component: 'Get Object' } );
 
 
 // Import models
-var ObjectModel = common.models.object;
+var ObjectModel = CS.models.object;
 
 
 // Generate custom error `GetObjectError` that inherits

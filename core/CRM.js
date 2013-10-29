@@ -2,9 +2,10 @@
 var _ = require('underscore');
 var async = require( 'async' );
 var domain = require( 'domain' );
+var CS = require( '../core' );
 
 // Create a child logger.
-var log = common.log.child( { component: 'CRM' } );
+var log = CS.log.child( { component: 'CRM' } );
 
 
 // # Control Rule Manager
@@ -27,7 +28,7 @@ ControlRuleManager.trigger = function( event, data, callback ) {
   delete data.task;
 
   // Import the Task mongoose model.
-  var Task = common.models.task;
+  var Task = CS.models.task;
 
   // Create a domain to wrap the function calls
   var d = domain.create();
@@ -147,7 +148,7 @@ ControlRuleManager.prototype.execute = function( event, data, callback ) {
         //addToExecutionList( task.performInvitationStrategy );
         break;
       case 'CUSTOM':
-        var customRule = GLOBAL.common.customRules[ controlrule.action ];
+        var customRule = GLOBAL.CS.customRules[ controlrule.action ];
 
         if( !_.isUndefined( customRule ) ) {
           // Add the rule to the list

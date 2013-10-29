@@ -5,12 +5,12 @@ var _ = require('underscore');
 var domain = require( 'domain' );
 
 // Create a child logger
-var log = common.log.child( { component: 'ActorToValidateAgreement' } );
+var log = CS.log.child( { component: 'ActorToValidateAgreement' } );
 
 // Models
-var Task = common.models.task;
-var Microtask = common.models.microtask;
-var Execution = common.models.execution;
+var Task = CS.models.task;
+var Microtask = CS.models.microtask;
+var Execution = CS.models.execution;
 
 var CSError = require('../../error');
 // Custom error

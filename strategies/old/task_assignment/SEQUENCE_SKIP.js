@@ -7,11 +7,11 @@ var TaskStatuses = require('../../../config/constants').TaskStatuses;
 
 
 // Child logger
-var log = common.log.child( { component: 'SequenceSkipTaskAssignmentStrategy' } );
+var log = CS.log.child( { component: 'SequenceSkipTaskAssignmentStrategy' } );
 
 // Import Models
-var Task = common.models.task;
-var User = common.models.user;
+var Task = CS.models.task;
+var User = CS.models.user;
 
 // Custom error
 // ---

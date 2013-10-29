@@ -1,9 +1,9 @@
 
 // Load libraries
 
-var log = common.log.child( { component: 'CreateControlMart' } );
+var log = CS.log.child( { component: 'CreateControlMart' } );
 var async = require('async');
-var ControlMart = common.models.controlmart;
+var ControlMart = CS.models.controlmart;
 
 var performRule = function( data, config, callback ) {
 
@@ -12,7 +12,7 @@ var performRule = function( data, config, callback ) {
   domain.on('error',callback);
 
   var objects = data.task.objects;
-  
+
   var createControlMartTuple = function(object,callback){
 
     var rawMart = {

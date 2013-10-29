@@ -4,9 +4,9 @@ var _ = require('underscore');
 
 var TaskStatuses = require( '../../config/constants' ).TaskStatuses;
 var ObjectStatuses = require( '../../config/constants' ).ObjectStatuses;
-var Microtask = common.models.microtask;
+var Microtask = CS.models.microtask;
 
-var log = common.log.child( { component: 'Replan custom rule' } );
+var log = CS.log.child( { component: 'Replan custom rule' } );
 
 
 var performRule = function( data, config, callback ) {

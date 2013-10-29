@@ -1,0 +1,57 @@
+extends layout
+
+include ../includes/status
+include ../includes/metadata
+
+
+block append libScripts
+  script(src='libs/markdown.js')
+  script(src='libs/moment.min.js')
+
+block header
+  h1 Answer list
+
+block content
+  if answers.length===0
+    blockquote
+      p No answers found in the database.
+  else
+    #accordion.panel-group
+      - var classMap = { 'CREATED': 'default', 'CLOSED': 'success', 'INVALID': 'danger' };
+      for execution in answers
+        .panel(class='panel-'+classMap[ execution.status ] )
+          .panel-heading
+            a.accordion-toggle(
+              href='#'+execution._id,
+              data-toggle='collapse',
+              data-parent='accordion') Execution
+            |  by 
+            if execution.performer
+              = execution.performer.name
+            else
+              | Guest
+            .pull-right
+              span.label(class='label-'+classMap[ execution.status ] )= execution.status
+              |  @ 
+              code= moment( execution[ execution.status.toLowerCase()+'Date' ] ).format( 'YYYY-MM-DD HH:mm' )
+            |  on 
+            span.label.label-info= execution.platform.name
+          div(id=execution._id).panel-collapse.collapse
+            .panel-body
+              .row
+                .col-md-8
+                  if execution.metadata.length>0
+                    h4 Metadata
+                    +printMetadata( execution.metadata )
+                  p: a(href='manage/task/'+execution.task) Task
+                  p: a(href='manage/microtask/'+execution.microtask) Microtask
+                .col-md-4.text-right
+                  p Created:
+                    code= moment( execution.createdDate ).format( 'YYYY-MM-DD HH:mm' )
+                  if execution.status==='CLOSED'
+                    p Closed:
+                      code= moment( execution.createdDate ).format( 'YYYY-MM-DD HH:mm' )
+                  if execution.status==='INVALID'
+                    p Closed:
+                      code= moment( execution.invalidDate ).format( 'YYYY-MM-DD HH:mm' )
+  //pre= JSON.stringify( answers, null, 2 )

@@ -2,9 +2,10 @@
 
 // Load libraries
 var util = require( 'util' );
+var CS = require( '../core' );
 
 // Use a child logger
-var log = common.log.child( { component: 'Post Replan' } );
+var log = CS.log.child( { component: 'Post Replan' } );
 
 // Generate custom error `Replan` that inherits
 // from `APIError`

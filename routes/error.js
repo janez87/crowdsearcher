@@ -1,9 +1,10 @@
 
 
 // Load libraries
+var CS = require( '../core' );
 
 // Create a child logger
-var log = common.log.child( { component: 'Error Routes' } );
+var log = CS.log.child( { component: 'Error Routes' } );
 
 
 exports.error = function( err, req, res, next ){

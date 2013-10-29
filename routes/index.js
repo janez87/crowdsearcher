@@ -1,13 +1,12 @@
-
-
 // Load libraries
 var nconf = require( 'nconf' );
+var CS = require( '../core' );
 
 // Create a child logger
-var log = common.log.child( { component: 'Index Routes' } );
+var log = CS.log.child( { component: 'Index Routes' } );
 
 // Load mongo Models
-var UserSchema = common.models.user;
+var UserSchema = CS.models.user;
 
 
 // Render the home page.
@@ -24,7 +23,7 @@ exports.checkAuth = function( req, res, next ) {
   if( !req.isAuthenticated() ) {
     var baseURL = nconf.get( 'webserver:externalAddress' );
 
-    req.session.destination = req.path;
+    req.session.destination = req.originalUrl.slice(1);
 
     return res.redirect( baseURL+'login' );
   } else {

@@ -3,14 +3,15 @@ var _ = require('underscore');
 var domain = require( 'domain' );
 var url = require('url');
 var util = require('util');
+var CS = require( '../../core' );
 
 // Create a custom logger
-var log = common.log.child( { component: 'TEF platform' } );
+var log = CS.log.child( { component: 'TEF platform' } );
 
 
 // Custom error
 // ---
-var CSError = require('../../error');
+var CSError = require('../../core/error');
 var TefPlatformError = function( id, message ) {
   /* jshint camelcase: false */
   TefPlatformError.super_.call( this, id, message);

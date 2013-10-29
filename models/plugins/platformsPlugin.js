@@ -1,6 +1,7 @@
 // Load libraries
 var _ = require('underscore');
 var mongo = require('mongoose');
+var CS = require( '../../core' );
 
 // Import Mongo Classes and Objects
 var Schema = mongo.Schema;
@@ -8,7 +9,7 @@ var ObjectId = Schema.Types.ObjectId;
 var MongoError = mongo.Error;
 
 // Create child logger
-var log = common.log.child( { component: 'Platforms plugin' } );
+var log = CS.log.child( { component: 'Platforms plugin' } );
 
 
 

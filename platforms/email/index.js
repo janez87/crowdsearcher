@@ -6,9 +6,10 @@ var domain = require( 'domain' );
 var nconf = require('nconf');
 var nodemailer = require('nodemailer');
 var async = require('async');
+var CS = require( '../../core' );
 
 // Create a custom logger
-var log = common.log.child( { component: 'Email' } );
+var log = CS.log.child( { component: 'Email' } );
 
 function invite(data, config, callback){
 

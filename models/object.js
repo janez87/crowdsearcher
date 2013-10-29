@@ -1,9 +1,10 @@
 // Load libraries
 var _ = require('underscore');
 var mongo = require('mongoose');
+var CS = require( '../core' );
 
 // Create a child logger
-var log = common.log.child( { component: 'Object model' } );
+var log = CS.log.child( { component: 'Object model' } );
 
 // Import Mongoose Classes and Objects
 var MongoError = mongo.Error;
@@ -12,7 +13,7 @@ var ObjectId = Schema.ObjectId;
 
 
 // Import the CRM for handling microtask events.
-var CRM = require( '../scripts/controlRuleManager' );
+var CRM = require( '../core/CRM' );
 
 
 // # Object definition

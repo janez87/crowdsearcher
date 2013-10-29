@@ -4,10 +4,10 @@ var _ = require('underscore');
 var async = require( 'async' );
 var util = require('util');
 
-var log = common.log.child( { component: 'AMT Approve Assignment' } );
+var log = CS.log.child( { component: 'AMT Approve Assignment' } );
 
 // Models
-var Platform = common.models.platform;
+var Platform = CS.models.platform;
 
 var CSError = require('../../error');
 // Custom error

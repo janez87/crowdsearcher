@@ -4,11 +4,11 @@ var _ = require('underscore');
 var async = require( 'async' );
 var util = require('util');
 
-var log = common.log.child( { component: 'TestMajority rule' } );
+var log = CS.log.child( { component: 'TestMajority rule' } );
 
 // Import the model
 
-var ControlMart = common.models.controlmart;
+var ControlMart = CS.models.controlmart;
 var ObjectStatuses = require( '../../config/constants' ).ObjectStatuses;
 
 var CSError = require('../../error');
@@ -62,7 +62,7 @@ var performRule = function( data, config, callback ) {
   };
 
   async.eachSeries(annotations,applyMajority,callback);
-  
+
 };
 
 var checkParameters = function( callback ) {

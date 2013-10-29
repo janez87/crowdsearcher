@@ -2,9 +2,10 @@
 
 // Load libraries
 var util = require( 'util' );
+var CS = require( '../core' );
 
 // Use a child logger
-var log = common.log.child( { component: 'Get Task List' } );
+var log = CS.log.child( { component: 'Get Task List' } );
 
 // Generate custom error `GetTaskListError` that inherits
 // from `APIError`
@@ -44,7 +45,7 @@ API.logic = function getJob( req, res, next ) {
   log.trace( 'Getting all the tasks for the job: %s', jobID );
 
 
-  var Task = common.models.task;
+  var Task = CS.models.task;
   Task
   .find( { job: jobID } )
   .lean()

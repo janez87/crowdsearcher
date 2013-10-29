@@ -7,7 +7,7 @@ var util = require('util');
 var domain = require( 'domain' );
 
 
-var log = common.log.child( { component: 'Redundant Splitting Strategy' } );
+var log = CS.log.child( { component: 'Redundant Splitting Strategy' } );
 
 
 // Custom error
@@ -25,7 +25,7 @@ RedundantError.NO_OBJECTS = 'NO_OBJECTS';
 
 
 // Import Models
-var MicroTask = common.models.microtask;
+var MicroTask = CS.models.microtask;
 
 var getNRandom = function(array,number){
 
@@ -80,7 +80,7 @@ var performStrategy = function( data, params, callback  ) {
       microTaskObjects = objects.slice( -objectsPerMicroTask );
 
     log.trace( 'Assigning objects from %s to %s to the %s microtask', i, i+objectsPerMicroTask, microTaskList.length );
-    
+
     var rawMicroTask = {
       platforms: task.platforms,
       objects: microTaskObjects,
@@ -90,7 +90,7 @@ var performStrategy = function( data, params, callback  ) {
 
     // Add to the list of `MicroTask` to save.
     for( var j=0; j<redundancy; j++ )
-      microTaskList.push( rawMicroTask );    
+      microTaskList.push( rawMicroTask );
   };
 
   // Create domain
@@ -112,7 +112,7 @@ var performStrategy = function( data, params, callback  ) {
 
       log.trace('%s objects remaining', objectsCopy.length);
       log.trace(objectsCopy);
-      
+
 
       var rawMicroTask = {
         platforms: task.platforms,
@@ -127,7 +127,7 @@ var performStrategy = function( data, params, callback  ) {
     //TODO: fare in modo che tutti i microtask abbiano lo stesso numero di oggetti
     if(objectsCopy.length>0){
       log.trace('Assigning the rest of the objects');
-      
+
       var newMicroTask = {
         platforms: task.platforms,
         objects: objectsCopy,

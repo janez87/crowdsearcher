@@ -3,6 +3,7 @@ var _  = require('underscore');
 var nconf = require( 'nconf' );
 var passport = require( 'passport' );
 var async = require('async');
+var CS = require( '../core' );
 
 // URL to update the Access Token
 // https://graph.facebook.com/oauth/access_token
@@ -15,8 +16,8 @@ var async = require('async');
 // https://developers.facebook.com/docs/howtos/login/debugging-access-tokens/
 
 function linkAccountToUser( req, token, tokenSecret, profile, done ) {
-  var log = common.log;
-  var User = common.models.user;
+  var log = CS.log;
+  var User = CS.models.user;
 
   log.trace( 'Connecting provider %s (%s)', profile.provider, profile.id );
   //log.trace( 'Profile data for (%s): %j', profile.username, profile );
@@ -141,8 +142,8 @@ function linkAccountToUser( req, token, tokenSecret, profile, done ) {
 function configPassport( callback ) {
   try {
 
-    var log = common.log;
-    var User = common.models.user;
+    var log = CS.log;
+    var User = CS.models.user;
 
     var FacebookStrategy = require( 'passport-facebook' ).Strategy;
     var TwitterStrategy = require( 'passport-twitter' ).Strategy;

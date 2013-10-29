@@ -3,7 +3,7 @@ var _ = require('underscore');
 var domain = require( 'domain' );
 var async = require('async');
 
-var log = common.log.child( { component: 'Invitation Strategy ANNOUNCEMENT' } );
+var log = CS.log.child( { component: 'Invitation Strategy ANNOUNCEMENT' } );
 
 var performStrategy = function( data, config, callback ) {
   log.debug( 'Running strategy' );
@@ -28,7 +28,7 @@ var performStrategy = function( data, config, callback ) {
 
     var platformConfig = platform.params;
     // Retrieving the platform implementation
-    var platformImpl = GLOBAL.common.platforms[ platformName ];
+    var platformImpl = CS.platforms[ platformName ];
 
     // The platform need to now wich strategy is called
     platformConfig.strategyName = 'ANNOUNCEMENT';

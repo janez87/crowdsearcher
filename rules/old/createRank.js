@@ -4,11 +4,11 @@ var util = require('util');
 var _ = require('underscore');
 var async = require('async');
 
-var log = common.log.child( { component: 'CreateRank' } );
+var log = CS.log.child( { component: 'CreateRank' } );
 
 // Models
-var Execution = common.models.execution;
-var ObjectModel = common.models.object;
+var Execution = CS.models.execution;
+var ObjectModel = CS.models.object;
 
 var CSError = require('../../error');
 // Custom error
