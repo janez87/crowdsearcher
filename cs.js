@@ -61,7 +61,8 @@ app.configure( function() {
     // Like the title
     title: 'CrowdSearcher',
     md: markdown.toHTML,
-    moment: moment
+    moment: moment,
+    _: _
   } );
 
 
@@ -230,9 +231,11 @@ config.once( 'ready', function configReady() {
   // Jobs
   app.get( '/manage/jobs', routes.checkAuth, manager.jobs );
   app.get( '/manage/job/new', routes.checkAuth, manager.newJob );
+  app.post( '/manage/job/new', routes.checkAuth, manager.postJob );
   app.get( '/manage/job/:id', routes.checkAuth, manager.job );
   // Tasks
   app.get( '/manage/task/new', routes.checkAuth, manager.newTask );
+  app.post( '/manage/task/new', routes.checkAuth, manager.postTask );
   app.get( '/manage/task/:id', routes.checkAuth, manager.task );
   // Microtasks
   app.get( '/manage/microtask/:id', routes.checkAuth, manager.microtask );
@@ -262,28 +265,19 @@ config.once( 'ready', function configReady() {
   app.get(  '/account', routes.checkAuth, accountRoutes.index );
 
 
-  // Autentication endpoints
-  var twAuth = passport.authorize( 'twitter', {
-    failureRedirect: baseURL+'login',
-    failureFlash: true
+  // Autentication endpoints based on configured socual networks
+  var socialMap = CS.social;
+  _.each( socialMap, function ( config, name ) {
+    var authConfig = _.defaults( {
+      failureRedirect: baseURL+'login',
+      failureFlash: true
+    }, config.authConfig );
+
+    var passportAuth = passport.authorize( name, authConfig );
+
+    app.get(  '/connect/'+name, passportAuth, accountRedirect );
+    app.get(  '/connect/'+name+'/callback', passportAuth, accountRedirect );
   } );
-
-  var fbAuth = passport.authorize( 'facebook', {
-    failureRedirect: baseURL+'login',
-    failureFlash: true,
-    scope: [
-      'email',
-      'publish_stream',
-      'read_stream',
-      'user_birthday'
-    ]
-  } );
-
-  app.get(  '/connect/twitter', twAuth, accountRedirect );
-  app.get(  '/connect/facebook', fbAuth, accountRedirect );
-
-  app.get(  '/connect/twitter/callback', twAuth, accountRedirect );
-  app.get(  '/connect/facebook/callback', fbAuth, accountRedirect );
 
 
   // Handle random request

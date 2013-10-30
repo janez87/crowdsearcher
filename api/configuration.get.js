@@ -24,7 +24,7 @@ GetConfigurationError.prototype.name = 'GetConfigurationError';
 var API = {
   // The API endpoint. The final endpoint will be:
   //    /api/**endpointUrl**
-  url: 'configuration',
+  url: 'configuration/:property?',
 
   // The API method to implement.
   method: 'GET'
@@ -34,21 +34,18 @@ var API = {
 
 // API core function logic. If this function is executed then each check is passed.
 API.logic = function getConfiguration( req, res ) {
+  var property = req.params.property;
 
-  // If none is selected then return everything
-  var force = _.isEmpty( req.query );
+  var force = !property;
+  var data = {};
 
-  var properties = req.query;
-
-
-  log.trace( 'Returning %j', properties );
-  var configuration = {};
+  log.trace( 'Getting %s from configuration', force? 'all properties' : property );
 
   // Compute and return the platforms
-  if( properties.platforms==='true' || force ) {
-    configuration.platforms = [];
+  if( property==='platforms' || force ) {
+    data.platforms = [];
     _.each( CS.platforms, function( platform, name ) {
-      configuration.platforms.push( {
+      data.platforms.push( {
         name: name,
         params: platform.params,
         invitation: _.isFunction( platform.invite ),
@@ -60,10 +57,10 @@ API.logic = function getConfiguration( req, res ) {
 
 
   // Compute and return the invitation strategies
-  if( properties.invitationStrategies==='true' || force ) {
-    configuration.invitationStrategies = [];
+  if( property==='true' || force ) {
+    data.invitationStrategies = [];
     _.each( CS.invitation, function( strategy, name ) {
-      configuration.invitationStrategies.push( {
+      data.invitationStrategies.push( {
         name: name,
         params: strategy.params,
         triggerOn: strategy.triggerOn
@@ -72,10 +69,10 @@ API.logic = function getConfiguration( req, res ) {
   }
 
   // Compute and return the splitting strategies
-  if( properties.splittingStrategies==='true' || force ) {
-    configuration.splittingStrategies = [];
+  if( property==='true' || force ) {
+    data.splittingStrategies = [];
     _.each( CS.splitting, function( strategy, name ) {
-      configuration.splittingStrategies.push( {
+      data.splittingStrategies.push( {
         name: name,
         params: strategy.params,
         triggerOn: strategy.triggerOn
@@ -84,10 +81,10 @@ API.logic = function getConfiguration( req, res ) {
   }
 
   // Compute and return the Microtask assignment strategies
-  if( properties.taskAssignmentStrategies==='true' || force ) {
-    configuration.taskAssignmentStrategies = [];
+  if( property==='taskAssignment' || force ) {
+    data = [];
     _.each( CS.taskAssignment, function( strategy, name ) {
-      configuration.taskAssignmentStrategies.push( {
+      data.push( {
         name: name,
         params: strategy.params,
         triggerOn: strategy.triggerOn
@@ -96,10 +93,10 @@ API.logic = function getConfiguration( req, res ) {
   }
 
   // Compute and return the Microtask assignment strategies
-  if( properties.assignmentStrategies==='true' || force ) {
-    configuration.assignmentStrategies = [];
+  if( property==='true' || force ) {
+    data.assignmentStrategies = [];
     _.each( CS.assignment, function( strategy, name ) {
-      configuration.assignmentStrategies.push( {
+      data.assignmentStrategies.push( {
         name: name,
         params: strategy.params,
         triggerOn: strategy.triggerOn
@@ -108,10 +105,10 @@ API.logic = function getConfiguration( req, res ) {
   }
 
   // Compute and return the implementation strategies
-  if( properties.executionStrategies==='true' || force ) {
-    configuration.executionStrategies = [];
+  if( property==='true' || force ) {
+    data.executionStrategies = [];
     _.each( CS.implementation, function( strategy, name ) {
-      configuration.executionStrategies.push( {
+      data.executionStrategies.push( {
         name: name,
         params: strategy.params,
         triggerOn: strategy.triggerOn
@@ -120,8 +117,8 @@ API.logic = function getConfiguration( req, res ) {
   }
 
   // Return the field types... mmm not really necessary
-  if( properties.fieldTypes==='true' || force ) {
-    configuration.fieldTypes = [
+  if( property==='true' || force ) {
+    data.fieldTypes = [
       'STRING',
       'TEXT',
       'URL',
@@ -135,10 +132,10 @@ API.logic = function getConfiguration( req, res ) {
   }
 
   // Compute and return the task types
-  if( properties.taskTypes==='true' || force ) {
-    configuration.taskTypes = [];
+  if( property==='true' || force ) {
+    data.taskTypes = [];
     _.each( CS.operations, function( operation, name ) {
-      configuration.taskTypes.push( {
+      data.taskTypes.push( {
         name: name,
         params: operation.params
       } );
@@ -147,11 +144,11 @@ API.logic = function getConfiguration( req, res ) {
 
 
   // Compute and return the object control strategies
-  if( properties.objectControlStrategies==='true' || force ) {
-    configuration.objectControlStrategies = [];
+  if( property==='true' || force ) {
+    data.objectControlStrategies = [];
 
     //TODO: FIx temp hack
-    configuration.objectControlStrategies.push( {
+    data.objectControlStrategies.push( {
       name: 'Majority',
       actions: [
         {
@@ -182,7 +179,7 @@ API.logic = function getConfiguration( req, res ) {
       }
     } );
 
-    configuration.objectControlStrategies.push( {
+    data.objectControlStrategies.push( {
       name: 'Check object status',
       actions: [
         {
@@ -198,12 +195,12 @@ API.logic = function getConfiguration( req, res ) {
   }
 
   // Compute and return the performer control strategies
-  if( properties.performerControlStrategies==='true' || force ) {
-    configuration.performerControlStrategies = [];
+  if( property==='true' || force ) {
+    data.performerControlStrategies = [];
 
     //TODO: FIx temp hack
     /*
-    configuration.performerControlStrategies.push( {
+    data.performerControlStrategies.push( {
       name: 'Check spammer',
       actions: [
         {
@@ -228,12 +225,12 @@ API.logic = function getConfiguration( req, res ) {
   }
 
   // Compute and return the task control strategies
-  if( properties.taskControlStrategies==='true' || force ) {
-    configuration.taskControlStrategies = [];
+  if( property==='true' || force ) {
+    data.taskControlStrategies = [];
 
     //TODO: FIx temp hack
     /*
-    configuration.taskControlStrategies.push( {
+    data.taskControlStrategies.push( {
       name: 'Check Microtask',
       actions: [
         {
@@ -250,9 +247,8 @@ API.logic = function getConfiguration( req, res ) {
 
 
   // Return the available events
-  if( properties.events==='true' || force ) {
-    configuration.events = [
-      'ADD_TASK',
+  if( property==='true' || force ) {
+    data.events = [
       'OPEN_TASK',
       'END_TASK',
       'EOF_TASK',
@@ -269,17 +265,17 @@ API.logic = function getConfiguration( req, res ) {
   }
 
   // Compute and return the list of available custom control rules
-  if( properties.eventScripts==='true' || force ) {
-    configuration.eventScripts = [];
+  if( property==='true' || force ) {
+    data.rules = [];
     _.each( CS.rules, function( customRule, name ) {
-      configuration.eventScripts.push( {
+      data.rules.push( {
         name: name,
         params: customRule.params
       } );
     } );
   }
 
-  res.json( configuration );
+  res.json( data );
 };
 
 

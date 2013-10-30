@@ -10,7 +10,7 @@ html(prefix="og: http://ogp.me/ns#")
       include ../includes/metaOpenGraph
       include ../includes/meta
 
-    block libCss
+    block libCSS
       include ../includes/libCSS
 
     block css
@@ -31,6 +31,13 @@ html(prefix="og: http://ogp.me/ns#")
         a.navbar-brand(href=appBase+'manage') CS Manager
 
       .collapse.navbar-collapse.navbar-top-collapse
+        ul.nav.navbar-nav
+          li: a(href='manage/jobs') Job list 
+            i.fa.fa-list
+          li: a(href='manage/job/new') Job 
+            i.fa.fa-plus-square
+          li: a(href='manage/task/new') Task 
+            i.fa.fa-plus-square
         ul.nav.navbar-nav.navbar-right
           if user
             li: a(href='account')= user.username || user.displayName

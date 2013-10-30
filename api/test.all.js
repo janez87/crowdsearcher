@@ -116,6 +116,7 @@ API.logic = function ( req, res, next ) {
 
   var rawTask = {
     name: 'Test',
+    private: true,
     description: '# Hello\n## description\n`var volo=figo`',
     job: '526e8a2d1e671c641a000010',
     //job: job,

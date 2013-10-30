@@ -24,10 +24,10 @@ block content
           p: .btn-group
             button.btn.btn-primary(type='submit') LogIn
             a.btn.btn-default(href='register') Register
-          p: .btn-group
-            a.btn.btn-facebook(href='connect/facebook')
-              i.icon-facebook-sign
-              |  | LogIn with Facebook
-            a.btn.btn-twitter(href='connect/twitter')
-              i.icon-twitter
-              |  | LogIn with Twitter
+          if _.size( socialMap )>0
+            p Social login
+              .btn-group
+                each social, name in socialMap
+                 - var icon = social.icon || 'fa-'+name+'-square'
+                  a.btn.btn-default(href='connect/'+name, title='Login with '+name)
+                    i.fa(class=icon)

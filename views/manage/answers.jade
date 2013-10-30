@@ -9,7 +9,18 @@ block append libScripts
   script(src='libs/moment.min.js')
 
 block header
-  h1 Answer list
+  .row
+    .col-md-6
+      h1 Answer list
+    .col-md-6.text-right
+      if answers.length>0
+        .btn-group
+          a.btn.btn-default(href='manage/task/'+answers[0].task)
+            i.fa.fa-folder-open
+            |  Task
+          a.btn.btn-default(href='manage/microtask/'+answers[0].microtask)
+            i.fa.fa-folder-open
+            |  Microtask
 
 block content
   if answers.length===0

@@ -1,0 +1,23 @@
+extends layout
+
+include ../includes/metadata
+include ../includes/status
+
+block append libCSS
+
+block append libScripts
+  script(src='libs/markdown.js')
+  script(src='libs/moment.min.js')
+  script(src='libs/jquery.noty.js')
+  script(src='libs/jquery.noty.top.js')
+  script(src='libs/jquery.noty.default.js')
+  script(src='javascripts/utils.js')
+
+block header
+  h1 Create Task
+  
+block content
+  // Load scripts
+  script(src='javascripts/strategy.js')
+  script(src='javascripts/new_task.js')
+  //pre= JSON.stringify( taskAssignmentStrategies, null, 2)

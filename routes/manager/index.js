@@ -60,13 +60,25 @@ exports.job = function( req, res, next ) {
 };
 
 exports.newJob = function( req, res, next ) {
-  r( baseUrl+'configuration?taskAssignmentStrategies=true', function ( err, resp, conf ) {
+  r( baseUrl+'configuration/taskAssignment', function ( err, resp, strategies ) {
     if( err ) return next( err );
 
     res.render( 'manage/newJob', {
-      title: 'Create job',
-      taskAssignmentStrategies: conf
+      title: 'Create Job',
+      taskAssignmentStrategies: strategies
     } );
+  } );
+};
+exports.postJob = function( req, res, next ) {
+  r( {
+    url: baseUrl+'job',
+    method: 'POST',
+    encoding: 'utf8',
+    json: req.body
+  }, function ( err, resp, job ) {
+    if( err ) return next( err );
+
+    res.json( job );
   } );
 };
 
@@ -74,7 +86,26 @@ exports.newJob = function( req, res, next ) {
 // ## Task handlers
 //
 exports.newTask = function( req, res, next ) {
-  res.send( 'new Task' );
+  r( baseUrl+'configuration', function ( err, resp, config ) {
+    if( err ) return next( err );
+
+    res.render( 'manage/newTask', {
+      title: 'Create Task',
+      config: config
+    } );
+  } );
+};
+exports.postTask = function( req, res, next ) {
+  r( {
+    url: baseUrl+'job',
+    method: 'POST',
+    encoding: 'utf8',
+    json: req.body
+  }, function ( err, resp, task ) {
+    if( err ) return next( err );
+
+    res.json( task );
+  } );
 };
 
 exports.task = function( req, res, next ) {

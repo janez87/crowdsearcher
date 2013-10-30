@@ -29,6 +29,9 @@ block content
       if tasks.length==0
         .alert.alert-info No tasks for this job.
       else
+        .pull-right
+          a.btn.btn-default(href='manage/task/new?job='+job._id) Add Task 
+            i.fa.fa-plus-square
         H2 Task list
         - var classMap = { 'CREATED': 'info', 'OPENED': 'success', 'FINALIZED': 'warning', 'CLOSED': 'danger' };
         

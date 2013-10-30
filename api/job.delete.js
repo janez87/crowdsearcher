@@ -14,6 +14,7 @@ var log = CS.log.child( { component: 'Delete Job' } );
 // from `APIError`
 var APIError = require( './error' );
 var DeleteJobError = function( id, message, status ) {
+  /* jshint camelcase: false */
   DeleteJobError.super_.call( this, id, message, status );
 };
 util.inherits( DeleteJobError, APIError );
@@ -25,21 +26,9 @@ DeleteJobError.prototype.name = 'DeleteJobError';
 // API object returned by the file
 // -----
 var API = {
-
-
-  checks: [
-    'checkJobId'
-  ],
-  // List of API parameters. In the format
-  //      name: required
-  // ... the required parameters will be verified automatically.
-  params: {
-    job: true
-  },
-
   // The API endpoint. The final endpoint will be:
   //    /api/**endpointUrl**
-  url: 'job',
+  url: 'job/:id',
 
   // The API method to implement.
   method: 'DELETE'
@@ -49,17 +38,19 @@ var API = {
 
 // API core function logic. If this function is executed then each check is passed.
 API.logic = function deleteJob( req, res, next ) {
-  log.trace( 'Removing Job %s', req.query.job );
+  var id = req.params.id;
+  log.trace( 'Removing Job %s', id );
 
-  var query = req.queryObject;
-
-  query
+  var Job = CS.models.job;
+  Job
+  .findById( id )
   .remove()
-  .exec( req.wrap( function( err, job ) {
+  .exec( req.wrap( function( err ) {
     if( err ) return next( err );
 
-    log.trace( 'Job %s (%s) removed', job._id, job.name );
-    res.json( job );
+    res.json( {
+      message: 'Good by job... we will miss you...'
+    } );
   } ) );
 };
 

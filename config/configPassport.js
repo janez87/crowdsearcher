@@ -145,8 +145,6 @@ function configPassport( callback ) {
     var log = CS.log;
     var User = CS.models.user;
 
-    var FacebookStrategy = require( 'passport-facebook' ).Strategy;
-    var TwitterStrategy = require( 'passport-twitter' ).Strategy;
     var LocalStrategy = require( 'passport-local' ).Strategy;
 
     passport.serializeUser( function( user, done ) {
@@ -187,24 +185,31 @@ function configPassport( callback ) {
 
     var baseURL = nconf.get( 'webserver:externalAddress' );
 
-    // Facebook
-    var fbConfig = _.extend( {}, nconf.get( 'social:facebook' ), {
-      callbackURL: baseURL+'connect/facebook/callback',
-      passReqToCallback: true
-    } );
-    passport.use( new FacebookStrategy( fbConfig, linkAccountToUser ) );
 
-    // Twitter
-    var twConfig = _.extend( {}, nconf.get( 'social:twitter' ), {
-      callbackURL: baseURL+'connect/twitter/callback',
-      passReqToCallback: true
-    } );
-    passport.use( new TwitterStrategy( twConfig, linkAccountToUser ) );
+    // Load social-logins based on configured strategies
+    CS.social = {};
+    var socialMap = nconf.get( 'social' );
+    _.each( socialMap, function( config, name ) {
+      var packageName = config[ 'package' ] || 'passport-'+name;
+      var strategyConfig = config.strategyConfig || {};
+      var strategyProperty = config.strategyName || 'Strategy';
 
-    callback();
+      strategyConfig = _.defaults( {
+        callbackURL: baseURL+'connect/'+name+'/callback',
+        passReqToCallback: true
+      }, strategyConfig );
+
+      var Strategy = require( packageName )[ strategyProperty ];
+      passport.use( new Strategy( strategyConfig, linkAccountToUser ) );
+
+      // Add the socual network to the CS.
+      CS.social[ name] = config;
+    } );
+
+    return callback();
   } catch( err ) {
     console.error( 'Passport configuration error', err );
-    callback( err );
+    return callback( err );
   }
 }
 
