@@ -1,7 +1,7 @@
 {
   "webserver": {
     "hostname": "localhost",
-    "port": 8100
+    "port": 2100
   },
 
   "api": {
@@ -11,7 +11,6 @@
 
   "mongo": {
       "url": "mongodb://localhost/CrowdSearcher",
-      "path": "data",
       "modelsPath": "models"
   },
 

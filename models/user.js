@@ -128,12 +128,16 @@ UserSchema.plugin( require( './plugins/metadataPlugin' ) );
 
 // # User virtual fields
 //
-// ## User setters
-//
+// ## Password setter
 UserSchema.virtual( 'password' ).set( function( password ) {
   this.salt = this.makeSalt();
   this.hashedPassword = this.encryptPassword( password );
 } );
+
+
+
+
+
 // ## User calculated fields
 //
 // Boolean indicating if the User is created.

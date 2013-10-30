@@ -47,13 +47,6 @@ function configMongo( callback ) {
     log.trace( 'Configuring mongodb using mongoose' );
     var mongoConfig = nconf.get( 'mongo' );
 
-    // Check if mongo path exists
-    var mongoPath = path.join( __dirname, '..', mongoConfig.path );
-    if( !fs.existsSync( mongoPath ) ) {
-      log.trace( 'Creating mongo data directory' );
-      fs.mkdirSync( mongoPath );
-    }
-
     var mongoUrl = mongoConfig.url;
     log.debug( 'Connecting to mongodb @ %s', mongoUrl );
 

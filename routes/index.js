@@ -35,7 +35,7 @@ exports.postRegister = function( req, res, next ) {
   var rawUser = req.body;
 
   // Create the Mongoose document
-  log.trace( 'Registering new user %j', rawUser.username );
+  log.trace( 'Registering new user %s', rawUser.username );
   var user = new UserSchema( rawUser );
 
   // Check if the `from` field is present in session
