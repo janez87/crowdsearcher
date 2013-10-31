@@ -84,11 +84,9 @@ API.logic = function setApi( req, res, next ) {
 
     doc.set( property, value );
 
-    doc.save( req.wrap( function( err ) {
+    doc.save( req.wrap( function( err, data ) {
       if( err ) return next( err );
-      return res.json( {
-
-      } );
+      return res.json( data );
     } ) );
   } ) );
 };

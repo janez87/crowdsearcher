@@ -28,7 +28,7 @@ DeleteJobError.prototype.name = 'DeleteJobError';
 var API = {
   // The API endpoint. The final endpoint will be:
   //    /api/**endpointUrl**
-  url: 'job/:id',
+  url: 'job',
 
   // The API method to implement.
   method: 'DELETE'
@@ -38,7 +38,7 @@ var API = {
 
 // API core function logic. If this function is executed then each check is passed.
 API.logic = function deleteJob( req, res, next ) {
-  var id = req.params.id;
+  var id = req.query.job;
   log.trace( 'Removing Job %s', id );
 
   var Job = CS.models.job;

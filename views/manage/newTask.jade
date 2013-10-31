@@ -4,6 +4,26 @@ include ../includes/metadata
 include ../includes/status
 
 block append libCSS
+  style(type='text/css')
+    .input-group {
+      margin-bottom: 5px;
+    }
+    .input-group span.input-group-addon.input-small > input[type="checkbox"] {
+      position: relative;
+      top: 2px;
+    }
+    .input-group span.input-group-addon.input-small+label {
+      border: 1px solid #ccc;
+      border-top-right-radius: 3px;
+      border-bottom-right-radius: 3px;
+      height: 30px;
+      padding: 5px 10px;
+      font-size: 12px;
+      line-height: 1.428571429;
+      display: table-cell;
+      width: 100%;
+      margin-bottom: 0;
+    }
 
 block append libScripts
   script(src='libs/markdown.js')
@@ -11,12 +31,144 @@ block append libScripts
   script(src='libs/jquery.noty.js')
   script(src='libs/jquery.noty.top.js')
   script(src='libs/jquery.noty.default.js')
+  script(src='libs/arg.min.js')
   script(src='javascripts/utils.js')
 
 block header
-  h1 Create Task
-  
+  .row
+    .col-md-8
+      h1.name Task
+    .col-md-4.text-right
+      .btn-group
+        a#send.btn.btn-success(href='manage/task/new') Send 
+          i.fa.fa-envelope-o
+        a#reset.btn.btn-warning(href='#') Reset 
+          i.fa.fa-refresh
+  hr
 block content
+  .text-center: h2.name Task details
+
+  .panel-group#accordion
+    .panel.panel-default
+      .panel-heading
+        a.accordion-toggle(href="#home",data-toggle="collapse",data-parent="#accordion") Task info
+      #home.panel-collapse.collapse
+        .panel-body
+          include task/home
+    .panel.panel-default
+      .panel-heading
+        a.accordion-toggle(href="#landing",data-toggle="collapse",data-parent="#accordion") Landing page
+      #landing.panel-collapse.collapse
+        .panel-body
+          .form-group
+            label(for='landing') Landing
+            textarea#landing.form-control(rows=10)
+            p.help-block Insert 
+              a(href='http://daringfireball.net/projects/markdown/syntax', target='_blank') markdown
+              |  here
+    .panel.panel-default
+      .panel-heading
+        a.accordion-toggle(href="#ending",data-toggle="collapse",data-parent="#accordion") Ending page
+      #ending.panel-collapse.collapse
+        .panel-body
+          .form-group
+            label(for='ending') Ending
+            textarea#ending.form-control(rows=10)
+            p.help-block Insert 
+              a(href='http://daringfireball.net/projects/markdown/syntax', target='_blank') markdown
+              |  here
+
+
+
+    .text-center: h2 Operations
+
+    .panel.panel-default
+      .panel-heading
+        a.accordion-toggle(href="#operations",data-toggle="collapse",data-parent="#operations") Operations
+      #operations.panel-collapse.collapse.in
+        .panel-body
+          include task/operations
+
+
+
+    .text-center: h2 Platforms
+
+    .panel.panel-default
+      .panel-heading
+        a.accordion-toggle(href="#platforms",data-toggle="collapse",data-parent="#accordion") Platforms
+      #platforms.panel-collapse.collapse
+        .panel-body
+          include task/platforms
+    
+
+
+    .text-center: h2 Data
+
+    .panel.panel-default
+      .panel-heading
+        a.accordion-toggle(href="#data",data-toggle="collapse",data-parent="#accordion") Data input
+      #data.panel-collapse.collapse
+        .panel-body
+          h3 Data input
+
+
+
+    .text-center: h2 Planning
+
+    .panel.panel-default
+      .panel-heading
+        a.accordion-toggle(href="#splitting",data-toggle="collapse",data-parent="#accordion") Splitting strategy
+      #splitting.panel-collapse.collapse
+        .panel-body
+          h3 Splitting strategy
+    .panel.panel-default
+      .panel-heading
+        a.accordion-toggle(href="#assignment",data-toggle="collapse",data-parent="#accordion") Assignment strategy
+      #assignment.panel-collapse.collapse
+        .panel-body
+          h3 Assignment strategy
+    .panel.panel-default
+      .panel-heading
+        a.accordion-toggle(href="#implementation",data-toggle="collapse",data-parent="#accordion") Implementation strategy
+      #implementation.panel-collapse.collapse
+        .panel-body
+          h3 Implementation strategy
+    
+
+
+    .text-center: h2 Execution control
+
+    .panel.panel-default
+      .panel-heading
+        a.accordion-toggle(href="#object-control",data-toggle="collapse",data-parent="#accordion") Object control strategy
+      #object-control.panel-collapse.collapse
+        .panel-body
+          h3 Object control strategy
+    .panel.panel-default
+      .panel-heading
+        a.accordion-toggle(href="#performer-control",data-toggle="collapse",data-parent="#accordion") Performer control strategy
+      #performer-control.panel-collapse.collapse
+        .panel-body
+          h3 Performer control strategy
+    .panel.panel-default
+      .panel-heading
+        a.accordion-toggle(href="#task-control",data-toggle="collapse",data-parent="#accordion") Task control strategy
+      #task-control.panel-collapse.collapse
+        .panel-body
+          h3 Task control strategy
+    .panel.panel-default
+      .panel-heading
+        a.accordion-toggle(href="#custom-control",data-toggle="collapse",data-parent="#accordion") Custom control rule
+      #custom-control.panel-collapse.collapse
+        .panel-body
+          h3 Custom control rule
+    .panel.panel-default
+      .panel-heading
+        a.accordion-toggle(href="#rule-control-panel",data-toggle="collapse",data-parent="#accordion") Execution control panel
+      #rule-control-panel.panel-collapse.collapse
+        .panel-body
+          h3 Execution control panel
+
   // Load scripts
   script(src='javascripts/strategy.js')
   script(src='javascripts/new_task.js')

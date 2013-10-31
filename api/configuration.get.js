@@ -82,14 +82,19 @@ API.logic = function getConfiguration( req, res ) {
 
   // Compute and return the Microtask assignment strategies
   if( property==='taskAssignment' || force ) {
-    data = [];
+    var taskAssignments = []
     _.each( CS.taskAssignment, function( strategy, name ) {
-      data.push( {
+      taskAssignments.push( {
         name: name,
         params: strategy.params,
         triggerOn: strategy.triggerOn
       } );
     } );
+    if( force ) {
+      data.taskAssignments = taskAssignments;
+    } else {
+      data = taskAssignments;
+    }
   }
 
   // Compute and return the Microtask assignment strategies
@@ -133,9 +138,9 @@ API.logic = function getConfiguration( req, res ) {
 
   // Compute and return the task types
   if( property==='true' || force ) {
-    data.taskTypes = [];
+    data.operations = [];
     _.each( CS.operations, function( operation, name ) {
-      data.taskTypes.push( {
+      data.operations.push( {
         name: name,
         params: operation.params
       } );
