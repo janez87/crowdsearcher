@@ -43,9 +43,9 @@ API.logic = function getConfiguration( req, res ) {
 
   // Compute and return the platforms
   if( property==='platforms' || force ) {
-    data.platforms = [];
+    var platforms = [];
     _.each( CS.platforms, function( platform, name ) {
-      data.platforms.push( {
+      platforms.push( {
         name: name,
         params: platform.params,
         invitation: _.isFunction( platform.invite ),
@@ -53,36 +53,51 @@ API.logic = function getConfiguration( req, res ) {
         enabled: !!platform.enabled
       } );
     } );
+    if( force ) {
+      data.platforms = platforms;
+    } else {
+      data = platforms;
+    }
   }
 
 
   // Compute and return the invitation strategies
   if( property==='true' || force ) {
-    data.invitationStrategies = [];
+    var invitation = [];
     _.each( CS.invitation, function( strategy, name ) {
-      data.invitationStrategies.push( {
+      invitation.push( {
         name: name,
         params: strategy.params,
         triggerOn: strategy.triggerOn
       } );
     } );
+    if( force ) {
+      data.invitation = invitation;
+    } else {
+      data = invitation;
+    }
   }
 
   // Compute and return the splitting strategies
   if( property==='true' || force ) {
-    data.splittingStrategies = [];
+    var splitting = [];
     _.each( CS.splitting, function( strategy, name ) {
-      data.splittingStrategies.push( {
+      splitting.push( {
         name: name,
         params: strategy.params,
         triggerOn: strategy.triggerOn
       } );
     } );
+    if( force ) {
+      data.splitting = splitting;
+    } else {
+      data = splitting;
+    }
   }
 
   // Compute and return the Microtask assignment strategies
   if( property==='taskAssignment' || force ) {
-    var taskAssignments = []
+    var taskAssignments = [];
     _.each( CS.taskAssignment, function( strategy, name ) {
       taskAssignments.push( {
         name: name,
@@ -99,26 +114,36 @@ API.logic = function getConfiguration( req, res ) {
 
   // Compute and return the Microtask assignment strategies
   if( property==='true' || force ) {
-    data.assignmentStrategies = [];
+    var assignment = [];
     _.each( CS.assignment, function( strategy, name ) {
-      data.assignmentStrategies.push( {
+      assignment.push( {
         name: name,
         params: strategy.params,
         triggerOn: strategy.triggerOn
       } );
     } );
+    if( force ) {
+      data.assignment = assignment;
+    } else {
+      data = assignment;
+    }
   }
 
   // Compute and return the implementation strategies
   if( property==='true' || force ) {
-    data.executionStrategies = [];
+    var implementation = [];
     _.each( CS.implementation, function( strategy, name ) {
-      data.executionStrategies.push( {
+      implementation.push( {
         name: name,
         params: strategy.params,
         triggerOn: strategy.triggerOn
       } );
     } );
+    if( force ) {
+      data.implementation = implementation;
+    } else {
+      data = implementation;
+    }
   }
 
   // Return the field types... mmm not really necessary
@@ -138,22 +163,27 @@ API.logic = function getConfiguration( req, res ) {
 
   // Compute and return the task types
   if( property==='true' || force ) {
-    data.operations = [];
+    var operations = [];
     _.each( CS.operations, function( operation, name ) {
-      data.operations.push( {
+      operations.push( {
         name: name,
         params: operation.params
       } );
     } );
+    if( force ) {
+      data.operations = operations;
+    } else {
+      data = operations;
+    }
   }
 
 
   // Compute and return the object control strategies
   if( property==='true' || force ) {
-    data.objectControlStrategies = [];
+    var objectControlStrategies = [];
 
     //TODO: FIx temp hack
-    data.objectControlStrategies.push( {
+    objectControlStrategies.push( {
       name: 'Majority',
       actions: [
         {
@@ -184,7 +214,7 @@ API.logic = function getConfiguration( req, res ) {
       }
     } );
 
-    data.objectControlStrategies.push( {
+    objectControlStrategies.push( {
       name: 'Check object status',
       actions: [
         {
@@ -197,11 +227,24 @@ API.logic = function getConfiguration( req, res ) {
         },
       ]
     } );
+
+
+
+    if( force ) {
+      data.objectControlStrategies = objectControlStrategies;
+    } else {
+      data = objectControlStrategies;
+    }
   }
 
   // Compute and return the performer control strategies
   if( property==='true' || force ) {
-    data.performerControlStrategies = [];
+    var performerControlStrategies = [];
+    if( force ) {
+      data.performerControlStrategies = performerControlStrategies;
+    } else {
+      data = performerControlStrategies;
+    }
 
     //TODO: FIx temp hack
     /*
@@ -231,7 +274,12 @@ API.logic = function getConfiguration( req, res ) {
 
   // Compute and return the task control strategies
   if( property==='true' || force ) {
-    data.taskControlStrategies = [];
+    var taskControlStrategies = [];
+    if( force ) {
+      data.taskControlStrategies = taskControlStrategies;
+    } else {
+      data = taskControlStrategies;
+    }
 
     //TODO: FIx temp hack
     /*

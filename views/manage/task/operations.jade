@@ -1,29 +1,36 @@
+include ../../includes/params
+
 .row
   .col-md-6
     h3 Available operations
     .form-group
       label(for="operation_name") Operation:
       .input-group
-        pre= JSON.stringify( config.operations, null, 2 )
         select#operation_name.form-control.input-small(
           data-toggle='collapse',
           data-parent='#operations-params')
-          option(selected) None
+          option(value='',selected) None
           each operation in config.operations
             option(
               data-target='#op-'+operation.name,
               value=operation.name)= operation.name
         span.input-group-btn
-          button.btn.btn-small.btn-success Add 
+          button.btn.btn-small.btn-success.add(
+            data-source='#operation_name',
+            data-target='#operation_list') Add 
             i.fa.fa-plus
-      .form-group
-        label(for="operation_label") Label:
-        input#operation_label.form-control.input-small(type="text", placeholder="Insert operation label", required)
-      hr
-      #operations-params
-        each operation in config.operations
-          div.collapse(id='op-'+operation.name)
-            h4 #{operation.name} operation parameters
-            +printParams( operation.params, 'op-'+operation.name )
+    .form-group
+      label(for="operation_label") Label:
+      input#operation_label.form-control.input-small(type="text", placeholder="Insert operation label", required)
+    hr
+    #operations-params
+      each operation in config.operations
+        div.collapse(id='op-'+operation.name)
+          h4 Operation parameters
+          if !_.isEmpty( operation.params ) 
+            +printParamsInput( operation.params, 'op-'+operation.name )
+          else
+            blockquote No parameters needed
   .col-md-6
     h3 Selected operations
+    #operation_list

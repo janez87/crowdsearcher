@@ -85,7 +85,7 @@ block content
     .panel.panel-default
       .panel-heading
         a.accordion-toggle(href="#operations",data-toggle="collapse",data-parent="#operations") Operations
-      #operations.panel-collapse.collapse.in
+      #operations.panel-collapse.collapse
         .panel-body
           include task/operations
 
@@ -102,7 +102,7 @@ block content
     
 
 
-    .text-center: h2 Data
+    .text-center: h2 Input data
 
     .panel.panel-default
       .panel-heading
@@ -120,19 +120,19 @@ block content
         a.accordion-toggle(href="#splitting",data-toggle="collapse",data-parent="#accordion") Splitting strategy
       #splitting.panel-collapse.collapse
         .panel-body
-          h3 Splitting strategy
+          include task/splitting
     .panel.panel-default
       .panel-heading
         a.accordion-toggle(href="#assignment",data-toggle="collapse",data-parent="#accordion") Assignment strategy
       #assignment.panel-collapse.collapse
         .panel-body
-          h3 Assignment strategy
+          include task/assignment
     .panel.panel-default
       .panel-heading
         a.accordion-toggle(href="#implementation",data-toggle="collapse",data-parent="#accordion") Implementation strategy
       #implementation.panel-collapse.collapse
         .panel-body
-          h3 Implementation strategy
+          include task/implementation
     
 
 
@@ -159,9 +159,9 @@ block content
     .panel.panel-default
       .panel-heading
         a.accordion-toggle(href="#custom-control",data-toggle="collapse",data-parent="#accordion") Custom control rule
-      #custom-control.panel-collapse.collapse
+      #custom-control.panel-collapse.collapse.in
         .panel-body
-          h3 Custom control rule
+          include task/rule
     .panel.panel-default
       .panel-heading
         a.accordion-toggle(href="#rule-control-panel",data-toggle="collapse",data-parent="#accordion") Execution control panel

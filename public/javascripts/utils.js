@@ -65,6 +65,7 @@ function createInput( config, name ) {
 
 
 function showParams( params, $paramContainer ) {
+  $paramContainer = $( $paramContainer );
   var $paramList = $( '.param-list', $paramContainer );
   $paramList.empty();
 
@@ -77,13 +78,14 @@ function showParams( params, $paramContainer ) {
 
 
 function getParams( $paramContainer ) {
+  $paramContainer = $( $paramContainer );
   var data = {};
-  var $dataInputList = $paramContainer.find ('.param-list input:not(input[type="hidden"]),.param-list select' );
+  var $dataInputList = $paramContainer.find ('input:not(input[type="hidden"]), select' );
 
   $dataInputList.each( function() {
     var $element = $( this );
     var multiple = $element.data( 'multiple' );
-    var originalType = $element.data( 'originalType' );
+    var originalType = $element.data( 'type' );
     var name = $element.data( 'name' );
     var value = $element.val();
 

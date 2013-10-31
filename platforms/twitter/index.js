@@ -48,14 +48,14 @@ function invite(data, config, callback){
 
   if(strategyName === 'ANNOUNCEMENT'){
 
-    Twit = new Twit({
+    var twit = new Twit({
       consumer_key: config.clientID,
       consumer_secret: config.clientSecret,
       access_token: config.token,
       access_token_secret: config.tokenSecret
     });
 
-    Twit.post('statuses/update', { status: message, includes_entities:true }, function(err, reply) {
+    twit.post('statuses/update', { status: message, includes_entities:true }, function(err, reply) {
       if (err) return callback(err);
 
       log.trace('Message posted on twitter');

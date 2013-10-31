@@ -1,3 +1,40 @@
 mixin printParams( params )
   if params
     pre= JSON.stringify( params, null, 2 )
+
+
+mixin printInput( name, type, multiple, id, def )
+  .form-group
+    label(for=id)= name
+    input.form-control.input-small(
+      id=id,
+      type=type,
+      placeholder='Insert '+name,
+      data-type=type,
+      data-name=name,
+      data-multiple=''+multiple,
+      value=def)
+
+mixin printBooleanInput( name, id, def )
+  .input-group
+    span.input-group-addon.input-small
+      input(
+        id=id,
+        type='checkbox',
+        checked=(def? 'checked': ''),
+        data-type=type,
+        data-name=name)
+    label(for=id)= name
+
+mixin printParamsInput( params, prefix )
+  if params
+    each config, name in params
+      - var id = prefix+'-'+name;
+      - var type = config.type || config;
+      - var def = config['default'] || '';
+      - var multiple = _.isArray( type );
+      - type = multiple? type[0] : type;
+      if type=='boolean'
+        +printBooleanInput( name, id, def )
+      else
+        +printInput( name, type, multiple, id, def )

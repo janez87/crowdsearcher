@@ -1,5 +1,5 @@
 /* jshint browser: true */
-/* global $, noty, baseUrl, Arg */
+/* global $, noty, baseUrl, Arg, getParams */
 
 function getObject() {
   var task = {};
@@ -11,11 +11,26 @@ function getObject() {
 $( 'select[data-toggle="collapse"]' ).on( 'change', function() {
   var $selected = $( 'option:selected', this );
   var $parent = $( $( this ).data( 'parent' ) );
-  $parent.children().slideUp();
-  console.log( $selected.val() );
+  $parent.children( ':visible' ).slideUp();
   if( $selected.val()!=='' ) {
     var target = $selected.data( 'target' );
     $( target ).slideDown();
+  }
+} );
+
+$( '.add' ).on( 'click', function ( evt ) {
+  var data = $( this ).data();
+  var $selected = $( 'option:selected', data.source );
+  if( $selected.val()!=='' ) {
+
+    var obj = {
+      name: $selected.val(),
+      params: getParams( $selected.data( 'target' ) )
+    };
+    var $target = $( data.target );
+    $target.append( '<p>'+obj.name+'</p>' );
+
+    console.log( obj );
   }
 } );
 

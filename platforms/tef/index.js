@@ -71,8 +71,7 @@ var Platform = {
 
   params: {
     url: {
-      type: 'url',
-      'default': '$baseUrl$'
+      type: 'url'
     },
     'interface': 'string'
   }

@@ -1,1 +1,33 @@
-h3 Platforms
+include ../../includes/params
+
+.row
+  .col-md-6
+    h3 Available platforms
+    .form-group
+      label(for="platform_name") Platform:
+      .input-group
+        select#platform_name.form-control.input-small(
+          data-toggle='collapse',
+          data-parent='#platforms-params')
+          option(value='',selected) None
+          each platform in config.platforms
+            option(
+              data-target='#pl-'+platform.name,
+              value=platform.name)= platform.name
+        span.input-group-btn
+          button.btn.btn-small.btn-success.add(
+            data-source='#platform_name',
+            data-target='#platform_list') Add 
+            i.fa.fa-plus
+    hr
+    #platforms-params
+      each platform in config.platforms
+        div.collapse(id='pl-'+platform.name)
+          h4 Platform parameters
+          if !_.isEmpty( platform.params ) 
+            +printParamsInput( platform.params, 'pl-'+platform.name )
+          else
+            blockquote No parameters needed
+  .col-md-6
+    h3 Selected platforms
+    #platform_list
