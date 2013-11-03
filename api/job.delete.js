@@ -26,6 +26,10 @@ DeleteJobError.prototype.name = 'DeleteJobError';
 // API object returned by the file
 // -----
 var API = {
+  params: {
+    job: true
+  },
+
   // The API endpoint. The final endpoint will be:
   //    /api/**endpointUrl**
   url: 'job',

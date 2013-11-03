@@ -19,6 +19,12 @@ include ../../includes/params
             data-source='#rule_name',
             data-target='#rule_list') Add 
             i.fa.fa-plus
+    .form-group
+      label(for="rule_event") Event:
+      select#rule_event.form-control.input-small(data-name='event')
+        option(value='',selected) None
+        each eventName in config.events
+          option(value=eventName)= eventName
     hr
     #rule-params
       each rule in config.rules
@@ -31,3 +37,17 @@ include ../../includes/params
   .col-md-6
     h3 Selected rules
     #rule_list
+script.
+  $( '.add' ).on( 'click', function ( evt ) {
+    if( $( '#rule_name' ).val()==='' )
+      return;
+
+    var $ruleEvent = $( '#rule_event' );
+    if( $ruleEvent.val()==='' ) {
+      evt.stopImmediatePropagation();
+      evt.stopPropagation();
+      warnNoty( 'You must select a valid <b>event</b>' );
+      $ruleEvent.select();
+      return false;
+    }
+  } );

@@ -80,7 +80,7 @@ function showParams( params, $paramContainer ) {
 function getParams( $paramContainer ) {
   $paramContainer = $( $paramContainer );
   var data = {};
-  var $dataInputList = $paramContainer.find ('input:not(input[type="hidden"]), select' );
+  var $dataInputList = $paramContainer.find( 'input:not(input[type="hidden"]), select' );
 
   $dataInputList.each( function() {
     var $element = $( this );
@@ -93,8 +93,9 @@ function getParams( $paramContainer ) {
     if 'platform'==$element.attr 'role'
       value = $element.siblings( 'input[type="hidden"]' ).val()
     */
-
-    value = multiple? value.split( ',' ) : value;
+    if( multiple ) {
+      value = value.length===0? [] : value.split( ',' );
+    }
     if( originalType==='number' ) {
       if( multiple ) {
         value = $.map( value, function ( num ) {
@@ -104,7 +105,7 @@ function getParams( $paramContainer ) {
         value = parseFloat( value, 10 );
       }
     } else if (originalType==='boolean') {
-      value = $element.prop( 'checked' );
+      value = $element.is( ':checked' );
     } else if (originalType==='date') {
       value = new Date( value );
     }
@@ -115,12 +116,22 @@ function getParams( $paramContainer ) {
   return data;
 }
 
+function warnNoty( text ) {
+  return noty( {
+    layout: 'center',
+    type: 'warning',
+    text: text,
+    modal: true
+  } );
+}
+
 function confirmNoty( text, success, fail ) {
   text = text || 'Are you sure?';
 
-  noty( {
+  return noty( {
     type: 'confirm',
     text: text,
+    modal: true,
     buttons: [ {
       addClass: 'btn btn-sm btn-success',
       text: 'Yes',

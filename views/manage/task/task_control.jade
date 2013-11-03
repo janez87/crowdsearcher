@@ -1,0 +1,36 @@
+include ../../includes/params
+
+.row
+  .col-md-6
+    h3 Available task control strategies
+    .form-group
+      label(for="task_control_name") Control strategy:
+      .input-group
+        select#task_control_name.form-control.input-small(
+          data-toggle='collapse',
+          data-parent='#task_controls-params')
+          option(value='',selected) None
+          each task_control in config.taskControlStrategies
+            - var id = _.slugify( 'task_control-'+task_control.name );
+            option(
+              data-target='#'+id,
+              data-actions=JSON.stringify( task_control.actions ),
+              value=task_control.name)= task_control.name
+        span.input-group-btn
+          button.btn.btn-small.btn-success.add_control(
+            data-source='#task_control_name',
+            data-target='#task_control_list') Add 
+            i.fa.fa-plus
+    hr
+    #task_controls-params
+      each task_control in config.taskControlStrategies
+        - var id = _.slugify( 'task_control-'+task_control.name );
+        div.collapse(id=id)
+          h4 Task control parameters
+          if !_.isEmpty( task_control.params ) 
+            +printParamsInput( task_control.params, id )
+          else
+            blockquote No parameters needed
+  .col-md-6
+    h3 Selected task control strategies
+    #task_control_list

@@ -16,7 +16,21 @@ var rule = {
     // Parameter description
     name: 'string',
     // Parameter description
-    number: 'number'
+    number: 'number',
+    multiNumber: ['number'],
+    enumeration: {
+      type: 'enum',
+      values: [
+        'ASD',
+        'DEF',
+        'ERF'
+      ],
+      default: 'DEF'
+    },
+    strAttay: ['string'],
+    bool: 'boolean',
+    date: 'date',
+    url: 'url',
   },
 
   // ## Perform rule

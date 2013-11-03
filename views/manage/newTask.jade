@@ -30,6 +30,7 @@ block append libScripts
   script(src='libs/moment.min.js')
   script(src='libs/jquery.noty.js')
   script(src='libs/jquery.noty.top.js')
+  script(src='libs/jquery.noty.center.js')
   script(src='libs/jquery.noty.default.js')
   script(src='libs/arg.min.js')
   script(src='javascripts/utils.js')
@@ -107,9 +108,9 @@ block content
     .panel.panel-default
       .panel-heading
         a.accordion-toggle(href="#data",data-toggle="collapse",data-parent="#accordion") Data input
-      #data.panel-collapse.collapse
+      #data.panel-collapse.collapse.in
         .panel-body
-          h3 Data input
+          include task/data_input
 
 
 
@@ -143,23 +144,23 @@ block content
         a.accordion-toggle(href="#object-control",data-toggle="collapse",data-parent="#accordion") Object control strategy
       #object-control.panel-collapse.collapse
         .panel-body
-          h3 Object control strategy
+          include task/object_control
     .panel.panel-default
       .panel-heading
         a.accordion-toggle(href="#performer-control",data-toggle="collapse",data-parent="#accordion") Performer control strategy
       #performer-control.panel-collapse.collapse
         .panel-body
-          h3 Performer control strategy
+          include task/performer_control
     .panel.panel-default
       .panel-heading
         a.accordion-toggle(href="#task-control",data-toggle="collapse",data-parent="#accordion") Task control strategy
       #task-control.panel-collapse.collapse
         .panel-body
-          h3 Task control strategy
+          include task/task_control
     .panel.panel-default
       .panel-heading
         a.accordion-toggle(href="#custom-control",data-toggle="collapse",data-parent="#accordion") Custom control rule
-      #custom-control.panel-collapse.collapse.in
+      #custom-control.panel-collapse.collapse
         .panel-body
           include task/rule
     .panel.panel-default

@@ -25,12 +25,6 @@ DeleteTaskError.prototype.name = 'DeleteTaskError';
 // API object returned by the file
 // -----
 var API = {
-  checks: [
-    'checkTaskId'
-  ],
-  // List of API parameters. In the format
-  //      name: required
-  // ... the required parameters will be verified automatically.
   params: {
     task: true
   },
@@ -47,17 +41,19 @@ var API = {
 
 // API core function logic. If this function is executed then each check is passed.
 API.logic = function removeTask( req, res, next ) {
-  log.trace( 'Removing Task %s', req.query.task );
+  var id = req.query.task;
+  log.trace( 'Removing task %s', id );
 
-  var query = req.queryObject;
-
-  query
+  var Task = CS.models.task;
+  Task
+  .findById( id )
   .remove()
-  .exec( req.wrap( function( err, task ) {
+  .exec( req.wrap( function( err ) {
     if( err ) return next( err );
 
-    log.trace( 'task %s (%s) removed', task._id, task.name );
-    res.json( task );
+    res.json( {
+      message: 'Good by task... we will miss you...'
+    } );
   } ) );
 };
 

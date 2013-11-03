@@ -306,10 +306,10 @@ API.logic = function getConfiguration( req, res ) {
       'END_TASK',
       'EOF_TASK',
 
-      'ADD_OBJECT',
+      'ADD_OBJECTS',
       'CLOSE_OBJECT',
 
-      'ADD_MICROTASK',
+      'ADD_MICROTASKS',
       'END_MICROTASK',
 
       'END_EXECUTION'

@@ -5,29 +5,23 @@ var util = require( 'util' );
 var CS = require( '../core' );
 
 // Use a child logger
-var log = CS.log.child( { component: 'Post OpenTask' } );
+var log = CS.log.child( { component: 'Open task' } );
 
-// Generate custom error `PostOpenTaskError` that inherits
+// Generate custom error `OpenTaskError` that inherits
 // from `APIError`
 var APIError = require( './error' );
-var PostOpenTaskError = function( id, message, status ) {
-  PostOpenTaskError.super_.call( this, id, message, status );
+var OpenTaskError = function( id, message, status ) {
+  OpenTaskError.super_.call( this, id, message, status );
 };
-util.inherits( PostOpenTaskError, APIError );
+util.inherits( OpenTaskError, APIError );
 
-PostOpenTaskError.prototype.name = 'PostOpenTaskError';
+OpenTaskError.prototype.name = 'OpenTaskError';
 // Custom error IDs
-
+OpenTaskError.NOT_FOUND = 'NOT_FOUND';
 
 // API object returned by the file
 // -----
 var API = {
-  // List of checks to perform. Each file is execute
-  // *in order* as an express middleware.
-  checks: [
-    'checkTaskId'
-  ],
-
   // List of API parameters. In the format
   //      name: required?
   // ... the required parameters will be verified automatically.
@@ -37,7 +31,7 @@ var API = {
 
   // The API endpoint. The final endpoint will be:
   //    /api/**endpointUrl**
-  url: 'opentask',
+  url: 'task/open',
 
   // The API method to implement.
   method: 'POST'
@@ -45,31 +39,25 @@ var API = {
 
 
 // API core function logic. If this function is executed then each check is passed.
-API.logic = function postTask( req, res, next ) {
-  log.trace( 'Task open' );
+API.logic = function openTask( req, res, next ) {
+  var id = req.query.task;
+  log.trace( 'Open task %s', id );
 
-  var query = req.queryObject;
-  // Exec the query and open the task
-  query.exec( req.wrap( function( err, task ) {
+  var Task = CS.models.task;
+  Task
+  .findById( id )
+  .exec( req.wrap( function( err, task ) {
     if( err ) return next( err );
+
+    if( !task )
+      return next( new OpenTaskError( OpenTaskError.NOT_FOUND, 'Task not found' ) );
 
     task.open( req.wrap( function( err ) {
       if( err ) return next( err );
-      res.json( {
-        id: task._id
-      } );
+
+      res.json( task );
     } ) );
   } ) );
-
-  /*
-  req.task.open( req.wrap( function( err ) {
-    if( err ) return next( err );
-
-    log.info( 'Task %s opened', req.task.id );
-
-    res.json( {} );
-  } ) );
-  */
 };
 
 

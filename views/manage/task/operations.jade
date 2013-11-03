@@ -21,7 +21,11 @@ include ../../includes/params
             i.fa.fa-plus
     .form-group
       label(for="operation_label") Label:
-      input#operation_label.form-control.input-small(type="text", placeholder="Insert operation label", required)
+      input#operation_label.form-control.input-small(
+        data-name='label',
+        type="text",
+        placeholder="Insert operation label",
+        required)
     hr
     #operations-params
       each operation in config.operations
@@ -34,3 +38,18 @@ include ../../includes/params
   .col-md-6
     h3 Selected operations
     #operation_list
+
+script.
+  $( '.add' ).on( 'click', function ( evt ) {
+    if( $( '#operation_name' ).val()==='' )
+      return;
+
+    var $label = $( '#operation_label' );
+    if( $label.val().trim()==='' ) {
+      evt.stopImmediatePropagation();
+      evt.stopPropagation();
+      warnNoty( 'You must insert a valid <b>label</b>' );
+      $label.select();
+      return false;
+    }
+  } );
