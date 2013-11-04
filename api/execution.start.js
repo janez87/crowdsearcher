@@ -11,6 +11,7 @@ var log = CS.log.child( { component: 'Start Execution' } );
 
 // Import other APIs
 var getExecutionAPI = require( './execution.get' );
+var Execution = CS.models.execution;
 
 // Generate custom error `StartExecutionError` that inherits
 // from `APIError`
@@ -44,14 +45,17 @@ API.logic = function startExecution( req, res, next ) {
   // Fake API call to `GET /api/execution`
   var getExecution = function( callback ) {
     // Make the fake call
-    getExecutionAPI.logic( req, res, callback );
+    getExecutionAPI.logic( req, {
+      json: function( data ) {
+        return callback( null, data );
+      }
+    }, next );
   };
 
   // From the id retrieve the Execution Object
-  var populateExecution = function( callback ) {
-    var query = req.queryObject;
-
-    query
+  var populateExecution = function( execution, callback ) {
+    Execution
+    .findById( execution._id )
     .populate( 'task microtask platform' )
     .exec( req.wrap( callback ) );
   };

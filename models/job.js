@@ -85,7 +85,10 @@ JobSchema.plugin( require( './plugins/metadataPlugin' ) );
 // Add the `accessKey` plugin.
 JobSchema.plugin( require( './plugins/accessKeyPlugin' ) );
 // Load the plugin for handling different strategies
-JobSchema.plugin( require( './plugins/strategyPlugin' ), { strategy: 'taskAssignment' } );
+JobSchema.plugin( require( './plugins/strategyPlugin' ), {
+  strategy: 'taskAssignment',
+  method: 'assign'
+} );
 
 
 

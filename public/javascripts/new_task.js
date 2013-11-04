@@ -242,11 +242,18 @@ $send.click( function() {
     noty( {
       type: 'success',
       text: 'Task posted',
+      modal: true,
       buttons: [ {
         addClass: 'btn btn-sm btn-default',
         text: '<i class="fa fa-folder-open"></i> Task details',
         onClick: function() {
           location.href = baseUrl+'manage/task/'+task._id;
+        }
+      }, {
+        addClass: 'btn btn-sm btn-primary',
+        text: '<i class="fa fa-cross"></i> Close',
+        onClick: function( n ) {
+          n.close();
         }
       } ]
     } );
