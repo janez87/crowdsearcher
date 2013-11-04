@@ -13,48 +13,55 @@ ul.nav.nav-tabs
     table.table.table-bordered.table-hover.table-condensed
       thead
         tr#data_header_list
-          td: button.btn.btn-success#btn_add_field Add field 
+          td: button.btn.btn-sm.btn-success#btn_add_field Add field 
             i.fa.fa-plus
       tbody#data_rows
-      tfooter
+      tfoot
         tr#data_input_list
-          td: button.btn.btn-success#btn_add_row Add row 
+          td: button.btn.btn-sm.btn-success#btn_add_row Add row 
             i.fa.fa-plus
 
 script.
+  // Handle data row remove click
   $( '#data_rows' ).on( 'click', '.remove', function ( evt ) {
     var $tr = $( this ).closest( 'tr' );
     $tr.slideUp().remove();
   } );
+  // Handle header remove click
   $( '#data_header_list' ).on( 'click', '.remove', function ( evt ) {
     var index = $( this ).closest( 'td' ).index()+1;
     $( 'td', $( this ).closest( 'table.table' ) ).remove( ':nth-child('+index+')' );
   } );
   
+
+  // Handle add row click
   $( '#btn_add_row' ).on( 'click', function ( evt ) {
+    var $headers = $( '#data_header_list' );
     var $inputs = $( 'input', '#data_input_list' );
+    var $rows = $( '#data_rows' );
 
     var $tr = $( '<tr></tr>' );
-    $tr.append( '<td><button type="button" title="Remove" class="btn btn-danger remove"><i class="fa fa-trash-o"></i></button></td>' )
+    $tr.append( '<td><button type="button" title="Remove" class="btn btn-sm btn-danger remove"><i class="fa fa-trash-o"></i></button></td>' )
     
-    var $rows = $( '#data_rows' );
     $inputs.each( function() {
-      $tr.append( '<td>'+this.value+'</td>' );
+      $tr.append( '<td data-value="'+this.value+'">'+this.value+'</td>' );
     } );
-    $rows.append( $tr )
+    $rows.append( $tr );
   } );
+  // Handle add field click
   $( '#btn_add_field' ).on( 'click', function ( evt ) {
     var $headers = $( '#data_header_list' );
     var $footer = $( '#data_input_list' );
 
     var $field = $( '<td><div class="input-group"><div class="input-group-btn">'
-      +'<button type="button" title="Remove" class="btn btn-danger remove"><i class="fa fa-trash-o"></i></button>'
-      +'</div><input type="text" placeholder="Insert field name" value="Field name" class="form-control"/></div></td>' );
+      +'<button type="button" title="Remove" class="btn btn-sm btn-danger remove"><i class="fa fa-trash-o"></i></button>'
+      +'</div><input type="text" placeholder="Insert field name" value="Field name" class="form-control input-sm"/></div></td>' );
     $headers.append( $field );
 
-    var $fieldInput = $( '<td><input type="text" placeholder="Insert field value" class="form-control"/></td>' );
+    var $fieldInput = $( '<td><input type="text" placeholder="Insert field value" class="form-control input-sm"/></td>' );
     $footer.append( $fieldInput );
   } );
+  // Add a field
   $( '#btn_add_field' ).click();
 
 

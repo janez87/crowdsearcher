@@ -56,7 +56,7 @@ API.logic = function ( req, res, next ) {
       name: 'classify',
       label: 'asde',
       params: {
-        categories: [ 'reb', 'green', 'blue' ]
+        categories: [ 'red', 'green', 'blue' ]
       }
     }
   ];
@@ -116,9 +116,9 @@ API.logic = function ( req, res, next ) {
 
   var rawTask = {
     name: 'Test',
-    private: true,
+    //private: true,
     description: '# Hello\n## description\n`var volo=figo`',
-    job: '526e8a2d1e671c641a000010',
+    job: '5272498081ded17826000011',
     //job: job,
     controlrules: controlrules,
     assignmentStrategy: {

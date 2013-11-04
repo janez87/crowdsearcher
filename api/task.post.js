@@ -11,9 +11,6 @@ var CRM = require( '../core/CRM' );
 
 // Import the required Models
 var Task = CS.models.task;
-var Job = CS.models.job;
-var Operation = CS.models.operation;
-var Platform = CS.models.platform;
 
 // Use a child logger
 var log = CS.log.child( { component: 'Post Task' } );
@@ -34,12 +31,6 @@ PostTaskError.WRONG_JOB_ID = 'WRONG_JOB_ID';
 // API object returned by the file
 // -----
 var API = {
-  // List of checks to perform. Each file is execute
-  // *in order* as an express middleware.
-  checks: [
-    'checkTaskData'
-  ],
-
   // The API endpoint. The final endpoint will be:
   //    /api/**endpointUrl**
   url: 'task',
@@ -51,23 +42,31 @@ var API = {
 
 // API core function logic. If this function is executed then each check is passed.
 API.logic = function postTask( req, res, next ) {
-  log.trace( 'Task poster' );
-
-  // Avoid pollution of the original object
-  var rawTask = _.clone( req.body );
+  var rawTask = req.body;
 
   // Temp trick to add the objects later
-  var alias = rawTask.alias;
   var objects = rawTask.objects;
   var operations = rawTask.operations;
   var platforms = rawTask.platforms;
-  delete rawTask.alias;
   delete rawTask.objects;
   delete rawTask.operations;
   delete rawTask.platforms;
 
   var task = new Task( rawTask );
 
+  var actions = [
+    _.bind( task.addPlatforms, task, platforms ),
+    _.bind( task.addOperations, task, operations ),
+    _.bind( task.addObjects, task, objects )
+  ];
+
+  async.series( actions, function ( err, results ) {
+    if( err ) return next( err );
+
+    log.trace( 'Results are: %j', results );
+    res.json( task );
+  } );
+  /*
   var createAndSavePlatforms = function( callback ) {
     Platform
     .create( platforms, req.wrap( function( err ) {
@@ -178,6 +177,7 @@ API.logic = function postTask( req, res, next ) {
     } );
 
   } );
+  */
 };
 
 

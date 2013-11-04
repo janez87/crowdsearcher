@@ -57,6 +57,10 @@ block content
                     a.btn.btn-xs.btn-default(href='manage/task/'+task._id)
                       i.fa.fa-folder-open
                       |  Details
-                    a.btn.btn-xs.btn-danger(href='manage/task/'+task._id+'/delete')
+                    a.btn.btn-xs.btn-danger(
+                      href='#',
+                      data-id=task._id,
+                      data-entity='task',
+                      data-method='DELETE')
                       i.fa.fa-trash-o
                       |  Remove

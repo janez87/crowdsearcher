@@ -29,9 +29,11 @@ block content
             if job.alias
               code= job.alias
             .btn-group.pull-right
-              a.btn.btn-sm.btn-danger.delete(
-                href='',
+              a.btn.btn-sm.btn-danger#delete(
+                href='#',
+                data-destination,
                 data-id=job._id,
+                data-entity='job',
                 data-method='DELETE')
                 i.fa.fa-trash-o
                 |  Remove
@@ -45,46 +47,3 @@ block content
                 p Created:
                   code= moment( job.creationDate ).format( 'YYYY-MM-DD HH:mm' )
               .md= job.description
-    script.
-      $( 'a.delete' ).on( 'click', function( evt ) {
-        evt.preventDefault();
-        var link = this;
-        var data = $( link ).data();
-
-
-        function deleteJob() {
-          var req = $.ajax( {
-            url: baseUrl+'api/job?job='+data.id,
-            type: data.method || 'DELETE'
-          } );
-
-          req.done( function ( job ) {
-            noty( {
-              type: 'success',
-              text: 'Job deleted',
-              timeout: 1500,
-              callback: {
-                afterClose: function() {
-                  var panel = $( link ).closest( '.panel' );
-                  panel.slideUp();
-                }
-              }
-            } );
-          } );
-
-          req.fail( function( jqXHR, status, err ) {
-            var json = jqXHR.responseJSON || {};
-            noty( {
-              type: 'error',
-              text: err+': '+json.message
-            } );
-
-            console.error( json, jqXHR );
-          } );
-        };
-
-        var text = 'Are you sure you want to delete the Job '+data.id+'?';
-        confirmNoty( text, deleteJob );
-
-        return false;
-      } );

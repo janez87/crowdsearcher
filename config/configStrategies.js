@@ -58,7 +58,7 @@ function configStrategies( callback ) {
 
         log.trace( '%s have %s strategies in %s: %j', container, _.size( strategies ), folder, strategies );
         // Add to the corresponding container in the `CS` global variable.
-        CS[ container.toLowerCase() ] = strategies;
+        CS[ container ] = strategies;
 
         return cb();
       } );

@@ -8,14 +8,14 @@ include ../includes/platforms
 include ../includes/params
 
 block append libCSS
-  script(src='stylesheets/jquery.dataTables.css')
-  script(src='stylesheets/datatables.css')
+  //script(src='stylesheets/jquery.dataTables.css')
+  //script(src='stylesheets/datatables.css')
 
 block append libScripts
   script(src='libs/markdown.js')
   script(src='libs/moment.min.js')
-  script(src='libs/jquery.dataTables.min.js')
-  script(src='libs/datatables.js')
+  //script(src='libs/jquery.dataTables.min.js')
+  //script(src='libs/datatables.js')
 
 block header
   .row
@@ -34,6 +34,7 @@ block header
   hr
 
 block content
+  //pre= JSON.stringify( task, null, 2 )
   .row
     .col-md-4
       .btn-group
@@ -44,14 +45,37 @@ block content
       if !task.closed
         .btn-group
           if task.status=='CREATED'
-            a.btn.btn-sm.btn-info(href='manage/task/'+task._id+'/open') Open
+            a.btn.btn-sm.btn-info(
+              href='#',
+              data-destination,
+              data-action='open',
+              data-id=task._id,
+              data-entity='task',
+              data-method='POST') Open
           if task.opened
-            a.btn.btn-sm.btn-warning(href='manage/task/'+task._id+'/finalize') finalize
+            a.btn.btn-sm.btn-warning(
+              href='#',
+              data-destination,
+              data-action='finalize',
+              data-id=task._id,
+              data-entity='task',
+              data-method='POST') finalize
           if task.finalized || task.opened
-            a.btn.btn-sm.btn-danger(href='manage/task/'+task._id+'/close') Close
+            a.btn.btn-sm.btn-danger#close(
+              href='#',
+              data-destination,
+              data-action='close',
+              data-id=task._id,
+              data-entity='task',
+              data-method='POST') Close
     .col-md-4.text-right
       .btn-group
-        a.btn.btn-sm.btn-danger(href='manage/task/'+task._id+'/delete')
+        a.btn.btn-sm.btn-danger(
+          href='#',
+          data-destination='manage/job/'+task.job,
+          data-id=task._id,
+          data-entity='task',
+          data-method='DELETE')
           i.fa.fa-trash-o
           |  Delete
         a.btn.btn-sm.btn-default(href='manage/answers?task='+task._id) Answers 
@@ -113,4 +137,3 @@ block content
     .col-md-6
       h3 Objects
       +printObjects( task.objects )
-  //pre= JSON.stringify( task, null, 2 )

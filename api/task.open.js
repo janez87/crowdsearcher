@@ -22,16 +22,9 @@ OpenTaskError.NOT_FOUND = 'NOT_FOUND';
 // API object returned by the file
 // -----
 var API = {
-  // List of API parameters. In the format
-  //      name: required?
-  // ... the required parameters will be verified automatically.
-  params: {
-    task: true
-  },
-
   // The API endpoint. The final endpoint will be:
   //    /api/**endpointUrl**
-  url: 'task/open',
+  url: 'task/:id/open',
 
   // The API method to implement.
   method: 'POST'
@@ -40,8 +33,8 @@ var API = {
 
 // API core function logic. If this function is executed then each check is passed.
 API.logic = function openTask( req, res, next ) {
-  var id = req.query.task;
-  log.trace( 'Open task %s', id );
+  var id = req.params.id;
+  log.trace( 'Opening task %s', id );
 
   var Task = CS.models.task;
   Task
@@ -55,6 +48,7 @@ API.logic = function openTask( req, res, next ) {
     task.open( req.wrap( function( err ) {
       if( err ) return next( err );
 
+      log.debug( 'Task %s opened', id );
       res.json( task );
     } ) );
   } ) );

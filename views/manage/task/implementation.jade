@@ -16,9 +16,9 @@ include ../../includes/params
               value=implementation.name)= implementation.name
         span.input-group-btn
           button.btn.btn-small.btn-success.add(
+            data-type='strategy',
             data-source='#implementation_name',
-            data-target='#implementation_list') Add 
-            i.fa.fa-plus
+            data-target='#implementation_list') Set 
     hr
     #implementation-params
       each implementation in config.implementation
@@ -30,4 +30,4 @@ include ../../includes/params
             blockquote No parameters needed
   .col-md-6
     h3 Selected implementation
-    #implementation_list
+    ul#implementation_list.list-group

@@ -1,16 +1,5 @@
 /* jshint browser: true */
-/* global $, noty, getParams, baseUrl */
-
-function slugify( string ) {
-  return string
-  .toString()
-  .toLowerCase()
-  .replace(/\s+/g, '-')
-  .replace(/[^\w\-]+/g, '')
-  .replace(/\-\-+/g, '-')
-  .replace(/^-+/, '')
-  .replace(/-+$/, '');
-}
+/* global $, noty, getParams, baseUrl, slugify */
 
 var $alias = $( '#alias' );
 var $name = $( '#name' );
@@ -24,7 +13,7 @@ $send.click( function() {
   var $description = $( '#description' );
   var $landing = $( '#landing' );
   var $ending = $( '#ending' );
-  var $assignment = $( '#assignment' );
+  var $assignment = $( '#assignment_name' );
 
   // Plain values
   var name = $name.val();
@@ -34,17 +23,10 @@ $send.click( function() {
   var ending = $ending.val();
 
   // Assignment strategy
-  var $strategy = $( 'option:selected', $assignment );
-  var $paramContainer = $assignment.closest( '.list-controller' );
-  $paramContainer = $( '.param-container', $paramContainer );
-  var strategyName = $strategy.data( 'name' );
-  var assignment;
-  if( strategyName ) {
-    assignment = {
-      name: strategyName,
-      params: getParams( $paramContainer )
-    };
-  }
+  var assignment = {
+    name: $assignment.val(),
+    params: getParams( '#assignment-params' )
+  };
 
   var data = {
     name: name===''? undefined : name,
@@ -56,7 +38,7 @@ $send.click( function() {
   };
 
   // Create the AJAX request
-  var url = baseUrl+'manage/job/new';
+  var url = baseUrl+'api/job';
   var req = $.ajax( {
     url: url,
     contentType: 'application/json; charset=UTF-8',

@@ -3,57 +3,27 @@ extends layout
 include ../includes/metadata
 include ../includes/status
 
-block append libCSS
-  style(type='text/css')
-    .input-group {
-      margin-bottom: 5px;
-    }
-    .input-group span.input-group-addon.input-small > input[type="checkbox"] {
-      position: relative;
-      top: 2px;
-    }
-    .input-group span.input-group-addon.input-small+label {
-      border: 1px solid #ccc;
-      border-top-right-radius: 3px;
-      border-bottom-right-radius: 3px;
-      height: 30px;
-      padding: 5px 10px;
-      font-size: 12px;
-      line-height: 1.428571429;
-      display: table-cell;
-      width: 100%;
-      margin-bottom: 0;
-    }
-
-block append libScripts
-  script(src='libs/markdown.js')
-  script(src='libs/moment.min.js')
-  script(src='libs/jquery.noty.js')
-  script(src='libs/jquery.noty.top.js')
-  script(src='libs/jquery.noty.center.js')
-  script(src='libs/jquery.noty.default.js')
-  script(src='libs/arg.min.js')
-  script(src='javascripts/utils.js')
-
 block header
   .row
     .col-md-8
       h1.name Task
     .col-md-4.text-right
       .btn-group
+        a#preview.btn.btn-default(href='#') Preview 
+          i.fa.fa-file-text-o
         a#send.btn.btn-success(href='manage/task/new') Send 
           i.fa.fa-envelope-o
         a#reset.btn.btn-warning(href='#') Reset 
           i.fa.fa-refresh
   hr
 block content
-  .text-center: h2.name Task details
+  .text-center: h2 Task details
 
   .panel-group#accordion
     .panel.panel-default
       .panel-heading
         a.accordion-toggle(href="#home",data-toggle="collapse",data-parent="#accordion") Task info
-      #home.panel-collapse.collapse
+      #home.panel-collapse.collapse.in
         .panel-body
           include task/home
     .panel.panel-default
@@ -62,8 +32,8 @@ block content
       #landing.panel-collapse.collapse
         .panel-body
           .form-group
-            label(for='landing') Landing
-            textarea#landing.form-control(rows=10)
+            label(for='landing_md') Landing
+            textarea#landing_md.form-control(rows=10)
             p.help-block Insert 
               a(href='http://daringfireball.net/projects/markdown/syntax', target='_blank') markdown
               |  here
@@ -73,8 +43,8 @@ block content
       #ending.panel-collapse.collapse
         .panel-body
           .form-group
-            label(for='ending') Ending
-            textarea#ending.form-control(rows=10)
+            label(for='ending_md') Ending
+            textarea#ending_md.form-control(rows=10)
             p.help-block Insert 
               a(href='http://daringfireball.net/projects/markdown/syntax', target='_blank') markdown
               |  here
@@ -85,7 +55,7 @@ block content
 
     .panel.panel-default
       .panel-heading
-        a.accordion-toggle(href="#operations",data-toggle="collapse",data-parent="#operations") Operations
+        a.accordion-toggle(href="#operations",data-toggle="collapse",data-parent="#accordion") Operations
       #operations.panel-collapse.collapse
         .panel-body
           include task/operations
@@ -108,7 +78,7 @@ block content
     .panel.panel-default
       .panel-heading
         a.accordion-toggle(href="#data",data-toggle="collapse",data-parent="#accordion") Data input
-      #data.panel-collapse.collapse.in
+      #data.panel-collapse.collapse
         .panel-body
           include task/data_input
 
@@ -169,8 +139,7 @@ block content
       #rule-control-panel.panel-collapse.collapse
         .panel-body
           h3 Execution control panel
+          ul#task_rule_list.list-group
 
   // Load scripts
-  script(src='javascripts/strategy.js')
   script(src='javascripts/new_task.js')
-  //pre= JSON.stringify( taskAssignmentStrategies, null, 2)

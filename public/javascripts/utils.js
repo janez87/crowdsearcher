@@ -1,6 +1,17 @@
 /* global $, noty */
 var baseUrl = $( 'base' ).prop( 'href' );
 
+function slugify( string ) {
+  return string
+  .toString()
+  .toLowerCase()
+  .replace(/\s+/g, '-')
+  .replace(/[^\w\-]+/g, '')
+  .replace(/\-\-+/g, '-')
+  .replace(/^-+/, '')
+  .replace(/-+$/, '');
+}
+
 function createInput( config, name ) {
   var type = config.type? config.type : config;
 

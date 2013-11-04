@@ -16,14 +16,15 @@ include ../../includes/params
               value=operation.name)= operation.name
         span.input-group-btn
           button.btn.btn-small.btn-success.add(
+            data-type='operation',
             data-source='#operation_name',
             data-target='#operation_list') Add 
             i.fa.fa-plus
     .form-group
       label(for="operation_label") Label:
       input#operation_label.form-control.input-small(
-        data-name='label',
         type="text",
+        data-name='label',
         placeholder="Insert operation label",
         required)
     hr
@@ -37,19 +38,18 @@ include ../../includes/params
             blockquote No parameters needed
   .col-md-6
     h3 Selected operations
-    #operation_list
+    ul#operation_list.list-group
 
 script.
-  $( '.add' ).on( 'click', function ( evt ) {
-    if( $( '#operation_name' ).val()==='' )
-      return;
-
-    var $label = $( '#operation_label' );
-    if( $label.val().trim()==='' ) {
-      evt.stopImmediatePropagation();
-      evt.stopPropagation();
-      warnNoty( 'You must insert a valid <b>label</b>' );
-      $label.select();
-      return false;
+  $( '.add', '#operations' ).on( 'click', function ( evt ) {
+    if( $( '#operation_name' ).val()!=='' ) {
+      var $label = $( '#operation_label' );
+      if( $label.val().trim()==='' ) {
+        evt.stopImmediatePropagation();
+        evt.stopPropagation();
+        warnNoty( 'You must insert a valid <b>label</b>' );
+        $label.select();
+        return false;
+      }
     }
   } );

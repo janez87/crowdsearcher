@@ -16,9 +16,11 @@ include ../../includes/params
               value=rule.name)= rule.name
         span.input-group-btn
           button.btn.btn-small.btn-success.add(
+            data-type='rule',
             data-source='#rule_name',
             data-target='#rule_list') Add 
             i.fa.fa-plus
+    .form-group: input(type='hidden',data-name='type', value='CUSTOM')
     .form-group
       label(for="rule_event") Event:
       select#rule_event.form-control.input-small(data-name='event')
@@ -36,7 +38,8 @@ include ../../includes/params
             blockquote No parameters needed
   .col-md-6
     h3 Selected rules
-    #rule_list
+    ul#rule_list.list-group
+
 script.
   $( '.add' ).on( 'click', function ( evt ) {
     if( $( '#rule_name' ).val()==='' )

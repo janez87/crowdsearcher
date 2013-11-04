@@ -2,16 +2,7 @@ extends layout
 
 include ../includes/metadata
 include ../includes/status
-
-block append libCSS
-
-block append libScripts
-  script(src='libs/markdown.js')
-  script(src='libs/moment.min.js')
-  script(src='libs/jquery.noty.js')
-  script(src='libs/jquery.noty.top.js')
-  script(src='libs/jquery.noty.default.js')
-  script(src='javascripts/utils.js')
+include ../includes/params
 
 block header
   h1 Create Job
@@ -33,21 +24,24 @@ block content
             a(href='http://daringfireball.net/projects/markdown/syntax', target='_blank') markdown 
             | here
     .col-md-6
-      .list-controller
-        .form-group
-          label(for="assignment") Task assignment strategy: 
-          select.list-controller-name.form-control#assignment
-            option(selected) None
-            if taskAssignmentStrategies.length>0
-              each strategy in taskAssignmentStrategies
-                option(
-                  data-name=strategy.name,
-                  data-type='strategy',
-                  data-params=JSON.stringify( strategy.params )
-                  )= strategy.name
-        .param-container.well.well-sm
-          h4 Parameters
-          .param-list
+      .form-group
+        label(for="assignment_name") Strategy:
+        select#assignment_name.form-control.input-small(
+          data-toggle='collapse',
+          data-parent='#assignment-params')
+          option(value='',selected) None
+          each assignment in assignments
+            option(
+              data-target='#assign-'+assignment.name,
+              value=assignment.name)= assignment.name
+      hr
+      #assignment-params
+        each assignment in assignments
+          div.collapse(id='assign-'+assignment.name)
+            if !_.isEmpty( assignment.params ) 
+              +printParamsInput( assignment.params, 'assign-'+assignment.name )
+            else
+              blockquote No parameters needed
   .row
     .col-md-6
       .form-group
@@ -74,6 +68,5 @@ block content
           |  Send
 
   // Load scripts
-  script(src='javascripts/strategy.js')
   script(src='javascripts/new_job.js')
   //pre= JSON.stringify( taskAssignmentStrategies, null, 2)

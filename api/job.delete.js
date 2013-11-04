@@ -48,12 +48,15 @@ API.logic = function deleteJob( req, res, next ) {
   var Job = CS.models.job;
   Job
   .findById( id )
-  .remove()
-  .exec( req.wrap( function( err ) {
+  .exec( req.wrap( function( err, job ) {
     if( err ) return next( err );
 
-    res.json( {
-      message: 'Good by job... we will miss you...'
+    job.remove( function( err ) {
+      if( err ) return next( err );
+
+      res.json( {
+        message: 'Good by job... we will miss you...'
+      } );
     } );
   } ) );
 };

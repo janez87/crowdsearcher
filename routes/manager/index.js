@@ -65,10 +65,11 @@ exports.newJob = function( req, res, next ) {
 
     res.render( 'manage/newJob', {
       title: 'Create Job',
-      taskAssignmentStrategies: strategies
+      assignments: strategies
     } );
   } );
 };
+/*
 exports.postJob = function( req, res, next ) {
   r( {
     url: baseUrl+'job',
@@ -81,7 +82,7 @@ exports.postJob = function( req, res, next ) {
     res.json( job );
   } );
 };
-
+*/
 
 // ## Task handlers
 //
@@ -95,9 +96,10 @@ exports.newTask = function( req, res, next ) {
     } );
   } );
 };
+/*
 exports.postTask = function( req, res, next ) {
   r( {
-    url: baseUrl+'job',
+    url: baseUrl+'task',
     method: 'POST',
     encoding: 'utf8',
     json: req.body
@@ -107,6 +109,7 @@ exports.postTask = function( req, res, next ) {
     res.json( task );
   } );
 };
+*/
 
 exports.task = function( req, res, next ) {
   r( baseUrl+'task/?populate=microtasks&populate=objects&populate=platforms&populate=operations&task='+req.params.id, function ( err, resp, task ) {

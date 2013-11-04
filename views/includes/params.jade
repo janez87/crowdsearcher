@@ -36,7 +36,7 @@ mixin printBooleanInput( name, id, def )
         checked=(def? 'checked': ''),
         data-type='boolean',
         data-name=name)
-    label(for=id) #{name}:
+    label(for=id)= name
 
 mixin printParamsInput( params, prefix )
   if params

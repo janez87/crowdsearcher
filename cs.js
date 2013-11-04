@@ -231,11 +231,11 @@ config.once( 'ready', function configReady() {
   // Jobs
   app.get( '/manage/jobs', routes.checkAuth, manager.jobs );
   app.get( '/manage/job/new', routes.checkAuth, manager.newJob );
-  app.post( '/manage/job/new', routes.checkAuth, manager.postJob );
+  //app.post( '/manage/job/new', routes.checkAuth, manager.postJob );
   app.get( '/manage/job/:id', routes.checkAuth, manager.job );
   // Tasks
   app.get( '/manage/task/new', routes.checkAuth, manager.newTask );
-  app.post( '/manage/task/new', routes.checkAuth, manager.postTask );
+  //app.post( '/manage/task/new', routes.checkAuth, manager.postTask );
   app.get( '/manage/task/:id', routes.checkAuth, manager.task );
   // Microtasks
   app.get( '/manage/microtask/:id', routes.checkAuth, manager.microtask );

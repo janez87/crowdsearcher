@@ -146,20 +146,6 @@ API.logic = function getConfiguration( req, res ) {
     }
   }
 
-  // Return the field types... mmm not really necessary
-  if( property==='true' || force ) {
-    data.fieldTypes = [
-      'STRING',
-      'TEXT',
-      'URL',
-      'DATE',
-      'IMAGE',
-      'VIDEO',
-      'BLOB',
-      'NUMBER',
-      'INT'
-    ];
-  }
 
   // Compute and return the task types
   if( property==='true' || force ) {
@@ -183,37 +169,6 @@ API.logic = function getConfiguration( req, res ) {
     var objectControlStrategies = [];
 
     //TODO: FIx temp hack
-    objectControlStrategies.push( {
-      name: 'Majority',
-      actions: [
-        {
-          action: 'loopMajority',
-          mapping: {
-            agreement: 'agreement',
-            numberOfAnswer: 'numberOfAnswer'
-          },
-          events: [ 'END_EXECUTION' ]
-        },
-        {
-          action: 'aggregateMajority',
-          mapping: {
-            mode: 'mode',
-            operation: 'operation'
-          },
-          events: [ 'END_EXECUTION' ]
-        },
-      ],
-      params: {
-        agreement: [ 'string' ],
-        numberOfAnswer: [ 'string' ],
-        mode:{
-          type: 'enum',
-          values: ['ALL','ONE','SPECIFIC']
-        },
-        operation: ['string']
-      }
-    } );
-
     objectControlStrategies.push( {
       name: 'Check object status',
       actions: [

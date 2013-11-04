@@ -18,7 +18,14 @@ html(prefix="og: http://ogp.me/ns#")
 
     block libScripts
       include ../includes/libJS
-      script(src='javascripts/manager.js')
+      script(src='libs/markdown.js')
+      script(src='libs/moment.min.js')
+      script(src='libs/jquery.noty.js')
+      script(src='libs/jquery.noty.top.js')
+      script(src='libs/jquery.noty.center.js')
+      script(src='libs/jquery.noty.default.js')
+      script(src='libs/arg.min.js')
+      script(src='javascripts/utils.js')
 
   body
     .navbar.navbar-default.navbar-fixed-top.navbar-inverse(role='navigation')
