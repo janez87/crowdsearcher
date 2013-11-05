@@ -46,11 +46,13 @@ function execute( task, microtask, execution, platform, callback ) {
   return callback( null, tefUrl );
 }
 
-function create( task, microtask, config, callback ) {
+/*
+function create( task, platform, callback ) {
   log.trace( 'Creating TEF ????' );
 
   return callback();
 }
+*/
 
 
 function check( config, callback ) {

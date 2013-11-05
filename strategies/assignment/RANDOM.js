@@ -2,12 +2,10 @@
 // Load libraries
 var _ = require('underscore');
 var util = require('util');
-var async = require( 'async' );
-var domain = require( 'domain' );
 var CS = require( '../../core' );
 
 // Create a child logger
-var log = CS.log.child( { component: 'RoundRobin assignment' } );
+var log = CS.log.child( { component: 'Random assignment' } );
 
 
 // # Custom error
@@ -32,6 +30,7 @@ var strategy = {
   //
   // Description of what the perform rule does.
   perform: function performStrategy( event, params, task, data, callback ) {
+
     task
     .populate( {
       path: 'microtasks',
@@ -44,7 +43,7 @@ var strategy = {
       var microtasks = task.microtasks;
 
       var size = microtasks.length;
-      var selected = microtasks[ _.random( 0, size-1 ) ];
+      var selected = microtasks[ _.random( 0, size-1 ) ]._id;
 
       return callback( null, selected );
     } );

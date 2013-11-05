@@ -2,12 +2,14 @@
 // Load libraries
 var _ = require('underscore');
 var util = require('util');
-var async = require( 'async' );
 var CS = require( '../../core' );
 
 // Create a child logger
 var log = CS.log.child( { component: 'Random implementation' } );
 
+
+// Import CS models
+var Platform = CS.models.platform;
 
 // # Custom error
 //
@@ -31,12 +33,24 @@ var strategy = {
   //
   // Description of what the perform rule does.
   perform: function performStrategy( event, params, task, data, callback ) {
-    var size = task.platforms.length;
 
-    log.trace( '%j', task.platforms );
+    log.trace( 'Initial: %s', task.platforms.length );
+    task
+    .populate( {
+      path: 'platforms',
+      match: {
+        enabled: true,
+        execution: true
+      }
+    }, function( err, task ) {
+      if( err ) return callback( err );
 
-    var selected = task.platforms[ _.random( 0, size-1 ) ];
-    return callback( null, selected );
+      var size = task.platforms.length;
+      log.trace( 'Filterd: %s', size );
+
+      var selected = task.platforms[ _.random( 0, size-1 ) ]._id;
+      return callback( null, selected );
+    } );
   }
 };
 

@@ -104,6 +104,12 @@ block content
       #implementation.panel-collapse.collapse
         .panel-body
           include task/implementation
+    .panel.panel-default
+      .panel-heading
+        a.accordion-toggle(href="#invitation",data-toggle="collapse",data-parent="#accordion") Invitation strategy
+      #invitation.panel-collapse.collapse
+        .panel-body
+          include task/invitation
     
 
 

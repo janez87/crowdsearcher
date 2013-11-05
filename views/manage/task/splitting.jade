@@ -45,12 +45,12 @@ script.
     if( $( '#splitting_name' ).val()==='' )
       return;
 
-    var $ruleEvent = $( '#splitting_event' );
-    if( $ruleEvent.val()==='' ) {
+    var $splittingEvent = $( '#splitting_event' );
+    if( $splittingEvent.val()==='' ) {
       evt.stopImmediatePropagation();
       evt.stopPropagation();
       warnNoty( 'You must select a valid <b>event</b>' );
-      $ruleEvent.select();
+      $splittingEvent.select();
       return false;
     }
   } );

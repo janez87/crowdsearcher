@@ -10,6 +10,9 @@ var CS = require( '../../core' );
 var log = CS.log.child( { component: 'RoundRobin assignment' } );
 
 
+// Import CS models
+var Task = CS.models.task;
+
 // # Custom error
 //
 var CSError = require('../../core/error');
@@ -39,21 +42,16 @@ var strategy = {
   // ## Perform rule
   //
   // Description of what the perform rule does.
-  perform: function performStrategy( event, params, task, data, callback ) {
-    task
-    .populate( {
-      path: 'tasks',
-      match: {
-        status: 'CREATED'
-      }
-    }, function( err, task ) {
+  perform: function performStrategy( event, params, job, data, callback ) {
+    Task
+    .find()
+    .where( 'job', job._id )
+    .where( 'status' ).ne( 'CLOSED' )
+    .exec( function( err, tasks ) {
       if( err ) return callback( err );
 
-      var microtasks = task.microtasks;
-
-      var size = microtasks.length;
-      var selected = microtasks[ _.random( 0, size-1 ) ];
-
+      var size = tasks.length;
+      var selected = tasks[ _.random( 0, size-1 ) ]._id;
       return callback( null, selected );
     } );
   }

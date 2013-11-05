@@ -57,6 +57,8 @@ function getTaskObject() {
   task.assignmentStrategy = $( '#assignment_list .strategy' ).data( 'value' );
   // Implementation strategy
   task.implementationStrategy = $( '#implementation_list .strategy' ).data( 'value' );
+  // Invitation strategy
+  task.invitationStrategy = $( '#invitation_list .strategy' ).data( 'value' );
 
   // Control rules
   task.controlrules = $( '.list-group:not(#task_rule_list) .rule' ).map( function() {

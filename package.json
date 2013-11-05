@@ -1,10 +1,9 @@
 {
   "name": "CrowdSearcher",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "scripts": {
-    "start": "node cs.js | bunyan -o short",
-    "test": "mocha -c -R spec"
+    "start": "node cs.js | bunyan -o short"
   },
   "dependencies": {
     "express": "3.x",
