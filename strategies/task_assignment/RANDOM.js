@@ -31,14 +31,6 @@ RoundRobinError.prototype.name = 'RoundRobinError';
 //
 // STRATEGY DESCRIPTION
 var strategy = {
-  // ## Parameters
-  //
-  params: {
-    // Number of object for each Microtask.
-    objectsNumber: 'number',
-    // The data must be shuffled?
-    shuffle: 'boolean'
-  },
   // ## Perform rule
   //
   // Description of what the perform rule does.

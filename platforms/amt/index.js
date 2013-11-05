@@ -15,16 +15,15 @@ var Microtask = CS.models.microtask;
 // Create a child logger
 var log = CS.log.child( { component: 'AMT' } );
 
+
 function execute( task, microtask, execution, platform, callback ) {
-  log.trace( 'Executing the microtask %s', microtask.id );
+  var params = platform.params;
 
-  // TODO fix with param url
-  var url = 'https://workersandbox.mturk.com/mturk/preview?groupId=';
+  var url = ( params.sandbox )? 'https://workersandbox.mturk.com/' : 'https://www.mturk.com/';
+  url += 'mturk/preview?groupId=';
 
-  //Retrieving the hit type id for building the url
+  // TODO: save the hitType in the control Mart?
   var hitTypeMetadata = task.getMetadata('hitType');
-
-  log.trace('Redirecting the performer to %s',url+hitTypeMetadata);
 
   return  callback(null,url+hitTypeMetadata);
 }
@@ -138,9 +137,9 @@ function createExecution( task, microtask, platform, assignment, callback ) {
 }
 function remote( req, res ) {
   var task = req.task;
-  log.trace( 'Task(%s): %s', task._id, task.name );
 
   var eventType = req.query[ 'Event.1.EventType' ];
+
   // Skip if not supported
   if( eventType!=='AssignmentSubmitted' )
     return res.send( 'LOVE U' );
@@ -348,7 +347,6 @@ function create( task, microtask, platform, callback ){
 
 
 var Platform = {
-  invite: undefined,
   remote: remote,
   execute: execute,
   init: create,

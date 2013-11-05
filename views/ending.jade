@@ -4,31 +4,26 @@ html(prefix="og: http://ogp.me/ns#")
     base(href=appBase)
     title= data.name
 
-    block meta
-      include includes/metaOpenGraph
-      include includes/meta
-
-    block libCss
-      include includes/libCSS
-
-    block css
-      link(rel='stylesheet', href='stylesheets/ending.css')
-
-    block libScripts
-      include includes/libJS
-
+    include includes/metaOpenGraph
+    include includes/meta
+    include includes/libCSS
   body
     .container
-      .row.header
-        .span3
+      .row
+        .col-md-3
           a(href='http://crowdsearcher.search-computing.org/', target='_blank')
-            img.img-polaroid.pull-left.logos(src="img/logo-cs.png",title="CrowdSearcher platform")
-        .span6.text-center
-          h1 Completo!
-        .span3
+            img.img-thumbnail.img-responsive.logo(src="img/logo-cs.png",title="CrowdSearcher platform")
+        .col-md-6.text-center
+          h1 Completed
+        .col-md-3.text-right
           a(href='http://www.polimi.it/', target='_blank')
-            img.img-polaroid.pull-right.logos(src="img/logo-polimi.png",title="Politecnico di Milano")
+            img.img-thumbnail.img-responsive.logo(src="img/logo-polimi.png",title="Politecnico di Milano")
       hr
       .hero-unit
-        h1.text-success Grazie!
-        p!= content
+        h1.text-success.text-center Thanks!
+        if content
+          p!= content
+        else
+          h2 Thanks for performing the Task 
+            code= data.name
+            | !

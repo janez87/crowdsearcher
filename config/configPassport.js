@@ -166,7 +166,9 @@ function configPassport( callback ) {
     var localAuthUser = function( req, username, password, done ) {
       log.trace( 'Autenticating with local credentials user %s', username );
       User
-      .findByUsername( username, function( err, user ) {
+      .findOne()
+      .where( 'username', username )
+      .exec( function( err, user ) {
         if( err ) return done( err );
 
         if( !user )

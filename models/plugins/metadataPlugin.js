@@ -28,8 +28,7 @@ module.exports = exports = function ( schema ) {
       key: {
         type: String,
         required: true,
-        trim: true,
-        lowercase: true
+        trim: true
       },
       value: {
         type: Mixed,

@@ -39,6 +39,11 @@ $( 'a[data-entity][data-id]' ).on( 'click', function( evt ) {
   var action = data.action;
 
   function performAction() {
+    var n = noty( {
+      text: 'Wait please...',
+      modal: true
+    } );
+
     var url = baseUrl+'api/'+entity+'/'+id+'/'+action;
     if( method==='DELETE' )
       url = baseUrl+'api/'+entity+'?'+entity+'='+id;
@@ -46,6 +51,10 @@ $( 'a[data-entity][data-id]' ).on( 'click', function( evt ) {
     var req = $.ajax( {
       url: url,
       type: method
+    } );
+
+    req.always( function() {
+      n.close();
     } );
 
     req.done( function() {

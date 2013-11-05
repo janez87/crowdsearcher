@@ -65,6 +65,14 @@ function getTaskObject() {
     return $( this ).data( 'value' );
   } ).get();
 
+
+  // Hack to add the init_platforms.
+  task.controlrules.push( {
+    action: 'init_platforms',
+    event: 'ADD_MICROTASKS',
+    type: 'CUSTOM'
+  } );
+
   return task;
 }
 
@@ -250,7 +258,7 @@ $send.click( function() {
         }
       }, {
         addClass: 'btn btn-sm btn-primary',
-        text: '<i class="fa fa-cross"></i> Close',
+        text: '<i class="fa fa-times"></i> Close',
         onClick: function( n ) {
           n.close();
         }

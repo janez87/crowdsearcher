@@ -7,6 +7,9 @@ var CS = require( '../core' );
 // Use a child logger
 var log = CS.log.child( { component: 'Get Task List' } );
 
+// Import CS models
+var Task = CS.models.task;
+
 // Generate custom error `GetTaskListError` that inherits
 // from `APIError`
 var APIError = require( './error' );
@@ -44,8 +47,6 @@ API.logic = function getJob( req, res, next ) {
   var jobID = req.query.job;
   log.trace( 'Getting all the tasks for the job: %s', jobID );
 
-
-  var Task = CS.models.task;
   Task
   .find( { job: jobID } )
   .lean()

@@ -15,31 +15,37 @@ html(prefix="og: http://ogp.me/ns#")
 
   body
     .container
-      .row.header
-        .span3
+      .row
+        .col-md-3
           a(href='http://crowdsearcher.search-computing.org/', target='_blank')
-            img.img-polaroid.pull-left.logos(src="img/logo-cs.png",title="CrowdSearcher platform")
-        .span6.text-center
+            img.img-thumbnail.img-responsive.logo(src="img/logo-cs.png",title="CrowdSearcher platform")
+        .col-md-6.text-center
           h1= data.name
-        .span3
+        .col-md-3.text-right
           a(href='http://www.polimi.it/', target='_blank')
-            img.img-polaroid.pull-right.logos(src="img/logo-polimi.png",title="Politecnico di Milano")
+            img.img-thumbnail.img-responsive.logo(src="img/logo-polimi.png",title="Politecnico di Milano")
       hr
 
       if showLink
         .text-right
           if lang==='it'
-            a.btn.btn-large.btn-primary(href=link) Inizia 
-              i.icon-play
+            a.btn.btn-lg.btn-primary(href=link) Inizia 
+              i.fa.fa-play
           else
-            a.btn.btn-large.btn-primary(href=link) Start 
-              i.icon-play
-      p!= content || data.description
+            a.btn.btn-lg.btn-primary(href=link) Start 
+              i.fa.fa-play
+      if content || description
+        p!= content || data.description
+      else
+        h2.text-success Welcome!
+        h3 Click on the button to start the task 
+          code= data.name
+          | .
       if showLink==='both'
         .text-right
           if lang==='it'
-            a.btn.btn-large.btn-primary(href=link) Inizia 
-              i.icon-play
+            a.btn.btn-lg.btn-primary(href=link) Inizia 
+              i.fa.fa-play
           else
-            a.btn.btn-large.btn-primary(href=link) Start 
-              i.icon-play
+            a.btn.btn-lg.btn-primary(href=link) Start 
+              i.fa.fa-play

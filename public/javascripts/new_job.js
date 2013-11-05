@@ -58,6 +58,12 @@ $send.click( function() {
         onClick: function() {
           location.href = baseUrl+'manage/job/'+job._id;
         }
+      }, {
+        addClass: 'btn btn-sm btn-primary',
+        text: '<i class="fa fa-times"></i> Close',
+        onClick: function( n ) {
+          n.close();
+        }
       } ]
     } );
   } );

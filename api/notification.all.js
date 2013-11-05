@@ -9,6 +9,7 @@ var log = CS.log.child( { component: 'Notification API' } );
 
 // Import models
 var Task = CS.models.task;
+var Platform = CS.models.platform;
 
 // Generate custom error `NotificationError` that inherits
 // from `APIError`

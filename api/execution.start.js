@@ -49,8 +49,7 @@ API.logic = function startExecution( req, res, next ) {
     getExecutionAPI.logic( req, {
       json: function( data ) {
         if( arguments.length===2 ) {
-          var baseURL = nconf.get( 'webserver:externalAddress' );
-          return res.redirect( baseURL+'login' );
+          return res.json( arguments[0], arguments[1] );
         } else {
           return callback( null, data );
         }

@@ -12,13 +12,7 @@ var log = CS.log.child( { component: 'Init platforms' } );
 
 var Microtask = CS.models.microtask;
 
-
-var performRule = function( event, config, task, data, callback  ) {
-  log.trace( 'Running' );
-  log.trace( 'event: %s', data.event );
-  log.trace( 'task: %s', data.task._id );
-  log.trace( 'Microtasks: %s', data.microtasks.length );
-
+var performRule = function( event, config, task, data, callback ) {
   var microtasks = data.microtasks;
 
   // init CronJob for retrieving the data upon timed events
@@ -91,17 +85,15 @@ var performRule = function( event, config, task, data, callback  ) {
     } ) );
   };
 
-  // For each microtask
-  async.eachSeries( microtasks, getPlatforms, callback );
-};
+  Microtask
+  .find()
+  .where( '_id' ).in( microtasks )
+  .exec( d.bind( function( err, microtasks ) {
+    if( err ) return callback( err );
 
-var checkParameters = function( params, done ) {
-  log.trace( 'Checking parameters' );
-
-  // Everything went better then expected...
-  return done(true);
+    return async.eachSeries( microtasks, getPlatforms, callback );
+  } ) );
 };
 
 
 module.exports.perform = exports.perform = performRule;
-module.exports.check = exports.check = checkParameters;
