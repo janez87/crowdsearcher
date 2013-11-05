@@ -1,25 +1,24 @@
 
 // Load libraries
 var _ = require('underscore');
-var async = require('async');
 var util = require('util');
 var CS = require( '../../core' );
 
 // Create a child logger
-var log = CS.log.child( { component: 'ALL invitation' } );
+var log = CS.log.child( { component: 'Static implementation' } );
 
 
 // # Custom error
 //
 var CSError = require('../../core/error');
-var AllInvitationError = function( id, message ) {
+var StaticError = function( id, message ) {
   /* jshint camelcase: false */
-  AllInvitationError.super_.call( this, id, message);
+  StaticError.super_.call( this, id, message);
 };
-util.inherits( AllInvitationError, CSError );
+util.inherits( StaticError, CSError );
 
 // Error name
-AllInvitationError.prototype.name = 'AllInvitationError';
+StaticError.prototype.name = 'StaticError';
 // Custom error IDs
 
 
@@ -27,6 +26,13 @@ AllInvitationError.prototype.name = 'AllInvitationError';
 //
 // STRATEGY DESCRIPTION
 var strategy = {
+  // ## Parameters
+  //
+  params: {
+    // The platforms to use for the invitation.
+    platforms: ['string']
+  },
+
   // ## Perform rule
   //
   // Description of what the perform rule does.
@@ -37,19 +43,18 @@ var strategy = {
       path: 'platforms',
       match: {
         enabled: true,
-        invitation: true
+        execution: true,
+        name: {
+          $in: params.platforms
+        }
       }
     }, function( err, task ) {
       if( err ) return callback( err );
 
-      function invite( platform, cb ) {
-        var implementation = platform.implementation;
+      var size = task.platforms.length;
 
-        implementation.invite( task, platform, cb );
-
-      }
-
-      async.each( task.platforms, invite, callback );
+      var selected = task.platforms[ _.random( 0, size-1 ) ]._id;
+      return callback( null, selected );
     } );
   }
 };

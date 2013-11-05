@@ -6,20 +6,20 @@ var util = require('util');
 var CS = require( '../../core' );
 
 // Create a child logger
-var log = CS.log.child( { component: 'ALL invitation' } );
+var log = CS.log.child( { component: 'SPECIFY invitation' } );
 
 
 // # Custom error
 //
 var CSError = require('../../core/error');
-var AllInvitationError = function( id, message ) {
+var SpecifyInvitationError = function( id, message ) {
   /* jshint camelcase: false */
-  AllInvitationError.super_.call( this, id, message);
+  SpecifyInvitationError.super_.call( this, id, message);
 };
-util.inherits( AllInvitationError, CSError );
+util.inherits( SpecifyInvitationError, CSError );
 
 // Error name
-AllInvitationError.prototype.name = 'AllInvitationError';
+SpecifyInvitationError.prototype.name = 'SpecifyInvitationError';
 // Custom error IDs
 
 
@@ -27,6 +27,13 @@ AllInvitationError.prototype.name = 'AllInvitationError';
 //
 // STRATEGY DESCRIPTION
 var strategy = {
+  // ## Parameters
+  //
+  params: {
+    // The platforms to use for the invitation.
+    platforms: ['string']
+  },
+
   // ## Perform rule
   //
   // Description of what the perform rule does.
@@ -37,7 +44,10 @@ var strategy = {
       path: 'platforms',
       match: {
         enabled: true,
-        invitation: true
+        invitation: true,
+        name: {
+          $in: params.platforms
+        }
       }
     }, function( err, task ) {
       if( err ) return callback( err );

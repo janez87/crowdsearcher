@@ -5,7 +5,7 @@ var util = require('util');
 var CS = require( '../../core' );
 
 // Create a child logger
-var log = CS.log.child( { component: 'EquiSplit Splitting' } );
+var log = CS.log.child( { component: 'EquiSplit Group By' } );
 
 
 // Import Models.
@@ -14,19 +14,19 @@ var ObjectModel = CS.models.object;
 // # Custom error
 //
 var CSError = require('../../core/error');
-var EquiSplitError = function( id, message ) {
+var GroupByEquiSplitError = function( id, message ) {
   /* jshint camelcase: false */
-  EquiSplitError.super_.call( this, id, message);
+  GroupByEquiSplitError.super_.call( this, id, message);
 };
-util.inherits( EquiSplitError, CSError );
+util.inherits( GroupByEquiSplitError, CSError );
 
 // Error name
-EquiSplitError.prototype.name = 'EquiSplitError';
+GroupByEquiSplitError.prototype.name = 'GroupByEquiSplitError';
 
 // Custom error IDs
-EquiSplitError.ZERO_OBJECTS = 'ZERO_OBJECTS';
-EquiSplitError.CONFIGURATION_MISMATCH = 'CONFIGURATION_MISMATCH';
-EquiSplitError.MISSING_PARAMETERS = 'MISSING_PARAMETERS';
+GroupByEquiSplitError.ZERO_OBJECTS = 'ZERO_OBJECTS';
+GroupByEquiSplitError.CONFIGURATION_MISMATCH = 'CONFIGURATION_MISMATCH';
+GroupByEquiSplitError.MISSING_PARAMETERS = 'MISSING_PARAMETERS';
 
 
 // # EquiSplit Strategy

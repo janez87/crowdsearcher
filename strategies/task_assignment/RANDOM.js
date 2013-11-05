@@ -7,7 +7,7 @@ var domain = require( 'domain' );
 var CS = require( '../../core' );
 
 // Create a child logger
-var log = CS.log.child( { component: 'RoundRobin assignment' } );
+var log = CS.log.child( { component: 'Random assignment' } );
 
 
 // Import CS models
@@ -16,14 +16,14 @@ var Task = CS.models.task;
 // # Custom error
 //
 var CSError = require('../../core/error');
-var RoundRobinError = function( id, message ) {
+var RandomError = function( id, message ) {
   /* jshint camelcase: false */
-  RoundRobinError.super_.call( this, id, message);
+  RandomError.super_.call( this, id, message);
 };
-util.inherits( RoundRobinError, CSError );
+util.inherits( RandomError, CSError );
 
 // Error name
-RoundRobinError.prototype.name = 'RoundRobinError';
+RandomError.prototype.name = 'RandomError';
 // Custom error IDs
 
 

@@ -8,9 +8,6 @@ var CS = require( '../../core' );
 var log = CS.log.child( { component: 'Random implementation' } );
 
 
-// Import CS models
-var Platform = CS.models.platform;
-
 // # Custom error
 //
 var CSError = require('../../core/error');
@@ -34,7 +31,6 @@ var strategy = {
   // Description of what the perform rule does.
   perform: function performStrategy( event, params, task, data, callback ) {
 
-    log.trace( 'Initial: %s', task.platforms.length );
     task
     .populate( {
       path: 'platforms',
@@ -46,7 +42,6 @@ var strategy = {
       if( err ) return callback( err );
 
       var size = task.platforms.length;
-      log.trace( 'Filterd: %s', size );
 
       var selected = task.platforms[ _.random( 0, size-1 ) ]._id;
       return callback( null, selected );
