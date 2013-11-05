@@ -8,10 +8,10 @@
       <% if( operation.name==='classify' ) { %>
         <Question>
           <QuestionIdentifier><%= object._id+'_'+operation._id %></QuestionIdentifier>
-          <DisplayName>Test DisplayName</DisplayName>
+          <DisplayName><%= task.name %></DisplayName>
           <IsRequired>true</IsRequired>
           <QuestionContent>
-            <Text>Select the position</Text>
+            <Text><%= JSON.stringify( object.data, null, 2 ) %></Text>
           </QuestionContent>
           <AnswerSpecification>
             <SelectionAnswer>

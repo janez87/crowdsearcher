@@ -4,17 +4,6 @@
     "port": 2100
   },
 
-  "useCache": false,
-
-  "scripts": {
-    "path": "scripts",
-    "default": "default"
-  },
-
-  "operations": {
-    "path": "operations"
-  },
-
   "api": {
     "urlPath": "api",
     "path": "api"
@@ -22,25 +11,31 @@
 
   "mongo": {
       "url": "mongodb://localhost/CrowdSearcher",
-      "path": "data",
       "modelsPath": "models"
   },
 
+  "rules": {
+    "path": "rules"
+  },
 
+  "strategies": {
+    "path": "strategies",
+    "splitting": "splitting",
+    "taskAssignment": "task_assignment",
+    "assignment": "assignment",
+    "implementation": "implementation",
+    "invitation": "invitation"
+  },
+
+  "operations": {
+    "path": "operations"
+  },
   "platforms": {
     "path": "platforms"
   },
 
-  "social": {
-    "facebook": {
-      "clientID": "",
-      "clientSecret": ""
-    },
-    "twitter": {
-      "consumerKey": "",
-      "consumerSecret": ""
-    }
-  },
+  "social": {},
+
   "logger": {
     "path": "logs",
     "streams": {

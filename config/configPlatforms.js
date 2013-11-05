@@ -2,13 +2,14 @@
 var _  = require('underscore');
 var nconf = require( 'nconf' );
 var glob = require('glob');
+var CS = require( '../core' );
 
 
 // Configure Platforms
 // ---
 function configPlatforms( callback ) {
   // Import the log, cannot be loaded before because is not available.
-  var log = common.log;
+  var log = CS.log;
 
   // Wrap into a `try catch` to handle all errors
   try {
@@ -21,7 +22,7 @@ function configPlatforms( callback ) {
     var platformsBaseDir = platformConfiguration.path;
 
 
-    // 
+    //
     var options = {
       cwd: platformsBaseDir
     };
@@ -45,7 +46,7 @@ function configPlatforms( callback ) {
         platforms[ platform ] = require( file );
       } );
 
-      GLOBAL.common.platforms = platforms;
+      CS.platforms = platforms;
       // files is an array of filenames.
       callback();
     });

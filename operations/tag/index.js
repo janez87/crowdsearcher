@@ -2,16 +2,17 @@
 // Load libraries
 var _ = require('underscore');
 var util = require('util');
+var CS = require( '../../core' );
 
 // Import a child logger
-var log = common.log.child( { component: 'Tag operation' } );
+var log = CS.log.child( { component: 'Tag operation' } );
 
 
 // Import the models
-var Annotation = common.models.annotation;
+var Annotation = CS.models.annotation;
 
 // Create the TagError class
-var CSError = require('../../error');
+var CSError = require('../../core/error');
 // Create the TagError class
 var TagError = function( id, message ) {
   TagError.super_.call( this, id, message);

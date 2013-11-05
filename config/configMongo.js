@@ -5,11 +5,11 @@ var fs  = require('fs');
 var path = require( 'path' );
 var nconf = require( 'nconf' );
 var mongo = require('mongoose');
-//require( 'express-mongoose' );
+var CS = require( '../core' );
 
 
 function importModels() {
-  var log = common.log;
+  var log = CS.log;
   var models = {};
 
   var modelsDir = nconf.get( 'mongo:modelsPath' );
@@ -34,7 +34,7 @@ function importModels() {
 }
 
 function configMongo( callback ) {
-  var log = common.log;
+  var log = CS.log;
   // Configure mongo
   try {
     /*
@@ -46,13 +46,6 @@ function configMongo( callback ) {
 
     log.trace( 'Configuring mongodb using mongoose' );
     var mongoConfig = nconf.get( 'mongo' );
-
-    // Check if mongo path exists
-    var mongoPath = path.join( __dirname, '..', mongoConfig.path );
-    if( !fs.existsSync( mongoPath ) ) {
-      log.trace( 'Creating mongo data directory' );
-      fs.mkdirSync( mongoPath );
-    }
 
     var mongoUrl = mongoConfig.url;
     log.debug( 'Connecting to mongodb @ %s', mongoUrl );
@@ -72,15 +65,15 @@ function configMongo( callback ) {
       db.removeAllListeners( 'error' );
 
       // Global shortcut
-      common.db = db;
+      CS.db = db;
 
       // Import models
       var models = importModels();
-      common.models = {};
+      CS.models = {};
       _.each( models, function( value, key ) {
         log.trace( 'Adding model %s', key );
         var model = db.model( key, value );
-        common.models[ key ] = model;
+        CS.models[ key ] = model;
       } );
 
       callback();

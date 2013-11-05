@@ -30,6 +30,8 @@ html(prefix="og: http://ogp.me/ns#")
         a.navbar-brand(href=appBase)= title
 
       .collapse.navbar-collapse.navbar-top-collapse
+        ul.nav.navbar-nav
+          li: a(href='manage') CS manager
         ul.nav.navbar-nav.navbar-right
           if user
             li: a(href='account')= user.username || user.displayName

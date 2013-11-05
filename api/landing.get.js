@@ -4,13 +4,14 @@ var nconf = require( 'nconf' );
 var querystring = require( 'querystring' );
 var Showdown = require('showdown');
 var converter = new Showdown.converter();
+var CS = require( '../core' );
 
 // Use a child logger
-var log = common.log.child( { component: 'Landing page' } );
+var log = CS.log.child( { component: 'Landing page' } );
 
 // Import Models
-var Task = common.models.task;
-var Job = common.models.job;
+var Task = CS.models.task;
+var Job = CS.models.job;
 
 // Generate custom error `GetLandingPageError` that inherits
 // from `APIError`
@@ -94,7 +95,7 @@ API.logic = function getLanding( req, res, next ) {
     var data = {
       content: landing,
       link: url,
-      data: objModel,
+      data: objModel.toObject( { getters: true } ),
       showLink: showLink,
       lang: req.query.lang
     };

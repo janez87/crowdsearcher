@@ -3,13 +3,16 @@
 var _ = require( 'underscore' );
 var url = require( 'url' );
 var util = require( 'util' );
+var nconf = require( 'nconf' );
 var async = require( 'async' );
+var CS = require( '../core' );
 
 // Use a child logger
-var log = common.log.child( { component: 'Start Execution' } );
+var log = CS.log.child( { component: 'Start Execution' } );
 
 // Import other APIs
 var getExecutionAPI = require( './execution.get' );
+var Execution = CS.models.execution;
 
 // Generate custom error `StartExecutionError` that inherits
 // from `APIError`
@@ -43,15 +46,24 @@ API.logic = function startExecution( req, res, next ) {
   // Fake API call to `GET /api/execution`
   var getExecution = function( callback ) {
     // Make the fake call
-    getExecutionAPI.logic( req, res, callback );
+    getExecutionAPI.logic( req, {
+      json: function( data ) {
+        if( arguments.length===2 ) {
+          return res.json( arguments[0], arguments[1] );
+        } else {
+          return callback( null, data );
+        }
+      },
+      format: _.bind( res.format, res ),
+      redirect: _.bind( res.redirect, res )
+    }, next );
   };
 
   // From the id retrieve the Execution Object
-  var populateExecution = function( callback ) {
-    var query = req.queryObject;
-
-    query
-    .populate( 'task microtask operations platform' )
+  var populateExecution = function( execution, callback ) {
+    Execution
+    .findById( execution._id )
+    .populate( 'task microtask platform' )
     .exec( req.wrap( callback ) );
   };
 
@@ -61,7 +73,7 @@ API.logic = function startExecution( req, res, next ) {
 
     var platform = execution.platform;
     // Import the platform implementation
-    var platformImplementation = common.platforms[ platform.name ];
+    var platformImplementation = platform.implementation;
 
     try {
       platformImplementation.execute(
@@ -89,17 +101,9 @@ API.logic = function startExecution( req, res, next ) {
     if( !executionUrl )
       return next( new StartExecutionError( StartExecutionError.INVALID_URL, 'The platform did not provide a valid url' ) );
 
-    log.debug( 'Run execution complete' );
     var urlObj = url.parse( executionUrl, true );
     urlObj.search = null;
-    var qs = _.extend( urlObj.query, req.query );
-
-    log.trace( 'Params: %j', req.query );
-    log.trace( 'qs: %j', qs );
-
-    //urlObj.query = {};
     executionUrl = url.format( urlObj );
-    log.trace( 'Redirect url is %s', executionUrl );
 
     res.format( {
       html: function() {

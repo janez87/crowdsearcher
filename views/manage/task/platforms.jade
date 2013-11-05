@@ -1,0 +1,74 @@
+include ../../includes/params
+
+.row
+  .col-md-6
+    h3 Available platforms
+    .form-group
+      label(for="platform_name") Platform:
+      .input-group
+        select#platform_name.form-control.input-small(
+          data-toggle='collapse',
+          data-parent='#platforms-params')
+          option(value='',selected) None
+          each platform in config.platforms
+            option(
+              data-target='#pl-'+platform.name,
+              data-enabled=''+platform.enabled,
+              data-invitation=''+platform.invitation,
+              data-execution=''+platform.execution,
+              value=platform.name)= platform.name
+        span.input-group-btn
+          button.btn.btn-small.btn-success.add(
+            data-type='platform',
+            data-source='#platform_name',
+            data-target='#platform_list') Add 
+            i.fa.fa-plus
+    .form-group: .input-group
+      span.input-group-addon.input-small
+        input(
+          id='platform-enabled',
+          type='checkbox',
+          data-name='enabled')
+      label(for='platform-enabled') Enabled
+    .form-group: .input-group
+      span.input-group-addon.input-small
+        input(
+          id='platform-execution',
+          type='checkbox',
+          data-name='execution')
+      label(for='platform-execution') Execution
+    .form-group: .input-group
+      span.input-group-addon.input-small
+        input(
+          id='platform-invitation',
+          type='checkbox',
+          data-name='invitation')
+      label(for='platform-invitation') Invitaition
+    hr
+    #platforms-params
+      each platform in config.platforms
+        div.collapse(id='pl-'+platform.name)
+          h4 Platform parameters
+          if !_.isEmpty( platform.params ) 
+            +printParamsInput( platform.params, 'pl-'+platform.name )
+          else
+            blockquote No parameters needed
+  .col-md-6
+    h3 Selected platforms
+    ul#platform_list.list-group
+
+script.
+  $( '#platform_name', '#platforms' ).on( 'change', function() {
+    var $selected = $( 'option:selected', this );
+    var data = $selected.data();
+    var $platformEnabled = $( '#platform-enabled' );
+    var $platformExecution = $( '#platform-execution' );
+    var $platformInvitation = $( '#platform-invitation' );
+
+    $platformEnabled.prop( 'checked', data.enabled );
+
+    $platformInvitation.prop( 'checked', false );
+    $platformInvitation.prop( 'disabled', !data.invitation );
+    $platformExecution.prop( 'checked', false );
+    $platformExecution.prop( 'disabled', !data.execution );
+  } );

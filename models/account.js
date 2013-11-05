@@ -1,20 +1,30 @@
-
-
 // Load libraries
+var _  = require('underscore');
 var mongo = require('mongoose');
-//var log = common.log.child( { component: 'Account model' } );
+var CS = require( '../core' );
 
-// Import Mongo Classes and Objects
+// Create a child logger
+var log = CS.log.child( { component: 'Account model' } );
+
+// Import Mongoose Classes and Objects
 var Schema = mongo.Schema;
 
-// Import plugins
-var metadataPlugin = require( './plugins/metadata' );
+// # Account definition
+// The Account represent a User account on some social network.
 
-// User schema
+// ## Schema
+//
+// Mongoose schema for the Account entity.
 var AccountSchema = new Schema( {
+  // ### Account data, stick to Passport profile information.
+  //
+  // Name of the provider (Eg facebook, twitter).
   provider: {
     type: String,
-    index: true
+    index: true,
+    required: true,
+    lowercase: true,
+    trim: true
   },
 
   uid: {
@@ -35,12 +45,42 @@ var AccountSchema = new Schema( {
   token: String,
   tokenSecret: String,
 
-  _creationDate: {
-    type: 'date',
+  // ### Time data
+  //
+  // Creation date of the entity. By default it will be the first save of the object.
+  createdDate: {
+    required: true,
+    type: Date,
     'default': Date.now
   }
+},
+
+/// ## Schema options
+//
+{
+  // Do not allow to add random properties to the model.
+  strict: true,
+  // Disable index check in production.
+  autoIndex: process.env.PRODUCTION? false : true
 } );
 
-AccountSchema.plugin( metadataPlugin );
 
+
+
+
+
+
+
+
+
+
+// ## Plugins to add to the Account model.
+//
+// Add the `metadata` fileld to the entity.
+AccountSchema.plugin( require( './plugins/metadataPlugin' ) );
+
+
+
+
+// Export the schema.
 exports = module.exports = AccountSchema;

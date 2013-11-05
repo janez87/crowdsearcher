@@ -1,0 +1,66 @@
+extends layout
+
+include ../includes/metadata
+include ../includes/status
+
+block append libScripts
+  script(src='libs/markdown.js')
+  script(src='libs/moment.min.js')
+
+block header
+  .row
+    .col-md-6
+      h1 #{job.name} 
+        if job.alias
+          small: a(href='#', title='Run')= job.alias
+    .col-md-6.text-right
+      p: code= job._id
+      p: small= moment( job.creationDate ).format( 'YYYY-MM-DD HH:mm' )
+
+block content
+  .row
+    .col-md-6
+      .well.well-sm.md= job.description
+    .col-md-6
+      h3 Metadata
+      mixin printMetadata( job.metadata )
+  .row
+    .col-md-12
+      .pull-right
+        a.btn.btn-default(href='manage/task/new?job='+job._id) Add Task 
+          i.fa.fa-plus-square
+      h2 Task list
+      if tasks.length==0
+        .alert.alert-info No tasks for this job.
+      else
+        - var classMap = { 'CREATED': 'info', 'OPENED': 'success', 'FINALIZED': 'warning', 'CLOSED': 'danger' };
+        
+        table.table.table-striped.table-condensed.table-bordered.table-hover
+          thead
+            tr
+              th(style='width: 10%') ID
+              th(style='width: 60%') Name
+              th(style='width: 10%') Status
+              th(style='width: 20%') Actions
+          tbody
+            for task in tasks
+              tr(class=classMap[ task.status ])
+                td.text-center(title=task._id)
+                  if task.private
+                    i.fa.fa-lock
+                  else
+                    i.fa.fa-unlock
+                td= task.name
+                td: +printStatus( task.status )
+                td.text-right
+                  .btn-group
+                    a.btn.btn-xs.btn-default(href='manage/task/'+task._id)
+                      i.fa.fa-folder-open
+                      |  Details
+                    a.btn.btn-xs.btn-danger(
+                      href='#',
+                      data-id=task._id,
+                      data-entity='task',
+                      data-method='DELETE')
+                      i.fa.fa-trash-o
+                      |  Remove

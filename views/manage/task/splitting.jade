@@ -1,0 +1,56 @@
+include ../../includes/params
+
+.row
+  .col-md-6
+    h3 Available splitting strategies
+    .form-group
+      label(for="splitting_name") Strategy:
+      .input-group
+        select#splitting_name.form-control.input-small(
+          data-toggle='collapse',
+          data-parent='#splitting-params')
+          option(value='',selected) None
+          each splitting in config.splitting
+            option(
+              data-target='#split-'+splitting.name,
+              value=splitting.name)= splitting.name
+        span.input-group-btn
+          button.btn.btn-small.btn-success.add(
+            data-type='strategy rule',
+            data-source='#splitting_name',
+            data-target='#splitting_list') Add 
+              i.fa.fa-plus 
+    .form-group: input(type='hidden',data-name='type', value='SPLITTING')
+    .form-group
+      label(for="splitting_event") Event:
+      select#splitting_event.form-control.input-small(data-name='event')
+        option(value='',selected) None
+        each eventName in config.events
+          option(value=eventName)= eventName
+    hr
+    #splitting-params
+      each splitting in config.splitting
+        div.collapse(id='split-'+splitting.name)
+          h4 Splitting strategy parameters
+          if !_.isEmpty( splitting.params ) 
+            +printParamsInput( splitting.params, 'split-'+splitting.name )
+          else
+            blockquote No parameters needed
+  .col-md-6
+    h3 Selected splitting
+    ul#splitting_list.list-group
+
+script.
+  $( '.add' ).on( 'click', function ( evt ) {
+    if( $( '#splitting_name' ).val()==='' )
+      return;
+
+    var $splittingEvent = $( '#splitting_event' );
+    if( $splittingEvent.val()==='' ) {
+      evt.stopImmediatePropagation();
+      evt.stopPropagation();
+      warnNoty( 'You must select a valid <b>event</b>' );
+      $splittingEvent.select();
+      return false;
+    }
+  } );

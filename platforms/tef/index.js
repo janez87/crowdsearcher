@@ -3,14 +3,15 @@ var _ = require('underscore');
 var domain = require( 'domain' );
 var url = require('url');
 var util = require('util');
+var CS = require( '../../core' );
 
 // Create a custom logger
-var log = common.log.child( { component: 'TEF platform' } );
+var log = CS.log.child( { component: 'TEF platform' } );
 
 
 // Custom error
 // ---
-var CSError = require('../../error');
+var CSError = require('../../core/error');
 var TefPlatformError = function( id, message ) {
   /* jshint camelcase: false */
   TefPlatformError.super_.call( this, id, message);
@@ -45,11 +46,13 @@ function execute( task, microtask, execution, platform, callback ) {
   return callback( null, tefUrl );
 }
 
-function create( task, microtask, config, callback ) {
+/*
+function create( task, platform, callback ) {
   log.trace( 'Creating TEF ????' );
 
   return callback();
 }
+*/
 
 
 function check( config, callback ) {
@@ -67,14 +70,10 @@ function check( config, callback ) {
 var Platform = {
   execute: execute,
   check: check,
-  init: create,
-
-  enabled: true,
 
   params: {
     url: {
-      type: 'url',
-      'default': '$baseUrl$'
+      type: 'url'
     },
     'interface': 'string'
   }

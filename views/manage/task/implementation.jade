@@ -1,0 +1,33 @@
+include ../../includes/params
+
+.row
+  .col-md-6
+    h3 Available implementation strategies
+    .form-group
+      label(for="implementation_name") Strategy:
+      .input-group
+        select#implementation_name.form-control.input-small(
+          data-toggle='collapse',
+          data-parent='#implementation-params')
+          option(value='',selected) None
+          each implementation in config.implementation
+            option(
+              data-target='#impl-'+implementation.name,
+              value=implementation.name)= implementation.name
+        span.input-group-btn
+          button.btn.btn-small.btn-success.add(
+            data-type='strategy',
+            data-source='#implementation_name',
+            data-target='#implementation_list') Set 
+    hr
+    #implementation-params
+      each implementation in config.implementation
+        div.collapse(id='impl-'+implementation.name)
+          h4 Implementation strategy parameters
+          if !_.isEmpty( implementation.params ) 
+            +printParamsInput( implementation.params, 'impl-'+implementation.name )
+          else
+            blockquote No parameters needed
+  .col-md-6
+    h3 Selected implementation
+    ul#implementation_list.list-group

@@ -14,7 +14,8 @@
     "./scripts/**",
     "./views/**",
     "./uploads/**",
-    "./docs/**"
+    "./docs/**",
+    "./tests/**"
   ],
 
   "out": "./docs",

@@ -2,16 +2,17 @@
 // Load libraries
 var _ = require('underscore');
 var util = require('util');
+var CS = require( '../../core' );
 
 // Import a child logger
-var log = common.log.child( { component: 'Classify operation' } );
+var log = CS.log.child( { component: 'Classify operation' } );
 
 
 // Import the Annotation model
-var Annotation = common.models.annotation;
+var Annotation = CS.models.annotation;
 
 // Create the ClassifyError class
-var CSError = require('../../error');
+var CSError = require('../../core/error');
 // Create the ClassifyError class
 var ClassifyError = function( id, message ) {
   /* jshint camelcase: false */
@@ -26,7 +27,7 @@ ClassifyError.CLASSIFY_BAD_FORMAT = 'CLASSIFY_BAD_FORMAT';
 ClassifyError.CLASSIFY_BAD_CATEGORIES = 'CLASSIFY_BAD_CATEGORIES';
 
 
-function checkData( data, operation ) {
+function check( data, operation ) {
   var params = operation.params;
   log.debug( 'Checking %j', data );
   log.debug( 'Operation parametes: %j', params );
@@ -92,7 +93,7 @@ function create( data, operation, callback ) {
 
 // Define the Operation Object
 var Classify = {
-  checkData: checkData,
+  checkData: check,
   create: create,
   params: {
     categories: {

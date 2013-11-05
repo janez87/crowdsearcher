@@ -3,6 +3,7 @@ var _  = require('underscore');
 var nconf = require( 'nconf' );
 var passport = require( 'passport' );
 var async = require('async');
+var CS = require( '../core' );
 
 // URL to update the Access Token
 // https://graph.facebook.com/oauth/access_token
@@ -15,8 +16,8 @@ var async = require('async');
 // https://developers.facebook.com/docs/howtos/login/debugging-access-tokens/
 
 function linkAccountToUser( req, token, tokenSecret, profile, done ) {
-  var log = common.log;
-  var User = common.models.user;
+  var log = CS.log;
+  var User = CS.models.user;
 
   log.trace( 'Connecting provider %s (%s)', profile.provider, profile.id );
   //log.trace( 'Profile data for (%s): %j', profile.username, profile );
@@ -141,11 +142,9 @@ function linkAccountToUser( req, token, tokenSecret, profile, done ) {
 function configPassport( callback ) {
   try {
 
-    var log = common.log;
-    var User = common.models.user;
+    var log = CS.log;
+    var User = CS.models.user;
 
-    var FacebookStrategy = require( 'passport-facebook' ).Strategy;
-    var TwitterStrategy = require( 'passport-twitter' ).Strategy;
     var LocalStrategy = require( 'passport-local' ).Strategy;
 
     passport.serializeUser( function( user, done ) {
@@ -156,14 +155,20 @@ function configPassport( callback ) {
       log.trace( 'Deserializing (%s)', id );
       User
       .findById( id )
-      .exec( done );
+      .exec( function( err, user ) {
+        if( err ) return done( err );
+
+        return done( null, user );
+      } );
     } );
 
     // Local
     var localAuthUser = function( req, username, password, done ) {
       log.trace( 'Autenticating with local credentials user %s', username );
       User
-      .findByUsername( username, function( err, user ) {
+      .findOne()
+      .where( 'username', username )
+      .exec( function( err, user ) {
         if( err ) return done( err );
 
         if( !user )
@@ -182,24 +187,31 @@ function configPassport( callback ) {
 
     var baseURL = nconf.get( 'webserver:externalAddress' );
 
-    // Facebook
-    var fbConfig = _.extend( {}, nconf.get( 'social:facebook' ), {
-      callbackURL: baseURL+'connect/facebook/callback',
-      passReqToCallback: true
-    } );
-    passport.use( new FacebookStrategy( fbConfig, linkAccountToUser ) );
 
-    // Twitter
-    var twConfig = _.extend( {}, nconf.get( 'social:twitter' ), {
-      callbackURL: baseURL+'connect/twitter/callback',
-      passReqToCallback: true
-    } );
-    passport.use( new TwitterStrategy( twConfig, linkAccountToUser ) );
+    // Load social-logins based on configured strategies
+    CS.social = {};
+    var socialMap = nconf.get( 'social' );
+    _.each( socialMap, function( config, name ) {
+      var packageName = config[ 'package' ] || 'passport-'+name;
+      var strategyConfig = config.strategyConfig || {};
+      var strategyProperty = config.strategyName || 'Strategy';
 
-    callback();
+      strategyConfig = _.defaults( {
+        callbackURL: baseURL+'connect/'+name+'/callback',
+        passReqToCallback: true
+      }, strategyConfig );
+
+      var Strategy = require( packageName )[ strategyProperty ];
+      passport.use( new Strategy( strategyConfig, linkAccountToUser ) );
+
+      // Add the socual network to the CS.
+      CS.social[ name] = config;
+    } );
+
+    return callback();
   } catch( err ) {
     console.error( 'Passport configuration error', err );
-    callback( err );
+    return callback( err );
   }
 }
 

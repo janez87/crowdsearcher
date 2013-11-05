@@ -1,0 +1,10 @@
+mixin printMetadata( metadata )
+  if metadata && metadata.length>0
+    dl.dl-horizontal
+      each data in metadata
+        dt(title=data.key) #{data.key}:
+        dd: code= data.value
+  else
+    .alert.alert-info
+      strong Info: 
+      | No metadata...

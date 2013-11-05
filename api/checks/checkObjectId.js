@@ -3,12 +3,13 @@
 // Load libraries
 var _  = require('underscore');
 var util  = require('util');
+var CS = require( '../../core' );
 
 // Import a child Logger
-//var log = common.log.child( { component: 'Check Objects' } );
+//var log = CS.log.child( { component: 'Check Objects' } );
 
 // Import the ObjectModel
-var ObjectModel = common.models.object;
+var ObjectModel = CS.models.object;
 
 // Generate custom error `CheckObjectError` that inherits
 // from `APIError`
@@ -47,7 +48,7 @@ exports = module.exports = function checkObjects( req, res, next ) {
 
     if( !object )
       return next( new CheckObjectError( CheckObjectError.OBJECT_NOT_FOUND, 'Object not found', APIError.NOT_FOUND ) );
-    
+
     log.trace( 'Object %s ok', id );
 
     // Pass the retrieved Object

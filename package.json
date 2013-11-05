@@ -1,46 +1,39 @@
 {
   "name": "CrowdSearcher",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "scripts": {
-    "start": "node cs.js | bunyan -o short",
-    "test": "mocha -c -R spec"
+    "start": "node cs.js | bunyan -o short"
   },
   "dependencies": {
     "express": "3.x",
-
-    "coffee-script": "*",
-    "stylus": "*",
-    "jade": "*",
-    "showdown": "*",
+    "coffee-script": "1.6.x",
+    "stylus": "0.x",
+    "jade": "0.x",
+    "showdown": "0.3.x",
     "express-coffee": "*",
-
-    "nconf": "*",
-    "bunyan": "*",
-    "underscore": "*",
-    "underscore.string": "*",
-
-    "request": "*",
-    "async": "*",
+    "nconf": "0.6.x",
+    "bunyan": "0.21.x",
+    "underscore": "1.5.x",
+    "underscore.string": "2.3.x",
+    "request": "2.x",
+    "async": "0.2.x",
     "mongoose": "3.6.x",
-    "q": "*",
-
-    "passport": "*",
-    "passport-local": "*",
-    "passport-oauth": "*",
-    "passport-facebook": "*",
-    "passport-twitter": "*",
-    "connect-flash": "*",
-
-    "glob": "*",
-
-    "fb": "*",
-    "amt": "*",
-    "twit":"*",
-
-    "node-schedule": "*",
-
-    "nodemailer":"*"
+    "connect-flash": "0.1.x",
+    "glob": "3.2.x",
+    "fb": "0.6.x",
+    "amt": "0.1.x",
+    "twit": "1.1.x",
+    "nodemailer": "0.5.x",
+    "markdown": "0.5.x",
+    "moment": "2.3.x",
+    "passport": "0.1.x",
+    "passport-local": "0.1.x",
+    "passport-facebook": "1.0.x",
+    "passport-twitter": "1.0.x",
+    "passport-github": "0.1.x",
+    "passport-google-oauth": "0.1.x",
+    "node-schedule": "0.1.x"
   },
   "devDependencies": {
     "supertest": "*",

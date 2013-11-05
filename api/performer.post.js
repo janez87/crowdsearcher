@@ -3,12 +3,13 @@
 // Load libraries
 var _ = require( 'underscore' );
 var util = require( 'util' );
+var CS = require( '../core' );
 
 // Import the required Models
-var Performer = common.models.user;
+var Performer = CS.models.user;
 
 // Use a child logger
-var log = common.log.child( { component: 'Post Performer' } );
+var log = CS.log.child( { component: 'Post Performer' } );
 
 // Generate custom error `PostPerformerError` that inherits
 // from `APIError`
@@ -43,26 +44,14 @@ var API = {
 API.logic = function postPerformer( req, res, next ) {
   log.trace( 'Performer poster' );
 
-  var rawPerformers = _.clone( req.body );
+  var rawPerformer = req.body;
+  var performer = new Performer( rawPerformer );
 
-  if( !_.isArray( rawPerformers ) )
-    rawPerformers = [ rawPerformers ];
-
-
-  Performer.create( rawPerformers, req.wrap( function( err ) {
+  req.wrap( 'save', performer )( function( err, performer ) {
     if( err ) return next( err );
 
-    var argArray =  _.toArray( arguments );
-    var performers = argArray.slice( 1 );
-    var performerIds = _.map( performers, function( perf ) {
-      return perf._id;
-    } );
-
-    log.trace('Performers created');
-    return res.json( {
-      performers: performerIds
-    } );
-  } ) );
+    return res.json( performer.toObject( { getters: true } ) );
+  } );
 };
 
 

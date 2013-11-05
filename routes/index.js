@@ -1,13 +1,12 @@
-
-
 // Load libraries
 var nconf = require( 'nconf' );
+var CS = require( '../core' );
 
 // Create a child logger
-var log = common.log.child( { component: 'Index Routes' } );
+var log = CS.log.child( { component: 'Index Routes' } );
 
 // Load mongo Models
-var UserSchema = common.models.user;
+var UserSchema = CS.models.user;
 
 
 // Render the home page.
@@ -23,9 +22,12 @@ exports.checkAuth = function( req, res, next ) {
   log.trace( 'Checking if user is authenticated' );
   if( !req.isAuthenticated() ) {
     var baseURL = nconf.get( 'webserver:externalAddress' );
+
+    req.session.destination = req.originalUrl.slice(1);
+
     return res.redirect( baseURL+'login' );
   } else {
-    next();
+    return next();
   }
 };
 // Handler for registering a new user
@@ -33,7 +35,7 @@ exports.postRegister = function( req, res, next ) {
   var rawUser = req.body;
 
   // Create the Mongoose document
-  log.trace( 'Registering new user %j', rawUser.username );
+  log.trace( 'Registering new user %s', rawUser.username );
   var user = new UserSchema( rawUser );
 
   // Check if the `from` field is present in session
@@ -61,7 +63,8 @@ exports.login = function( req, res ) {
   req.session.from = req.query.from || req.session.from;
 
   res.render( 'login', {
-    errorMessage: req.flash( 'error' )
+    errorMessage: req.flash( 'error' ),
+    socialMap: CS.social
   } );
 };
 exports.logout = function( req, res ) {

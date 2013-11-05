@@ -55,8 +55,7 @@ npm-debug.log
 ### SublimeText project files
 *.sublime-workspace
 
-### Skip data
-data/*
+### Skip docs
 docs
 
 # ignore override config file

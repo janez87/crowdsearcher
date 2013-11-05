@@ -1,0 +1,38 @@
+extends layout
+
+include ../includes/metadata
+include ../includes/status
+
+block header
+  .text-center
+    h1 Object details
+  hr
+  .row
+    .col-md-4
+      a.btn.btn-sm.btn-default(href='manage/task/'+object.task)
+          i.fa.fa-folder-open
+          |  Task
+    .col-md-4.text-center
+      h3: +printStatus( object.status )
+    .col-md-4.text-right
+      p: code= object._id
+      p
+        small= moment( object.creationDate ).format( 'YYYY-MM-DD HH:mm' )
+        |  
+        i.fa.fa-angle-double-right
+        |  
+        if object.closed
+          small= moment( object.closedDate ).format( 'YYYY-MM-DD HH:mm' )
+        else
+          a.btn.btn-xs.btn-primary#close(
+            href='#',
+            data-destination,
+            data-action='close',
+            data-id=object._id,
+            data-entity='object',
+            data-method='POST') Close
+  hr
+
+block content
+  h3 Data content:
+  pre= JSON.stringify( object.data, null, 2)

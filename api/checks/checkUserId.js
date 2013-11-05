@@ -3,12 +3,13 @@
 // Load libraries
 var _  = require('underscore');
 var util  = require('util');
+var CS = require( '../../core' );
 
 // Import a child Logger
-var log = common.log.child( { component: 'Check User ID' } );
+var log = CS.log.child( { component: 'Check User ID' } );
 
 // Import the User Model
-var User = common.models.user;
+var User = CS.models.user;
 
 // Generate custom error `CheckUserIdError` that inherits
 // from `APIError`

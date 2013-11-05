@@ -36,6 +36,9 @@ var flash = require('connect-flash');
 var nconf = require( 'nconf' );
 var domain = require( 'domain' );
 var passport = require( 'passport' );
+var moment = require( 'moment' );
+var markdown = require( 'markdown' ).markdown;
+var CS = require( './core' );
 
 // Configure the Express app
 // ---
@@ -56,7 +59,10 @@ app.configure( function() {
   // Export some properities to the views
   app.locals( {
     // Like the title
-    title: 'CrowdSearcher'
+    title: 'CrowdSearcher',
+    md: markdown.toHTML,
+    moment: moment,
+    _: _
   } );
 
 
@@ -112,13 +118,6 @@ app.configure( function() {
   // Used with PassportJS to create *request scoped* messages
   app.use( flash() );
 
-  // Complie on the fly coffeescripts files
-  app.use(require('express-coffee')({
-    path: publicPath,
-    live: !process.env.PRODUCTION,
-    uglify: process.env.PRODUCTION
-  }));
-
   // Complie on the fly stylus files
   app.use( require('stylus').middleware( publicPath ) );
 
@@ -127,15 +126,17 @@ app.configure( function() {
 
 
   // ### PassportJS
-  app.use(passport.initialize());
-  app.use(passport.session());
+  app.use( passport.initialize() );
+  app.use( passport.session() );
 
   // Pass user to the views
   app.use( function( req, res, next ) {
-    // Add th user to the views object
-    app.locals( {
-      user: req.user
-    } );
+    if( req.path.split( '/' )[1]!=='api' ) {
+      // Add th user to the views object
+      app.locals( {
+        user: req.user
+      } );
+    }
 
     return next();
   } );
@@ -149,7 +150,7 @@ app.configure( function() {
 // Server
 var serverError = function( error ) {
   // Import the logger
-  var log = common.log;
+  var log = CS.log;
 
   log.error( error );
   if( error.code==='EADDRINUSE' ) {
@@ -187,7 +188,7 @@ config.once( 'ready', function configReady() {
   var accountRoutes = require('./routes/account');
 
   // Import the logger
-  var log = common.log;
+  var log = CS.log;
 
   var baseURL = nconf.get( 'webserver:externalAddress' );
   // Pass the application external url to all the views
@@ -224,6 +225,25 @@ config.once( 'ready', function configReady() {
   // Home page
   app.get( '/', routes.index );
 
+  // CS Manager
+  var manager = require( './routes/manager' );
+  app.get( '/manage', routes.checkAuth, manager.index );
+  // Jobs
+  app.get( '/manage/jobs', routes.checkAuth, manager.jobs );
+  app.get( '/manage/job/new', routes.checkAuth, manager.newJob );
+  //app.post( '/manage/job/new', routes.checkAuth, manager.postJob );
+  app.get( '/manage/job/:id', routes.checkAuth, manager.job );
+  // Tasks
+  app.get( '/manage/task/new', routes.checkAuth, manager.newTask );
+  //app.post( '/manage/task/new', routes.checkAuth, manager.postTask );
+  app.get( '/manage/task/:id', routes.checkAuth, manager.task );
+  // Microtasks
+  app.get( '/manage/microtask/:id', routes.checkAuth, manager.microtask );
+  // Objects
+  app.get( '/manage/object/:id', routes.checkAuth, manager.object );
+  // Answers
+  app.get( '/manage/answers', routes.checkAuth, manager.answers );
+
 
   var accountRedirect = function( req, res ) {
     log.trace( 'Session destination: %s', req.session.destination );
@@ -245,33 +265,24 @@ config.once( 'ready', function configReady() {
   app.get(  '/account', routes.checkAuth, accountRoutes.index );
 
 
-  // Autentication endpoints
-  var twAuth = passport.authorize( 'twitter', {
-    failureRedirect: baseURL+'login',
-    failureFlash: true
+  // Autentication endpoints based on configured socual networks
+  var socialMap = CS.social;
+  _.each( socialMap, function ( config, name ) {
+    var authConfig = _.defaults( {
+      failureRedirect: baseURL+'login',
+      failureFlash: true
+    }, config.authConfig );
+
+    var passportAuth = passport.authorize( name, authConfig );
+
+    app.get(  '/connect/'+name, passportAuth, accountRedirect );
+    app.get(  '/connect/'+name+'/callback', passportAuth, accountRedirect );
   } );
-
-  var fbAuth = passport.authorize( 'facebook', {
-    failureRedirect: baseURL+'login',
-    failureFlash: true,
-    scope: [
-      'email',
-      'publish_stream',
-      'read_stream',
-      'user_birthday'
-    ]
-  } );
-
-  app.get(  '/connect/twitter', twAuth, accountRedirect );
-  app.get(  '/connect/facebook', fbAuth, accountRedirect );
-
-  app.get(  '/connect/twitter/callback', twAuth, accountRedirect );
-  app.get(  '/connect/facebook/callback', fbAuth, accountRedirect );
 
 
   // Handle random request
   app.all('*', function randomUrlHandler( req, res ) {
-    log.trace( 'Requested "%s %s" by %s', req.method, req.originalUrl, req.ip );
+    log.warn( 'Requested "%s %s" by %s', req.method, req.originalUrl, req.ip );
     res.status( 404 );
     res.format( {
       html: function() {

@@ -3,12 +3,13 @@
 // Load libraries
 var _  = require('underscore');
 var util  = require('util');
+var CS = require( '../../core' );
 
 // Import a child Logger
-//var log = common.log.child( { component: 'Check Job' } );
+//var log = CS.log.child( { component: 'Check Job' } );
 
 // Import the Job Model
-var Job = common.models.job;
+var Job = CS.models.job;
 
 // Generate custom error `CheckJobError` that inherits
 // from `APIError`
@@ -47,12 +48,12 @@ exports = module.exports = function checkJob(req, res, next) {
 
     if( !job )
       return next( new CheckJobError( CheckJobError.JOB_NOT_FOUND, 'Job not found', APIError.NOT_FOUND ) );
-    
+
     log.trace( 'Job %s ok', id );
 
     // Pass the retrieved microtask
     req.job = job;
-    
+
     return next();
   } ) );
   */

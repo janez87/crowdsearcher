@@ -18,12 +18,10 @@
 
   "devel": true,
   "node": true,
-  
+
 
   "indent": 2,
 
   "globals": {
-    "GLOBAL": false,
-    "common": false
   }
 }
