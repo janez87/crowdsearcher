@@ -62,7 +62,7 @@ API.logic = function getConfiguration( req, res ) {
 
 
   // Compute and return the invitation strategies
-  if( property==='true' || force ) {
+  if( property==='invitation' || force ) {
     var invitation = [];
     _.each( CS.invitation, function( strategy, name ) {
       invitation.push( {
@@ -79,7 +79,7 @@ API.logic = function getConfiguration( req, res ) {
   }
 
   // Compute and return the splitting strategies
-  if( property==='true' || force ) {
+  if( property==='splitting' || force ) {
     var splitting = [];
     _.each( CS.splitting, function( strategy, name ) {
       splitting.push( {
@@ -113,7 +113,7 @@ API.logic = function getConfiguration( req, res ) {
   }
 
   // Compute and return the Microtask assignment strategies
-  if( property==='true' || force ) {
+  if( property==='assignment' || force ) {
     var assignment = [];
     _.each( CS.assignment, function( strategy, name ) {
       assignment.push( {
@@ -130,7 +130,7 @@ API.logic = function getConfiguration( req, res ) {
   }
 
   // Compute and return the implementation strategies
-  if( property==='true' || force ) {
+  if( property==='implementation' || force ) {
     var implementation = [];
     _.each( CS.implementation, function( strategy, name ) {
       implementation.push( {
@@ -148,7 +148,7 @@ API.logic = function getConfiguration( req, res ) {
 
 
   // Compute and return the task types
-  if( property==='true' || force ) {
+  if( property==='operations' || force ) {
     var operations = [];
     _.each( CS.operations, function( operation, name ) {
       operations.push( {
@@ -165,7 +165,7 @@ API.logic = function getConfiguration( req, res ) {
 
 
   // Compute and return the object control strategies
-  if( property==='true' || force ) {
+  if( property==='objectControlStrategies' || force ) {
     var objectControlStrategies = [];
 
     //TODO: FIx temp hack
@@ -184,7 +184,6 @@ API.logic = function getConfiguration( req, res ) {
     } );
 
 
-
     if( force ) {
       data.objectControlStrategies = objectControlStrategies;
     } else {
@@ -193,7 +192,7 @@ API.logic = function getConfiguration( req, res ) {
   }
 
   // Compute and return the performer control strategies
-  if( property==='true' || force ) {
+  if( property==='performerControlStrategies' || force ) {
     var performerControlStrategies = [];
     if( force ) {
       data.performerControlStrategies = performerControlStrategies;
@@ -228,7 +227,7 @@ API.logic = function getConfiguration( req, res ) {
   }
 
   // Compute and return the task control strategies
-  if( property==='true' || force ) {
+  if( property==='taskControlStrategies' || force ) {
     var taskControlStrategies = [];
     if( force ) {
       data.taskControlStrategies = taskControlStrategies;
@@ -255,11 +254,11 @@ API.logic = function getConfiguration( req, res ) {
 
 
   // Return the available events
-  if( property==='true' || force ) {
+  if( property==='events' || force ) {
     data.events = [
       'OPEN_TASK',
-      'END_TASK',
       'EOF_TASK',
+      'END_TASK',
 
       'ADD_OBJECTS',
       'CLOSE_OBJECT',
@@ -273,7 +272,7 @@ API.logic = function getConfiguration( req, res ) {
   }
 
   // Compute and return the list of available custom control rules
-  if( property==='true' || force ) {
+  if( property==='rules' || force ) {
     data.rules = [];
     _.each( CS.rules, function( customRule, name ) {
       data.rules.push( {

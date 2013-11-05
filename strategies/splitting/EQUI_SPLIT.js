@@ -74,7 +74,7 @@ var strategy = {
       // Will handle the list of raw microtask to create.
       var microtaskToCreate = [];
 
-      // Split the array into smaller array, each containing `objectsNumber` elements.
+      // Split the array into smaller array, each containing at most `objectsNumber` elements.
       var i, j, subArray;
       for( i=0, j=objects.length; i<j; i+=params.objectsNumber ) {
         var start = i;

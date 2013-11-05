@@ -11,29 +11,26 @@ var log = CS.log.child( { component: 'Limit Task Execution' } );
 var Execution = CS.models.execution;
 
 var performRule = function( event, config, task, data, callback ) {
-  log.trace('Performing the rule');
-
   var d = domain.create();
-  d.on('error', callback );
+  d.on( 'error', callback );
 
   var maxExecution = config.maxExecution;
 
   Execution
   .find()
   .where( 'task', task._id )
+  .where( 'status', 'CLOSED' )
   .count()
   .exec( d.bind( function( err, count ) {
     if( err ) return callback( err );
 
-    log.trace( 'Found %s executions of %s max', count, maxExecution );
-
-    // Max reached, close task
+    // Max reached, close Microtask
     if( count===maxExecution )
-      return task.closeTask( d.bind( callback ) );
+      return task.close( d.bind( callback ) );
 
     // No problem, go ahead
     return callback();
-  }) );
+  } ) );
 };
 
 var checkParameters = function( params, done ) {

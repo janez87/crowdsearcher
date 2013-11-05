@@ -1,78 +1,59 @@
 
 // Load libraries
 var _ = require('underscore');
+var async = require('async');
 var CS = require( '../core' );
+var domain = require( 'domain' );
 
 // Create a child logger
-var log = CS.log.child( { component: 'Close MicroTask' } );
+var log = CS.log.child( { component: 'Close Microtask' } );
 
 // Models
 var Microtask = CS.models.microtask;
+var ObjectModel = CS.models.object;
 
 var performRule = function( event, config, task, data, callback ) {
-  log.trace('Performing the rule');
+  var d = domain.create();
+  d.on( 'error', callback );
 
-  var domain = require( 'domain' ).create();
+  var objectId = data.object;
 
-  domain.on('error',function(err){
-    return callback(err);
-  });
+  Microtask
+  .find()
+  .where( 'task', task._id )
+  .where( 'status' ).ne( 'CLOSED' )
+  .where( 'objects' ).in( [ objectId ] )
+  .populate( 'objects' )
+  .exec( d.bind( function( err, microtasks ) {
+    if( err ) return callback( err );
 
-  var execution = data.execution;
+    // Ok go on
+    if( !microtasks )
+      return callback();
 
-  // Ensuring the rule is called on the right event
-  if(_.isUndefined(execution)){
-    log.warn('Execution undefined, this rule can be called only on execution end');
-    return callback();
-  }
-
-  Microtask.findById(execution.microtask,function(err,microtask){
-    if (err) return callback(err);
-
-    // Populating the objects
-    microtask.populate('objects',function(err,microtask){
-
-      log.trace('%s objects retrieved',microtask.objects.length);
-
-      var objects = microtask.objects;
-
-      var closed = 0;
-      _.each(objects,function(object){
-
-        log.trace('Retrieving the status of the object %s',object.id);
-
-        var status = object.status;
-
-        if(status === 'CLOSED'){
-          log.trace('Object %s is closed',object.id);
-          closed++;
+    // Get all the non-closed objects
+    ObjectModel
+    .populate( microtasks, {
+      path: 'objects',
+      match: {
+        status: {
+          $ne: 'CLOSED'
         }
-      });
+      }
+    }, d.bind( function( err, microtasks ) {
+      if( err ) return callback( err );
 
-      log.trace('Found %s closed objects',closed);
+      var selected = _.filter( microtasks, function( microtask ) {
+        return microtask.objects.length===0;
+      } );
 
-      if(closed === objects.length){
-
-        log.trace('Closing the microtask %s',microtask.id);
-        return microtask.closeMicroTask(domain.bind(callback));
-      }else{
-
-        log.trace('%s need to be evaluated',objects.length-closed);
-        return callback();
+      function closeMicrotask( microtask, cb ) {
+        return microtask.close( d.bind( cb ) );
       }
 
-    });
-  });
-
+      return async.each( selected, closeMicrotask, callback );
+    } ) );
+  } ) );
 };
-
-var checkParameters = function( params, done ) {
-  log.trace( 'Checking parameters' );
-
-  // Everything went better then expected...
-  return done(true);
-};
-
 
 module.exports.perform = exports.perform = performRule;
-module.exports.check = exports.check = checkParameters;

@@ -9,27 +9,34 @@ var CS = require( '../core' );
 var log = CS.log.child( { component: 'Notify rule' } );
 
 
+// Import CS models
+var Execution = CS.models.execution;
+
 var performRule = function( event, config, task, data, callback ) {
-  log.trace('Performing the rule');
   var d = domain.create();
   d.on( 'error', callback );
 
   var method = config.method;
   var url = config.url;
+  var executionId = data.execution;
 
-
-  data.execution.populate( 'annotations.object', d.bind( function( err, execution ) {
+  Execution
+  .findById( executionId )
+  .populate( 'annotations.object' )
+  .exec( d.bind( function( err, execution ) {
     if( err ) return callback( err );
 
-    request( {
+    if( !execution )
+      return callback( new Error( 'Execution not found' ) );
+
+    return request( {
       method: method,
       url: url,
-      json: execution.toObject()
+      json: execution.toObject( { getters: true } )
     }, function( err, response, json ) {
       return callback( err, json );
     });
   } ) );
-
 };
 
 var checkParameters = function( params, done ) {

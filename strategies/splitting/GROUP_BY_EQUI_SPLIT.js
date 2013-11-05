@@ -37,6 +37,8 @@ var strategy = {
   //
   params: {
     // Number of object for each Microtask.
+    field: 'string',
+    // Number of object for each Microtask.
     objectsNumber: 'number',
     // The data must be shuffled?
     shuffle: 'boolean'
@@ -46,13 +48,13 @@ var strategy = {
   //
   // Description of what the perform rule does.
   perform: function performStrategy( event, params, task, data, callback ) {
+    var field = params.field;
 
     // Find all non `closed` object for the current Task.
     ObjectModel
     .find()
     .where( 'task', task._id )
     .where( 'status' ).ne( 'CLOSED' )
-    .select( '_id' )
     .lean()
     .exec( function( err, objects ) {
       if( err ) return callback( err );
@@ -63,33 +65,42 @@ var strategy = {
         return callback();
       }
 
+      var objectGroups = _.groupBy( objects, function( object ) {
+        return object.data[ field ];
+      } );
+
       // Shuffle the data if necessary
       if( params.shuffle ) {
         log.trace( 'Shuffling the objects' );
-        objects = _.shuffle( objects );
+        _.each( objectGroups, function ( arr, key ) {
+          objectGroups[ key ] = _.shuffle( arr );
+        } );
       }
 
-      log.trace( 'Got %s objects from the DB, will be grouped in %s', objects.length, params.objectsNumber );
+      log.trace( 'Got %s objects from the DB, will be grouped by %s in %s', objects.length, field, params.objectsNumber );
 
       // Will handle the list of raw microtask to create.
       var microtaskToCreate = [];
 
-      // Split the array into smaller array, each containing `objectsNumber` elements.
-      var i, j, subArray;
-      for( i=0, j=objects.length; i<j; i+=params.objectsNumber ) {
-        var start = i;
-        var end = start+params.objectsNumber;
-        subArray = objects.slice( start, end );
-        //log.trace( 'Slice from %s to %s: %j', start, end, subArray );
-        var rawMicrotask = {
-          platforms: task.platforms,
-          operations: task.operations,
-          objects: subArray
-        };
-        //log.trace( 'Associating %s objects to a microtask: %j', subArray.length, subArray );
+      // Split each array contained into `objectGroups` into smaller array,
+      // each containing at most `objectsNumber` elements.
+      _.each( objectGroups, function ( objectList ) {
+        var i, j, subArray;
+        for( i=0, j=objectList.length; i<j; i+=params.objectsNumber ) {
+          var start = i;
+          var end = start+params.objectsNumber;
+          subArray = objectList.slice( start, end );
+          //log.trace( 'Slice from %s to %s: %j', start, end, subArray );
+          var rawMicrotask = {
+            platforms: task.platforms,
+            operations: task.operations,
+            objects: subArray
+          };
+          //log.trace( 'Associating %s objects to a microtask: %j', subArray.length, subArray );
 
-        microtaskToCreate.push( rawMicrotask );
-      }
+          microtaskToCreate.push( rawMicrotask );
+        }
+      } );
       log.debug( 'Creating %s microtasks', microtaskToCreate.length );
 
       return task.addMicrotasks( microtaskToCreate, callback );

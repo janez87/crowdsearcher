@@ -3,11 +3,6 @@ extends layout
 include ../includes/metadata
 include ../includes/status
 
-block append libScripts
-  script(src='libs/markdown.js')
-  script(src='libs/moment.min.js')
-
-
 block header
   .text-center
     h1 Object details
@@ -29,7 +24,13 @@ block header
         if object.closed
           small= moment( object.closedDate ).format( 'YYYY-MM-DD HH:mm' )
         else
-          small Object not closed
+          a.btn.btn-xs.btn-primary#close(
+            href='#',
+            data-destination,
+            data-action='close',
+            data-id=object._id,
+            data-entity='object',
+            data-method='POST') Close
   hr
 
 block content

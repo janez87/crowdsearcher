@@ -18,7 +18,7 @@
     "underscore.string": "2.3.x",
     "request": "2.x",
     "async": "0.2.x",
-    "mongoose": "3.6.x",
+    "mongoose": "3.x",
     "connect-flash": "0.1.x",
     "glob": "3.2.x",
     "fb": "0.6.x",

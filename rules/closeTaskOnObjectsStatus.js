@@ -1,51 +1,39 @@
 
 // Load libraries
-var _ = require('underscore');
 var CS = require( '../core' );
+var domain = require( 'domain' );
 
 // Create a child logger
 var log = CS.log.child( { component: 'Close Task' } );
 
+// Models
+var ObjectModel = CS.models.object;
 
+var performRule = function( event, config, task, data, callback ) {
+  var d = domain.create();
+  d.on( 'error', callback );
 
-var performRule = function( event, config, task, data, callback  ) {
-  log.trace('Performing the rule Close Task');
-
-  var domain = require('domain').create();
-
-  domain.on('error',callback);
+  var objectId = data.object;
 
   if( task.status==='CLOSED' )
     return callback();
 
-  task.populate('objects',function(err,task){
-    if (err) callback(err);
+  var objectsNumber = task.objects.length;
 
-    var objects = task.objects;
+  ObjectModel
+  .find()
+  .where( 'task', task._id )
+  .where( 'status', 'CLOSED' )
+  .count()
+  .exec( d.bind( function( err, count ) {
+    if( err ) return callback( err );
 
-    var closedObjects = _.where(objects,{status:'CLOSED'});
-
-    log.trace('found %s closed objects',closedObjects.length);
-
-    if(closedObjects.length === task.objects.length){
-      return task.closeTask(callback);
-    }else{
-
-      log.trace('Some object need to be evaluated');
-
-      return callback();
+    if( count===objectsNumber ) {
+      return task.close( d.bind( callback ) );
     }
-  });
 
+    return callback();
+  } ) );
 };
-
-var checkParameters = function( params, done ) {
-  log.trace( 'Checking parameters' );
-
-  // Everything went better then expected...
-  return done(true);
-};
-
 
 module.exports.perform = exports.perform = performRule;
-module.exports.check = exports.check = checkParameters;

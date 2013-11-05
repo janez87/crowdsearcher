@@ -9,32 +9,41 @@ var log = CS.log.child( { component: 'Limit MicroTask Execution' } );
 
 // Models
 var Execution = CS.models.execution;
+var Microtask = CS.models.microtask;
+
 
 var performRule = function( event, config, task, data, callback ) {
-  log.trace('Performing the rule');
-
   var d = domain.create();
-  d.on('error', callback );
+  d.on( 'error', callback );
 
+  var microtaskId = data.microtask;
   var maxExecution = config.maxExecution;
-  var microtask = data.microtask;
 
   Execution
   .find()
-  .where( 'microtask', microtask._id )
+  .where( 'microtask', microtaskId )
+  .where( 'status', 'CLOSED' )
   .count()
   .exec( d.bind( function( err, count ) {
     if( err ) return callback( err );
 
-    log.trace( 'Found %s executions of %s max', count, maxExecution );
-
     // Max reached, close Microtask
-    if( count===maxExecution )
-      return microtask.closeMicroTask( d.bind( callback ) );
+    if( count===maxExecution ) {
+      Microtask
+      .findById( microtaskId )
+      .exec( d.bind( function( err, microtask ) {
+        if( err ) return callback( err );
+
+        if( !microtask )
+          return callback( new Error( 'No Microtask found' ) );
+
+        return microtask.close( d.bind( callback ) );
+      } ) );
+    }
 
     // No problem, go ahead
     return callback();
-  }) );
+  } ) );
 };
 
 var checkParameters = function( params, done ) {
