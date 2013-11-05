@@ -3,6 +3,7 @@
 var _ = require( 'underscore' );
 var url = require( 'url' );
 var util = require( 'util' );
+var nconf = require( 'nconf' );
 var async = require( 'async' );
 var CS = require( '../core' );
 
@@ -47,8 +48,15 @@ API.logic = function startExecution( req, res, next ) {
     // Make the fake call
     getExecutionAPI.logic( req, {
       json: function( data ) {
-        return callback( null, data );
-      }
+        if( arguments.length===2 ) {
+          var baseURL = nconf.get( 'webserver:externalAddress' );
+          return res.redirect( baseURL+'login' );
+        } else {
+          return callback( null, data );
+        }
+      },
+      format: _.bind( res.format, res ),
+      redirect: _.bind( res.redirect, res )
     }, next );
   };
 
@@ -94,17 +102,9 @@ API.logic = function startExecution( req, res, next ) {
     if( !executionUrl )
       return next( new StartExecutionError( StartExecutionError.INVALID_URL, 'The platform did not provide a valid url' ) );
 
-    log.debug( 'Run execution complete' );
     var urlObj = url.parse( executionUrl, true );
     urlObj.search = null;
-    var qs = _.extend( urlObj.query, req.query );
-
-    log.trace( 'Params: %j', req.query );
-    log.trace( 'qs: %j', qs );
-
-    //urlObj.query = {};
     executionUrl = url.format( urlObj );
-    log.trace( 'Redirect url is %s', executionUrl );
 
     res.format( {
       html: function() {

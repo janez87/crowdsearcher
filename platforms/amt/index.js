@@ -350,12 +350,6 @@ function create( task, microtask, platform, callback ){
 var Platform = {
   invite: undefined,
   remote: remote,
-  /*
-  timed: {
-    expression: '* * * * *',
-    onTick: retrieve
-  },
-  */
   execute: execute,
   init: create,
   params : {
@@ -369,11 +363,11 @@ var Platform = {
     },
     accessKeyId:{
       type:'pass',
-      'default': 'AKIAIJEW5UG5SRI2TUQA'
+      'default': ''
     },
     secretAccessKey:{
       type:'pass',
-      'default': 'T51sR9TKMlcWOdsHTzNb0QTjhiY6/UdzIft1hEMo'
+      'default': ''
     },
     price:{
       type:'number',

@@ -216,6 +216,10 @@ TaskSchema.plugin( require( './plugins/strategyPlugin' ), {
 
 // # Task calculated fields
 //
+// Boolean indicating if the task is created.
+TaskSchema.virtual( 'created' ).get( function() {
+  return this.status==='CREATED';
+} );
 // Boolean indicating if the task is opened.
 TaskSchema.virtual( 'opened' ).get( function() {
   return this.status==='OPENED';

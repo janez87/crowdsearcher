@@ -12,21 +12,21 @@ var log = CS.log.child( { component: 'Aggregate Majority' } );
 
 // Models
 var ControlMart = CS.models.controlmart;
+var Microtask = CS.models.microtask;
 
 var performRule = function(event, config, task, data, callback ) {
   log.trace('Performing the rule');
 
   // Error handler
   var domain = require( 'domain' ).create();
-
   domain.on('error',callback);
 
-  var microtask = data.microtask;
+  var microtaskId = data.microtask;
 
   var mode = config.mode;
 
   // For each object it evaluate the status of the majorities
-  var evaluateMajority = function(object,callback){
+  var evaluateMajority = function( microtask, object, callback ) {
 
     // If the object is already close do nothing
     log.trace('Evaluating the majority');
@@ -105,12 +105,20 @@ var performRule = function(event, config, task, data, callback ) {
 
   };
 
-  microtask.populate('objects operations',domain.bind(function(err,microtask){
-    if(err) return callback(err);
+  Microtask
+  .findById( microtaskId )
+  .populate( 'objects operations' )
+  .exec( domain.bind( function( err, microtask ) {
+    if( err ) return callback( err );
 
-    log.trace('Microtask %s populated', microtask.id);
-    return async.eachSeries(microtask.objects,evaluateMajority,callback);
-  }));
+    if( !microtask )
+      return callback( new Error( 'No microtaskId retrieved' ) );
+
+    log.trace('Microtask %s populated', microtask._id);
+
+    var fn = _.partial( evaluateMajority, microtask );
+    return async.eachSeries( microtask.objects, fn, callback );
+  } ) );
 
 };
 

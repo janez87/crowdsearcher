@@ -13,22 +13,26 @@ var log = CS.log.child( { component: 'Classify Majority' } );
 
 // Models
 var ControlMart = CS.models.controlmart;
+var Execution = CS.models.execution;
 
 
-var performRule = function( event, config,task, data, callback ) {
+var performRule = function( event, config, task, data, callback ) {
   log.trace('Performing the rule');
 
   // Error handler
   var domain = require( 'domain' ).create();
-
   domain.on('error',callback);
 
-  var execution = data.execution;
+  var executionId = data.execution;
   var operationLabel = config.operation;
 
-  // Populate the operations
-  task.populate('operations',domain.bind(function(err,task){
-    if (err) return callback(err);
+  Execution
+  .findById( executionId )
+  .exec( domain.bind( function( err, execution ) {
+    if( err ) return callback( err );
+
+    if( !execution )
+      return callback( new Error( 'No execution retrieved' ) );
 
     var annotations = execution.annotations;
     var operation = _.findWhere(task.operations,{label:operationLabel});
@@ -36,7 +40,9 @@ var performRule = function( event, config,task, data, callback ) {
     log.trace('Performing the rule for the operation %s',operation.label);
 
     // Select only annotations of the current operation
-    annotations = _.filter(annotations, function(annotation){
+    annotations = _.filter(annotations, function( annotation ) {
+      log.trace( 'Operation (%s): %j', annotation.operation );
+      log.trace( 'Operation: %j', annotation.operation );
       return annotation.operation.equals(operation._id);
     });
 

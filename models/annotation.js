@@ -12,12 +12,12 @@ var Schema = mongo.Schema;
 var ObjectId = Schema.ObjectId;
 var Mixed = Schema.Types.Mixed;
 
-// # Execution definition
-// The Execution is an instance of the Microtask for a Performer.
+// # Annotation definition
+// The Annotation is an instance of the Microtask for a Performer.
 
 // ## Schema
 //
-// Mongoose schema for the Execution entity.
+// Mongoose schema for the Annotation entity.
 var AnnotationSchema = new Schema( {
   // ### Response
   //
@@ -49,8 +49,7 @@ var AnnotationSchema = new Schema( {
   // ### Time data
   //
   // Creation date of the entity. By default it will be the first save of the object.
-  creationDate: {
-    required: true,
+  createdDate: {
     type: Date,
     'default': Date.now
   }
@@ -75,7 +74,7 @@ var AnnotationSchema = new Schema( {
 
 
 
-// ## Plugins to add to the Execution model.
+// ## Plugins to add to the Annotation model.
 //
 // Add the `metadata` fileld to the entity.
 AnnotationSchema.plugin( require( './plugins/metadataPlugin' ) );

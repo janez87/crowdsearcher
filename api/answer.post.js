@@ -9,6 +9,10 @@ var CS = require( '../core' );
 // Use a child logger
 var log = CS.log.child( { component: 'Post Answer' } );
 
+// Import CS antities
+var Execution = CS.models.execution;
+var Operation = CS.models.operation;
+
 // Generate custom error `PostAnswerError` that inherits
 // from `APIError`
 var APIError = require( './error' );
@@ -28,13 +32,6 @@ PostAnswerError.BAD_FORMAT = 'BAD_FORMAT';
 // API object returned by the file
 // -----
 var API = {
-  // List of checks to perform. Each file is execute
-  // *in order* as an express middleware.
-  checks: [
-    'checkExecutionId'
-  ],
-
-
   // List of API parameters. In the format
   //      name: required
   // ... the required parameters will be verified automatically.
@@ -55,64 +52,82 @@ var API = {
 API.logic = function postAnswer( req, res, next ) {
   log.trace( 'Posting answer' );
 
-  var answerData = req.body.data;
-  var query = req.queryObject;
-  log.trace( 'Answer posted: %j', answerData );
+  var answers = req.body.data;
+  var executionId = req.query.execution;
+  var data = {};
 
-  if( _.isUndefined( answerData ) )
+  if( _.isUndefined( answers ) )
     return next( new PostAnswerError( PostAnswerError.BAD_FORMAT, 'The response must be a json containing a "data" field', APIError.BAD_REQUEST ) );
 
-
-
-  /*
-  function checkObjectIds() {
-    // Get the array of `objectIds`.
-    var objectIds = _.pluck( data, 'objectId' );
-
-
-    // Create a domain to handle Mongoose errors
-    var d = domain.create();
-    d.on( 'error', callback );
-
-    MicroTask
-    .findById( execution.microtask )
-    .select( 'objects' )
-    .lean()
-    .exec( d.bind( function( err, microtask ) {
+  function checkExecution( callback ) {
+    Execution
+    .findById( executionId )
+    .populate( 'microtask platform' )
+    .exec( req.wrap( function( err, execution ) {
       if( err ) return callback( err );
 
+      if( !execution )
+        return callback( new Error( 'No execution retrieved' ) );
 
-      var microtaskObjectIds = _.invoke( microtask.objects, 'toString' );
+      if( execution.closed )
+        return callback( new Error( 'Execution already closed' ) );
 
-      log.trace( 'Passed ids', objectIds );
-      log.trace( 'Microtask ids', microtaskObjectIds );
+      data.execution = execution;
 
-      var wrongIds = _.difference( objectIds, microtaskObjectIds );
-      log.trace( 'Found %s wrong ids: %j', wrongIds.length, wrongIds );
+      Operation
+      .populate( execution.microtask, {
+        path: 'operations'
+      }, req.wrap( function( err, microtask ) {
+        if( err ) return callback( err );
 
-      if( wrongIds.length>0 )
-        return callback( new LikeError( LikeError.LIKE_BAD_OBJECTIDS, 'The following ids does not belong to the current microtask\n'+wrongIds.join() ) );
-
-      return callback();
+        data.microtask = microtask;
+        return callback();
+      } ) );
     } ) );
-  };
-  */
+  }
 
-  // Perform the stored query to retrieve the execution object.
-  var retrieveExecution = function( callback ) {
-    query
-    .populate( 'operations' )
-    .exec( req.wrap( function( err, executionObj ) {
-      // Error if the execution is closed
-      if( executionObj.closed )
-        return next( new PostAnswerError( PostAnswerError.EXECUTION_CLOSED, 'The execution is already closed', APIError.FORBIDDEN ) );
+  function addAnnotations( callback ) {
+    var execution = data.execution;
+    var microtask = data.microtask;
 
-      var data = {
-        execution: executionObj
-      };
-      callback( null, data );
-    } ) );
-  };
+    // `answers` is an ordered array of answer.
+    // The position of each answer corresponds to the operation in the `microtask`
+    // at the same index. THIS WILL CHANGE SOON
+    var answerOperationList = [];
+    _.each( microtask.operations, function( operation, index ) {
+      answerOperationList.push( {
+        operation: operation,
+        answers: answers[ index ] || []
+      } );
+    } );
+
+    function createAnnotations( item, cb ) {
+      var operationAnswers = item.answers;
+      var operation = item.operation;
+
+      log.trace( 'Operation: %j', operation );
+      log.trace( 'Operation answers: %j', operationAnswers );
+
+      var implementation = operation.implementation;
+      return implementation.create( operationAnswers, operation, function( err, annotations ) {
+        if( err ) return callback( err );
+
+        _.each( annotations, function ( annotation ) {
+          execution.annotations.push( annotation );
+        } );
+        return cb();
+      } );
+    }
+
+    async.each( answerOperationList, createAnnotations, callback );
+  }
+
+  function closeExecution( callback ) {
+    var execution = data.execution;
+    execution.close( req.wrap( callback ) );
+  }
+
+  /*
 
   // Now check if the answer is posted correctly and create the annotations.
   function createAnnotations( data, callback ) {
@@ -155,14 +170,6 @@ API.logic = function postAnswer( req, res, next ) {
   var initAnswers = function( data, callback ) {
     var execution = data.execution;
 
-    // Associate each operation with a the response posted.
-    var answerListObj = [];
-    _.each( execution.operations, function( operation, index ) {
-      answerListObj.push( {
-        operation: operation,
-        answer: answerData[ index ] || null
-      } );
-    } );
 
     // For each response create and an array of Annotations.
     async.map( answerListObj, createAnnotations, function( err, arrayOfAnnotations ) {
@@ -174,24 +181,22 @@ API.logic = function postAnswer( req, res, next ) {
       return callback( null, data );
     } );
   };
+  */
 
 
   var actions = [
-    retrieveExecution,
-    //checkObjectIds,
-    initAnswers,
+    checkExecution,
+    addAnnotations,
     closeExecution
   ];
 
   // Execute each action
-  async.waterfall( actions, function( err, annotations, results ) {
+  async.series( actions, function( err ) {
     if( err ) return next( err );
 
-    // ... and return the `Annotation`s.
-    return res.json( {
-      annotations: annotations,
-      data: results
-    } );
+    // ... and return the execution
+    var execution = data.execution;
+    return res.json( execution.toObject( { getters: true } ) );
   } );
 };
 

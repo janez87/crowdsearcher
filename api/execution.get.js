@@ -125,6 +125,9 @@ API.logic = function getExecution( req, res, next ) {
       if( task.closed )
         return callback( new Error( 'Task closed, cannot get an execution' ) );
 
+      if( task.created )
+        return callback( new Error( 'Task not yet opened, cannot get an execution' ) );
+
       execution.task = task;
       data.task = task;
       return callback();
@@ -133,7 +136,6 @@ API.logic = function getExecution( req, res, next ) {
 
   function checkPerformer( callback ) {
     var task = data.task;
-    log.trace( 'Task: %j', task );
     if( !task.private )
       return callback();
 

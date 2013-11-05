@@ -27,7 +27,7 @@ ClassifyError.CLASSIFY_BAD_FORMAT = 'CLASSIFY_BAD_FORMAT';
 ClassifyError.CLASSIFY_BAD_CATEGORIES = 'CLASSIFY_BAD_CATEGORIES';
 
 
-function checkData( data, operation ) {
+function check( data, operation ) {
   var params = operation.params;
   log.debug( 'Checking %j', data );
   log.debug( 'Operation parametes: %j', params );
@@ -93,7 +93,7 @@ function create( data, operation, callback ) {
 
 // Define the Operation Object
 var Classify = {
-  checkData: checkData,
+  checkData: check,
   create: create,
   params: {
     categories: {

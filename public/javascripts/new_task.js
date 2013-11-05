@@ -35,20 +35,17 @@ function getTaskObject() {
     $( '#data_header_list td input' ).each( function() {
       var index = $( this ).closest( 'td' ).index()+1;
       headerMap[ index ] = this.value;
-      console.log( index, this.value, this );
     } );
 
-    console.log( headerMap );
     task.objects = $( '#data_rows tr' ).map( function() {
       var row = {};
 
       $( 'td', this ).each( function() {
         var index = $( this ).index()+1;
         row[ headerMap[ index ] ] = $( this ).data( 'value' );
-        console.log( index, $( this ).data( 'value' ), this );
       } );
 
-      return row;
+      return { data: row };
     } ).get();
   }
 
