@@ -33,7 +33,7 @@ var API = {
 
   // The API endpoint. The final endpoint will be:
   //    /api/**endpointUrl**
-  url: 'performer',
+  url: 'performer|user',
 
   // The API method to implement.
   method: 'POST'

@@ -43,7 +43,7 @@
         "level": "trace"
       },
       "file": {
-        "level": "error",
+        "level": "trace",
         "filename": "cs_volog.jlog"
       }
     }
