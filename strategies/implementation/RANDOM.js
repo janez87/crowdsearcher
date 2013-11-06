@@ -20,7 +20,7 @@ util.inherits( RandomError, CSError );
 // Error name
 RandomError.prototype.name = 'RandomError';
 // Custom error IDs
-
+RandomError.NO_AVAILABLE_PLATFORMS = 'NO_AVAILABLE_PLATFORMS';
 
 // # Random Strategy
 //
@@ -42,9 +42,12 @@ var strategy = {
       if( err ) return callback( err );
 
       var size = task.platforms.length;
-
-      var selected = task.platforms[ _.random( 0, size-1 ) ]._id;
-      return callback( null, selected );
+      if( size>0 ) {
+        var selected = task.platforms[ _.random( 0, size-1 ) ]._id;
+        return callback( null, selected );
+      } else {
+        return callback( new RandomError( RandomError.NO_AVAILABLE_PLATFORMS, 'No available platforms' ) );
+      }
     } );
   }
 };

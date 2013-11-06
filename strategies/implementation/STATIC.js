@@ -20,7 +20,7 @@ util.inherits( StaticError, CSError );
 // Error name
 StaticError.prototype.name = 'StaticError';
 // Custom error IDs
-
+StaticError.NO_AVAILABLE_PLATFORMS = 'NO_AVAILABLE_PLATFORMS';
 
 // # Random Strategy
 //
@@ -53,8 +53,12 @@ var strategy = {
 
       var size = task.platforms.length;
 
-      var selected = task.platforms[ _.random( 0, size-1 ) ]._id;
-      return callback( null, selected );
+      if( size>0 ) {
+        var selected = task.platforms[ 0 ]._id;
+        return callback( null, selected );
+      } else {
+        return callback( new StaticError( StaticError.NO_AVAILABLE_PLATFORMS, 'No available platforms' ) );
+      }
     } );
   }
 };

@@ -25,6 +25,7 @@ util.inherits( RandomError, CSError );
 // Error name
 RandomError.prototype.name = 'RandomError';
 // Custom error IDs
+RandomError.NO_AVAILABLE_TASKS = 'NO_AVAILABLE_TASKS';
 
 
 // # RoundRobin Strategy
@@ -43,8 +44,12 @@ var strategy = {
       if( err ) return callback( err );
 
       var size = tasks.length;
-      var selected = tasks[ _.random( 0, size-1 ) ]._id;
-      return callback( null, selected );
+      if( size>0 ) {
+        var selected = tasks[ _.random( 0, size-1 ) ]._id;
+        return callback( null, selected );
+      } else {
+        return callback( new RandomError( RandomError.NO_AVAILABLE_TASKS, 'No available tasks' ) );
+      }
     } );
   }
 };

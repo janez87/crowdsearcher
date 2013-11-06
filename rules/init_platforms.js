@@ -69,7 +69,11 @@ var performRule = function( event, config, task, data, callback ) {
     };
 
     // otherwise init the platform by calling `init`.
-    platformImplementation.init( task, microtask, platform, checkTimed );
+    if( platformImplementation.init ) {
+      platformImplementation.init( task, microtask, platform, checkTimed );
+    } else {
+      return callback();
+    }
   };
 
   var getPlatforms = function( microtask, callback ) {

@@ -11,15 +11,16 @@ var log = CS.log.child( { component: 'Random assignment' } );
 // # Custom error
 //
 var CSError = require('../../core/error');
-var RoundRobinError = function( id, message ) {
+var RandomError = function( id, message ) {
   /* jshint camelcase: false */
-  RoundRobinError.super_.call( this, id, message);
+  RandomError.super_.call( this, id, message);
 };
-util.inherits( RoundRobinError, CSError );
+util.inherits( RandomError, CSError );
 
 // Error name
-RoundRobinError.prototype.name = 'RoundRobinError';
+RandomError.prototype.name = 'RandomError';
 // Custom error IDs
+RandomError.NO_AVAILABLE_MICROTASKS = 'NO_AVAILABLE_MICROTASKS';
 
 
 // # RoundRobin Strategy
@@ -43,9 +44,13 @@ var strategy = {
       var microtasks = task.microtasks;
 
       var size = microtasks.length;
-      var selected = microtasks[ _.random( 0, size-1 ) ]._id;
+      if( size>0 ) {
+        var selected = microtasks[ _.random( 0, size-1 ) ]._id;
+        return callback( null, selected );
+      } else {
+        return callback( new RandomError( RandomError.NO_AVAILABLE_MICROTASKS, 'No available microtasks' ) );
+      }
 
-      return callback( null, selected );
     } );
   }
 };

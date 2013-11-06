@@ -30,6 +30,15 @@ GetExecutionError.prototype.name = 'GetExecutionError';
 // Custom error IDs
 GetExecutionError.MISSING_PARAMETERS = 'MISSING_PARAMETERS';
 GetExecutionError.CLOSED_TASK = 'CLOSED_TASK';
+GetExecutionError.TASK_NOT_OPENED = 'TASK_NOT_OPENED';
+GetExecutionError.JOB_NOT_FOUND = 'JOB_NOT_FOUND';
+GetExecutionError.TASK_NOT_FOUND = 'TASK_NOT_FOUND';
+GetExecutionError.MICROTASK_NOT_FOUND = 'MICROTASK_NOT_FOUND';
+GetExecutionError.CLOSED_MICROTASK = 'CLOSED_MICROTASK';
+GetExecutionError.USER_NOT_FOUND = 'USER_NOT_FOUND';
+GetExecutionError.PLATFORM_NOT_FOUND = 'PLATFORM_NOT_FOUND';
+GetExecutionError.PLATFORM_NOT_ENABLED = 'PLATFORM_NOT_ENABLED';
+GetExecutionError.PLATFORM_NOT_EXECUTABLE = 'PLATFORM_NOT_EXECUTABLE';
 
 
 // API object returned by the file
@@ -94,7 +103,7 @@ API.logic = function getExecution( req, res, next ) {
       if( err ) return next( err );
 
       if( !job )
-        return next( new Error( 'No job found' ) );
+        return next( new GetExecutionError( GetExecutionError.JOB_NOT_FOUND, 'No job found' ) );
 
       // Now we have the id of the Task, proceed as if we got th task id
       // from the query parameter.
@@ -120,13 +129,13 @@ API.logic = function getExecution( req, res, next ) {
       if( err ) return callback( err );
 
       if( !task )
-        return callback( new Error( 'No task retrieved' ) );
+        return callback( new GetExecutionError( GetExecutionError.TASK_NOT_FOUND, 'No task retrieved' ) );
 
       if( task.closed )
-        return callback( new Error( 'Task closed, cannot get an execution' ) );
+        return callback( new GetExecutionError( GetExecutionError.CLOSED_TASK, 'Task closed, cannot get an execution' ) );
 
       if( task.created )
-        return callback( new Error( 'Task not yet opened, cannot get an execution' ) );
+        return callback( new GetExecutionError( GetExecutionError.TASK_NOT_OPENED, 'Task not yet opened, cannot get an execution' ) );
 
       execution.task = task;
       data.task = task;
@@ -152,7 +161,7 @@ API.logic = function getExecution( req, res, next ) {
         if( err ) return callback( err );
 
         if( !user )
-          return callback( new Error( 'No user retrieved' ) );
+          return callback( new GetExecutionError( GetExecutionError.USER_NOT_FOUND, 'No user retrieved' ) );
 
         execution.performer = user;
         data.user = user;
@@ -201,10 +210,10 @@ API.logic = function getExecution( req, res, next ) {
       if( err ) return callback( err );
 
       if( !microtask )
-        return callback( new Error( 'No microtask retrieved' ) );
+        return callback( new GetExecutionError( GetExecutionError.MICROTASK_NOT_FOUND, 'No microtask retrieved' ) );
 
       if( microtask.closed )
-        return callback( new Error( 'Microtask closed, cannot get an execution' ) );
+        return callback( new GetExecutionError( GetExecutionError.CLOSED_MICROTASK, 'Microtask closed, cannot get an execution' ) );
 
       data.microtask = microtask;
       return callback();
@@ -231,13 +240,13 @@ API.logic = function getExecution( req, res, next ) {
       if( err ) return callback( err );
 
       if( !platform )
-        return callback( new Error( 'No platform retrieved' ) );
+        return callback( new GetExecutionError( GetExecutionError.PLATFORM_NOT_FOUND, 'No platform retrieved' ) );
 
       if( !platform.enabled )
-        return callback( new Error( 'Platform not enabled' ) );
+        return callback( new GetExecutionError( GetExecutionError.PLATFORM_NOT_ENABLED, 'Platform not enabled' ) );
 
       if( !platform.execution )
-        return callback( new Error( 'Platform not enabled for execution' ) );
+        return callback( new GetExecutionError( GetExecutionError.PLATFORM_NOT_EXECUTABLE, 'Platform not enabled for execution' ) );
 
       data.platform = platform;
       return callback();
