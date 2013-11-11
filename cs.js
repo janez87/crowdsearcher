@@ -1,3 +1,4 @@
+// Process stuff
 process.title = 'CrowdSearcher';
 //TODO: remove, debug only
 Error.stackTraceLimit = Infinity;
@@ -109,6 +110,31 @@ app.configure( function() {
     uploadDir: uploadPath
   } ));
   app.use(express.methodOverride());
+
+  app.use(express.methodOverride());
+
+  // ## CORS middleware
+  //
+  // see: http://stackoverflow.com/questions/7067966/how-to-allow-cors-in-express-nodejs
+  function allowCrossDomain( req, res, next ) {
+    if( req.path.split( '/' )[1]==='api' ) {
+      res.header('Access-Control-Allow-Origin', '*');
+      res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+      res.header('Access-Control-Allow-Headers', '*');
+      //res.header('Access-Control-Allow-Headers', 'Accepts, Content-Type, Authorization, X-Requested-With');
+      res.header('Access-Control-Allow-Headers', req.get( 'Access-Control-Request-Headers' ) );
+
+      // intercept OPTIONS method
+      if( 'OPTIONS'===req.method ) {
+        return res.send( 200 );
+      } else {
+        return next();
+      }
+    } else {
+      return next();
+    }
+  }
+  app.use( allowCrossDomain );
 
   // Add session support
   app.use( express.cookieParser() );

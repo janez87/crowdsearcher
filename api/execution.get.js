@@ -277,6 +277,7 @@ API.logic = function getExecution( req, res, next ) {
   }
 
   if( executionId ) {
+    log.debug( 'with id %s', executionId );
     req.queryObject = Execution.findById( executionId );
     return next();
   } else {
