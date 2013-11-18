@@ -84,19 +84,21 @@ module.exports = exports = function ( schema ) {
   };
   // Find an operation by id.
   schema.methods.getOperationById = function( id, callback ) {
-    // If the field is populated then use the original ids.
-    var ids = this.populated( 'operations' );
-    if( !ids )
-      // if is not populated use the ids from the list of operations.
-      ids = this.operations;
+    var _this = this;
+    var populated = this.populated( 'operations' );
+
+    if( !populated ) {
+      return this.populate( 'operations', function( err ) {
+        if( err ) return callback( err );
+        _this.getOperationsById( id, callback );
+      } );
+    }
 
     log.trace( 'Find operation by id (%s)', id );
 
-    var operation = _.find( ids, function( currentId ) {
-      return currentId.equals( id );
+    var operation = _.find( this.operations, function( op ) {
+      return op._id.equals( id );
     } );
-
-
     return callback( null, operation );
   };
   // ### Bulk methods

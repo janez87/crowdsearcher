@@ -37,24 +37,17 @@ function checkData( data, operation ) {
 
 // Return an Annotation Object
 function create( data, operation, callback ) {
-  log.debug( 'Creating annotations' );
+  log.debug( 'Creating annotation' );
+
   var annotations = [];
-
-  _.each( data, function( answer ) {
-    if( !_.isArray( answer.value ) )
-      answer.value = [ answer.value ];
-
-    log.trace( 'Values: %j', answer.value );
-    _.each( answer.value, function( tag ) {
-      log.trace( 'Creating annotation' );
-      var annotation = new Annotation( {
-        response: tag,
-        object: answer.objectId,
-        operation: operation,
-        creationDate: answer.date
-      } );
-      annotations.push( annotation );
+  _.each( data.response, function( tag ) {
+    var annotation = new Annotation( {
+      response: tag,
+      object: data.object,
+      operation: operation,
+      creationDate: data.date
     } );
+    annotations.push( annotation );
   } );
 
   return callback( null, annotations );

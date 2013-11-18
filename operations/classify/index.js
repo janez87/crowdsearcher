@@ -65,29 +65,16 @@ function check( data, operation ) {
 
 // Return an array of Annotation Object
 function create( data, operation, callback ) {
-  log.debug( 'Creating annotations' );
+  log.debug( 'Creating annotation' );
 
-  var annotations = [];
-
-  // For each data recieved
-  _.each( data, function( answer ) {
-    if( !_.isArray( answer.value ) )
-      answer.value = [ answer.value ];
-
-    // Iterate over the categories selected
-    _.each( answer.value, function( category ) {
-      var annotation = new Annotation( {
-        response: category,
-        object: answer.objectId,
-        operation: operation,
-        creationDate: answer.date
-      } );
-
-      annotations.push( annotation );
-    } );
+  var annotation = new Annotation( {
+    response: data.response,
+    object: data.object,
+    operation: operation,
+    creationDate: data.date
   } );
 
-  return callback( null, annotations );
+  return callback( null, [annotation] );
 }
 
 

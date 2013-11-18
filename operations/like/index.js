@@ -47,19 +47,13 @@ function checkData( data, operation ) {
 function create( data, operation, callback ) {
   log.debug( 'Creating annotation' );
 
-  var annotations = [];
-  // Create an annotation for each
-  _.each( data, function( obj ) {
-    var annotation = new Annotation( {
-      operation: operation,
-      object: obj.objectId,
-      creationDate: obj.date
-    } );
-
-    annotations.push( annotation );
+  var annotation = new Annotation( {
+    object: data.object,
+    operation: operation,
+    creationDate: data.date
   } );
 
-  return callback( null, annotations );
+  return callback( null, [ annotation ] );
 }
 
 

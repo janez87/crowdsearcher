@@ -28,8 +28,9 @@ var UserSchema = new Schema( {
   username: {
     type: String,
     index: true,
-    trim: true
-    //required: true
+    trim: true,
+    required: true,
+    unique: true
   },
 
   // Password hash, password must be set using the password virtual field.

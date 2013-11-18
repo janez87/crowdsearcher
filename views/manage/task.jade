@@ -7,16 +7,6 @@ include ../includes/operations
 include ../includes/platforms
 include ../includes/params
 
-block append libCSS
-  //script(src='stylesheets/jquery.dataTables.css')
-  //script(src='stylesheets/datatables.css')
-
-block append libScripts
-  script(src='libs/markdown.js')
-  script(src='libs/moment.min.js')
-  //script(src='libs/jquery.dataTables.min.js')
-  //script(src='libs/datatables.js')
-
 block header
   .row
     .col-md-4
@@ -70,6 +60,9 @@ block content
               data-method='POST') Close
     .col-md-4.text-right
       .btn-group
+        if task.status!=='CREATED'
+          a.btn.btn-sm.btn-default(href='manage/answers?task='+task._id) Answers 
+            i.fa.fa-list
         a.btn.btn-sm.btn-danger(
           href='#',
           data-destination='manage/job/'+task.job,
@@ -78,9 +71,6 @@ block content
           data-method='DELETE')
           i.fa.fa-trash-o
           |  Delete
-        if task.opened || task.finalized
-          a.btn.btn-sm.btn-default(href='manage/answers?task='+task._id) Answers 
-            i.fa.fa-list
         if task.opened || task.finalized
           a.btn.btn-sm.btn-primary(href='api/run?task='+task._id) Execute 
             i.fa.fa-play

@@ -216,8 +216,6 @@ ExecutionSchema.methods.close = function( callback ) {
 // Invalidates the current Execution. The `END_EXECUTION` event will be triggered **after** setting the
 // status field to `INVALID`.
 ExecutionSchema.methods.makeInvalid = function( callback ) {
-  var _this = this;
-
   // Skip if already `invalid`.
   if( this.invalid )
     return callback( new MongoError( 'The Execution is already invalid' ) );
@@ -225,17 +223,18 @@ ExecutionSchema.methods.makeInvalid = function( callback ) {
   log.debug( 'Invalidating execution', this._id );
 
   this.set( 'status', 'INVALID' );
-
+  this.set( 'invalidDate', Date.now() );
   // If not present also set the closed date.
+  /*
   if( !this.closedDate )
     this.set( 'closedDate', Date.now() );
-
-  this.set( 'invalidateDate', Date.now() );
+  */
 
   this.save( function( err ) {
     if( err ) return callback( err );
 
-    _this.fire( 'END_EXECUTION', callback );
+    //_this.fire( 'END_EXECUTION', callback );
+    return callback();
   } );
 };
 

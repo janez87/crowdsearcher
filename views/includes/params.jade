@@ -1,6 +1,13 @@
 mixin printParams( params )
   if params
-    pre= JSON.stringify( params, null, 2 )
+    dl.dl-horizontal
+      each value, key in params
+        dt(title=key)= key
+        dd
+          if _.isObject( value )
+            pre= JSON.stringify( value, null, 2 )
+          else
+            tt= value
 
 
 mixin printInput( name, type, multiple, id, def )
