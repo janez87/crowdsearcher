@@ -15,7 +15,7 @@ var Microtask = CS.models.microtask;
 // Create a child logger
 var log = CS.log.child( { component: 'AMT' } );
 
-
+/*
 function execute( task, microtask, execution, platform, callback ) {
   var params = platform.params;
 
@@ -135,78 +135,7 @@ function createExecution( task, microtask, platform, assignment, callback ) {
     execution.close( callback );
   } );
 }
-function remote( req, res ) {
-  var task = req.task;
 
-  var eventType = req.query[ 'Event.1.EventType' ];
-
-  // Skip if not supported
-  if( eventType!=='AssignmentSubmitted' )
-    return res.send( 'LOVE U' );
-
-  var hitTypeId = req.query[ 'Event.1.HITTypeId' ];
-  var hitId = req.query[ 'Event.1.HITId' ];
-  var assignmentId = req.query[ 'Event.1.AssignmentId' ];
-
-  // Check for consistency
-  var taskHitTypeId = task.getMetadata( 'hitType' );
-  if( taskHitTypeId!==hitTypeId ) {
-    log.error( 'HitTypeId mismatch (task!=notification): %s!=%s', taskHitTypeId, hitTypeId );
-    return res.send( 'HITTYPE_MISMATCH' );
-  }
-
-  // Search for the microtask
-  Microtask
-  .findOne()
-  .where( 'task', task._id )
-  .elemMatch( 'metadata', {
-    key: 'hit',
-    value: hitId
-  } )
-  .populate( 'platforms operations' )
-  .exec( req.wrap( function ( err, microtask ) {
-    if( err ) {
-      log.error( err );
-      return res.send( 'QUERY_ERROR' );
-    }
-
-    if( !microtask ) {
-      log.warn( 'No microtask selected' );
-      return res.send( 'NO_MICROTASK' );
-    }
-
-    var platform = _.findWhere( microtask.platforms, { name: 'amt' } );
-    if( !platform ) {
-      log.warn( 'No AMT platform present' );
-      return res.send( 'NO_PLATFORM' );
-    }
-
-    var platformParameters = platform.params;
-    // Init the AMT wrapper
-    var amt = new AMT( {
-      sandbox: platformParameters.sandbox,
-      key: platformParameters.accessKeyId,
-      secret: platformParameters.secretAccessKey,
-    } );
-    var Assignment = amt.Assignment;
-
-    // Retrieve the assignement
-    Assignment.get( assignmentId, function ( err, assignment ) {
-      if( err ) {
-        log.error( err );
-        return res.send( 'BAD_ASSIGNMENT' );
-      }
-
-      return createExecution( task, microtask, platform, assignment, function ( err ) {
-        if( err ) {
-          log.error( err );
-          return res.send( 'NO_RESPONSE_CREATED' );
-        }
-        return res.send( 'OK' );
-      } );
-    } );
-  } ) );
-}
 
 function create( task, microtask, platform, callback ){
   log.trace( 'Creating the task inteface using AMT' );
@@ -344,12 +273,244 @@ function create( task, microtask, platform, callback ){
     return callback();
   } );
 }
+*/
+
+
+
+
+function onOpenTask( params, task, data, callback ) {
+  log.debug( 'OPEN_TASK' );
+  // Create Hit Type
+  var amt = new AMT( {
+    sandbox: params.sandbox,
+    key: params.accessKeyId,
+    secret: params.secretAccessKey,
+  } );
+
+  var HITType = amt.HITType;
+  var Reward = amt.Reward;
+  var Notification = amt.Notification;
+
+  var hitTypeId;
+
+  function createHitType( cb ) {
+    log.trace( 'Creating HitType' );
+    var reward = new Reward( params.price );
+    var duration = params.duration;
+
+    var hitType = new HITType( {
+      title: task.name,
+      description: params.description || task.description || '',
+      Keywords: (params.keywords || []).join( ',' ),
+      reward: reward,
+      duration: duration
+    } );
+
+    return hitType.create( cb );
+  }
+
+  function addNotification( hitType, cb ) {
+    hitTypeId = hitType.id;
+
+    log.trace( 'Setting notification to hitType %s', hitTypeId );
+
+    var destination = nconf.get( 'webserver:externalAddress' );
+    destination += 'api/'+task._id+'/notification/amt';
+    log.trace( 'Destination is: %s', destination );
+
+    var notification = new Notification( {
+      destination: destination,
+      transport: 'REST',
+      events: [ 'AssignmentSubmitted' ]
+    } );
+    return hitType.setNotification( notification, cb );
+  }
+
+  function saveTask( hitType, cb ) {
+    task.setMetadata( 'hitType', hitTypeId );
+    task.save( cb );
+  }
+
+  var actions = [
+    createHitType,
+    addNotification,
+    saveTask
+  ];
+  return async.waterfall( actions, callback );
+}
+
+function onEndTask( params, task, data, callback ) {
+  log.debug( 'END_TASK' );
+  // expite hitType
+  return callback();
+}
+
+function onAddMicrotasks( params, task, data, callback ) {
+  log.debug( 'ADD_MICROTASKS' );
+
+  var amt = new AMT( {
+    sandbox: params.sandbox,
+    key: params.accessKeyId,
+    secret: params.secretAccessKey,
+  } );
+
+  var HIT = amt.HIT;
+  var hitTypeId = task.getMetadata( 'hitType' );
+
+  // Add HIT
+  function generateQuestionXML( microtask, cb ) {
+
+    // TODO: change to something more async.. and controlled..
+    var question;
+    try {
+      if( params.questionFile )
+        question = fs.readFileSync( __dirname+'/custom/'+params.questionFile, 'utf8' );
+
+    } catch( ex ) {
+      question = fs.readFileSync( __dirname+'/question.xml', 'utf8' );
+    }
+
+    // Create a renderer for the file
+    var render = _.template( question );
+
+    // Generate the final XML question file
+    var questionXML = render( {
+      microtask: microtask,
+      task: task
+    } );
+
+    return cb( null, questionXML );
+  }
+  function createHit( question, cb ) {
+    var hit = new HIT( {
+      hitTypeId: hitTypeId,
+      question: question,
+      life: params.lifeTimeInSeconds,
+      MaxAssignments: params.maxAssignments
+    } );
+
+    return hit.create( cb );
+  }
+
+  function saveMicrotask( microtask, hit, hitTypeId, cb ) {
+    log.trace( 'Saving hit metadata' );
+
+    microtask.setMetadata( 'hit', hit.id );
+    return microtask.save( cb );
+  }
+
+
+  function performActions( microtask, cb ) {
+    var actions = [
+      _.partial( generateQuestionXML, microtask ),
+      createHit,
+      _.partial( saveMicrotask, microtask )
+    ];
+
+    return async.waterfall( actions, cb );
+  }
+
+  var microtasks = data.microtasks;
+  return async.each( microtasks, performActions, callback );
+}
+
+function onEndMicrotask( params, task, data, callback ) {
+  log.debug( 'END_MICROTASK' );
+  // expire HIT
+  return callback();
+}
+
+
+function remote( req, res ) {
+  var task = req.task;
+
+  var eventType = req.query[ 'Event.1.EventType' ];
+
+  // Skip if not supported
+  if( eventType!=='AssignmentSubmitted' )
+    return res.send( 'LOVE U' );
+
+  var hitTypeId = req.query[ 'Event.1.HITTypeId' ];
+  var hitId = req.query[ 'Event.1.HITId' ];
+  var assignmentId = req.query[ 'Event.1.AssignmentId' ];
+
+  // Check for consistency
+  var taskHitTypeId = task.getMetadata( 'hitType' );
+  if( taskHitTypeId!==hitTypeId ) {
+    log.error( 'HitTypeId mismatch (task!=notification): %s!=%s', taskHitTypeId, hitTypeId );
+    return res.send( 'HITTYPE_MISMATCH' );
+  }
+
+  // Search for the microtask
+  Microtask
+  .findOne()
+  .where( 'task', task._id )
+  .elemMatch( 'metadata', {
+    key: 'hit',
+    value: hitId
+  } )
+  .populate( 'operations' )
+  .populate( {
+    path: 'platforms',
+    match: {
+      name: 'amt'
+    }
+  } )
+  .exec( req.wrap( function ( err, microtask ) {
+    if( err ) {
+      log.error( err );
+      return res.send( 'QUERY_ERROR' );
+    }
+
+    if( !microtask ) {
+      log.warn( 'No microtask selected' );
+      return res.send( 'NO_MICROTASK' );
+    }
+
+    var platform = microtask.platforms[0];
+    if( !platform ) {
+      log.warn( 'No AMT platform present' );
+      return res.send( 'NO_PLATFORM' );
+    }
+
+    var platformParameters = platform.params;
+    // Init the AMT wrapper
+    var amt = new AMT( {
+      sandbox: platformParameters.sandbox,
+      key: platformParameters.accessKeyId,
+      secret: platformParameters.secretAccessKey,
+    } );
+    var Assignment = amt.Assignment;
+
+    // Retrieve the assignement
+    Assignment.get( assignmentId, function ( err, assignment ) {
+      if( err ) {
+        log.error( err );
+        return res.send( 'BAD_ASSIGNMENT' );
+      }
+
+      return createExecution( task, microtask, platform, assignment, function ( err ) {
+        if( err ) {
+          log.error( err );
+          return res.send( 'NO_RESPONSE_CREATED' );
+        }
+        return res.send( 'OK' );
+      } );
+    } );
+  } ) );
+}
 
 
 var Platform = {
   remote: remote,
-  execute: execute,
-  init: create,
+
+  hooks: {
+    'OPEN_TASK': onOpenTask,
+    'END_TASK': onEndTask,
+    'ADD_MICROTASKS': onAddMicrotasks,
+    'END_MICROTASK': onEndMicrotask
+  },
+
   params : {
     questionFile:{
       type:'string',

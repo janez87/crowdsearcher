@@ -414,8 +414,13 @@ TaskSchema.methods.addObjects = function( objects, callback ) {
     _this.save( function( err ) {
       if( err ) return callback( err );
 
+      // Send the Ids
+      var objectIds = _.map( args, function( object ) {
+        return object._id;
+      } );
+
       // Once all the changes are saved trigger the `ADD_OBJECTS`.
-      _this.fire( 'ADD_OBJECTS', { objects: args }, callback );
+      _this.fire( 'ADD_OBJECTS', { objects: objectIds }, callback );
     } );
   } );
 };
@@ -464,7 +469,12 @@ TaskSchema.methods.addMicrotasks = function( microtasks, callback ) {
     _this.save( function( err ) {
       if( err ) return callback( err );
 
-      _this.fire( 'ADD_MICROTASKS', { microtasks: args }, callback );
+      // Send the Ids
+      var microtaskIds = _.map( args, function( microtask ) {
+        return microtask._id;
+      } );
+
+      _this.fire( 'ADD_MICROTASKS', { microtasks: microtaskIds }, callback );
     } );
   } );
 };

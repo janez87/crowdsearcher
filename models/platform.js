@@ -1,4 +1,5 @@
 // Load libraries
+var _ = require('underscore');
 var mongo = require('mongoose');
 var CS = require( '../core' );
 
@@ -94,7 +95,19 @@ PlatformSchema.virtual( 'implementation' ).get( function() {
 } );
 
 
+// # Middlewares
+//
+PlatformSchema.pre( 'save', function( next ) {
+  var defaults = {};
+  _.each( this.implementation.params, function( param, key ) {
+    if( !_.isUndefined( param.default ) ) {
+      defaults[ key ] = param.default;
+    }
+  });
+  this.params = _.defaults( this.params, defaults );
 
+  return next();
+} );
 
 
 

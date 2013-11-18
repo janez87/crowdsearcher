@@ -91,19 +91,21 @@ module.exports = exports = function ( schema ) {
   };
   // Find a platform by id.
   schema.methods.getPlatformById = function( id, callback ) {
-    // If the field is populated then use the original ids.
-    var ids = this.populated( 'platforms' );
-    if( !ids )
-      // if is not populated use the ids from the list of platforms.
-      ids = this.platforms;
+    var _this = this;
+    var populated = this.populated( 'platforms' );
+
+    if( !populated ) {
+      return this.populate( 'platforms', function( err ) {
+        if( err ) return callback( err );
+        _this.getPlatformById( id, callback );
+      } );
+    }
 
     log.trace( 'Find platform by id (%s)', id );
 
-    var platform = _.find( ids, function ( currentId ) {
-      return currentId.equals( id );
+    var platform = _.find( this.platforms, function( op ) {
+      return op._id.equals( id );
     } );
-
-
     return callback( null, platform );
   };
 };

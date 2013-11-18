@@ -18,6 +18,7 @@ var Mixed = Schema.Types.Mixed;
 // Mongoose schema for the controlrule entity.
 var ControlRuleSchema = new Schema( {
   // ### Rule data
+  /*
   // The event that will trigger this rule.
   'event': {
     type: String,
@@ -25,6 +26,7 @@ var ControlRuleSchema = new Schema( {
     index: true,
     uppercase: true
   },
+  */
 
   // The name of the rule file to load. **Only** available when type is set to `CUSTOM`.
   action: {
@@ -147,11 +149,25 @@ ControlRuleSchema.virtual( 'rule' ).get( function() {
 
 
 
+// # Middlewares
+ControlRuleSchema.pre( 'save', function( next ) {
+  var defaults = {};
+  _.each( this.rule.params, function( param, key ) {
+    if( !_.isUndefined( param.default ) ) {
+      defaults[ key ] = param.default;
+    }
+  });
+  this.params = _.defaults( this.params, defaults );
+
+  return next();
+} );
+
 
 
 // # ControlRule instance methods
 //
 // Run the selected rule.
+/*
 ControlRuleSchema.methods.run = function ( event, task, data, callback ) {
   var rule = this.rule;
   if( !rule || !rule.perform )
@@ -159,7 +175,7 @@ ControlRuleSchema.methods.run = function ( event, task, data, callback ) {
 
   return rule.perform( event, this.params, task, data, callback );
 };
-
+*/
 
 // Export the schema.
 exports = module.exports = ControlRuleSchema;
