@@ -12,11 +12,8 @@ var log = CS.log.child( { component: 'Close Microtask' } );
 var Microtask = CS.models.microtask;
 var ObjectModel = CS.models.object;
 
-var performRule = function( event, config, task, data, callback ) {
-  var d = domain.create();
-  d.on( 'error', callback );
-
-  var objectId = data.object;
+function onCloseObject( params, task, data, callback ) {
+  var objectId = data.objectId;
 
   Microtask
   .find()
@@ -24,14 +21,14 @@ var performRule = function( event, config, task, data, callback ) {
   .where( 'status' ).ne( 'CLOSED' )
   .where( 'objects' ).in( [ objectId ] )
   .populate( 'objects' )
-  .exec( d.bind( function( err, microtasks ) {
+  .exec( function( err, microtasks ) {
     if( err ) return callback( err );
 
     // Ok go on
     if( !microtasks )
       return callback();
 
-    // Get all the non-closed objects
+    // Get all the non-closed objects for each microtask
     ObjectModel
     .populate( microtasks, {
       path: 'objects',
@@ -40,7 +37,7 @@ var performRule = function( event, config, task, data, callback ) {
           $ne: 'CLOSED'
         }
       }
-    }, d.bind( function( err, microtasks ) {
+    }, function( err, microtasks ) {
       if( err ) return callback( err );
 
       var selected = _.filter( microtasks, function( microtask ) {
@@ -48,12 +45,27 @@ var performRule = function( event, config, task, data, callback ) {
       } );
 
       function closeMicrotask( microtask, cb ) {
-        return microtask.close( d.bind( cb ) );
+        return microtask.close( cb );
       }
 
       return async.each( selected, closeMicrotask, callback );
-    } ) );
-  } ) );
+    } );
+  } );
+
+  return callback();
+}
+
+// # Rule definition
+//
+// Description of the rule.
+var rule = {
+  // # Hooks
+  //
+  // Description of what the rule does in general.
+  hooks: {
+    // Description of what the rule does in this specific event.
+    'CLOSE_OBJECT': onCloseObject
+  }
 };
 
-module.exports.perform = exports.perform = performRule;
+module.exports = exports = rule;

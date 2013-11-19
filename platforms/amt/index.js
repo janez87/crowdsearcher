@@ -135,144 +135,6 @@ function createExecution( task, microtask, platform, assignment, callback ) {
     execution.close( callback );
   } );
 }
-
-
-function create( task, microtask, platform, callback ){
-  log.trace( 'Creating the task inteface using AMT' );
-
-  // Creating a domain for the mongoose queries
-  var d = domain.create();
-  d.on( 'error', callback );
-
-  var params = platform.params;
-
-  var amt = new AMT( {
-    sandbox: params.sandbox,
-    key: params.accessKeyId,
-    secret: params.secretAccessKey,
-  } );
-
-  var HITType = amt.HITType;
-  var HIT = amt.HIT;
-  var Reward = amt.Reward;
-  var Notification = amt.Notification;
-
-  var hitTypeId = task.getMetadata( 'hitType' );
-
-
-  function populateMicrotask( cb ) {
-    microtask
-    .populate( 'operations objects', function ( err, popMicrotask ) {
-      if( err ) return cb( err );
-
-      microtask = popMicrotask;
-      return cb();
-    } );
-  }
-  function createHitType( cb ) {
-    log.trace( 'Creating HitType' );
-    var reward = new Reward( params.price );
-    var duration = params.duration;
-
-    var hitType = new HITType( {
-      title: task.name,
-      description: params.description || task.description,
-      Keywords: params.keywords.join( ',' ),
-      reward: reward,
-      duration: duration
-    } );
-
-    return hitType.create( cb );
-  }
-  function addNotification( hitType, cb ) {
-    log.trace( 'Setting notification to hitType' );
-
-    var destination = nconf.get( 'webserver:externalAddress' );
-    destination += 'api/'+task._id+'/notification/amt';
-    log.trace( 'Destination is: %s', destination );
-
-    var notification = new Notification( {
-      destination: destination,
-      transport: 'REST',
-      events: [ 'AssignmentSubmitted' ]
-    } );
-    return hitType.setNotification( notification, function ( err ) {
-      return cb( err, hitType.id );
-    } );
-  }
-  function getQuestion( hitTypeIdPassed, cb ) {
-    if( !_.isFunction( cb ) ) {
-      cb = hitTypeIdPassed;
-      hitTypeIdPassed = hitTypeId;
-    }
-
-    // TODO: change to something more async.. and controlled..
-    var question;
-    try {
-      if( params.questionFile )
-        question = fs.readFileSync( __dirname+'/custom/'+params.questionFile, 'utf8' );
-
-    } catch( ex ) {
-      question = fs.readFileSync( __dirname+'/question.xml', 'utf8' );
-    }
-
-    // Create a renderer for the file
-    var render = _.template( question );
-    // Generate the final XML question file
-    var questionXML = render( {
-      microtask: microtask,
-      task: task
-    } );
-
-    return cb( null, hitTypeIdPassed, questionXML );
-  }
-  function createHit( hitTypeId, question, cb ) {
-    var hit = new HIT( {
-      hitTypeId: hitTypeId,
-      question: question,
-      life: params.lifeTimeInSeconds,
-      MaxAssignments: params.maxAssignments
-    } );
-
-    return hit.create( cb );
-  }
-  function saveTask( hitTypeId, cb ) {
-    log.trace( 'Saving hitTypeId metadata' );
-
-    task.setMetadata( 'hitType', hitTypeId );
-    return d.bind( task.save.bind( task ) )( function ( err ) {
-      if( err ) return cb( err );
-
-      return cb( null, hitTypeId );
-    } );
-  }
-  function saveMicroTask( hit, hitTypeId, cb ) {
-    log.trace( 'Saving hit metadata' );
-
-    microtask.setMetadata( 'hit', hit.id );
-    return d.bind( microtask.save.bind( microtask ) )( cb );
-  }
-
-
-  var actions = [
-    getQuestion,
-    createHit,
-    saveMicroTask
-  ];
-  if( _.isUndefined( hitTypeId ) ){
-    log.trace( 'HitType not found, creating one' );
-    actions.unshift( createHitType, addNotification, saveTask );
-  }
-
-  actions.unshift( populateMicrotask );
-
-  async.waterfall( actions, function( err ) {
-    if( err ) return callback( err );
-
-    log.trace( 'HIT created');
-    return callback();
-  } );
-}
 */
 
 
@@ -417,12 +279,29 @@ function onAddMicrotasks( params, task, data, callback ) {
 function onEndMicrotask( params, task, data, callback ) {
   log.debug( 'END_MICROTASK' );
   // expire HIT
-  return callback();
+
+  var amt = new AMT( {
+    sandbox: params.sandbox,
+    key: params.accessKeyId,
+    secret: params.secretAccessKey,
+  } );
+
+  var HIT = amt.HIT;
+  var microtask = data.microtask;
+  var hitId = microtask.getMetadata( 'hit' );
+
+  HIT.get( hitId, function( err, hit ) {
+    if( err ) return callback( err );
+
+    hit.expire( callback );
+  } );
 }
 
 
-function remote( req, res ) {
+function handleNotification( req, res, next ) {
   var task = req.task;
+
+  log.trace( 'Query: %j', req.query );
 
   var eventType = req.query[ 'Event.1.EventType' ];
 
@@ -502,7 +381,7 @@ function remote( req, res ) {
 
 
 var Platform = {
-  remote: remote,
+  //notify: handleNotification,
 
   hooks: {
     'OPEN_TASK': onOpenTask,

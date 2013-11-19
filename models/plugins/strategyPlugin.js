@@ -1,12 +1,10 @@
 // Load libraries
-var util = require('util');
 var mongo = require('mongoose');
 var CS = require( '../../core' );
 
 // Import Mongo Classes and Objects
 var Schema = mongo.Schema;
 var Mixed = Schema.Types.Mixed;
-var MongoError = mongo.Error;
 
 // Create child logger
 var log = CS.log.child( { component: 'Strategy plugin' } );
@@ -64,7 +62,7 @@ module.exports = exports = function ( schema, options ) {
 
     var script = this[ strategy+'StrategyScript' ];
     if( !script || !script.perform )
-      return callback( new MongoError( 'Strategy not found' ) );
+      return callback( new Error( 'Strategy not found' ) );
 
     var params = this[ strategy+'Strategy' ].params;
     return script.perform( data.event, params, this, data, callback );

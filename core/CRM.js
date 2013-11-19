@@ -24,6 +24,8 @@ ControlRuleManager.trigger = function( event, data, callback ) {
   // The task id must be available in the data object.
   var taskId = data.task._id? data.task._id : data.task;
 
+  log.debug( 'CRM event %s', event );
+
   if( !taskId )
     return callback( new Error( 'Task id must be specified' ) );
 
@@ -59,6 +61,16 @@ ControlRuleManager.trigger = function( event, data, callback ) {
           return c();
         }
       );
+    } else if( event==='END_MICROTASK' ) {
+      defaults.microtaskId = data.microtask;
+
+      retrieveActionList.push(
+        _.partial( retrieveMicrotasks, [defaults.microtaskId] ),
+        function( microtasks, c ) {
+          defaults.microtask = microtasks[0];
+          return c();
+        }
+      );
     } else if( event==='ADD_OBJECTS' ) {
       defaults.objectIds = data.objects;
 
@@ -81,6 +93,16 @@ ControlRuleManager.trigger = function( event, data, callback ) {
         }
       );
     } else if( event==='CLOSE_OBJECT' ) {
+      defaults.executionId = data.execution;
+
+      retrieveActionList.push(
+        _.partial( retrieveExecution, defaults.executionId ),
+        function( execution, c ) {
+          defaults.execution = execution;
+          return c();
+        }
+      );
+    } else if( event==='END_EXECUTION' ) {
       defaults.executionId = data.execution;
 
       retrieveActionList.push(
@@ -240,7 +262,11 @@ ControlRuleManager.trigger = function( event, data, callback ) {
   function triggerPlatformRules( task, cb ) {
     // Find all platforms with hooks on the triggered event.
     var hooks = _.filter( task.platforms, function( platform ) {
-      return _.isFunction( platform.implementation.hooks[ event ] );
+      var platformHooks = platform.implementation.hooks;
+      if( platformHooks )
+        return _.isFunction( platform.implementation.hooks[ event ] );
+      else
+        return false;
     } );
 
     log.trace( 'Found %s platforms hooks to run', hooks.length );

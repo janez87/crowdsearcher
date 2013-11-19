@@ -15,20 +15,39 @@ var log = CS.log.child( { component: 'Classify Majority' } );
 var ControlMart = CS.models.controlmart;
 var Execution = CS.models.execution;
 
+function onOpenTask( params, task, data, callback ) {
+  // body...
 
-var performRule = function( event, config, task, data, callback ) {
+  return callback();
+}
+
+function onEndTask( params, task, data, callback ) {
+  // body...
+
+  return callback();
+}
+
+function onAddMicrotasks( params, task, data, callback ) {
+  // body...
+
+  return callback();
+}
+
+function onEndMicrotask( params, task, data, callback ) {
+  // body...
+
+  return callback();
+}
+
+function onEndExecution( params, task, data, callback ) {
   log.trace('Performing the rule');
 
-  // Error handler
-  var domain = require( 'domain' ).create();
-  domain.on('error',callback);
-
-  var executionId = data.execution;
-  var operationLabel = config.operation;
+  var executionId = data.executionId;
+  var operationLabel = params.operation;
 
   Execution
   .findById( executionId )
-  .exec( domain.bind( function( err, execution ) {
+  .exec( function( err, execution ) {
     if( err ) return callback( err );
 
     if( !execution )
@@ -128,7 +147,7 @@ var performRule = function( event, config, task, data, callback ) {
 
         // If the number of evaluations is equal to the required ones
         log.trace('Checking the majority');
-        if(evaluations>=config.answers){
+        if(evaluations>=params.answers){
 
           // Get the category with the maximum count
           var maxCount = _.max(_.pairs(categoryCount),function(p){
@@ -151,7 +170,7 @@ var performRule = function( event, config, task, data, callback ) {
 
 
           // If the max is greated or equal the agreement needed it close the object for this operation
-          if(maxCount[1] >= config.agreement){
+          if(maxCount[1] >= params.agreement){
             status = 'closed';
           }
 
@@ -205,39 +224,63 @@ var performRule = function( event, config, task, data, callback ) {
     };
 
     return async.each(annotations,checkMajority,callback);
-  }));
+  });
+}
 
+// # Rule definition
+//
+// Description of the rule.
+var rule = {
+  // # Hooks
+  //
+  // Description of what the rule does in general.
+  hooks: {
+    // Description of what the rule does in this specific event.
+    'OPEN_TASK': onOpenTask,
+    // Description of what the rule does in this specific event.
+    'END_TASK': onEndTask,
+    // Description of what the rule does in this specific event.
+    'ADD_MICROTASKS': onAddMicrotasks,
+    // Description of what the rule does in this specific event.
+    'END_MICROTASK': onEndMicrotask,
+    // Description of what the rule does in this specific event.
+    'END_EXECUTION': onEndExecution
+  },
+
+
+  // ## Parameters
+  //
+  //
+  params: {
+    // Label of the Operation
+    operation: 'string',
+    // Number of answers
+    answers: 'number',
+    // Agreement will be reached here
+    agreement:'number'
+  },
+
+  // ## Check rule
+  //
+  // Description of the constraints of the rule parameters.
+  check: function checkParams( params, done ) {
+    if(_.isUndefined(params.operation)){
+      log.error('The label of the operation must be specified');
+      return done(false);
+    }
+
+    if(_.isUndefined(params.agreement) || params.agreement<=0){
+      log.error('The agreement must be an integer greater than 0');
+      return done(false);
+    }
+
+    if(_.isUndefined(params.answers) || params.answers<=0){
+      log.error('The number of answers must be an integer greater than 0');
+      return done(false);
+    }
+
+    return done(true);
+  },
 };
 
-var checkParameters = function( params, done ) {
-  log.trace( 'Checking parameters' );
-
-  // Everything went better then expected...
-
-  if(_.isUndefined(params.operation)){
-    log.error('The label of the operation must be specified');
-    return done(false);
-  }
-
-  if(_.isUndefined(params.agreement) || params.agreement<=0){
-    log.error('The agreement must be an integer greater than 0');
-    return done(false);
-  }
-
-  if(_.isUndefined(params.answers) || params.answers<=0){
-    log.error('The number of answers must be an integer greater than 0');
-    return done(false);
-  }
-
-  return done(true);
-};
-
-var params = {
-  operation: 'string',
-  answers:'number',
-  agreement:'number'
-};
-
-module.exports.perform = exports.perform = performRule;
-module.exports.check = exports.check = checkParameters;
-module.exports.params = exports.params = params;
+module.exports = exports = rule;

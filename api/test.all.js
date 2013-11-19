@@ -39,6 +39,16 @@ var API = {
 API.logic = function ( req, res, next ) {
   var platforms = [
     {
+      name: 'tef',
+      enabled: true,
+      invitation: false,
+      execution: true,
+      params: {
+        url: 'http://131.175.59.94:8100/'
+      }
+    }
+    /*
+    {
       name: 'amt',
       enabled: true,
       invitation: false,
@@ -46,8 +56,10 @@ API.logic = function ( req, res, next ) {
       params: {
         accessKeyId: 'AKIAIJEW5UG5SRI2TUQA',
         secretAccessKey: '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',
+        price: 10
       }
     }
+    */
   ];
   var operations = [
     {
@@ -66,15 +78,40 @@ API.logic = function ( req, res, next ) {
       type: 'SPLITTING',
       action: 'EQUI_SPLIT',
       params: {
-        objectsNumber: 2,
+        objectsNumber: 1,
         shuffle: true
       }
+    },
+    /*
+    {
+      type: 'CUSTOM',
+      action: 'limitMicrotaskExecution',
+      params: {
+        maxExecution: 1
+      }
+    },
+    {
+      type: 'CUSTOM',
+      action: 'limitTaskExecution',
+      params: {
+        maxExecution: 5
+      }
+    }
+    */
+    {
+      type: 'CUSTOM',
+      action: 'closeTaskOnObjectStatus'
+    },
+    {
+      type: 'CUSTOM',
+      action: 'closeMicroTaskOnObjectStatus'
     }
   ];
   var objects = [
     { data: 'Numero: '+Math.random() },
     { data: 'Numero: '+Math.random() },
     { data: 'Numero: '+Math.random() },
+    /*
     { data: 'Numero: '+Math.random() },
     { data: 'Numero: '+Math.random() },
     { data: 'Numero: '+Math.random() },
@@ -90,6 +127,7 @@ API.logic = function ( req, res, next ) {
     { data: 'Numero: '+Math.random() },
     { data: 'Numero: '+Math.random() },
     { data: 'Numero: '+Math.random() }
+    */
   ];
 
   /*
@@ -108,7 +146,7 @@ API.logic = function ( req, res, next ) {
     //job: job,
     controlrules: controlrules,
     assignmentStrategy: {
-      name: 'ROUND_ROBIN'
+      name: 'RANDOM'
     },
     implementationStrategy: {
       name: 'RANDOM'
@@ -120,8 +158,8 @@ API.logic = function ( req, res, next ) {
     _.bind( task.addPlatforms, task, platforms ),
     _.bind( task.addOperations, task, operations ),
     _.bind( task.addObjects, task, objects ),
-    _.bind( task.open, task ),
-    _.bind( task.addObjects, task, objects ),
+    _.bind( task.open, task )
+    //_.bind( task.addObjects, task, objects ),
   ];
 
   async.series( actions, function ( err, results ) {
