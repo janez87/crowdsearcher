@@ -44,9 +44,22 @@ API.logic = function ( req, res, next ) {
       invitation: false,
       execution: true,
       params: {
-        url: 'http://localhost:8100/'
+        url: 'http://131.175.59.94:8100/'
       }
     }
+    /*
+    {
+      name: 'amt',
+      enabled: true,
+      invitation: false,
+      execution: true,
+      params: {
+        accessKeyId: 'AKIAIJEW5UG5SRI2TUQA',
+        secretAccessKey: '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',
+        price: 10
+      }
+    }
+    */
   ];
   var operations = [
     {
@@ -62,33 +75,43 @@ API.logic = function ( req, res, next ) {
   ];
   var controlrules = [
     {
-      event: 'OPEN_TASK',
-      action: 'testParam',
-      type: 'CUSTOM',
-      params: {
-        name: 'as',
-        number: 1
-      }
-    },
-    {
-      event: 'OPEN_TASK',
-      action: 'EQUI_SPLIT',
       type: 'SPLITTING',
+      action: 'EQUI_SPLIT',
       params: {
-        objectsNumber: 2,
+        objectsNumber: 1,
         shuffle: true
       }
     },
+    /*
     {
-      event: 'END_TASK',
-      action: 'test',
-      type: 'CUSTOM'
+      type: 'CUSTOM',
+      action: 'limitMicrotaskExecution',
+      params: {
+        maxExecution: 1
+      }
+    },
+    {
+      type: 'CUSTOM',
+      action: 'limitTaskExecution',
+      params: {
+        maxExecution: 5
+      }
+    }
+    */
+    {
+      type: 'CUSTOM',
+      action: 'closeTaskOnObjectStatus'
+    },
+    {
+      type: 'CUSTOM',
+      action: 'closeMicroTaskOnObjectStatus'
     }
   ];
   var objects = [
     { data: 'Numero: '+Math.random() },
     { data: 'Numero: '+Math.random() },
     { data: 'Numero: '+Math.random() },
+    /*
     { data: 'Numero: '+Math.random() },
     { data: 'Numero: '+Math.random() },
     { data: 'Numero: '+Math.random() },
@@ -104,12 +127,13 @@ API.logic = function ( req, res, next ) {
     { data: 'Numero: '+Math.random() },
     { data: 'Numero: '+Math.random() },
     { data: 'Numero: '+Math.random() }
+    */
   ];
 
   /*
   var job = new Job( {
     name: 'Test Job',
-    description: '# Hello\n## moto\n`var volo=culo`'
+    description: '# Hello\n## moto\n`var volo="io"`'
   } );
   job.save();
   */
@@ -117,12 +141,12 @@ API.logic = function ( req, res, next ) {
   var rawTask = {
     name: 'Test',
     //private: true,
-    description: '# Hello\n## description\n`var volo=figo`',
-    job: '5272498081ded17826000011',
+    description: '# Hello\n## description\n`var volo="Io"`',
+    job: '5289fbfed92edb9814000010',
     //job: job,
     controlrules: controlrules,
     assignmentStrategy: {
-      name: 'ROUND_ROBIN'
+      name: 'RANDOM'
     },
     implementationStrategy: {
       name: 'RANDOM'
@@ -134,8 +158,8 @@ API.logic = function ( req, res, next ) {
     _.bind( task.addPlatforms, task, platforms ),
     _.bind( task.addOperations, task, operations ),
     _.bind( task.addObjects, task, objects ),
-    _.bind( task.open, task ),
-    _.bind( task.addObjects, task, objects ),
+    _.bind( task.open, task )
+    //_.bind( task.addObjects, task, objects ),
   ];
 
   async.series( actions, function ( err, results ) {

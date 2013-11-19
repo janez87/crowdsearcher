@@ -123,22 +123,6 @@ ObjectSchema.virtual( 'editable' ).get( function() {
 
 
 
-
-
-
-// ## Plugins to add to the object model.
-//
-// Add the `metadata` fileld to the entity.
-ObjectSchema.plugin( require( './plugins/metadataPlugin' ) );
-// Add the `accessKey` plugin.
-ObjectSchema.plugin( require( './plugins/accessKeyPlugin' ) );
-
-
-
-
-
-
-
 // # Object instance methods
 //
 

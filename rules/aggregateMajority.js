@@ -14,16 +14,35 @@ var log = CS.log.child( { component: 'Aggregate Majority' } );
 var ControlMart = CS.models.controlmart;
 var Microtask = CS.models.microtask;
 
-var performRule = function(event, config, task, data, callback ) {
-  log.trace('Performing the rule');
 
-  // Error handler
-  var domain = require( 'domain' ).create();
-  domain.on('error',callback);
+function onOpenTask( params, task, data, callback ) {
+  // body...
 
-  var microtaskId = data.microtask;
+  return callback();
+}
 
-  var mode = config.mode;
+function onEndTask( params, task, data, callback ) {
+  // body...
+
+  return callback();
+}
+
+function onAddMicrotasks( params, task, data, callback ) {
+  // body...
+
+  return callback();
+}
+
+function onEndMicrotask( params, task, data, callback ) {
+  // body...
+
+  return callback();
+}
+
+function onEndExecution( params, task, data, callback ) {
+  var microtask = data.microtask;
+
+  var mode = params.mode;
 
   // For each object it evaluate the status of the majorities
   var evaluateMajority = function( microtask, object, callback ) {
@@ -67,7 +86,7 @@ var performRule = function(event, config, task, data, callback ) {
       }
       if(mode==='SPECIFIC'){
         // Close the object if the specified operation are closed
-        var ops = config.operations;
+        var ops = params.operations;
 
         if(!_.isArray(ops)){
           ops = [ops];
@@ -105,10 +124,9 @@ var performRule = function(event, config, task, data, callback ) {
 
   };
 
-  Microtask
-  .findById( microtaskId )
-  .populate( 'objects operations' )
-  .exec( domain.bind( function( err, microtask ) {
+  microtask
+  .populate( 'objects' )
+  .exec( function( err, microtask ) {
     if( err ) return callback( err );
 
     if( !microtask )
@@ -118,47 +136,70 @@ var performRule = function(event, config, task, data, callback ) {
 
     var fn = _.partial( evaluateMajority, microtask );
     return async.eachSeries( microtask.objects, fn, callback );
-  } ) );
+  } );
+}
 
-};
 
-var checkParameters = function( params, done ) {
-  log.trace( 'Checking parameters' );
+// # Rule definition
+//
+// Description of the rule.
+var rule = {
+  // # Hooks
+  //
+  // Description of what the rule does in general.
+  hooks: {
+    // Description of what the rule does in this specific event.
+    'OPEN_TASK': onOpenTask,
+    // Description of what the rule does in this specific event.
+    'END_TASK': onEndTask,
+    // Description of what the rule does in this specific event.
+    'ADD_MICROTASKS': onAddMicrotasks,
+    // Description of what the rule does in this specific event.
+    'END_MICROTASK': onEndMicrotask,
+    // Description of what the rule does in this specific event.
+    'END_EXECUTION': onEndExecution
+  },
 
-  var mode = params.mode;
 
-  if(_.isUndefined(mode)){
-    log.error('A mode must be specified');
-    return done(false);
-  }
+  // ## Parameters
+  //
+  //
+  params: {
+    mode:{
+      type: 'enum',
+      values: [ 'ALL', 'ONE', 'SPECIFIC' ]
+    },
+    operations: [ 'string' ]
+  },
 
-  if(mode!=='ALL' && mode!=='ONE' && mode!=='SPECIFIC'){
-    log.error('Unsupported mode is specified (%s)',mode);
-    return done(false);
-  }
+  // ## Check rule
+  //
+  // Description of the constraints of the rule parameters.
+  check: function checkParams( params, done ) {
+    var mode = params.mode;
 
-  if(mode==='SPECIFIC'){
-    var operations = params.operations;
-
-    if(_.isUndefined(operations)){
-      log.error('The operations must be specified for the SPECIFIC mode');
+    if(_.isUndefined(mode)){
+      log.error('A mode must be specified');
       return done(false);
     }
-  }
 
-  // Everything went better then expected...
-  return done(true);
-};
+    if(mode!=='ALL' && mode!=='ONE' && mode!=='SPECIFIC'){
+      log.error('Unsupported mode is specified (%s)',mode);
+      return done(false);
+    }
 
-// So che non esiste questo tipo.. tu pero volevi un esempio.
-var params = {
-  mode:{
-    type: 'enum',
-    values: ['ALL','ONE','SPECIFIC']
+    if(mode==='SPECIFIC'){
+      var operations = params.operations;
+
+      if(_.isUndefined(operations)){
+        log.error('The operations must be specified for the SPECIFIC mode');
+        return done(false);
+      }
+    }
+
+    // Everything went better then expected...
+    return done(true);
   },
-  operations: ['string']
 };
 
-module.exports.perform = exports.perform = performRule;
-module.exports.check = exports.check = checkParameters;
-module.exports.params = exports.params = params;
+module.exports = exports = rule;

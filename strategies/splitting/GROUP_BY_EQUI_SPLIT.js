@@ -29,6 +29,66 @@ GroupByEquiSplitError.CONFIGURATION_MISMATCH = 'CONFIGURATION_MISMATCH';
 GroupByEquiSplitError.MISSING_PARAMETERS = 'MISSING_PARAMETERS';
 
 
+function onOpenTask( params, task, data, callback ) {
+  var field = params.field;
+
+  // Find all non `closed` object for the current Task.
+  ObjectModel
+  .find()
+  .where( 'task', task._id )
+  .where( 'status' ).ne( 'CLOSED' )
+  .lean()
+  .exec( function( err, objects ) {
+    if( err ) return callback( err );
+
+    // Check object number.
+    if( objects.length===0 ) {
+      log.warn( 'No objects specified' );
+      return callback();
+    }
+
+    var objectGroups = _.groupBy( objects, function( object ) {
+      return object.data[ field ];
+    } );
+
+    // Shuffle the data if necessary
+    if( params.shuffle ) {
+      log.trace( 'Shuffling the objects' );
+      _.each( objectGroups, function ( arr, key ) {
+        objectGroups[ key ] = _.shuffle( arr );
+      } );
+    }
+
+    log.trace( 'Got %s objects from the DB, will be grouped by %s in %s', objects.length, field, params.objectsNumber );
+
+    // Will handle the list of raw microtask to create.
+    var microtaskToCreate = [];
+
+    // Split each array contained into `objectGroups` into smaller array,
+    // each containing at most `objectsNumber` elements.
+    _.each( objectGroups, function ( objectList ) {
+      var i, j, subArray;
+      for( i=0, j=objectList.length; i<j; i+=params.objectsNumber ) {
+        var start = i;
+        var end = start+params.objectsNumber;
+        subArray = objectList.slice( start, end );
+        //log.trace( 'Slice from %s to %s: %j', start, end, subArray );
+        var rawMicrotask = {
+          platforms: task.platforms,
+          operations: task.operations,
+          objects: subArray
+        };
+        //log.trace( 'Associating %s objects to a microtask: %j', subArray.length, subArray );
+
+        microtaskToCreate.push( rawMicrotask );
+      }
+    } );
+    log.debug( 'Creating %s microtasks', microtaskToCreate.length );
+
+    return task.addMicrotasks( microtaskToCreate, callback );
+  } );
+}
+
 // # EquiSplit Strategy
 //
 // STRATEGY DESCRIPTION
@@ -44,67 +104,11 @@ var strategy = {
     shuffle: 'boolean'
   },
 
-  // ## Perform rule
+  // # Hooks
   //
-  // Description of what the perform rule does.
-  perform: function performStrategy( event, params, task, data, callback ) {
-    var field = params.field;
-
-    // Find all non `closed` object for the current Task.
-    ObjectModel
-    .find()
-    .where( 'task', task._id )
-    .where( 'status' ).ne( 'CLOSED' )
-    .lean()
-    .exec( function( err, objects ) {
-      if( err ) return callback( err );
-
-      // Check object number.
-      if( objects.length===0 ) {
-        log.warn( 'No objects specified' );
-        return callback();
-      }
-
-      var objectGroups = _.groupBy( objects, function( object ) {
-        return object.data[ field ];
-      } );
-
-      // Shuffle the data if necessary
-      if( params.shuffle ) {
-        log.trace( 'Shuffling the objects' );
-        _.each( objectGroups, function ( arr, key ) {
-          objectGroups[ key ] = _.shuffle( arr );
-        } );
-      }
-
-      log.trace( 'Got %s objects from the DB, will be grouped by %s in %s', objects.length, field, params.objectsNumber );
-
-      // Will handle the list of raw microtask to create.
-      var microtaskToCreate = [];
-
-      // Split each array contained into `objectGroups` into smaller array,
-      // each containing at most `objectsNumber` elements.
-      _.each( objectGroups, function ( objectList ) {
-        var i, j, subArray;
-        for( i=0, j=objectList.length; i<j; i+=params.objectsNumber ) {
-          var start = i;
-          var end = start+params.objectsNumber;
-          subArray = objectList.slice( start, end );
-          //log.trace( 'Slice from %s to %s: %j', start, end, subArray );
-          var rawMicrotask = {
-            platforms: task.platforms,
-            operations: task.operations,
-            objects: subArray
-          };
-          //log.trace( 'Associating %s objects to a microtask: %j', subArray.length, subArray );
-
-          microtaskToCreate.push( rawMicrotask );
-        }
-      } );
-      log.debug( 'Creating %s microtasks', microtaskToCreate.length );
-
-      return task.addMicrotasks( microtaskToCreate, callback );
-    } );
+  // Description of what the strategy does in general.
+  hooks: {
+    'OPEN_TASK': onOpenTask
   },
 
   // ## Check rule

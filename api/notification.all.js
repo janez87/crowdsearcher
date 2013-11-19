@@ -50,7 +50,7 @@ API.logic = function notificationAPI( req, res, next ) {
     return res.send( 'BAD_PLATFORM' );
   }
 
-  if( !_.isFunction( platform.remote ) ) {
+  if( !_.isFunction( platform.notify ) ) {
     log.warn( 'Platform notification handler not implemented' );
     return res.send( 'BAD_PLATFORM_HANDLER' );
   }
@@ -68,9 +68,11 @@ API.logic = function notificationAPI( req, res, next ) {
       return res.send( 'BAD_TASK_ID' );
     }
 
+    // Pass the task to the request.
     req.task = task;
 
-    return platform.remote( req, res, next );
+    // Give the control over the response to the notify handler.
+    return platform.notify( req, res, next );
   } ) );
 };
 

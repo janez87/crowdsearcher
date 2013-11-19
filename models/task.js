@@ -349,13 +349,34 @@ TaskSchema.methods.close = function( callback ) {
   // Close the task.
   log.debug( 'Closing task', this._id );
 
-  this.set( 'status', 'CLOSED' );
-  this.set( 'closedDate', Date.now() );
 
-  this.save( function( err ) {
+  function closeTask( err ) {
+    if( err ) return callback( err );
+    _this.set( 'status', 'CLOSED' );
+    _this.set( 'closedDate', Date.now() );
+
+    _this.save( function( err ) {
+      if( err ) return callback( err );
+
+      _this.fire( 'END_TASK', callback );
+    } );
+  }
+
+  // Close all the microtasks
+  var microtaskIds = this.populated( 'microtasks' ) || this.microtasks;
+  var  Microtask = this.model( 'microtask' );
+  Microtask
+  .find()
+  .where( '_id' ).in( microtaskIds )
+  .where( 'status' ).ne( 'CLOSED' )
+  .exec( function( err, microtasks ) {
     if( err ) return callback( err );
 
-    _this.fire( 'END_TASK', callback );
+    function closeMicrotask( microtask, cb ) {
+      return microtask.close( cb );
+    }
+
+    async.each( microtasks, closeMicrotask, closeTask );
   } );
 };
 
@@ -414,8 +435,13 @@ TaskSchema.methods.addObjects = function( objects, callback ) {
     _this.save( function( err ) {
       if( err ) return callback( err );
 
+      // Send the Ids
+      var objectIds = _.map( args, function( object ) {
+        return object._id;
+      } );
+
       // Once all the changes are saved trigger the `ADD_OBJECTS`.
-      _this.fire( 'ADD_OBJECTS', { objects: args }, callback );
+      _this.fire( 'ADD_OBJECTS', { objects: objectIds }, callback );
     } );
   } );
 };
@@ -464,7 +490,12 @@ TaskSchema.methods.addMicrotasks = function( microtasks, callback ) {
     _this.save( function( err ) {
       if( err ) return callback( err );
 
-      _this.fire( 'ADD_MICROTASKS', { microtasks: args }, callback );
+      // Send the Ids
+      var microtaskIds = _.map( args, function( microtask ) {
+        return microtask._id;
+      } );
+
+      _this.fire( 'ADD_MICROTASKS', { microtasks: microtaskIds }, callback );
     } );
   } );
 };
