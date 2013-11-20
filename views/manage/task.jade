@@ -60,6 +60,9 @@ block content
               data-method='POST') Close
     .col-md-4.text-right
       .btn-group
+        a.btn.btn-sm.btn-default(href='manage/task/'+task._id+'/dashboard')
+          i.fa.fa-dashboard
+          |  Dashboard 
         if task.status!=='CREATED'
           a.btn.btn-sm.btn-default(href='manage/answers?task='+task._id) Answers 
             i.fa.fa-list

@@ -166,3 +166,17 @@ exports.answers = function( req, res, next ) {
     });
   } );
 };
+
+// # Dashboard handler
+//
+exports.dashboard = function( req, res, next ) {
+  var url = baseUrl+req.params.entity+'/'+req.params.id+'/stats';
+  r( url, function ( err, resp, stats ) {
+    if( err ) return next( err );
+
+    res.render( 'manage/dashboard', {
+      title: 'Dashboard for '+req.params.id,
+      stats: stats
+    });
+  } );
+};

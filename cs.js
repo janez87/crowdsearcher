@@ -269,6 +269,8 @@ config.once( 'ready', function configReady() {
   app.get( '/manage/object/:id', routes.checkAuth, manager.object );
   // Answers
   app.get( '/manage/answers', routes.checkAuth, manager.answers );
+  // Dashboard
+  app.get( '/manage/:entity/:id/dashboard', routes.checkAuth, manager.dashboard );
 
 
   var accountRedirect = function( req, res ) {
