@@ -44,7 +44,7 @@ module.exports = exports = function ( schema, options ) {
 
 
   // Add the field to the schema.
-  schema.virtual( strategy+'StrategyScript' ).get( function() {
+  schema.virtual( strategy+'StrategyImplementation' ).get( function() {
     var container = CS[ strategy ];
     var field = this[ strategy+'Strategy' ];
 
@@ -60,7 +60,7 @@ module.exports = exports = function ( schema, options ) {
     var strategyName = this[ strategy+'Strategy' ].name;
     log.trace( 'Performing %s strategy %s', strategy, strategyName );
 
-    var script = this[ strategy+'StrategyScript' ];
+    var script = this[ strategy+'StrategyImplementation' ];
     if( !script || !script.perform )
       return callback( new Error( 'Strategy not found' ) );
 

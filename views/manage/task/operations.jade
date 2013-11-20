@@ -41,13 +41,22 @@ include ../../includes/params
     ul#operation_list.list-group
 
 script.
-  $( '.add', '#operations' ).on( 'click', function ( evt ) {
+  $( '#operations .add' ).on( 'click', function ( evt ) {
     if( $( '#operation_name' ).val()!=='' ) {
+      var $operations = $( '#operation_list .operation' );
+
+      var labels = $operations.map( function() {
+        var $op = $( this );
+        return $op.data( 'value' ).label;
+      } ).get();
+
       var $label = $( '#operation_label' );
-      if( $label.val().trim()==='' ) {
+      var label = $label.val().trim();
+
+      if( label==='' || $.inArray( label, labels )!==-1 ) {
         evt.stopImmediatePropagation();
         evt.stopPropagation();
-        warnNoty( 'You must insert a valid <b>label</b>' );
+        warnNoty( 'You must insert a <b>valid</b> and <b>unique</b> label' );
         $label.select();
         return false;
       }

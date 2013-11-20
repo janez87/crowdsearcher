@@ -74,25 +74,15 @@ API.logic = function ( req, res, next ) {
     }
   ];
   var controlrules = [
-    {
-      type: 'SPLITTING',
-      action: 'EQUI_SPLIT',
-      params: {
-        objectsNumber: 1,
-        shuffle: true
-      }
-    },
     /*
     {
-      type: 'CUSTOM',
-      action: 'limitMicrotaskExecution',
+      name: 'limitMicrotaskExecution',
       params: {
         maxExecution: 1
       }
     },
     {
-      type: 'CUSTOM',
-      action: 'limitTaskExecution',
+      name: 'limitTaskExecution',
       params: {
         maxExecution: 5
       }
@@ -100,11 +90,11 @@ API.logic = function ( req, res, next ) {
     */
     {
       type: 'CUSTOM',
-      action: 'closeTaskOnObjectStatus'
+      name: 'closeTaskOnObjectStatus'
     },
     {
       type: 'CUSTOM',
-      action: 'closeMicroTaskOnObjectStatus'
+      name: 'closeMicroTaskOnObjectStatus'
     }
   ];
   var objects = [
@@ -142,7 +132,7 @@ API.logic = function ( req, res, next ) {
     name: 'Test',
     //private: true,
     description: '# Hello\n## description\n`var volo="Io"`',
-    job: '5289fbfed92edb9814000010',
+    job: '528ccb7bf47136e027000010',
     //job: job,
     controlrules: controlrules,
     assignmentStrategy: {
@@ -150,6 +140,13 @@ API.logic = function ( req, res, next ) {
     },
     implementationStrategy: {
       name: 'RANDOM'
+    },
+    splittingStrategy: {
+      name: 'EQUI_SPLIT',
+      params: {
+        objectsNumber: 1,
+        shuffle: true
+      }
     }
   };
   var task = new Task( rawTask );

@@ -58,7 +58,7 @@ include ../../includes/params
     ul#platform_list.list-group
 
 script.
-  $( '#platform_name', '#platforms' ).on( 'change', function() {
+  $( '#platforms #platform_name' ).on( 'change', function() {
     var $selected = $( 'option:selected', this );
     var data = $selected.data();
     var $platformEnabled = $( '#platform-enabled' );
@@ -71,4 +71,23 @@ script.
     $platformInvitation.prop( 'disabled', !data.invitation );
     $platformExecution.prop( 'checked', false );
     $platformExecution.prop( 'disabled', !data.execution );
+  } );
+  $( '#platforms .add' ).on( 'click', function ( evt ) {
+    var name = $( '#platform_name' ).val();
+    if( name==='' )
+      return false;
+
+    var $platforms = $( '#platform_list .platform' );
+
+    var platforms = $platforms.map( function() {
+      var $platform = $( this );
+      return $platform.data( 'value' ).name;
+    } ).get();
+
+    if( $.inArray( name, platforms )!==-1 ) {
+      evt.stopImmediatePropagation();
+      evt.stopPropagation();
+      warnNoty( 'You can only add a platform once' );
+      return false;
+    }
   } );

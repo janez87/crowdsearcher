@@ -89,9 +89,7 @@ block content
             - var ruleId = 'rule_'+controlrule._id;
             .list-group-item
               .list-group-item-heading
-                span.label.label-default.pull-right= controlrule.event
-                code= controlrule.type
-                a(data-toggle='collapse',href='#'+ruleId)= controlrule.action
+                a(data-toggle='collapse',href='#'+ruleId)= controlrule.name
               .list-group-item-text.collapse(id=ruleId)
                 +printParams( controlrule.params )
 

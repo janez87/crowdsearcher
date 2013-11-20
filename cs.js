@@ -111,8 +111,6 @@ app.configure( function() {
   } ));
   app.use(express.methodOverride());
 
-  app.use(express.methodOverride());
-
   // ## CORS middleware
   //
   // see: http://stackoverflow.com/questions/7067966/how-to-allow-cors-in-express-nodejs

@@ -178,9 +178,8 @@ ControlRuleManager.trigger = function( event, data, callback ) {
 
   // Function that wraps each function into a 'secure' domain.
   function executeRule( controlrule, cb ) {
-    var rule = controlrule.rule.hooks[ event ];
-
-    return executeFunction( rule, controlrule.params, cb );
+    var hooks = controlrule.rule.hooks;
+    return executeFunction( hooks, controlrule.params, cb );
   }
 
 
@@ -212,7 +211,12 @@ ControlRuleManager.trigger = function( event, data, callback ) {
 
   // Function that wraps each function into a 'secure' domain
   // and provides a fresh version of the Task from the DB.
-  function executeFunction( fn, params, cb ) {
+  function executeFunction( hooks, params, cb ) {
+    if( !hooks || !_.isFunction( hooks[ event ] ) ) {
+      return cb();
+    }
+
+    var fn = hooks[ event ];
     // Create a domain to wrap the function calls
     var d = domain.create();
     // Catch any strange error, log it and exit.
@@ -254,9 +258,8 @@ ControlRuleManager.trigger = function( event, data, callback ) {
 
 
   function executeHook( platform, cb ) {
-    var hook = platform.implementation.hooks[ event ];
-
-    return executeFunction( hook, platform.params, cb );
+    var hooks = platform.implementation.hooks;
+    return executeFunction( hooks, platform.params, cb );
   }
 
   function triggerPlatformRules( task, cb ) {
@@ -286,10 +289,57 @@ ControlRuleManager.trigger = function( event, data, callback ) {
     } );
   }
 
+  function executeStrategyHook( strategy, cb ) {
+    var task = data.task;
+    var strategyData = task[ strategy+'Strategy' ];
+
+    log.trace( 'Execute %s hook: %j', strategy, strategyData );
+    // No strategy defined... no problem
+    if( !strategyData )
+      return cb();
+
+    var params = task[ strategy+'Strategy' ].params;
+    var implementation = task[ strategy+'StrategyImplementation' ];
+    var hooks = implementation.hooks;
+
+    return executeFunction( hooks, params, cb );
+  }
+
+  function triggerStrategyRules( task, cb ) {
+    var strategies = [
+      'splitting',
+      'assignment',
+      'implementation',
+      'invitation'
+    ];
+
+    async.each( strategies, executeStrategyHook, function( err ) {
+      if( err ) {
+        log.warn( 'Error on triggering strategy hooks', err );
+        return cb( null, task );
+      }
+
+      log.debug( '%s completed, no error were rised', event );
+      return cb( null, task );
+    } );
+  }
+
+
+  function checkTask( task, cb ) {
+    // Check if the task can trigger events.
+    if( task.status==='CREATED' || ( task.closed && event!=='END_TASK' ) ) {
+      log.warn( 'Task cannot trigger rule/hook, status is %s', task.status );
+      return callback();
+    }
+
+    return cb( null, task );
+  }
+
 
   var actions = [
-    //_.partial( retrieveTask, taskId ),
     retrieveData,
+    checkTask,
+    triggerStrategyRules,
     triggerPlatformRules,
     triggerControlRules
   ];

@@ -65,14 +65,6 @@ function getTaskObject() {
     return $( this ).data( 'value' );
   } ).get();
 
-
-  // Hack to add the init_platforms.
-  task.controlrules.push( {
-    action: 'init_platforms',
-    event: 'ADD_MICROTASKS',
-    type: 'CUSTOM'
-  } );
-
   return task;
 }
 
@@ -84,12 +76,12 @@ function createListElement( obj, type, viewOnly ) {
   $output.addClass( type );
   $output.attr( 'data-value', JSON.stringify( obj ) );
 
-  var content = '<div class="row"><div class="col-md-6">'+
+  var content = '<div class="row"><div class="col-sm-6">'+
     '<h4 class="list-group-item-heading" data-toggle="collapse" data-target="#'+id+'" title="'+obj.name+'">'+obj.name+'</h4>'+
-    '</div><div class="col-md-4 text-right">';
+    '</div><div class="col-sm-4 text-right">';
 
-  if( obj.event || obj.label ) {
-    content += '<code>'+(obj.event||obj.label)+'</code>';
+  if( obj.label ) {
+    content += '<code>'+obj.label+'</code>';
   } else {
     if( obj.enabled )
       content += '<i class="fa fa-power-off fa-border" title="Platform enabled"></i>';
@@ -101,7 +93,7 @@ function createListElement( obj, type, viewOnly ) {
       content += '<i class="fa fa-envelope-o fa-border" title="Platform enabled for invitation"></i>';
   }
 
-  content += '</div><div class="col-md-2 text-right">';
+  content += '</div><div class="col-sm-2 text-right">';
 
   if( !viewOnly )
     content += '<button type="button" title="Remove" class="btn btn-xs btn-danger remove"><i class="fa fa-trash-o"></i></button>';
@@ -126,9 +118,6 @@ $( '.add' ).on( 'click', function() {
       name: $selected.val(),
       params: getParams( $selected.data( 'target' ) )
     };
-
-    if( data.type==='rule' || data.type==='strategy rule' )
-      obj.action = obj.name;
 
     // Find other inputs
     var $additionalData = $selected
@@ -169,26 +158,21 @@ $( '.add_control' ).on( 'click', function() {
 
     $.each( actions, function() {
       var action = this;
+      var actionParams = {};
 
-      $.each( action.events, function( i, eventName ) {
-        var actionParams = {};
+      if( action.mapping ) {
+        $.each( action.mapping, function( source, destination ) {
+          actionParams[ destination ] = params[ source ];
+        } );
+      }
 
-        if( action.mapping ) {
-          $.each( action.mapping, function( source, destination ) {
-            actionParams[ destination ] = params[ source ];
-          } );
-        }
+      var obj = {
+        name: action.name,
+        params: actionParams
+      };
 
-        var obj = {
-          name: action.action,
-          event: eventName,
-          type: 'CUSTOM',
-          params: actionParams
-        };
-
-        var $target = $( data.target );
-        $target.append( createListElement( obj, 'rule' ) );
-      } );
+      var $target = $( data.target );
+      $target.append( createListElement( obj, 'rule' ) );
     } );
   }
 } );

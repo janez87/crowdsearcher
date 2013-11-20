@@ -31,3 +31,13 @@ include ../../includes/params
   .col-md-6
     h3 Selected implementation
     ul#implementation_list.list-group
+
+script.
+  $( '#implementation .add' ).on( 'click', function ( evt ) {
+    var numChild = $( '#implementation_list' ).children().length;
+    if( numChild>0 ) {
+      evt.stopImmediatePropagation();
+      evt.stopPropagation();
+      return false;
+    }
+  } );

@@ -3,18 +3,29 @@ extends layout
 include ../includes/metadata
 include ../includes/status
 
+block append css
+  :stylus
+    .affix
+      z-index 1000
+      padding 10px
+      top 51px
+      left 0px
+      right 0px
+      height 90px
+      background-color: #FFF
+      border-bottom 1px solid #ddd
+
 block header
-  .row
-    .col-md-8
-      h1.name Task
-    .col-md-4.text-right
-      .btn-group
-        a#preview.btn.btn-default(href='#') Preview 
-          i.fa.fa-file-text-o
-        a#send.btn.btn-success(href='manage/task/new') Send 
-          i.fa.fa-envelope-o
-        a#reset.btn.btn-warning(href='#') Reset 
-          i.fa.fa-refresh
+  div(style="height: 70px")
+    .row(data-spy="affix",data-offset-top="10")
+      .col-sm-8
+        h1.name Task
+      .col-sm-4.text-right
+        .btn-group
+          a#send.btn.btn-success(href='manage/task/new') Send 
+            i.fa.fa-envelope-o
+          a#reset.btn.btn-warning(href='#') Reset 
+            i.fa.fa-refresh
   hr
 block content
   .text-center: h2 Task details

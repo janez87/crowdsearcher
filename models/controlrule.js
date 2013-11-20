@@ -18,51 +18,13 @@ var Mixed = Schema.Types.Mixed;
 // Mongoose schema for the controlrule entity.
 var ControlRuleSchema = new Schema( {
   // ### Rule data
-  /*
-  // The event that will trigger this rule.
-  'event': {
-    type: String,
-    required: true,
-    index: true,
-    uppercase: true
-  },
-  */
+  //
 
   // The name of the rule file to load. **Only** available when type is set to `CUSTOM`.
-  action: {
+  name: {
     type: String,
     required: true,
     trim: true
-  },
-
-  // The type of rule to load.
-  // Each type identifies a different folder for loading the rule.
-  // **Note**:
-  // The following represents the default valies, folders can be customized
-  // by changing the `rules` node in the configuration file.
-  type: {
-    type: String,
-    trim: true,
-    uppercase: true,
-    index: true,
-    // The possible values for `type` are:
-    'enum': [
-      // Represents a script contained into the **rules** folder.
-      'CUSTOM',
-
-      // The 'rule' lo load is the Task's splitting strategy.
-      'SPLITTING',
-
-      // The 'rule' lo load is the Task's assignment strategy.
-      'ASSIGNMENT',
-
-      // The 'rule' lo load is the Task's implementation strategy.
-      'IMPLEMENTATION',
-
-      // The 'rule' lo load is the Task's invitation strategy.
-      'INVITATION',
-    ],
-    'default': 'CUSTOM'
   },
 
   // Parameters for the control rule.
@@ -106,10 +68,10 @@ ControlRuleSchema.plugin( require( './plugins/accessKeyPlugin' ) );
 // # Validators
 //
 // Validate the control rule action, must be a rule present in the **CS**.
-ControlRuleSchema.path( 'action' ).validate( function validateAction( action ) {
-  var action = this.rule;
-  return !!action;
-}, 'Invalid action' );
+ControlRuleSchema.path( 'name' ).validate( function validateAction( name ) {
+  var ruleImpl = this.rule;
+  return !!ruleImpl;
+}, 'Invalid name' );
 
 // Validate control rule parameters.
 ControlRuleSchema.path( 'params' ).validate( function validateParams( params, done ) {
@@ -135,13 +97,7 @@ ControlRuleSchema.path( 'params' ).validate( function validateParams( params, do
 //
 // Get the rule instance.
 ControlRuleSchema.virtual( 'rule' ).get( function() {
-  var container;
-  if( this.type==='CUSTOM' ) {
-    container = 'rules';
-  } else {
-    container = this.type.toLowerCase();
-  }
-  return CS[ container ][ this.action ];
+  return CS.rules[ this.name ];
 } );
 
 
@@ -162,20 +118,6 @@ ControlRuleSchema.pre( 'save', function( next ) {
   return next();
 } );
 
-
-
-// # ControlRule instance methods
-//
-// Run the selected rule.
-/*
-ControlRuleSchema.methods.run = function ( event, task, data, callback ) {
-  var rule = this.rule;
-  if( !rule || !rule.perform )
-    return callback( new Error( 'No '+this.type+' rule with name '+this.action+' to run' ) );
-
-  return rule.perform( event, this.params, task, data, callback );
-};
-*/
 
 // Export the schema.
 exports = module.exports = ControlRuleSchema;

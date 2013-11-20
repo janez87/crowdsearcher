@@ -173,12 +173,10 @@ API.logic = function getConfiguration( req, res ) {
       name: 'Check object status',
       actions: [
         {
-          action: 'closeMicroTaskOnObjectStatus',
-          events: [ 'END_EXECUTION' ]
+          name: 'closeMicroTaskOnObjectStatus',
         },
         {
-          action: 'closeTaskOnObjectsStatus',
-          events: [ 'END_EXECUTION' ]
+          name: 'closeTaskOnObjectStatus',
         },
       ]
     } );
