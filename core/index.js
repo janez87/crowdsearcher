@@ -6,5 +6,6 @@ var CS = {};
 
 
 CS.title = 'CrowdSearcher';
+CS.error = require( './error' );
 
 module.exports = exports = CS;

@@ -8,9 +8,11 @@ var CS = require( '../core' );
 var log = CS.log.child( { component: 'Stats' } );
 
 // Import Models
+/*
 var Execution = CS.models.execution;
 var Microtask = CS.models.microtask;
 var Task      = CS.models.task;
+*/
 
 // Generate custom error `GetAnswersError` that inherits
 // from `APIError`
@@ -21,7 +23,6 @@ var GetStatsError = function( id, message, status ) {
 util.inherits( GetStatsError, APIError );
 // Custom error IDS
 GetStatsError.prototype.name = 'GetStatsError';
-GetStatsError.MISSING_PARAMETERS = 'MISSING_PARAMETERS';
 
 
 // API object returned by the file
@@ -40,7 +41,10 @@ var API = {
 API.logic = function getStats( req, res, next ) {
   var entity = req.params.entity;
   var id = req.params.id;
+
   log.trace( 'Stats for %s with id %s', entity, id  );
+
+  // Compute stats here
   res.json( {
     test: 'ciao'
   } );
