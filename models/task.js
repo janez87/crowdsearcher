@@ -105,16 +105,6 @@ var TaskSchema = new Schema( {
     ref: 'job'
   },
 
-
-  // List of `Platform`s of the Task. Each platform is a *reference* to a Platform model.
-  platforms: {
-    type: [ {
-      type: ObjectId,
-      ref: 'platform'
-    } ],
-    'default': []
-  },
-
   // Unique list of `Object`s of the Task.
   objects: {
     type: [ {
@@ -381,6 +371,104 @@ TaskSchema.methods.close = function( callback ) {
 };
 
 
+// Method that return a clone of the task.
+// The object returned is a plan JavaScript object containing the same properties of
+// the original task a part from the microtasks and the metadata.
+// The objects are cloned
+TaskSchema.methods.clone = function(callback){
+
+  log.tace('Cloning the task %s',this._id);
+
+  var attributes = [
+    'name',
+    'description',
+    'landing',
+    'ending'
+  ];
+
+  this
+  .populate('platforms objects operations',function(err,task){
+    if(err) return callback(err);
+
+    var clonedTask = {};
+
+    // Cloning the plain attributes
+    log.trace('Cloning the plame attributes');
+    clonedTask = _.pick(task,attributes);
+
+    //Cloning the strategies
+    log.trace('Cloning the splittingStrategy');
+    clonedTask.splittingStrategy = {};
+    clonedTask.splittingStrategy.name = task.splittingStrategy.name;
+    clonedTask.splittingStrategy.params = _.clone(task.splittingStrategy.params);
+
+    log.trace('Cloning the assignmentStrategy');
+    clonedTask.assignmentStrategy = {};
+    clonedTask.assignmentStrategy.name = task.assignmentStrategy.name;
+    clonedTask.assignmentStrategy.params = _.clone(task.assignmentStrategy.params);
+
+    log.trace('Cloning the executionStrategy');
+    clonedTask.executionStrategy = {};
+    clonedTask.executionStrategy.name = task.executionStrategy.name;
+    clonedTask.executionStrategy.params = _.clone(task.executionStrategy.params);
+
+    log.trace('Cloning the invitationStrategy');
+    if(!_.isUndefined(task.invitationStrategy)){
+      clonedTask.invitationStrategy = {};
+      clonedTask.invitationStrategy.name = task.invitationStrategy.name;
+      clonedTask.invitationStrategy.params = _.clone(task.invitationStrategy.params);
+    }
+
+    //Cloning the control rule
+    log.trace('Cloning the rule');
+    var clonedRules = [];
+    _.each(task.controlRules,function(rule){
+      var clonedRule = {};
+      clonedRule.name = rule.name;
+      clonedRule.params = _.clone(rule.params);
+      clonedRules.push(clonedRule);
+    });
+    clonedTask.controlrules = clonedRules;
+
+    //Cloning the operations
+    log.trace('Cloning the operations');
+    var clonedOperations = [];
+    _.each(task.operations,function(operation){
+      var clonedOperation = {};
+      clonedOperation.name = operation.name;
+      clonedOperation.label = operation.label;
+      clonedOperation.params = _.clone(operation.params);
+      clonedOperations.push(clonedOperation);
+    });
+    clonedTask.operations = clonedOperations;
+
+    //Cloning the platforms
+    log.trace('Cloning the platforms');
+    var clonedPlatforms = [];
+    _.each(task.paltforms,function(platform){
+      var clonedPlatform = {};
+      clonedPlatform.name = platform.name;
+      clonedPlatform.enabled = platform.enabled;
+      clonedPlatform.invitation = platform.invitation;
+      clonedPlatform.execution = platform.execution;
+      clonedPlatform.params = _.clone(platform.params);
+      clonedPlatforms.push(clonedPlatform);
+    });
+    clonedTask.platforms = clonedPlatforms;
+
+    //CLoning the objets
+    log.trace('Cloning the objects');
+    var clonedObjects = [];
+    _.each(task.objects,function(object){
+      var clonedObject = {};
+      clonedObject.data = _.clone(object.data);
+      clonedObjects.push(clonedObjects);
+    });
+    clonedTask.objects = clonedObjects;
+
+    return callback(null,clonedTask);
+  });
+};
 
 
 // ## Object
@@ -445,8 +533,6 @@ TaskSchema.methods.addObjects = function( objects, callback ) {
     } );
   } );
 };
-
-
 
 
 // ## Microtask
