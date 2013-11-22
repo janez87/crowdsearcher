@@ -14,7 +14,6 @@ var log = CS.log.child( { component: 'Aggregate Majority' } );
 var ControlMart = CS.models.controlmart;
 var Microtask = CS.models.microtask;
 
-
 function onOpenTask( params, task, data, callback ) {
   // body...
 
@@ -40,6 +39,7 @@ function onEndMicrotask( params, task, data, callback ) {
 }
 
 function onEndExecution( params, task, data, callback ) {
+  
   var microtask = data.microtask;
 
   var mode = params.mode;
@@ -124,7 +124,8 @@ function onEndExecution( params, task, data, callback ) {
 
   };
 
-  microtask
+  Microtask
+  .findById(microtask)
   .populate( 'objects' )
   .exec( function( err, microtask ) {
     if( err ) return callback( err );

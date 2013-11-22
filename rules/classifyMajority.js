@@ -15,10 +15,84 @@ var log = CS.log.child( { component: 'Classify Majority' } );
 var ControlMart = CS.models.controlmart;
 var Execution = CS.models.execution;
 
-function onOpenTask( params, task, data, callback ) {
-  // body...
 
-  return callback();
+function createMart(task,objects,params,callback){
+
+  var operation = _.findWhere(task.operations,{label:params.operation});
+
+  var createControlMart = function(objectId,callback){
+    log.trace('Creating the control mart for the object %s',objectId);
+    var martToBeCreated = [];
+
+    // Update the control mart
+    var resultMart = {
+      task:task._id,
+      object:objectId,
+      name:'result',
+      data:undefined,
+      operation:operation._id
+    };
+    log.trace('Creating the mart for the result');
+    martToBeCreated.push(resultMart);
+
+    var statustMart = {
+      task:task._id,
+      object:objectId,
+      name:'status',
+      data:'OPENED',
+      operation:operation._id
+    };
+    log.trace('Creating the mart for the status');
+    martToBeCreated.push(statustMart);
+
+    var evaluationtMart = {
+      task:task._id,
+      object:objectId,
+      name:'evaluations',
+      data:0,
+      operation:operation._id
+    };
+
+    log.trace('Creating the mart for the evalutations');
+    martToBeCreated.push(evaluationtMart);
+
+    _.each(operation.params.categories,function(category){
+      log.trace('Creating the mart for the category %s',category);
+      var categorytMart = {
+        task:task._id,
+        object:objectId,
+        name:category,
+        data:0,
+        operation:operation._id
+      };
+      martToBeCreated.push(categorytMart);
+    });
+
+    return ControlMart.insert(martToBeCreated,callback);
+  };
+
+
+  return async.each(objects,createControlMart,callback);
+}
+
+function onOpenTask( params, task, data, callback ) {
+  // In the open task the rule creates the controlmart
+
+  log.trace('Creating the control mart at the OPEN_TASK');
+
+  var objects = task.objects;
+  
+  return createMart(task,objects,params,callback);
+  
+}
+
+function onAddObjects(params, task, data, callback){
+
+  log.trace('Creating the control mart at the ON_ADD_OBJECTS');
+
+  var objects = data.objectIds;
+
+  return createMart(task,objects,params,callback);
 }
 
 function onEndTask( params, task, data, callback ) {
@@ -83,61 +157,17 @@ function onEndExecution( params, task, data, callback ) {
       },function(err,controlmart){
         if( err ) return callback( err );
 
-        // Stuff that will be thrown away asap
-        var result;
-        /*if(_.has(controlmart,'result') && !_.isUndefined(controlmart['result'][operation._id]) && !_.isUndefined(controlmart['result'][operation._id][objectId]) ){
-          result = controlmart['result'][operation._id][objectId].data;
-        }*/
-
-        result = _.findWhere(controlmart,{name:'result'});
-        if(!_.isUndefined(result)){
-          result = result.data;
-          log.trace('Reading the result information from the controlmart ( %s )',result);
-        }
-
-        /*if(_.has(controlmart,'evaluations') && !_.isUndefined(controlmart['evaluations'][operation._id]) && !_.isUndefined(controlmart['evaluations'][operation._id][objectId])){
-          evaluations = controlmart['evaluations'][operation._id][objectId].data;
-        }*/
-
-        var evaluations = _.findWhere(controlmart,{name:'evaluations'});
-        if(!_.isUndefined(evaluations)){
-          evaluations = evaluations.data;
-          log.trace('Reading the evaluations information from the controlmart ( %s )',evaluations);
-        }else{
-          evaluations = 0;
-        }
+        var result = _.findWhere(controlmart,{name:'result'}).data;
+        
+        var evaluations = _.findWhere(controlmart,{name:'evaluations'}).data;
 
         var categoryCount = {};
         _.each(operation.params.categories,function(category){
-          /*if(_.has(controlmart,category) && !_.isUndefined(controlmart[category][operation._id]) && !_.isUndefined(controlmart[category][operation._id][objectId])){
-            categoryCount[category] = controlmart[category][operation._id][objectId].data;
-          }else{
-            categoryCount[category] = 0;
-          }*/
           var count = _.findWhere(controlmart,{name:category});
-          if(!_.isUndefined(count)){
-            categoryCount[category] = count.data;
-            log.trace('Reading the category information from the controlmart ( %s )',categoryCount[category]);
-          }else{
-            categoryCount[category] = 0;
-          }
+          categoryCount[category] = count.data;
         });
 
-        var status = 'open';
-        /*if(_.has(controlmart,'status') && !_.isUndefined(controlmart['status'][operation._id]) && !_.isUndefined(controlmart['status'][operation._id][objectId])){
-          status = controlmart['status'][operation._id][objectId].data;
-        }*/
-
-        status = _.findWhere(controlmart,{name:'status'});
-        if(!_.isUndefined(status)){
-          status = status.data;
-          log.trace('Reading the status information from the controlmart ( %s )',status);
-
-          if(status === 'closed'){
-            log.trace('Object already closed for this operation');
-            return callback();
-          }
-        }
+        var status = _.findWhere(controlmart,{name:'status'}).data;
 
 
         // Updating the various counters
@@ -244,7 +274,8 @@ var rule = {
     // Description of what the rule does in this specific event.
     'END_MICROTASK': onEndMicrotask,
     // Description of what the rule does in this specific event.
-    'END_EXECUTION': onEndExecution
+    'END_EXECUTION': onEndExecution,
+    'ON_ADD_OBJECTS': onAddObjects
   },
 
 
