@@ -5,7 +5,6 @@
 
 // Load libraries
 var _ = require('underscore');
-var async = require( 'async' );
 var CS = require( '../core' );
 
 // Create a child logger
@@ -13,9 +12,39 @@ var log = CS.log.child( { component: 'CheckSpammer' } );
 
 // Models
 var ControlMart = CS.models.controlmart;
+var Execution = CS.models.execution;
 
 
-var performRule = function( event, config,task, data, callback ) {
+function onOpenTask( params, task, data, callback ) {
+  // In the open task the rule creates the controlmart
+
+  return callback();
+}
+
+function onAddObjects(params, task, data, callback){
+
+  return callback();
+}
+
+function onEndTask( params, task, data, callback ) {
+  // body...
+
+  return callback();
+}
+
+function onAddMicrotasks( params, task, data, callback ) {
+  // body...
+
+  return callback();
+}
+
+function onEndMicrotask( params, task, data, callback ) {
+  // body...
+
+  return callback();
+}
+
+function onEndExecution( params,task, data, callback ) {
   log.trace('Performing the rule');
 
   // Error handler
@@ -24,17 +53,19 @@ var performRule = function( event, config,task, data, callback ) {
   domain.on('error',callback);
 
   var execution = data.execution;
-  var operationLabel = config.operation;
+  var operationLabel = params.operation;
 
-  var performer = execution.performer;
-
-  if(_.isUndefined(performer)){
-    log.warn('The performer is anonymous');
-    return callback();
-  }
-
-  execution.populate('annotations.operation annotations.objects',function(err,execution){
+  Execution
+  .findById(execution)
+  .populate('performer annotations.operation annotations.objects',function(err,execution){
     if( err ) return callback( err );
+
+    var performer = execution.performer;
+
+    if(_.isUndefined(performer)){
+      log.warn('The performer is anonymous');
+      return callback();
+    }
 
     var annotations = _.filter(execution.annotations,function(annotation){
       return annotation.operation.label === operationLabel;
@@ -82,7 +113,7 @@ var performRule = function( event, config,task, data, callback ) {
       }
 
       _.each(annotations, function(annotation){
-        var gt = annotation.object.getMetadata(config.groundtruth);
+        var gt = annotation.object.getMetadata(params.groundtruth);
 
         log.trace('Updating the evaluations');
         evaluations++;
@@ -101,10 +132,10 @@ var performRule = function( event, config,task, data, callback ) {
         }
 
         ratio = correct/evaluations;
-        if(evaluations >= config.answers){
+        if(evaluations >= params.answers){
           log.trace('The performer did %s evaluations',evaluations);
-          if(ratio<=config.threshold){
-            log.trace('The ratio of the performer is below the threshold (%s <= %s)',ratio,config.ratio);
+          if(ratio<=params.threshold){
+            log.trace('The ratio of the performer is below the threshold (%s <= %s)',ratio,params.ratio);
             spammer = true;
           }
         }
@@ -161,49 +192,59 @@ var performRule = function( event, config,task, data, callback ) {
       return ControlMart.insert(updatedMart,callback);
 
     });
-
-
   });
+}
 
+var rule = {
+  check: function checkParams( params, done ) {
+    log.trace( 'Checking parameters' );
 
+    // Everything went better then expected...
 
+    if(_.isUndefined(params.operation)){
+      log.error('The label of the operation must be specified');
+      return done(false);
+    }
+
+    if(_.isUndefined(params.groundtruth)){
+      log.error('The groundtruth metadata must be specified');
+      return done(false);
+    }
+
+    if(_.isUndefined(params.threshold) || params.threshold<=0){
+      log.error('The threshold must be an integer greater than 0');
+      return done(false);
+    }
+
+    if(_.isUndefined(params.answers) || params.answers<=0){
+      log.error('The number of answers must be an integer greater than 0');
+      return done(false);
+    }
+
+    return done(true);
+  },
+
+  hooks: {
+    // Description of what the rule does in this specific event.
+    'OPEN_TASK': onOpenTask,
+    // Description of what the rule does in this specific event.
+    'END_TASK': onEndTask,
+    // Description of what the rule does in this specific event.
+    'ADD_MICROTASKS': onAddMicrotasks,
+    // Description of what the rule does in this specific event.
+    'END_MICROTASK': onEndMicrotask,
+    // Description of what the rule does in this specific event.
+    'END_EXECUTION': onEndExecution,
+    'ON_ADD_OBJECTS': onAddObjects
+  },
+
+  params : {
+    operation: 'string',
+    answers:'number',
+    threshold:'number',
+    groundtruth:'string'
+  }
 };
 
-var checkParameters = function( params, done ) {
-  log.trace( 'Checking parameters' );
 
-  // Everything went better then expected...
-
-  if(_.isUndefined(params.operation)){
-    log.error('The label of the operation must be specified');
-    return done(false);
-  }
-
-  if(_.isUndefined(params.groundtruth)){
-    log.error('The groundtruth metadata must be specified');
-    return done(false);
-  }
-
-  if(_.isUndefined(params.threshold) || params.threshold<=0){
-    log.error('The threshold must be an integer greater than 0');
-    return done(false);
-  }
-
-  if(_.isUndefined(params.answers) || params.answers<=0){
-    log.error('The number of answers must be an integer greater than 0');
-    return done(false);
-  }
-
-  return done(true);
-};
-
-var params = {
-  operation: 'string',
-  answers:'number',
-  threshold:'number',
-  groundtruth:'string'
-};
-
-module.exports.perform = exports.perform = performRule;
-module.exports.check = exports.check = checkParameters;
-module.exports.params = exports.params = params;
+module.exports.rule = exports.rule = rule;
