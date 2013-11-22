@@ -1,5 +1,6 @@
 // Load libraries
 var _  = require('underscore');
+var async = require('async');
 var mongo = require('mongoose');
 var CS = require( '../core' );
 
@@ -224,19 +225,62 @@ ExecutionSchema.methods.makeInvalid = function( callback ) {
 
   this.set( 'status', 'INVALID' );
   this.set( 'invalidDate', Date.now() );
-  // If not present also set the closed date.
-  /*
-  if( !this.closedDate )
-    this.set( 'closedDate', Date.now() );
-  */
 
   this.save( function( err ) {
     if( err ) return callback( err );
 
-    //_this.fire( 'END_EXECUTION', callback );
     return callback();
   } );
 };
+
+
+
+// Create annotation based on a array of responses.
+ExecutionSchema.methods.createAnnotations = function( responses, callback ) {
+  var populated = this.populated( 'microtask' );
+
+  if( _.isUndefined( populated ) ) {
+    return this
+    .populate( 'microtask', function( err, execution ) {
+      if( err ) return callback( err );
+
+      return execution.createAnnotations( responses, callback );
+    } );
+  }
+
+  var _this = this;
+  var microtask = this.microtask;
+
+  function parseResponse( response, cb ) {
+    var operationId = response.operation;
+
+    microtask.getOperationById( operationId, function( err, operation ) {
+      if( err ) return cb( err );
+
+      var implementation = operation.implementation;
+      if( implementation && implementation.create ) {
+        return implementation.create( response, operation, function( err, annotations ) {
+          if( err ) return cb( err );
+
+          log.trace( 'Annotations(%s): %j', annotations.length, annotations );
+          // Add the annotations to the execution object.
+          _.each( annotations, function ( annotation ) {
+            log.trace( 'Annotation: %j', annotation );
+            _this.annotations.push( annotation );
+          } );
+          return cb();
+        } );
+      } else {
+        log.warn( 'Operation %s does not have an implementation', operation.name );
+        return cb();
+      }
+    } );
+  }
+
+  async.each( responses, parseResponse, callback );
+};
+
+
 
 
 exports = module.exports = ExecutionSchema;

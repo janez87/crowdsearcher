@@ -103,37 +103,8 @@ API.logic = function postAnswer( req, res, next ) {
 
   function addAnnotations( callback ) {
     var execution = data.execution;
-    var microtask = data.microtask;
 
-    function createAnnotations( item, cb ) {
-      var operationId = item.operation;
-
-      microtask.getOperationById( operationId, function( err, operation ) {
-        if( err ) return cb( err );
-
-        var implementation = operation.implementation;
-        if( implementation && implementation.create ) {
-          return implementation.create( item, operation, function( err, annotations ) {
-            if( err ) return cb( err );
-
-            log.trace( 'Annotations(%s): %j', annotations.length, annotations );
-            // Add the annotations to the execution object.
-            _.each( annotations, function ( annotation ) {
-              log.trace( 'Annotation: %j', annotation );
-              execution.annotations.push( annotation );
-            } );
-            return cb();
-          } );
-        } else {
-          log.warn( 'Operation %s does not have an implementation', operation.name );
-          return cb();
-        }
-      } );
-    }
-
-    //var answerByOperation = _.groupBy( answers, 'operation' );
-
-    async.each( answers, createAnnotations, callback );
+    return execution.createAnnotations( answers, callback );
   }
 
   function saveExecution( callback ) {

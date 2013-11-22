@@ -1,33 +1,53 @@
 <QuestionForm xmlns="http://mechanicalturk.amazonaws.com/AWSMechanicalTurkDataSchemas/2005-10-01/QuestionForm.xsd">
-  <% _.each( microtask.objects, function( object ) { %>
-    <Overview>
-      <Title><%= task.name %></Title>
-      <Text><%= task.description %></Text>
-    </Overview>
-    <% _.each( microtask.operations, function( operation ) { %>
-      <% if( operation.name==='classify' ) { %>
+  <Overview>
+    <Title><%= task.name %></Title>
+    <Text><%= task.description %></Text>
+  </Overview>
+    <% _.each( microtask.objects, function( object ) { %>
+      <% _.each( microtask.operations, function( operation ) { %>
         <Question>
           <QuestionIdentifier><%= object._id+'_'+operation._id %></QuestionIdentifier>
-          <DisplayName><%= task.name %></DisplayName>
-          <IsRequired>true</IsRequired>
           <QuestionContent>
-            <Text><%= JSON.stringify( object.data, null, 2 ) %></Text>
+            <Title><%= operation.label %></Title>
+            <Text>
+              <%= JSON.stringify( object.data, null, 2 ) %>
+            </Text>
           </QuestionContent>
-          <AnswerSpecification>
-            <SelectionAnswer>
-              <StyleSuggestion>checkbox</StyleSuggestion>
-              <Selections>
-              <% _.each( operation.params.categories, function( category ) { %>
-                <Selection>
-                  <SelectionIdentifier><%=category%></SelectionIdentifier>
-                  <Text><%=category%></Text>
-                </Selection>
-              <% } ) %>
-              </Selections>
-            </SelectionAnswer>
-          </AnswerSpecification>
+          <% if( operation.name==='classify' ) { %>
+            <AnswerSpecification>
+              <SelectionAnswer>
+                <StyleSuggestion>list</StyleSuggestion>
+                <Selections>
+                  <% _.each( operation.params.categories, function( category ) { %>
+                    <Selection>
+                      <SelectionIdentifier><%=category%></SelectionIdentifier>
+                      <Text><%=category%></Text>
+                    </Selection>
+                  <% } ) %>
+                </Selections>
+              </SelectionAnswer>
+            </AnswerSpecification>
+          <% } %>
+          <% if( operation.name==='like' ) { %>
+            <AnswerSpecification>
+              <SelectionAnswer>
+                  <StyleSuggestion>checkbox</StyleSuggestion>
+                  <Selections>
+                    <Selection>
+                      <SelectionIdentifier><%= object._id %></SelectionIdentifier>
+                      <Text><%= operation.label %></Text>
+                    </Selection>
+                  </Selections>
+                </SelectionAnswer>
+            </AnswerSpecification>
+          <% } %>
+          <% if( operation.name==='tag' ) { %>
+            <AnswerSpecification>
+              <FreeTextAnswer>
+              </FreeTextAnswer>
+            </AnswerSpecification>
+          <% } %>
         </Question>
-      <% } %>
-    <% } ) %>
+      <% } ) %>
   <% } ) %>
 </QuestionForm>

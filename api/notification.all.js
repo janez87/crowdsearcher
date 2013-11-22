@@ -41,8 +41,9 @@ var API = {
 API.logic = function notificationAPI( req, res, next ) {
   var taskId = req.params.task;
   var platform = req.params.platform;
+  var method = req.method;
 
-  log.trace( 'Got notification for %s task %s', platform, taskId );
+  log.trace( 'Got %s notification for %s task %s', method, platform, taskId );
 
   var platform = CS.platforms[ platform ];
   if( !platform ) {

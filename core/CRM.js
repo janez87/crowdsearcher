@@ -339,8 +339,8 @@ ControlRuleManager.trigger = function( event, data, callback ) {
   var actions = [
     retrieveData,
     checkTask,
-    triggerStrategyRules,
     triggerPlatformRules,
+    triggerStrategyRules,
     triggerControlRules
   ];
 
