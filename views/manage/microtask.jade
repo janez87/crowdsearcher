@@ -15,6 +15,16 @@ block header
       code= moment( microtask[ microtask.status.toLowerCase()+'Date' ] ).format( 'YYYY-MM-DD HH:mm' )
     .col-md-4.text-right
       code= microtask._id
+      p
+      .btn-group
+        a.btn.btn-sm.btn-info(href='manage/microtask/'+microtask._id+'/controlmart')
+          i.fa.fa-table
+          |  Mart
+        a.btn.btn-sm.btn-default(href='manage/microtask/'+microtask._id+'/dashboard')
+          i.fa.fa-dashboard
+          |  Dashboard
+        a.btn.btn-sm.btn-default(href='manage/answers?microtask='+microtask._id) Answers 
+          i.fa.fa-list
   hr
 
 block content
@@ -34,8 +44,6 @@ block content
           data-entity='microtask',
           data-method='POST') Close
     .col-md-4.text-right
-      a.btn.btn-sm.btn-default(href='manage/answers?microtask='+microtask._id) Answers 
-        i.fa.fa-list
   hr
 
   .row

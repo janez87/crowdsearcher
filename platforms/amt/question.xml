@@ -13,6 +13,7 @@
               <%= JSON.stringify( object.data, null, 2 ) %>
             </Text>
           </QuestionContent>
+
           <% if( operation.name==='classify' ) { %>
             <AnswerSpecification>
               <SelectionAnswer>
@@ -28,6 +29,7 @@
               </SelectionAnswer>
             </AnswerSpecification>
           <% } %>
+
           <% if( operation.name==='like' ) { %>
             <AnswerSpecification>
               <SelectionAnswer>
@@ -41,6 +43,7 @@
                 </SelectionAnswer>
             </AnswerSpecification>
           <% } %>
+
           <% if( operation.name==='tag' ) { %>
             <AnswerSpecification>
               <FreeTextAnswer>

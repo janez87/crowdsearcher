@@ -65,11 +65,6 @@ function createExecution( task, microtask, platform, assignment, callback ) {
     var objectId = identifiers[ 0 ];
     var operationId = identifiers[1];
 
-    if( identifiers.length===1 ) {
-      operationId = identifiers[0];
-      objectId = null;
-    }
-
     var operation = _.find( operations, function ( op ) {
       return op._id.equals( operationId );
     } );

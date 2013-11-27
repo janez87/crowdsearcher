@@ -43,132 +43,130 @@ var CS = require( './core' );
 
 // Configure the Express app
 // ---
-app.configure( function() {
-  // Directories
-  var publicPath = path.join(__dirname, 'public');
-  var viewsPath = path.join(__dirname, 'views');
-  var uploadPath = path.join(__dirname, 'uploads');
+// Directories
+var publicPath = path.join(__dirname, 'public');
+var viewsPath = path.join(__dirname, 'views');
+var uploadPath = path.join(__dirname, 'uploads');
 
-  // Create upload path if not exists
-  if( !fs.existsSync( uploadPath ) )
-    fs.mkdirSync( uploadPath );
+// Create upload path if not exists
+if( !fs.existsSync( uploadPath ) )
+  fs.mkdirSync( uploadPath );
 
-  // Use JADE as template engine
-  app.set( 'views', viewsPath );
-  app.set( 'view engine', 'jade' );
+// Use JADE as template engine
+app.set( 'views', viewsPath );
+app.set( 'view engine', 'jade' );
 
-  // Export some properities to the views
-  app.locals( {
-    // Like the title
-    title: 'CrowdSearcher',
-    md: markdown.toHTML,
-    moment: moment,
-    _: _
-  } );
+// Export some properities to the views
+app.locals( {
+  // Like the title
+  title: 'CrowdSearcher',
+  md: markdown.toHTML,
+  moment: moment,
+  _: _
+} );
 
 
-  // Create a Domain to handle errors properly *for each request*
-  app.use( function( req, res, next ) {
+// Create a Domain to handle errors properly *for each request*
+app.use( function( req, res, next ) {
 
-    var requestDomain = domain.create();
-    // Add the domain to the request, so ca be `exited` later
-    req.domain = requestDomain;
+  var requestDomain = domain.create();
+  // Add the domain to the request, so ca be `exited` later
+  req.domain = requestDomain;
 
-    // Utility function used to wrap an async call to the api domain
-    var wrapInDomain = function( fn, ctx ) {
-      if( _.isString( fn ) && !_.isUndefined( ctx ) )
-        fn = ctx[ fn ];
+  // Utility function used to wrap an async call to the api domain
+  var wrapInDomain = function( fn, ctx ) {
+    if( _.isString( fn ) && !_.isUndefined( ctx ) )
+      fn = ctx[ fn ];
 
-      if( ctx )
-        fn = fn.bind( ctx );
+    if( ctx )
+      fn = fn.bind( ctx );
 
-      return requestDomain.bind( fn );
-    };
-    // Can be invoked using either `req.wrap` or `req.wrapInDomain`.
-    req.wrapInDomain = req.wrap = wrapInDomain;
+    return requestDomain.bind( fn );
+  };
+  // Can be invoked using either `req.wrap` or `req.wrapInDomain`.
+  req.wrapInDomain = req.wrap = wrapInDomain;
 
-    // Bind Emitters
-    requestDomain.add( req );
-    requestDomain.add( res );
+  // Bind Emitters
+  requestDomain.add( req );
+  requestDomain.add( res );
 
-    // On Domain error call the error middleware
-    requestDomain.on( 'error', next );
+  // On Domain error call the error middleware
+  requestDomain.on( 'error', next );
 
-    // Enter the domain to manage request unhandled exceptions
-    requestDomain.enter();
-    return next();
-  } );
+  // Enter the domain to manage request unhandled exceptions
+  requestDomain.enter();
+  return next();
+} );
 
-  // Use icon
-  app.use(express.favicon());
+// Use icon
+app.use(express.favicon());
 
-  // Log all the requests?
-  //app.use(express.logger('dev'));
+// Log all the requests?
+//app.use(express.logger('dev'));
 
-  // Used to handle uploaded files
-  app.use(express.bodyParser( {
-    uploadDir: uploadPath
-  } ));
-  app.use(express.methodOverride());
+// Used to handle uploaded files
+app.use(express.bodyParser( {
+  uploadDir: uploadPath
+} ));
+app.use(express.methodOverride());
 
-  // ## CORS middleware
-  //
-  // see: http://stackoverflow.com/questions/7067966/how-to-allow-cors-in-express-nodejs
-  function allowCrossDomain( req, res, next ) {
-    if( req.path.split( '/' )[1]==='api' ) {
-      res.header('Access-Control-Allow-Origin', '*');
-      res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-      res.header('Access-Control-Allow-Headers', '*');
-      //res.header('Access-Control-Allow-Headers', 'Accepts, Content-Type, Authorization, X-Requested-With');
-      res.header('Access-Control-Allow-Headers', req.get( 'Access-Control-Request-Headers' ) );
+// ## CORS middleware
+//
+// see: http://stackoverflow.com/questions/7067966/how-to-allow-cors-in-express-nodejs
+function allowCrossDomain( req, res, next ) {
+  if( req.path.split( '/' )[1]==='api' ) {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+    res.header('Access-Control-Allow-Headers', '*');
+    //res.header('Access-Control-Allow-Headers', 'Accepts, Content-Type, Authorization, X-Requested-With');
+    res.header('Access-Control-Allow-Headers', req.get( 'Access-Control-Request-Headers' ) );
 
-      // intercept OPTIONS method
-      if( 'OPTIONS'===req.method ) {
-        return res.send( 200 );
-      } else {
-        return next();
-      }
+    // intercept OPTIONS method
+    if( 'OPTIONS'===req.method ) {
+      return res.send( 200 );
     } else {
       return next();
     }
-  }
-  app.use( allowCrossDomain );
-
-  // Add session support
-  app.use( express.cookieParser() );
-  app.use( express.session( {
-    secret: 'CrowdSearcherJS'
-  } ) );
-  // Used with PassportJS to create *request scoped* messages
-  app.use( flash() );
-
-  // Complie on the fly stylus files
-  app.use( require('stylus').middleware( publicPath ) );
-
-  // Serve static contents from **publicPath**
-  app.use( express.static( publicPath ) );
-
-
-  // ### PassportJS
-  app.use( passport.initialize() );
-  app.use( passport.session() );
-
-  // Pass user to the views
-  app.use( function( req, res, next ) {
-    if( req.path.split( '/' )[1]!=='api' ) {
-      // Add th user to the views object
-      app.locals( {
-        user: req.user
-      } );
-    }
-
+  } else {
     return next();
-  } );
+  }
+}
+app.use( allowCrossDomain );
+
+// Add session support
+app.use( express.cookieParser() );
+app.use( express.session( {
+  secret: 'CrowdSearcherJS'
+} ) );
+// Used with PassportJS to create *request scoped* messages
+app.use( flash() );
+
+// Complie on the fly stylus files
+app.use( require('stylus').middleware( publicPath ) );
+
+// Serve static contents from **publicPath**
+app.use( express.static( publicPath ) );
 
 
-  // Manage app routes
-  app.use(app.router);
-});
+// ### PassportJS
+app.use( passport.initialize() );
+app.use( passport.session() );
+
+// Pass user to the views
+app.use( function( req, res, next ) {
+  if( req.path.split( '/' )[1]!=='api' ) {
+    // Add th user to the views object
+    app.locals( {
+      user: req.user
+    } );
+  }
+
+  return next();
+} );
+
+
+// Manage app routes
+app.use(app.router);
 
 
 // Server
@@ -191,6 +189,7 @@ var serverError = function( error ) {
   }, 1000 );
 };
 app.on( 'error', serverError );
+
 
 
 // Load the configuration
@@ -269,6 +268,9 @@ config.once( 'ready', function configReady() {
   app.get( '/manage/answers', routes.checkAuth, manager.answers );
   // Dashboard
   app.get( '/manage/:entity/:id/dashboard', routes.checkAuth, manager.dashboard );
+  // Control Mart
+  app.get( '/manage/:entity/:id/controlmart', routes.checkAuth, manager.controlmart );
+  app.get( '/manage/:entity/:id/mart', routes.checkAuth, manager.controlmart );
 
 
   var accountRedirect = function( req, res ) {

@@ -262,12 +262,9 @@ ExecutionSchema.methods.createAnnotations = function( responses, callback ) {
         return implementation.create( response, operation, function( err, annotations ) {
           if( err ) return cb( err );
 
-          log.trace( 'Annotations(%s): %j', annotations.length, annotations );
           // Add the annotations to the execution object.
-          _.each( annotations, function ( annotation ) {
-            log.trace( 'Annotation: %j', annotation );
-            _this.annotations.push( annotation );
-          } );
+          _this.annotations.push.apply( _this.annotations, annotations );
+
           return cb();
         } );
       } else {

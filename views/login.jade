@@ -1,11 +1,11 @@
 extends layout
 
 block content
-  if errorMessage.length>0
+  if errors.length>0
     .alert.alert-danger
       strong Login failed 
-      each message in errorMessage
-        | #{errorMessage}
+      each message in errors
+        | #{message}
   .row: .col-md-6
     form.form-horizontal(role='form',action='login', method='post')
       .form-group
