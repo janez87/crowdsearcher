@@ -10,8 +10,15 @@ block header
         if job.alias
           small: a(href='#', title='Run')= job.alias
     .col-md-6.text-right
-      p: code= job._id
-      p: small= moment( job.creationDate ).format( 'YYYY-MM-DD HH:mm' )
+      code= job._id
+      p
+      .btn-group
+        a.btn.btn-sm.btn-info(href='manage/job/'+job._id+'/controlmart')
+          i.fa.fa-table
+          |  Mart
+        //a.btn.btn-sm.btn-default(href='manage/job/'+job._id+'/dashboard')
+          i.fa.fa-dashboard
+          |  Dashboard
 
 block content
   .row

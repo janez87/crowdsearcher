@@ -73,14 +73,12 @@ module.exports = exports = function ( schema ) {
   //
   // Find a platform by name.
   schema.methods.getPlatformByName = function( name, callback ) {
-    var _this = this;
     var populated = this.populated( 'platforms' );
 
-
-    if( !populated ) {
-      return this.populate( 'platforms', function( err ) {
+    if( _.isUndefined( populated ) ) {
+      return this.populate( 'platforms', function( err, entity ) {
         if( err ) return callback( err );
-        _this.getPlatformByName( name, callback );
+        entity .getPlatformByName( name, callback );
       } );
     }
 
@@ -91,21 +89,10 @@ module.exports = exports = function ( schema ) {
   };
   // Find a platform by id.
   schema.methods.getPlatformById = function( id, callback ) {
-    var _this = this;
-    var populated = this.populated( 'platforms' );
+    var Platform = CS.models.platform;
 
-    if( !populated ) {
-      return this.populate( 'platforms', function( err ) {
-        if( err ) return callback( err );
-        _this.getPlatformById( id, callback );
-      } );
-    }
-
-    log.trace( 'Find platform by id (%s)', id );
-
-    var platform = _.find( this.platforms, function( op ) {
-      return op._id.equals( id );
-    } );
-    return callback( null, platform );
+    return Platform
+    .findById( id )
+    .exec( callback );
   };
 };

@@ -63,17 +63,17 @@ module.exports = exports = function ( schema ) {
   };
   // With or without the 's'.
   schema.methods.addOperation = schema.methods.addOperations;
+
+
   // ### Getters
   // Find an operation by label.
   schema.methods.getOperationByLabel = function( label, callback ) {
-    var _this = this;
     var populated = this.populated( 'operations' );
 
-
-    if( !populated ) {
-      return this.populate( 'operations', function( err ) {
+    if( _.isUndefined( populated ) ) {
+      return this.populate( 'operations', function( err, entity) {
         if( err ) return callback( err );
-        _this.getOperationByLabel( label, callback );
+        entity.getOperationByLabel( label, callback );
       } );
     }
 
@@ -84,34 +84,24 @@ module.exports = exports = function ( schema ) {
   };
   // Find an operation by id.
   schema.methods.getOperationById = function( id, callback ) {
-    var _this = this;
-    var populated = this.populated( 'operations' );
+    var Operation = CS.models.operation;
 
-    if( !populated ) {
-      return this.populate( 'operations', function( err ) {
-        if( err ) return callback( err );
-        _this.getOperationsById( id, callback );
-      } );
-    }
-
-    log.trace( 'Find operation by id (%s)', id );
-
-    var operation = _.find( this.operations, function( op ) {
-      return op._id.equals( id );
-    } );
-    return callback( null, operation );
+    return Operation
+    .findById( id )
+    .exec( callback );
   };
+
+
   // ### Bulk methods
   //
   // Find operations by type (classify, like, etc).
   schema.methods.getOperationsByType = function( type, callback ) {
-    var _this = this;
     var populated = this.populated( 'operations' );
 
-    if( !populated ) {
-      return this.populate( 'operations', function( err ) {
+    if( _.isUndefined( populated ) ) {
+      return this.populate( 'operations', function( err, entity ) {
         if( err ) return callback( err );
-        _this.getOperationsByType( type, callback );
+        entity.getOperationsByType( type, callback );
       } );
     }
 

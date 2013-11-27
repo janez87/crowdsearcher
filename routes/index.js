@@ -62,8 +62,10 @@ exports.login = function( req, res ) {
   req.session.destination = req.query.continueTo || req.session.destination;
   req.session.from = req.query.from || req.session.from;
 
+  var errors = req.flash( 'error' );
+
   res.render( 'login', {
-    errorMessage: req.flash( 'error' ),
+    errors: errors,
     socialMap: CS.social
   } );
 };

@@ -20,8 +20,5 @@
   "node": true,
 
 
-  "indent": 2,
-
-  "globals": {
-  }
+  "indent": 2
 }

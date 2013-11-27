@@ -71,9 +71,6 @@ var AccountSchema = new Schema( {
 
 
 
-
-
-
 // ## Plugins to add to the Account model.
 //
 // Add the `metadata` fileld to the entity.

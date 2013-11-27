@@ -1,10 +1,10 @@
 // Load libraries
 var _ = require('underscore');
 var async = require( 'async' );
-var domain = require( 'domain' );
 var fs = require('fs');
 var nconf = require('nconf');
 var AMT = require('amt');
+var moment = require( 'moment' );
 var CS = require( '../../core' );
 
 // Import Models
@@ -15,7 +15,6 @@ var Microtask = CS.models.microtask;
 // Create a child logger
 var log = CS.log.child( { component: 'AMT' } );
 
-/*
 function execute( task, microtask, execution, platform, callback ) {
   var params = platform.params;
 
@@ -28,23 +27,12 @@ function execute( task, microtask, execution, platform, callback ) {
   return  callback(null,url+hitTypeMetadata);
 }
 
-function createAnnotation( data, callback ) {
-  var answerData = data[ 0 ];
-  var operation = data[ 1 ];
-
-  var opImplementation = CS.operations[ operation.name ];
-  if( opImplementation ) {
-    return opImplementation.create( [answerData], operation, callback );
-  } else {
-    log.warn( 'Operation %s implementation not found', operation.name );
-    return callback();
-  }
-}
-
 function createExecution( task, microtask, platform, assignment, callback ) {
   var accept = assignment.AcceptTime;
   var submit = assignment.SubmitTime;
   var worker = assignment.WorkerId;
+
+  log.trace( 'Creating execution' );
 
 
   var operations = microtask.operations;
@@ -54,30 +42,28 @@ function createExecution( task, microtask, platform, assignment, callback ) {
     microtask: microtask,
     job: task.job,
     //performer: amtPerformer, // TODO fix
-    operations: _.clone( operations ),
     platform: platform,
-    creationDate: accept
+    createdDate: accept
   };
 
   var execution = new Execution( rawExecution );
 
   // Parse each answer
   var amtAnswers = assignment.answer.QuestionFormAnswers.Answer;
-  var dataList = [];
+  var responses = [];
 
   if( !_.isArray( amtAnswers ) )
     amtAnswers = [ amtAnswers ];
 
-  for (var i=amtAnswers.length-1; i>=0; i-- ) {
+
+  // Create response object for each AMT answer
+  for (var i=amtAnswers.length-1; i>=0 && assignment.status==='Submitted'; i-- ) {
     var answer = amtAnswers[i];
+
     // Get the objectId and operationId identifiers
     var identifiers = answer.QuestionIdentifier.split( '_' );
     var objectId = identifiers[ 0 ];
     var operationId = identifiers[1];
-    if( identifiers.length===1 ) {
-      operationId = objectId;
-      objectId = null;
-    }
 
     var operation = _.find( operations, function ( op ) {
       return op._id.equals( operationId );
@@ -89,53 +75,68 @@ function createExecution( task, microtask, platform, assignment, callback ) {
     }
 
     // Creating the data for the operation
-    var answerData = {
+    var response = {
       date: submit,
-      objectId: objectId,
+      object: objectId,
       operation: operationId
     };
 
     // retrieve the value based on the operation type
-    if( operation.name==='classify' || operation.name==='fuzzyclassify' ) {
+    if( operation.name==='classify' ) {
       var category = answer.SelectionIdentifier;
-      answerData.value = category;
+      response.response = category;
+
     } else if( operation.name==='tag' ) {
       var tags = answer.FreeText;
-      tags = tags.split( ',' );
-      answerData.value = tags;
+      tags = tags.match( /[^,\s][^\,]*[^,\s][^\s,]*/ig );
+      response.response = tags;
+
     } else if( operation.name==='comment' ) {
       var comment = answer.FreeText;
-      answerData.value = comment;
+      response.response = comment;
+
     } else if( operation.name==='like' ) {
-      var like = answer.SelectionIdentifier;
-      answerData.objectId = like;
+      var likedObject = answer.SelectionIdentifier;
+      response.object = likedObject;
+
+      // Object not liked
+      if( !likedObject )
+        continue;
     } else {
-      log.warn( 'Operation %s not supported', operation.name );
+      log.warn( 'Operation %s not supported by AMT', operation.name );
+      // Do not add to responses array.
       continue;
     }
 
-    dataList.push( [ answerData, operation ] );
+    responses.push( response );
   }
 
-  log.trace( 'Creating annotations for %s objects', dataList.length );
+  execution.setMetadata( 'assignment', assignment.id );
+  execution.setMetadata( 'worker', worker ); // TODO: FIX
 
-  async.map( dataList, createAnnotation, function ( err, annotations ) {
+  execution.save( function( err, execution ) {
     if( err ) return callback( err );
 
-    annotations = _.flatten( annotations );
+    if( responses.length===0 || assignment.status!=='Submitted' )
+      return callback();
 
-    log.trace( '%s Annotations created', annotations.length );
-    for (var i = annotations.length - 1; i >= 0; i--) {
-      execution.annotations.push( annotations[i] );
-    }
-    execution.setMetadata( 'assignment', assignment.id );
-    execution.setMetadata( 'worker', worker );
+    execution.createAnnotations( responses, function( err ) {
+      if( err ) return callback( err );
 
-    // Closing the Execution
-    execution.close( callback );
+      log.trace( 'SubmitTime: %s', submit );
+      log.trace( 'Is after closed? %s', moment( submit ).isAfter( task.closedDate ) );
+
+      if( submit && moment( submit ).isAfter( task.closedDate ) ) {
+        // Assignment submitted after the task was closed.
+        return execution.makeInvalid( callback );
+
+      } else {
+        // Assignment ok.
+        return execution.close( callback );
+      }
+    } );
   } );
 }
-*/
 
 
 
@@ -162,7 +163,7 @@ function onOpenTask( params, task, data, callback ) {
 
     var hitType = new HITType( {
       title: task.name,
-      description: params.description || task.description || '',
+      description: params.description || task.description || 'CrowdSearcher Task',
       Keywords: (params.keywords || []).join( ',' ),
       reward: reward,
       duration: duration
@@ -183,7 +184,7 @@ function onOpenTask( params, task, data, callback ) {
     var notification = new Notification( {
       destination: destination,
       transport: 'REST',
-      events: [ 'AssignmentSubmitted' ]
+      events: [ 'AssignmentAbandoned', 'AssignmentReturned', 'AssignmentSubmitted' ]
     } );
     return hitType.setNotification( notification, cb );
   }
@@ -224,13 +225,10 @@ function onAddMicrotasks( params, task, data, callback ) {
 
     // TODO: change to something more async.. and controlled..
     var question;
-    try {
-      if( params.questionFile )
-        question = fs.readFileSync( __dirname+'/custom/'+params.questionFile, 'utf8' );
-
-    } catch( ex ) {
+    if( _.isString( params.questionFile ) && params.questionFile.trim().length>0 )
+      question = fs.readFileSync( __dirname+'/custom/'+params.questionFile, 'utf8' );
+    else
       question = fs.readFileSync( __dirname+'/question.xml', 'utf8' );
-    }
 
     // Create a renderer for the file
     var render = _.template( question );
@@ -240,6 +238,8 @@ function onAddMicrotasks( params, task, data, callback ) {
       microtask: microtask,
       task: task
     } );
+
+    //require( 'fs' ).writeFileSync( 'd:\\test.xml', questionXML );
 
     return cb( null, questionXML );
   }
@@ -263,13 +263,18 @@ function onAddMicrotasks( params, task, data, callback ) {
 
 
   function performActions( microtask, cb ) {
-    var actions = [
-      _.partial( generateQuestionXML, microtask ),
-      createHit,
-      _.partial( saveMicrotask, microtask )
-    ];
+    microtask
+    .populate( 'objects', function( err, microtask ) {
+      if( err ) return cb( err );
 
-    return async.waterfall( actions, cb );
+      var actions = [
+        _.partial( generateQuestionXML, microtask ),
+        createHit,
+        _.partial( saveMicrotask, microtask )
+      ];
+
+      return async.waterfall( actions, cb );
+    } );
   }
 
   var microtasks = data.microtasks;
@@ -298,85 +303,114 @@ function onEndMicrotask( params, task, data, callback ) {
 }
 
 
-function handleNotification( req, res, next ) {
+
+
+
+
+function handleNotification( req, res ) {
   var task = req.task;
+  var index = 1;
 
-  log.trace( 'Query: %j', req.query );
+  log.debug( 'Got notification' );
 
-  var eventType = req.query[ 'Event.1.EventType' ];
-
-  // Skip if not supported
-  if( eventType!=='AssignmentSubmitted' )
-    return res.send( 'LOVE U' );
-
-  var hitTypeId = req.query[ 'Event.1.HITTypeId' ];
-  var hitId = req.query[ 'Event.1.HITId' ];
-  var assignmentId = req.query[ 'Event.1.AssignmentId' ];
-
-  // Check for consistency
-  var taskHitTypeId = task.getMetadata( 'hitType' );
-  if( taskHitTypeId!==hitTypeId ) {
-    log.error( 'HitTypeId mismatch (task!=notification): %s!=%s', taskHitTypeId, hitTypeId );
-    return res.send( 'HITTYPE_MISMATCH' );
+  function test() {
+    return _.isUndefined( req.query[ 'Event.'+index+'.EventType' ] );
   }
 
-  // Search for the microtask
-  Microtask
-  .findOne()
-  .where( 'task', task._id )
-  .elemMatch( 'metadata', {
-    key: 'hit',
-    value: hitId
-  } )
-  .populate( 'operations' )
-  .populate( {
-    path: 'platforms',
-    match: {
-      name: 'amt'
-    }
-  } )
-  .exec( req.wrap( function ( err, microtask ) {
-    if( err ) {
-      log.error( err );
-      return res.send( 'QUERY_ERROR' );
+  function parseParam( callback ) {
+    // Generate base name
+    var base = 'Event.'+index+'.';
+    log.trace( 'Event #: %s', index );
+
+    // Increment the index
+    index++;
+
+    var eventType = req.query[ base+'EventType' ];
+
+    log.trace( 'Event type: %s', eventType );
+
+    // Skip if not supported
+    if( eventType!=='AssignmentAbandoned' &&
+        eventType!=='AssignmentReturned' &&
+        eventType!=='AssignmentSubmitted' )
+      return callback();
+
+    var hitTypeId = req.query[ base+'HITTypeId' ];
+    var hitId = req.query[ base+'HITId' ];
+    var assignmentId = req.query[ base+'AssignmentId' ];
+    var taskHitTypeId = task.getMetadata( 'hitType' );
+
+    /*
+    log.trace( 'hitTypeId: %s', hitTypeId );
+    log.trace( 'taskHitTypeId: %s', taskHitTypeId );
+    log.trace( 'hitId: %s', hitId );
+    log.trace( 'assignmentId: %s', assignmentId );
+    */
+
+    // Check for consistency
+    if( taskHitTypeId!==hitTypeId ) {
+      log.error( 'HitTypeId mismatch (task!=notification): %s!=%s', taskHitTypeId, hitTypeId );
+      return callback();
     }
 
-    if( !microtask ) {
-      log.warn( 'No microtask selected' );
-      return res.send( 'NO_MICROTASK' );
-    }
-
-    var platform = microtask.platforms[0];
-    if( !platform ) {
-      log.warn( 'No AMT platform present' );
-      return res.send( 'NO_PLATFORM' );
-    }
-
-    var platformParameters = platform.params;
-    // Init the AMT wrapper
-    var amt = new AMT( {
-      sandbox: platformParameters.sandbox,
-      key: platformParameters.accessKeyId,
-      secret: platformParameters.secretAccessKey,
-    } );
-    var Assignment = amt.Assignment;
-
-    // Retrieve the assignement
-    Assignment.get( assignmentId, function ( err, assignment ) {
-      if( err ) {
-        log.error( err );
-        return res.send( 'BAD_ASSIGNMENT' );
+    // Find the corresponding Microtask
+    Microtask
+    .findOne()
+    // Same Task id
+    .where( 'task', task._id )
+    // Must have a metadata with the specified hitId
+    .elemMatch( 'metadata', {
+      key: 'hit',
+      value: hitId
+    } )
+    .populate( 'operations' )
+    // Only the AMT platform is needed
+    .populate( {
+      path: 'platforms',
+      match: {
+        name: 'amt'
       }
+    } )
+    .exec( req.wrap( function ( err, microtask ) {
+      if( err ) return callback( err );
 
-      return createExecution( task, microtask, platform, assignment, function ( err ) {
-        if( err ) {
-          log.error( err );
-          return res.send( 'NO_RESPONSE_CREATED' );
-        }
-        return res.send( 'OK' );
+      if( !microtask ) return callback( new CS.error( 'No microtask retrieved' ) );
+
+      var amtPlatform = microtask.platforms[0];
+      if( !amtPlatform ) return callback( new CS.error( 'No amt platform present' ) );
+
+      var params = amtPlatform.params;
+
+      var amt = new AMT( {
+        sandbox: params.sandbox,
+        key: params.accessKeyId,
+        secret: params.secretAccessKey,
       } );
-    } );
-  } ) );
+
+      var Assignment = amt.Assignment;
+      // Retrieve the assignment
+      Assignment.get( assignmentId, function ( err, assignment ) {
+        if( err ) return callback( err );
+
+        return createExecution( task, microtask, amtPlatform, assignment, callback );
+        //return callback();
+      } );
+
+    } ) );
+
+  }
+
+
+
+
+  // Parse each Event parameter passed
+  async.until( test, parseParam, function( err ) {
+    if( err ) return log.error( err );
+
+    log.debug( 'Notification handling finished' );
+
+    return res.send( 'OK' );
+  } );
 }
 
 
@@ -390,10 +424,12 @@ var Platform = {
     'END_MICROTASK': onEndMicrotask
   },
 
+  execute: execute,
+  notify: handleNotification,
+
   params : {
     questionFile:{
-      type:'string',
-      'default': 'question.xml'
+      type:'string'
     },
     sandbox: {
       type: 'boolean',

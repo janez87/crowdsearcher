@@ -12,6 +12,14 @@ block header
       code= moment( object[ object.status.toLowerCase()+'Date' ] ).format( 'YYYY-MM-DD HH:mm' )
     .col-md-4.text-right
       code= object._id
+      p
+      .btn-group
+        a.btn.btn-sm.btn-info(href='manage/object/'+object._id+'/controlmart')
+          i.fa.fa-table
+          |  Mart
+        a.btn.btn-sm.btn-default(href='manage/object/'+object._id+'/dashboard')
+          i.fa.fa-dashboard
+          |  Dashboard
   hr
 
 block content

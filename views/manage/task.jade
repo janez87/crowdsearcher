@@ -21,6 +21,17 @@ block header
       code= moment( task[ task.status.toLowerCase()+'Date' ] ).format( 'YYYY-MM-DD HH:mm' )
     .col-md-4.text-right
       code= task._id
+      p
+      .btn-group
+        a.btn.btn-sm.btn-info(href='manage/task/'+task._id+'/controlmart')
+          i.fa.fa-table
+          |  Mart
+        a.btn.btn-sm.btn-default(href='manage/task/'+task._id+'/dashboard')
+          i.fa.fa-dashboard
+          |  Dashboard
+        if !task.created
+          a.btn.btn-sm.btn-default(href='manage/answers?task='+task._id) Answers 
+            i.fa.fa-list
   hr
 
 block content
@@ -60,12 +71,6 @@ block content
               data-method='POST') Close
     .col-md-4.text-right
       .btn-group
-        a.btn.btn-sm.btn-default(href='manage/task/'+task._id+'/dashboard')
-          i.fa.fa-dashboard
-          |  Dashboard 
-        if task.status!=='CREATED'
-          a.btn.btn-sm.btn-default(href='manage/answers?task='+task._id) Answers 
-            i.fa.fa-list
         a.btn.btn-sm.btn-danger(
           href='#',
           data-destination='manage/job/'+task.job,

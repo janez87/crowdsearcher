@@ -180,3 +180,17 @@ exports.dashboard = function( req, res, next ) {
     });
   } );
 };
+
+// # Control Mart handler
+//
+exports.controlmart = function( req, res, next ) {
+  var url = baseUrl+req.params.entity+'/'+req.params.id+'/mart';
+  r( url, function ( err, resp, mart ) {
+    if( err ) return next( err );
+
+    res.render( 'manage/mart', {
+      title: 'Control Mart for '+req.params.id,
+      mart: mart
+    });
+  } );
+};

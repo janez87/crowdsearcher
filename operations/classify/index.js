@@ -12,7 +12,7 @@ var log = CS.log.child( { component: 'Classify operation' } );
 var Annotation = CS.models.annotation;
 
 // Create the ClassifyError class
-var CSError = require('../../core/error');
+var CSError = CS.error;
 // Create the ClassifyError class
 var ClassifyError = function( id, message ) {
   /* jshint camelcase: false */
