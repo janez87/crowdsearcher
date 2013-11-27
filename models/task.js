@@ -1,12 +1,14 @@
 // Load libraries
-var _  = require('underscore');
-var mongo = require('mongoose');
-var async = require('async');
-var domain = require('domain');
+var _ = require( 'underscore' );
+var mongo = require( 'mongoose' );
+var async = require( 'async' );
+var domain = require( 'domain' );
 var CS = require( '../core' );
 
 // Create a child logger
-var log = CS.log.child( { component: 'Task model' } );
+var log = CS.log.child( {
+  component: 'Task model'
+} );
 
 // Import Mongoose Classes and Objects
 var MongoError = mongo.Error;
@@ -26,152 +28,141 @@ var CRM = require( '../core/CRM' );
 //
 // Mongoose schema for the Task entity.
 var TaskSchema = new Schema( {
-  // ### General data
-  //
-  // The name of the task.
-  name: {
-    index: true,
-    type: String,
-    required: true,
-    trim: true
-  },
-  // The `private` attribute is a flag that states if a user **must** be present for each `Execution`.
-  'private': {
-    type: Boolean,
-    'default': false
-  },
+    // ### General data
+    //
+    // The name of the task.
+    name: {
+      index: true,
+      type: String,
+      required: true,
+      trim: true
+    },
+    // The `private` attribute is a flag that states if a user **must** be present for each `Execution`.
+    'private': {
+      type: Boolean,
+      'default': false
+    },
 
 
-  // ### Markdown-enabled fileds that contains text abount the task.
-  //
-  // The description of the Task.
-  description: {
-    type: String
-  },
-  // The landing page of the Task, will be rendered using markdown.
-  landing: {
-    type: String
-  },
-  // The ending page of the Task, will be rendered using markdown.
-  ending: {
-    type: String
-  },
+    // ### Markdown-enabled fileds that contains text abount the task.
+    //
+    // The description of the Task.
+    description: {
+      type: String
+    },
+    // The landing page of the Task, will be rendered using markdown.
+    landing: {
+      type: String
+    },
+    // The ending page of the Task, will be rendered using markdown.
+    ending: {
+      type: String
+    },
 
 
-  // ### Status
-  //
-  // Current status of the Task.
-  // The status changes how the Task behave to some events/requests.
-  status: {
-    type: String,
-    required: true,
-    index: true,
-    uppercase: true,
-    'enum': [
-      // The Task has been posted to the CS, no event/rule will be triggered in this state
-      'CREATED',
+    // ### Status
+    //
+    // Current status of the Task.
+    // The status changes how the Task behave to some events/requests.
+    status: {
+      type: String,
+      required: true,
+      index: true,
+      uppercase: true,
+      'enum': [
+        // The Task has been posted to the CS, no event/rule will be triggered in this state
+        'CREATED',
 
-      // The Task has been **activated**, this means that all the events can now be triggered.
-      // Setting the state to `OPENED` will trigger the `OPEN_TASK` event.
-      'OPENED',
+        // The Task has been **activated**, this means that all the events can now be triggered.
+        // Setting the state to `OPENED` will trigger the `OPEN_TASK` event.
+        'OPENED',
 
-      // The Task will no longer accept incoming objects from any source.
-      // Setting the state to `FINALIZED` will trigger the `EOF_TASK` event.
-      'FINALIZED',
+        // The Task will no longer accept incoming objects from any source.
+        // Setting the state to `FINALIZED` will trigger the `EOF_TASK` event.
+        'FINALIZED',
 
-      //'WAIT',
-      //'SUSPENDED',
+        //'WAIT',
+        //'SUSPENDED',
 
-      // The Task has been closed, it will not accept any `Object`/`Microtask` and `Execution`s.
-      // Setting the state to `CLOSED` will trigger the `END_TASK` event and set the `closedDate`
-      // field to the current date.
-      'CLOSED'
-    ],
-    'default': 'CREATED'
-  },
+        // The Task has been closed, it will not accept any `Object`/`Microtask` and `Execution`s.
+        // Setting the state to `CLOSED` will trigger the `END_TASK` event and set the `closedDate`
+        // field to the current date.
+        'CLOSED'
+      ],
+      'default': 'CREATED'
+    },
 
-  // Ordered list of control rules for the Task.
-  // See `ControlRule` model.
-  controlrules: [ ControlRule ],
-
-
-  // ### References
-  //
-  // Reference to the `Job` container for this Task.
-  job: {
-    index: true,
-    required: true,
-    type: ObjectId,
-    ref: 'job'
-  },
+    // Ordered list of control rules for the Task.
+    // See `ControlRule` model.
+    controlrules: [ ControlRule ],
 
 
-  // List of `Platform`s of the Task. Each platform is a *reference* to a Platform model.
-  platforms: {
-    type: [ {
+    // ### References
+    //
+    // Reference to the `Job` container for this Task.
+    job: {
+      index: true,
+      required: true,
       type: ObjectId,
-      ref: 'platform'
-    } ],
-    'default': []
+      ref: 'job'
+    },
+
+    // Unique list of `Object`s of the Task.
+    objects: {
+      type: [ {
+        type: ObjectId,
+        ref: 'object'
+      } ],
+      'default': []
+    },
+
+
+    // Unique list of `Microtask`s of the Task. Each microtask is a *reference* to a `Microtask` model.
+    microtasks: {
+      type: [ {
+        type: ObjectId,
+        ref: 'microtask'
+      } ],
+      'default': []
+    },
+
+
+    // ### Time data
+    //
+    // Creation date of the object. By default it will be the first save of the object.
+    createdDate: {
+      required: true,
+      type: Date,
+      'default': Date.now
+    },
+
+    // Closed date of the object. Will be available only after **closing** the task.
+    openedDate: {
+      type: Date,
+      'default': null
+    },
+
+    // Closed date of the object. Will be available only after **closing** the task.
+    finalizedDate: {
+      type: Date,
+      'default': null
+    },
+
+    // Closed date of the object. Will be available only after **closing** the task.
+    closedDate: {
+      type: Date,
+      'default': null
+    }
   },
 
-  // Unique list of `Object`s of the Task.
-  objects: {
-    type: [ {
-      type: ObjectId,
-      ref: 'object'
-    } ],
-    'default': []
-  },
-
-
-  // Unique list of `Microtask`s of the Task. Each microtask is a *reference* to a `Microtask` model.
-  microtasks: {
-    type: [ {
-      type: ObjectId,
-      ref: 'microtask'
-    } ],
-    'default': []
-  },
-
-
-  // ### Time data
+  /// ## Schema options
   //
-  // Creation date of the object. By default it will be the first save of the object.
-  createdDate: {
-    required: true,
-    type: Date,
-    'default': Date.now
-  },
-
-  // Closed date of the object. Will be available only after **closing** the task.
-  openedDate: {
-    type: Date,
-    'default': null
-  },
-
-  // Closed date of the object. Will be available only after **closing** the task.
-  finalizedDate: {
-    type: Date,
-    'default': null
-  },
-
-  // Closed date of the object. Will be available only after **closing** the task.
-  closedDate: {
-    type: Date,
-    'default': null
-  }
-},
-
-/// ## Schema options
-//
-{
-  // Do not allow to add random properties to the model.
-  strict: true,
-  // Disable index check in production.
-  autoIndex: process.env.PRODUCTION? false : true
-} );
-
+  {
+    // Do not allow to add random properties to the model.
+    strict: true,
+    // Disable index check in production.
+    autoIndex: process.env.PRODUCTION ? false : true
+  } );
 
 
 
@@ -217,25 +208,30 @@ TaskSchema.plugin( require( './plugins/strategyPlugin' ), {
 // # Task calculated fields
 //
 // Boolean indicating if the task is created.
-TaskSchema.virtual( 'created' ).get( function() {
-  return this.status==='CREATED';
-} );
+TaskSchema.virtual( 'created' )
+  .get( function() {
+    return this.status === 'CREATED';
+  } );
 // Boolean indicating if the task is opened.
-TaskSchema.virtual( 'opened' ).get( function() {
-  return this.status==='OPENED';
-} );
+TaskSchema.virtual( 'opened' )
+  .get( function() {
+    return this.status === 'OPENED';
+  } );
 // Boolean indicating if the task is finalized.
-TaskSchema.virtual( 'finalized' ).get( function() {
-  return this.status==='FINALIZED';
-} );
+TaskSchema.virtual( 'finalized' )
+  .get( function() {
+    return this.status === 'FINALIZED';
+  } );
 // Boolean indicating if the task is closed.
-TaskSchema.virtual( 'closed' ).get( function() {
-  return this.status==='CLOSED';
-} );
+TaskSchema.virtual( 'closed' )
+  .get( function() {
+    return this.status === 'CLOSED';
+  } );
 // Boolean indicating if the task is editable.
-TaskSchema.virtual( 'editable' ).get( function() {
-  return this.opened || ( this.status==='CREATED' );
-} );
+TaskSchema.virtual( 'editable' )
+  .get( function() {
+    return this.opened || ( this.status === 'CREATED' );
+  } );
 
 
 
@@ -250,15 +246,15 @@ TaskSchema.virtual( 'editable' ).get( function() {
 // Checks if the current task can be opened.
 TaskSchema.methods.canOpen = function( callback ) {
   // The Task can be opened only if is in the `CREATED` state.
-  if( this.status!=='CREATED' )
+  if ( this.status !== 'CREATED' )
     return callback( new MongoError( 'Status is not "CREATED"' ) );
 
   // Must have at least a `Platform`.
-  if( this.platforms.length===0 )
+  if ( this.platforms.length === 0 )
     return callback( new MongoError( 'No platforms specified' ) );
 
   // Must have at least an `Operation`.
-  if( this.operations.length===0 )
+  if ( this.operations.length === 0 )
     return callback( new MongoError( 'No operations specified' ) );
 
   // Everything ok
@@ -271,7 +267,7 @@ TaskSchema.methods.canOpen = function( callback ) {
 // Shortcut for triggering events using the given data as payload.
 // The payload **always** have a `task` key containing the id of the current task.
 TaskSchema.methods.fire = function( event, data, callback ) {
-  if( !_.isFunction( callback ) ) {
+  if ( !_.isFunction( callback ) ) {
     callback = data;
     data = {};
   }
@@ -285,20 +281,20 @@ TaskSchema.methods.fire = function( event, data, callback ) {
 TaskSchema.methods.open = function( callback ) {
   var _this = this;
   // Skip if already opened.
-  if( this.opened || this.finalized || this.closed )
+  if ( this.opened || this.finalized || this.closed )
     return callback( new MongoError( 'Already opened' ) );
 
   // Checks if the task can be opened.
-  this.canOpen( function ( err ) {
-    if( err ) return callback( err );
+  this.canOpen( function( err ) {
+    if ( err ) return callback( err );
 
     log.debug( 'Opening task %s', _this._id );
 
     _this.set( 'status', 'OPENED' );
     _this.set( 'openedDate', Date.now() );
 
-    _this.save( function ( err ) {
-      if( err ) return callback( err );
+    _this.save( function( err ) {
+      if ( err ) return callback( err );
 
       _this.fire( 'OPEN_TASK', callback );
     } );
@@ -311,7 +307,7 @@ TaskSchema.methods.finalize = function( callback ) {
   var _this = this;
 
   // Skip if already finalized or closed.
-  if( this.finalized || this.closed )
+  if ( this.finalized || this.closed )
     return callback( new MongoError( 'Already finalized' ) );
 
   log.debug( 'Finalizing task', this._id );
@@ -320,7 +316,7 @@ TaskSchema.methods.finalize = function( callback ) {
   this.set( 'finalizedDate', Date.now() );
 
   this.save( function( err ) {
-    if( err ) return callback( err );
+    if ( err ) return callback( err );
 
     _this.fire( 'EOF_TASK', callback );
   } );
@@ -335,13 +331,13 @@ TaskSchema.methods.close = function( callback ) {
   var _this = this;
 
   // Skip if already closed.
-  if( this.closed )
+  if ( this.closed )
     return callback( new MongoError( 'Already closed' ) );
 
   // If the task is not finalized, then first finalize it.
-  if( !this.finalized ) {
+  if ( !this.finalized ) {
     return this.finalize( function( err ) {
-      if( err ) return callback( err );
+      if ( err ) return callback( err );
       _this.close( callback );
     } );
   }
@@ -351,12 +347,12 @@ TaskSchema.methods.close = function( callback ) {
 
 
   function closeTask( err ) {
-    if( err ) return callback( err );
+    if ( err ) return callback( err );
     _this.set( 'status', 'CLOSED' );
     _this.set( 'closedDate', Date.now() );
 
     _this.save( function( err ) {
-      if( err ) return callback( err );
+      if ( err ) return callback( err );
 
       _this.fire( 'END_TASK', callback );
     } );
@@ -364,20 +360,22 @@ TaskSchema.methods.close = function( callback ) {
 
   // Close all the microtasks
   var microtaskIds = this.populated( 'microtasks' ) || this.microtasks;
-  var  Microtask = this.model( 'microtask' );
+  var Microtask = this.model( 'microtask' );
   Microtask
-  .find()
-  .where( '_id' ).in( microtaskIds )
-  .where( 'status' ).ne( 'CLOSED' )
-  .exec( function( err, microtasks ) {
-    if( err ) return callback( err );
+    .find()
+    .where( '_id' )
+    . in ( microtaskIds )
+    .where( 'status' )
+    .ne( 'CLOSED' )
+    .exec( function( err, microtasks ) {
+      if ( err ) return callback( err );
 
-    function closeMicrotask( microtask, cb ) {
-      return microtask.close( cb );
-    }
+      function closeMicrotask( microtask, cb ) {
+        return microtask.close( cb );
+      }
 
-    async.each( microtasks, closeMicrotask, closeTask );
-  } );
+      async.each( microtasks, closeMicrotask, closeTask );
+    } );
 };
 
 
@@ -395,17 +393,17 @@ TaskSchema.methods.addObjects = function( objects, callback ) {
   var ObjectModel = this.model( 'object' );
 
   // Check if the task can accept new objects.
-  if( !this.editable )
-    return callback(  new MongoError( 'Task not editable, status: '+this.status ) );
+  if ( !this.editable )
+    return callback( new MongoError( 'Task not editable, status: ' + this.status ) );
 
   // Normalize behaviour.
-  if( !_.isArray( objects ) )
+  if ( !_.isArray( objects ) )
     objects = [ objects ];
 
   // Filter invalid object and add the task parameter to all the elements in
   // the array, so they became valid `Object` entities.
-  var objects = _.filter( objects, function ( object ) {
-    if( ( object instanceof ObjectModel ) || _.isObject( object ) ) {
+  var objects = _.filter( objects, function( object ) {
+    if ( ( object instanceof ObjectModel ) || _.isObject( object ) ) {
       object.task = _this._id;
       return true;
     } else {
@@ -414,14 +412,14 @@ TaskSchema.methods.addObjects = function( objects, callback ) {
   } );
 
   // If no object will be added then exit.
-  if( objects.length===0 )
+  if ( objects.length === 0 )
     return callback();
 
   log.debug( 'Adding %s objects to the task %s', objects.length, _this._id );
 
   // Bulk create `Object` entities using mongoose create method.
   ObjectModel.create( objects, function( err ) {
-    if( err ) return callback( err );
+    if ( err ) return callback( err );
 
     // Convert into plain array.
     var args = _.toArray( arguments );
@@ -433,7 +431,7 @@ TaskSchema.methods.addObjects = function( objects, callback ) {
 
     // Persist the changes.
     _this.save( function( err ) {
-      if( err ) return callback( err );
+      if ( err ) return callback( err );
 
       // Send the Ids
       var objectIds = _.map( args, function( object ) {
@@ -441,7 +439,9 @@ TaskSchema.methods.addObjects = function( objects, callback ) {
       } );
 
       // Once all the changes are saved trigger the `ADD_OBJECTS`.
-      _this.fire( 'ADD_OBJECTS', { objects: objectIds }, callback );
+      _this.fire( 'ADD_OBJECTS', {
+        objects: objectIds
+      }, callback );
     } );
   } );
 };
@@ -459,24 +459,24 @@ TaskSchema.methods.addMicrotasks = function( microtasks, callback ) {
   var Microtask = this.model( 'microtask' );
 
   // Check if the task can accept new microtasks.
-  if( this.closed || this.finalized )
-    return callback( new MongoError( 'Status is "'+this.status+'"' ) );
+  if ( this.closed || this.finalized )
+    return callback( new MongoError( 'Status is "' + this.status + '"' ) );
 
   // Normalize behaviour.
-  if( !_.isArray( microtasks ) )
+  if ( !_.isArray( microtasks ) )
     microtasks = [ microtasks ];
 
   log.debug( 'Adding %s microtasks to the task %s', microtasks.length, this._id );
 
   // Add the application key and the Task reference to each microtask.
-  _.each( microtasks, function ( microtask ) {
+  _.each( microtasks, function( microtask ) {
     microtask.applicationKey = _this.applicationKey;
     microtask.task = _this._id;
   } );
 
   // Bulk create the tasks
   Microtask.create( microtasks, function( err ) {
-    if( err ) return callback( err );
+    if ( err ) return callback( err );
 
     // Convert into plain array.
     var args = _.toArray( arguments );
@@ -488,14 +488,16 @@ TaskSchema.methods.addMicrotasks = function( microtasks, callback ) {
 
     // Persist the changes
     _this.save( function( err ) {
-      if( err ) return callback( err );
+      if ( err ) return callback( err );
 
       // Send the Ids
       var microtaskIds = _.map( args, function( microtask ) {
         return microtask._id;
       } );
 
-      _this.fire( 'ADD_MICROTASKS', { microtasks: microtaskIds }, callback );
+      _this.fire( 'ADD_MICROTASKS', {
+        microtasks: microtaskIds
+      }, callback );
     } );
   } );
 };
@@ -518,78 +520,56 @@ TaskSchema.pre( 'remove', function( next ) {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // OLD METHODS, rewrite
 
 // ### Useful methods
 // Perform the invitation strategy.
 // If no data is passed then it performs the current strategy
 // Otherwise it will use the new strategy passed in the strategy object
-TaskSchema.methods.invite = function(strategy,callback){
+TaskSchema.methods.invite = function( strategy, callback ) {
 
-  if(!strategy || _.isUndefined(strategy) || _.isEmpty(strategy)){
-    log.trace('Re-executiong the same invitation strategy');
+  if ( !strategy || _.isUndefined( strategy ) || _.isEmpty( strategy ) ) {
+    log.trace( 'Re-executiong the same invitation strategy' );
 
     var data = {};
     data.task = this;
-    this.performInvitationStrategy(data,callback);
+    this.performInvitationStrategy( data, callback );
 
-  }else{
+  } else {
 
-    log.trace('A new strategy %j has been selected',strategy);
+    log.trace( 'A new strategy %j has been selected', strategy );
     var _this = this;
 
-    var setNewStrategy = function(callback){
-      log.trace('Setting the new strategy');
-      _this.setInvitationStrategy(strategy,callback);
+    var setNewStrategy = function( callback ) {
+      log.trace( 'Setting the new strategy' );
+      _this.setInvitationStrategy( strategy, callback );
     };
 
-    var performStrategy = function(callback){
-      log.trace('Performing the new strategy');
+    var performStrategy = function( callback ) {
+      log.trace( 'Performing the new strategy' );
       var data = {};
       data.task = _this;
-      _this.performInvitationStrategy(data,callback);
+      _this.performInvitationStrategy( data, callback );
     };
 
-    var actions = [setNewStrategy,performStrategy];
+    var actions = [ setNewStrategy, performStrategy ];
 
-    async.series(actions,callback);
+    async.series( actions, callback );
   }
 
 
 };
 
 // Perform the splitting strategy and replan the task on other platform (if needed)
-TaskSchema.methods.replan = function(strategy,platformName,callback){
+TaskSchema.methods.replan = function( strategy, platformName, callback ) {
 
   var _this = this;
 
   var d = domain.create();
 
-  d.on('error',callback);
+  d.on( 'error', callback );
 
-  var initCronJob = function(microtask,platform){
+  var initCronJob = function( microtask, platform ) {
     log.trace( 'Scheduling CronJob' );
 
     // Create a `domain` to handle cron job exceptions
@@ -604,94 +584,96 @@ TaskSchema.methods.replan = function(strategy,platformName,callback){
     var cronJob;
     var tickFunction = function() {
       microtask
-      .populate( 'task operations platforms',cronDomain.bind( function( err, microtask ) {
+        .populate( 'task operations platforms', cronDomain.bind( function( err, microtask ) {
 
-        // call the tick function
-        platformImplementation.timed.onTick( microtask.task, microtask, platform, cronJob );
-      } ) );
+          // call the tick function
+          platformImplementation.timed.onTick( microtask.task, microtask, platform, cronJob );
+        } ) );
     };
 
-     // Schedule the job and start it!
+    // Schedule the job and start it!
     var cronExpression = platformImplementation.timed.expression;
     cronJob = schedule.scheduleJob( cronExpression, tickFunction );
   };
 
   // Set the new strategy (if passed)
-  var setStrategy = function(callback){
-    if(_.isUndefined(strategy)){
-      log.trace('Using the old strategy');
+  var setStrategy = function( callback ) {
+    if ( _.isUndefined( strategy ) ) {
+      log.trace( 'Using the old strategy' );
       return callback();
     }
 
-    log.trace('Setting the new strategy');
-    _this.setSplittingStrategy(strategy,d.bind(function(err){
-      if (err){
-        log.error(err);
-        return callback(err);
+    log.trace( 'Setting the new strategy' );
+    _this.setSplittingStrategy( strategy, d.bind( function( err ) {
+      if ( err ) {
+        log.error( err );
+        return callback( err );
       }
 
       return callback();
-    }));
+    } ) );
   };
 
   // Perform the splittig strategy
-  var performStrategy = function(callback){
-    log.trace('Performing the strategy');
+  var performStrategy = function( callback ) {
+    log.trace( 'Performing the strategy' );
     var data = {};
     data.task = _this;
-    _this.performSplittingStrategy(data,function(err,microtasks){
-      if(err) return callback(err);
+    _this.performSplittingStrategy( data, function( err, microtasks ) {
+      if ( err ) return callback( err );
 
-      return callback(null,microtasks);
-    });
+      return callback( null, microtasks );
+    } );
   };
 
   // Init the platform
-  var initPlatform = function( microtasks,callback){
-    log.trace('Init the platform (if needed)');
+  var initPlatform = function( microtasks, callback ) {
+    log.trace( 'Init the platform (if needed)' );
 
-    log.trace('%s microtasks were created',microtasks.length);
+    log.trace( '%s microtasks were created', microtasks.length );
 
-    if(_.isEmpty(microtasks)){
-      log.trace('No microtasks were created');
+    if ( _.isEmpty( microtasks ) ) {
+      log.trace( 'No microtasks were created' );
       return callback();
     }
 
     // I need the platform object
-    _this.populate('platforms',function(err,task){
-      if(err) return callback(err);
+    _this.populate( 'platforms', function( err, task ) {
+      if ( err ) return callback( err );
 
-      var platform = _.findWhere(task.platforms,{name:platformName});
+      var platform = _.findWhere( task.platforms, {
+        name: platformName
+      } );
 
-      if(_.isUndefined(platform)){
-        log.error('The selected platform (%s) was not configured',platformName);
-        return callback(new Error('The selected platform was not configured'));
+      if ( _.isUndefined( platform ) ) {
+        log.error( 'The selected platform (%s) was not configured', platformName );
+        return callback( new Error( 'The selected platform was not configured' ) );
       }
 
-      var platformImpl = CS.platforms[platformName];
+      var platformImpl = CS.platforms[ platformName ];
 
-      var postMicroTask = function(microtask,callback){
-        log.trace('Initalazing the platform for the microtask %s',microtask.id);
+      var postMicroTask = function( microtask, callback ) {
+        log.trace( 'Initalazing the platform for the microtask %s', microtask.id );
 
-        platformImpl.init(task,microtask,platform,function(err){
-          if(err) return callback(err);
+        platformImpl.init( task, microtask, platform, function( err ) {
+          if ( err ) return callback( err );
 
-          if(platformImpl.timed){
-            initCronJob(microtask,platform);
+          if ( platformImpl.timed ) {
+            initCronJob( microtask, platform );
           }
 
           return callback();
-        });
+        } );
       };
 
-      async.eachSeries(microtasks,postMicroTask,callback);
+      async.eachSeries( microtasks, postMicroTask, callback );
 
-    });
+    } );
   };
 
-  var actions = [setStrategy,performStrategy,initPlatform];
+  var actions = [ setStrategy, performStrategy, initPlatform ];
 
-  async.waterfall(actions,callback);
+  async.waterfall( actions, callback );
 };
 
 
