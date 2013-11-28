@@ -16,9 +16,17 @@ block header
         a.btn.btn-sm.btn-info(href='manage/job/'+job._id+'/controlmart')
           i.fa.fa-table
           |  Mart
-        //a.btn.btn-sm.btn-default(href='manage/job/'+job._id+'/dashboard')
-          i.fa.fa-dashboard
-          |  Dashboard
+        a.btn.btn-sm.btn-default(href='manage/job/'+job._id+'/flows')
+          i.fa.fa-random
+          |  Flows
+        a.btn.btn-sm.btn-danger(
+          href='#',
+          data-id=job._id,
+          data-destination='manage/jobs',
+          data-entity='job',
+          data-method='DELETE')
+          i.fa.fa-trash-o
+          |  Remove
 
 block content
   .row

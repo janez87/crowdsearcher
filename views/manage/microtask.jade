@@ -44,6 +44,14 @@ block content
           data-entity='microtask',
           data-method='POST') Close
     .col-md-4.text-right
+      a.btn.btn-sm.btn-danger(
+        href='#',
+        data-id=microtask._id,
+        data-destination='manage/task/'+microtask.task,
+        data-entity='microtask',
+        data-method='DELETE')
+        i.fa.fa-trash-o
+        |  Remove
   hr
 
   .row

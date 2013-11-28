@@ -1,12 +1,11 @@
-// Process stuff
 process.title = 'CrowdSearcher';
-//TODO: remove, debug only
-Error.stackTraceLimit = Infinity;
+
+Error.stackTraceLimit = process.env.PRODUCTION ? 15 : Infinity;
 
 // Cluster related
 var cluster = require( 'cluster' );
 
-if( cluster.isWorker ) {
+if ( cluster.isWorker ) {
   var REPORT_STATS_INTERVAL = 5000;
   var reportStats = function() {
     process.send( {
@@ -24,16 +23,16 @@ var Configurator = require( './config' );
 
 
 // # Create the Express Object
-var express = require('express');
+var express = require( 'express' );
 // Create the express application
 var app = express();
 
 // Load libraries
-var _  = require('underscore');
-var fs  = require('fs');
-var url  = require('url');
+var _ = require( 'underscore' );
+var fs = require( 'fs' );
+var url = require( 'url' );
 var path = require( 'path' );
-var flash = require('connect-flash');
+var flash = require( 'connect-flash' );
 var nconf = require( 'nconf' );
 var domain = require( 'domain' );
 var passport = require( 'passport' );
@@ -44,12 +43,12 @@ var CS = require( './core' );
 // Configure the Express app
 // ---
 // Directories
-var publicPath = path.join(__dirname, 'public');
-var viewsPath = path.join(__dirname, 'views');
-var uploadPath = path.join(__dirname, 'uploads');
+var publicPath = path.join( __dirname, 'public' );
+var viewsPath = path.join( __dirname, 'views' );
+var uploadPath = path.join( __dirname, 'uploads' );
 
 // Create upload path if not exists
-if( !fs.existsSync( uploadPath ) )
+if ( !fs.existsSync( uploadPath ) )
   fs.mkdirSync( uploadPath );
 
 // Use JADE as template engine
@@ -75,10 +74,10 @@ app.use( function( req, res, next ) {
 
   // Utility function used to wrap an async call to the api domain
   var wrapInDomain = function( fn, ctx ) {
-    if( _.isString( fn ) && !_.isUndefined( ctx ) )
+    if ( _.isString( fn ) && !_.isUndefined( ctx ) )
       fn = ctx[ fn ];
 
-    if( ctx )
+    if ( ctx )
       fn = fn.bind( ctx );
 
     return requestDomain.bind( fn );
@@ -99,30 +98,30 @@ app.use( function( req, res, next ) {
 } );
 
 // Use icon
-app.use(express.favicon());
+app.use( express.favicon() );
 
 // Log all the requests?
 //app.use(express.logger('dev'));
 
 // Used to handle uploaded files
-app.use(express.bodyParser( {
+app.use( express.bodyParser( {
   uploadDir: uploadPath
-} ));
-app.use(express.methodOverride());
+} ) );
+app.use( express.methodOverride() );
 
 // ## CORS middleware
 //
 // see: http://stackoverflow.com/questions/7067966/how-to-allow-cors-in-express-nodejs
 function allowCrossDomain( req, res, next ) {
-  if( req.path.split( '/' )[1]==='api' ) {
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-    res.header('Access-Control-Allow-Headers', '*');
+  if ( req.path.split( '/' )[ 1 ] === 'api' ) {
+    res.header( 'Access-Control-Allow-Origin', '*' );
+    res.header( 'Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE' );
+    res.header( 'Access-Control-Allow-Headers', '*' );
     //res.header('Access-Control-Allow-Headers', 'Accepts, Content-Type, Authorization, X-Requested-With');
-    res.header('Access-Control-Allow-Headers', req.get( 'Access-Control-Request-Headers' ) );
+    res.header( 'Access-Control-Allow-Headers', req.get( 'Access-Control-Request-Headers' ) );
 
     // intercept OPTIONS method
-    if( 'OPTIONS'===req.method ) {
+    if ( 'OPTIONS' === req.method ) {
       return res.send( 200 );
     } else {
       return next();
@@ -142,7 +141,7 @@ app.use( express.session( {
 app.use( flash() );
 
 // Complie on the fly stylus files
-app.use( require('stylus').middleware( publicPath ) );
+app.use( require( 'stylus' ).middleware( publicPath ) );
 
 // Serve static contents from **publicPath**
 app.use( express.static( publicPath ) );
@@ -154,7 +153,7 @@ app.use( passport.session() );
 
 // Pass user to the views
 app.use( function( req, res, next ) {
-  if( req.path.split( '/' )[1]!=='api' ) {
+  if ( req.path.split( '/' )[ 1 ] !== 'api' ) {
     // Add th user to the views object
     app.locals( {
       user: req.user
@@ -166,7 +165,7 @@ app.use( function( req, res, next ) {
 
 
 // Manage app routes
-app.use(app.router);
+app.use( app.router );
 
 
 // Server
@@ -175,17 +174,17 @@ var serverError = function( error ) {
   var log = CS.log;
 
   log.error( error );
-  if( error.code==='EADDRINUSE' ) {
+  if ( error.code === 'EADDRINUSE' ) {
     log.error( 'Address is in use, try to change the PORT parameter in the configuration' );
   }
 
-  if( error.code==='EACCESS' ) {
+  if ( error.code === 'EACCESS' ) {
     log.error( 'The user does not have the required privileges to run the application\nTry changind the PORT parameter in the configuration file or run as a different user' );
   }
 
   log.error( 'The server will be stopped and the process will exit' );
   setTimeout( function() {
-    process.exit(1);
+    process.exit( 1 );
   }, 1000 );
 };
 app.on( 'error', serverError );
@@ -201,14 +200,14 @@ config.on( 'error', function configError( err ) {
   console.error( err );
   console.error( err.stack );
   process.exit( 1 );
-});
+} );
 
 // Once the configuration is ready
 config.once( 'ready', function configReady() {
   // Load the routers
-  var routes = require('./routes');
-  var errorRoutes = require('./routes/error');
-  var accountRoutes = require('./routes/account');
+  var routes = require( './routes' );
+  var errorRoutes = require( './routes/error' );
+  var accountRoutes = require( './routes/account' );
 
   // Import the logger
   var log = CS.log;
@@ -221,8 +220,8 @@ config.once( 'ready', function configReady() {
 
   // Configure the API's
   try {
-    require('./routes/api')( app );
-  } catch( err ) {
+    require( './routes/api' )( app );
+  } catch ( err ) {
     log.error( err, 'API binding error' );
     return config.emit( 'error', err );
   }
@@ -240,7 +239,7 @@ config.once( 'ready', function configReady() {
   // Auth middlewares
   var authMiddleware = [
     passport.authenticate( 'local', {
-      failureRedirect: baseURL+'login',
+      failureRedirect: baseURL + 'login',
       failureFlash: true
     } )
   ];
@@ -256,6 +255,7 @@ config.once( 'ready', function configReady() {
   app.get( '/manage/job/new', routes.checkAuth, manager.newJob );
   //app.post( '/manage/job/new', routes.checkAuth, manager.postJob );
   app.get( '/manage/job/:id', routes.checkAuth, manager.job );
+  app.get( '/manage/job/:id/flows', routes.checkAuth, manager.flows );
   // Tasks
   app.get( '/manage/task/new', routes.checkAuth, manager.newTask );
   //app.post( '/manage/task/new', routes.checkAuth, manager.postTask );
@@ -284,32 +284,32 @@ config.once( 'ready', function configReady() {
   };
 
   // User related
-  app.get(  '/register', routes.register );
+  app.get( '/register', routes.register );
   app.post( '/register', routes.postRegister, accountRedirect );
-  app.get(  '/login', routes.login );
-  app.post( '/login', authMiddleware, accountRedirect);
-  app.get(  '/logout', routes.logout );
+  app.get( '/login', routes.login );
+  app.post( '/login', authMiddleware, accountRedirect );
+  app.get( '/logout', routes.logout );
 
-  app.get(  '/account', routes.checkAuth, accountRoutes.index );
+  app.get( '/account', routes.checkAuth, accountRoutes.index );
 
 
   // Autentication endpoints based on configured socual networks
   var socialMap = CS.social;
-  _.each( socialMap, function ( config, name ) {
+  _.each( socialMap, function( config, name ) {
     var authConfig = _.defaults( {
-      failureRedirect: baseURL+'login',
+      failureRedirect: baseURL + 'login',
       failureFlash: true
     }, config.authConfig );
 
     var passportAuth = passport.authorize( name, authConfig );
 
-    app.get(  '/connect/'+name, passportAuth, accountRedirect );
-    app.get(  '/connect/'+name+'/callback', passportAuth, accountRedirect );
+    app.get( '/connect/' + name, passportAuth, accountRedirect );
+    app.get( '/connect/' + name + '/callback', passportAuth, accountRedirect );
   } );
 
 
   // Handle random request
-  app.all('*', function randomUrlHandler( req, res ) {
+  app.all( '*', function randomUrlHandler( req, res ) {
     log.warn( 'Requested "%s %s" by %s', req.method, req.originalUrl, req.ip );
     res.status( 404 );
     res.format( {
@@ -327,12 +327,12 @@ config.once( 'ready', function configReady() {
         } );
       }
     } );
-  });
+  } );
 
   // Eventually START SERVER!
-  log.debug( 'Starting server on port '+config.getPort() );
+  log.debug( 'Starting server on port ' + config.getPort() );
   app.listen( config.getPort(), function runningServer() {
-    log.info( 'Server running on port '+config.getPort() );
+    log.info( 'Server running on port ' + config.getPort() );
   } );
 } );
 

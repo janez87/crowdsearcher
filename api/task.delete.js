@@ -1,11 +1,11 @@
-
-
 // Load libraries
 var util = require( 'util' );
 var CS = require( '../core' );
 
 // Use a child logger
-var log = CS.log.child( { component: 'Delete Task' } );
+var log = CS.log.child( {
+  component: 'Delete Task'
+} );
 
 
 // Mongo models
@@ -20,7 +20,7 @@ util.inherits( DeleteTaskError, APIError );
 
 DeleteTaskError.prototype.name = 'DeleteTaskError';
 // Custom error IDs
-
+DeleteTaskError.NOT_FOUND = 'NOT_FOUND';
 
 // API object returned by the file
 // -----
@@ -46,15 +46,22 @@ API.logic = function removeTask( req, res, next ) {
 
   var Task = CS.models.task;
   Task
-  .findById( id )
-  .remove()
-  .exec( req.wrap( function( err ) {
-    if( err ) return next( err );
+    .findById( id )
+    .exec( req.wrap( function( err, task ) {
+      if ( err ) return next( err );
 
-    res.json( {
-      message: 'Good by task... we will miss you...'
-    } );
-  } ) );
+      if ( !task )
+        return next( new DeleteTaskError( DeleteTaskError.NOT_FOUND, 'Task not found' ) );
+
+      task.remove( function( err ) {
+        if ( err ) return next( err );
+
+        log.trace( 'Task removed' );
+        return res.json( {
+          message: 'Good by task... we will miss you...'
+        } );
+      } );
+    } ) );
 };
 
 

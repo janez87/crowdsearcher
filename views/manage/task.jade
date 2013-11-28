@@ -73,12 +73,12 @@ block content
       .btn-group
         a.btn.btn-sm.btn-danger(
           href='#',
-          data-destination='manage/job/'+task.job,
           data-id=task._id,
+          data-destination='manage/job/'+task.job,
           data-entity='task',
           data-method='DELETE')
           i.fa.fa-trash-o
-          |  Delete
+          |  Remove
         if task.opened || task.finalized
           a.btn.btn-sm.btn-primary(href='api/run?task='+task._id) Execute 
             i.fa.fa-play

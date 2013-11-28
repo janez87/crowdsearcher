@@ -7,7 +7,9 @@ var request = require( 'request' );
 var CS = require( '../../core' );
 
 // Create a child logger
-var log = CS.log.child( { component: 'Manger route' } );
+var log = CS.log.child( {
+  component: 'Manger route'
+} );
 
 
 // Create a general requester
@@ -33,8 +35,8 @@ exports.index = function( req, res ) {
 // ## Job apis
 //
 exports.jobs = function( req, res, next ) {
-  r( baseUrl+'jobs', function ( err, resp, json ) {
-    if( err ) return next( err );
+  r( baseUrl + 'jobs', function( err, resp, json ) {
+    if ( err ) return next( err );
 
     res.render( 'manage/jobs', {
       title: 'Job list',
@@ -44,24 +46,24 @@ exports.jobs = function( req, res, next ) {
 };
 
 exports.job = function( req, res, next ) {
-  r( baseUrl+'job/?job='+req.params.id, function ( err, resp, job ) {
-    if( err ) return next( err );
+  r( baseUrl + 'job/?job=' + req.params.id, function( err, resp, job ) {
+    if ( err ) return next( err );
 
-    r( baseUrl+'tasks/?job='+req.params.id, function ( err, resp, tasks ) {
-      if( err ) return next( err );
+    r( baseUrl + 'tasks/?job=' + req.params.id, function( err, resp, tasks ) {
+      if ( err ) return next( err );
 
       res.render( 'manage/job', {
         title: job.name,
         job: job || [],
         tasks: tasks || []
       } );
-    });
+    } );
   } );
 };
 
 exports.newJob = function( req, res, next ) {
-  r( baseUrl+'configuration/taskAssignment', function ( err, resp, strategies ) {
-    if( err ) return next( err );
+  r( baseUrl + 'configuration/taskAssignment', function( err, resp, strategies ) {
+    if ( err ) return next( err );
 
     res.render( 'manage/newJob', {
       title: 'Create Job',
@@ -87,8 +89,8 @@ exports.postJob = function( req, res, next ) {
 // ## Task handlers
 //
 exports.newTask = function( req, res, next ) {
-  r( baseUrl+'configuration', function ( err, resp, config ) {
-    if( err ) return next( err );
+  r( baseUrl + 'configuration', function( err, resp, config ) {
+    if ( err ) return next( err );
 
     res.render( 'manage/newTask', {
       title: 'Create Task',
@@ -112,26 +114,26 @@ exports.postTask = function( req, res, next ) {
 */
 
 exports.task = function( req, res, next ) {
-  r( baseUrl+'task/?populate=microtasks&populate=objects&populate=platforms&populate=operations&task='+req.params.id, function ( err, resp, task ) {
-    if( err ) return next( err );
+  r( baseUrl + 'task/?populate=microtasks&populate=objects&populate=platforms&populate=operations&task=' + req.params.id, function( err, resp, task ) {
+    if ( err ) return next( err );
 
     res.render( 'manage/task', {
       title: task.name,
       task: task
-    });
+    } );
   } );
 };
 
 // ## Microtask handlers
 //
 exports.microtask = function( req, res, next ) {
-  r( baseUrl+'microtask/?populate=objects&populate=platforms&populate=operations&microtask='+req.params.id, function ( err, resp, microtask ) {
-    if( err ) return next( err );
+  r( baseUrl + 'microtask/?populate=objects&populate=platforms&populate=operations&microtask=' + req.params.id, function( err, resp, microtask ) {
+    if ( err ) return next( err );
 
     res.render( 'manage/microtask', {
-      title: 'Microtask '+microtask._id,
+      title: 'Microtask ' + microtask._id,
       microtask: microtask
-    });
+    } );
   } );
 };
 
@@ -140,13 +142,13 @@ exports.microtask = function( req, res, next ) {
 // ## Object handlers
 //
 exports.object = function( req, res, next ) {
-  r( baseUrl+'object/?object='+req.params.id, function ( err, resp, object ) {
-    if( err ) return next( err );
+  r( baseUrl + 'object/?object=' + req.params.id, function( err, resp, object ) {
+    if ( err ) return next( err );
 
     res.render( 'manage/object', {
-      title: 'Object '+object._id,
+      title: 'Object ' + object._id,
       object: object
-    });
+    } );
   } );
 };
 
@@ -157,40 +159,49 @@ exports.answers = function( req, res, next ) {
   var qs = querystring.stringify( _.defaults( {
     populate: [ 'platform', 'performer', 'annotations.operation' ]
   }, req.query ) );
-  r( baseUrl+'answer?'+qs, function ( err, resp, answers ) {
-    if( err ) return next( err );
+  r( baseUrl + 'answer?' + qs, function( err, resp, answers ) {
+    if ( err ) return next( err );
 
     res.render( 'manage/answers', {
       title: 'Answers',
       answers: answers
-    });
+    } );
   } );
 };
 
 // # Dashboard handler
 //
 exports.dashboard = function( req, res, next ) {
-  var url = baseUrl+req.params.entity+'/'+req.params.id+'/stats';
-  r( url, function ( err, resp, stats ) {
-    if( err ) return next( err );
+  var url = baseUrl + req.params.entity + '/' + req.params.id + '/stats';
+  r( url, function( err, resp, stats ) {
+    if ( err ) return next( err );
 
     res.render( 'manage/dashboard', {
-      title: 'Dashboard for '+req.params.id,
+      title: 'Dashboard for ' + req.params.id,
       stats: stats
-    });
+    } );
   } );
 };
 
 // # Control Mart handler
 //
 exports.controlmart = function( req, res, next ) {
-  var url = baseUrl+req.params.entity+'/'+req.params.id+'/mart';
-  r( url, function ( err, resp, mart ) {
-    if( err ) return next( err );
+  var url = baseUrl + req.params.entity + '/' + req.params.id + '/mart';
+  r( url, function( err, resp, mart ) {
+    if ( err ) return next( err );
 
     res.render( 'manage/mart', {
-      title: 'Control Mart for '+req.params.id,
+      title: 'Control Mart for ' + req.params.id,
       mart: mart
-    });
+    } );
+  } );
+};
+
+// # Control Mart handler
+//
+exports.flows = function( req, res, next ) {
+  res.render( 'manage/flows', {
+    title: 'Task Flows for job ' + req.params.id,
+    jobId: req.params.id
   } );
 };

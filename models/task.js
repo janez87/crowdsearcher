@@ -509,7 +509,109 @@ TaskSchema.methods.addMicrotasks = function( microtasks, callback ) {
 // ## Pre-remove middleware
 // Removes all the data associated with this task, including microtasks, objects and executions.
 TaskSchema.pre( 'remove', function( next ) {
-  next();
+  var _this = this;
+
+  function remove( entity, cb ) {
+    entity.remove( cb );
+  }
+
+  function removeMicrotasks( callback ) {
+    log.debug( 'Removing microtasks' );
+
+    var Microtask = CS.models.microtask;
+    Microtask
+      .find()
+      .where( 'task', _this._id )
+      .exec( function( err, microtasks ) {
+        if ( err ) return callback( err );
+
+        async.each( microtasks, remove, function( err ) {
+          if ( err ) return callback( err );
+
+          log.debug( 'All microtasks removed' );
+          return callback();
+        } );
+      } );
+  }
+
+  function removePlatforms( callback ) {
+    log.debug( 'Removing platforms' );
+
+    var Platform = CS.models.platform;
+    Platform
+      .find()
+      .where( '_id' )[ 'in' ]( _this.platforms )
+      .exec( function( err, platforms ) {
+        if ( err ) return callback( err );
+
+        async.each( platforms, remove, function( err ) {
+          if ( err ) return callback( err );
+
+          log.debug( 'All platforms removed' );
+          return callback();
+        } );
+      } );
+  }
+
+  function removeOperations( callback ) {
+    log.debug( 'Removing operations' );
+
+    var Operation = CS.models.operation;
+    Operation
+      .find()
+      .where( '_id' )[ 'in' ]( _this.operations )
+      .exec( function( err, operations ) {
+        if ( err ) return callback( err );
+
+        async.each( operations, remove, function( err ) {
+          if ( err ) return callback( err );
+
+          log.debug( 'All operations removed' );
+          return callback();
+        } );
+      } );
+  }
+
+  function removeObjects( callback ) {
+    log.debug( 'Removing objects' );
+
+    var ObjectModel = CS.models.object;
+    ObjectModel
+      .find()
+      .where( '_id' )[ 'in' ]( _this.objects )
+      .exec( function( err, objects ) {
+        if ( err ) return callback( err );
+
+        async.each( objects, remove, function( err ) {
+          if ( err ) return callback( err );
+
+          log.debug( 'All objects removed' );
+          return callback();
+        } );
+      } );
+  }
+
+  function removeControlMart( callback ) {
+    log.debug( 'Removing control mart' );
+    //log.debug( 'All control mart data removed' );
+    return callback();
+  }
+
+  var actions = [
+    removeMicrotasks,
+    removePlatforms,
+    removeOperations,
+    removeObjects,
+    removeControlMart
+  ];
+
+  async.series( actions, function( err ) {
+    if ( err ) return next( err );
+
+    log.debug( 'Task removed' );
+    return next();
+  } );
+
 } );
 
 

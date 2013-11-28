@@ -18,13 +18,13 @@ var workers = {};
 // Polling time, in *ms*, for checking the worker status.
 var CHECK_WORKERS_INTERVAL = 5000;
 // Max time of non response, in *ms*, before the worker is terminated.
-var MAX_TIME = CHECK_WORKERS_INTERVAL*2;
+var MAX_TIME = CHECK_WORKERS_INTERVAL * 2;
 
 // Delete the worker
 // ----
 var deleteWorker = function( pid ) {
   // If the worker *pid* exist
-  if( workers.hasOwnProperty( pid )  ) {
+  if ( workers.hasOwnProperty( pid ) ) {
     // ... then gracefully kill
     workers[ pid ].worker.disconnect();
     // and remove it from the available workers.
@@ -42,7 +42,7 @@ var createWorker = function() {
   // add to the worker pool
   workers[ worker.id ] = {
     worker: worker,
-    lastCb: Date.now()-CHECK_WORKERS_INTERVAL // Give the worker some time to start
+    lastCb: Date.now() - CHECK_WORKERS_INTERVAL // Give the worker some time to start
   };
 
 
@@ -68,7 +68,7 @@ var createWorker = function() {
     console.log( 'Worker listening @', address, 'disconnected' );
   } );
   worker.on( 'exit', function( code, signal ) {
-    console.log( 'Worker ' + worker.id + ' killed by signal '+signal+'('+code+'). restarting...' );
+    console.log( 'Worker ' + worker.id + ' killed by signal ' + signal + '(' + code + '). restarting...' );
   } );
 };
 
@@ -77,13 +77,13 @@ var createWorker = function() {
 var checkWorkers = function() {
 
   // For each worker
-  for( var id in workers ) {
+  for ( var id in workers ) {
     // get current time
     var time = Date.now();
 
     // if the worker exists and its not responding then kill it!
-    if( workers.hasOwnProperty( id ) &&
-        (workers[ id ].lastCb+MAX_TIME)<time ) {
+    if ( workers.hasOwnProperty( id ) &&
+      ( workers[ id ].lastCb + MAX_TIME ) < time ) {
 
       // Nice log for a murder...
       console.log( 'Long running worker', id, 'detected, klling it' );
@@ -110,6 +110,6 @@ cluster.setupMaster( {
 
 // Now we have defined all the required functions
 // and checks, we are ready to **start the server cluster**!
-for( var i=0; i<numCPUs; i++ ) {
+for ( var i = 0; i < numCPUs; i++ ) {
   createWorker();
 }

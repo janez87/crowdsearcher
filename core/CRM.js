@@ -1,11 +1,13 @@
 // Load libraries.
-var _ = require('underscore');
+var _ = require( 'underscore' );
 var async = require( 'async' );
 var domain = require( 'domain' );
 var CS = require( '../core' );
 
 // Create a child logger.
-var log = CS.log.child( { component: 'CRM' } );
+var log = CS.log.child( {
+  component: 'CRM'
+} );
 
 
 // # Control Rule Manager
@@ -22,11 +24,11 @@ var ControlRuleManager = {};
 // Only task with status either `OPENED` or `FINALIZED` can trigger events.
 ControlRuleManager.trigger = function( event, data, callback ) {
   // The task id must be available in the data object.
-  var taskId = data.task._id? data.task._id : data.task;
+  var taskId = data.task._id ? data.task._id : data.task;
 
   log.debug( 'CRM event %s', event );
 
-  if( !taskId )
+  if ( !taskId )
     return callback( new Error( 'Task id must be specified' ) );
 
   // Import the Task mongoose model.
@@ -51,7 +53,7 @@ ControlRuleManager.trigger = function( event, data, callback ) {
       }
     );
 
-    if( event==='ADD_MICROTASKS' ) {
+    if ( event === 'ADD_MICROTASKS' ) {
       defaults.microtaskIds = data.microtasks;
 
       retrieveActionList.push(
@@ -61,17 +63,17 @@ ControlRuleManager.trigger = function( event, data, callback ) {
           return c();
         }
       );
-    } else if( event==='END_MICROTASK' ) {
+    } else if ( event === 'END_MICROTASK' ) {
       defaults.microtaskId = data.microtask;
 
       retrieveActionList.push(
-        _.partial( retrieveMicrotasks, [defaults.microtaskId] ),
+        _.partial( retrieveMicrotasks, [ defaults.microtaskId ] ),
         function( microtasks, c ) {
-          defaults.microtask = microtasks[0];
+          defaults.microtask = microtasks[ 0 ];
           return c();
         }
       );
-    } else if( event==='ADD_OBJECTS' ) {
+    } else if ( event === 'ADD_OBJECTS' ) {
       defaults.objectIds = data.objects;
 
       retrieveActionList.push(
@@ -82,17 +84,17 @@ ControlRuleManager.trigger = function( event, data, callback ) {
         }
       );
 
-    } else if( event==='CLOSE_OBJECT' ) {
+    } else if ( event === 'CLOSE_OBJECT' ) {
       defaults.objectId = data.object;
 
       retrieveActionList.push(
-        _.partial( retrieveObjects, [defaults.objectId] ),
+        _.partial( retrieveObjects, [ defaults.objectId ] ),
         function( objects, c ) {
-          defaults.object = objects[0];
+          defaults.object = objects[ 0 ];
           return c();
         }
       );
-    } else if( event==='CLOSE_OBJECT' ) {
+    } else if ( event === 'CLOSE_OBJECT' ) {
       defaults.executionId = data.execution;
 
       retrieveActionList.push(
@@ -102,7 +104,7 @@ ControlRuleManager.trigger = function( event, data, callback ) {
           return c();
         }
       );
-    } else if( event==='END_EXECUTION' ) {
+    } else if ( event === 'END_EXECUTION' ) {
       defaults.executionId = data.execution;
 
       retrieveActionList.push(
@@ -125,55 +127,55 @@ ControlRuleManager.trigger = function( event, data, callback ) {
   function retrieveTask( id, cb ) {
     // Populate the task, this object will be passed to the rule.
     Task
-    .findById( id )
+      .findById( id )
     // Populate all the refs, exclude objects for performance.
     .populate( 'job platforms operations microtasks' )
-    .exec( function( err, task ) {
-      if( err ) return cb( err );
+      .exec( function( err, task ) {
+        if ( err ) return cb( err );
 
-      // Check if a task was found.
-      if( !task )
-        return cb( new Error( 'No task found for '+id ) );
+        // Check if a task was found.
+        if ( !task )
+          return cb( new Error( 'No task found for ' + id ) );
 
-      return cb( null, task );
-    } );
+        return cb( null, task );
+      } );
   }
 
   function retrieveMicrotasks( ids, cb ) {
     Microtask
-    .find()
-    .where( '_id' ).in( ids )
-    .populate( 'operations platforms' )
-    .exec( function( err, microtasks ) {
-      if( err ) return cb( err );
+      .find()
+      .where( '_id' ). in ( ids )
+      .populate( 'operations platforms' )
+      .exec( function( err, microtasks ) {
+        if ( err ) return cb( err );
 
-      return cb( null,  microtasks );
-    } );
+        return cb( null, microtasks );
+      } );
   }
 
   function retrieveExecution( id, cb ) {
     Execution
-    .findById( id )
-    .populate( 'platform microtask performer annotations.operation' )
-    .exec( function( err, execution ) {
-      if( err ) return cb( err );
+      .findById( id )
+      .populate( 'platform microtask performer annotations.operation' )
+      .exec( function( err, execution ) {
+        if ( err ) return cb( err );
 
-      // Check if an execution was found.
-      if( !execution )
-        return cb( new Error( 'No execution found for '+id ) );
+        // Check if an execution was found.
+        if ( !execution )
+          return cb( new Error( 'No execution found for ' + id ) );
 
-      return cb( null, execution );
-    } );
+        return cb( null, execution );
+      } );
   }
 
   function retrieveObjects( ids, cb ) {
     ObjectModel
-    .where( '_id' ).in( ids )
-    .exec( function( err, objects ) {
-      if( err ) return cb( err );
+      .where( '_id' ). in ( ids )
+      .exec( function( err, objects ) {
+        if ( err ) return cb( err );
 
-      return cb( null, objects );
-    } );
+        return cb( null, objects );
+      } );
   }
 
   // Function that wraps each function into a 'secure' domain.
@@ -195,11 +197,11 @@ ControlRuleManager.trigger = function( event, data, callback ) {
     log.trace( 'Found %s rules to run', rules.length );
 
     // Exit in case of no rules.
-    if( rules.length===0 )
+    if ( rules.length === 0 )
       return cb();
 
-    async.mapSeries( rules, executeRule, function ( err, results ) {
-      if( err ) {
+    async.mapSeries( rules, executeRule, function( err, results ) {
+      if ( err ) {
         log.warn( 'Error on triggering platform hooks', err );
         return cb( null, results );
       }
@@ -212,7 +214,7 @@ ControlRuleManager.trigger = function( event, data, callback ) {
   // Function that wraps each function into a 'secure' domain
   // and provides a fresh version of the Task from the DB.
   function executeFunction( hooks, params, cb ) {
-    if( !hooks || !_.isFunction( hooks[ event ] ) ) {
+    if ( !hooks || !_.isFunction( hooks[ event ] ) ) {
       return cb();
     }
 
@@ -220,7 +222,7 @@ ControlRuleManager.trigger = function( event, data, callback ) {
     // Create a domain to wrap the function calls
     var d = domain.create();
     // Catch any strange error, log it and exit.
-    d.on( 'error', function ( err ) {
+    d.on( 'error', function( err ) {
       // Log the error
       log.error( err );
 
@@ -231,20 +233,20 @@ ControlRuleManager.trigger = function( event, data, callback ) {
 
     // Get a fresh Task from the DB
     return retrieveTask( taskId, function( err, task ) {
-      if( err ) {
+      if ( err ) {
         log.warn( 'Error while retrieving the Task', err );
         return cb();
       }
 
       // Check if the task can trigger events.
-      if( task.status==='CREATED' || ( task.status==='CLOSED' && event!=='END_TASK' ) ) {
+      if ( task.status === 'CREATED' || ( task.status === 'CLOSED' && event !== 'END_TASK' ) ) {
         log.warn( 'Task cannot trigger rule/hook, status is %s', task.status );
         return cb();
       }
 
       // Execute the passed function.
       d.bind( fn )( params, task, data, function( err ) {
-        if( err ) {
+        if ( err ) {
           log.warn( 'Error while execution a rule/hook', err );
         }
         // Exit the domain
@@ -266,7 +268,7 @@ ControlRuleManager.trigger = function( event, data, callback ) {
     // Find all platforms with hooks on the triggered event.
     var hooks = _.filter( task.platforms, function( platform ) {
       var platformHooks = platform.implementation.hooks;
-      if( platformHooks )
+      if ( platformHooks )
         return _.isFunction( platform.implementation.hooks[ event ] );
       else
         return false;
@@ -275,11 +277,11 @@ ControlRuleManager.trigger = function( event, data, callback ) {
     log.trace( 'Found %s platforms hooks to run', hooks.length );
 
     // Exit in case of no hooks.
-    if( hooks.length===0 )
+    if ( hooks.length === 0 )
       return cb( null, task );
 
     async.each( hooks, executeHook, function( err ) {
-      if( err ) {
+      if ( err ) {
         log.warn( 'Error on triggering platform hooks', err );
         return cb( null, task );
       }
@@ -291,15 +293,15 @@ ControlRuleManager.trigger = function( event, data, callback ) {
 
   function executeStrategyHook( strategy, cb ) {
     var task = data.task;
-    var strategyData = task[ strategy+'Strategy' ];
+    var strategyData = task[ strategy + 'Strategy' ];
 
     log.trace( 'Execute %s hook: %j', strategy, strategyData );
     // No strategy defined... no problem
-    if( !strategyData )
+    if ( !strategyData )
       return cb();
 
-    var params = task[ strategy+'Strategy' ].params;
-    var implementation = task[ strategy+'StrategyImplementation' ];
+    var params = task[ strategy + 'Strategy' ].params;
+    var implementation = task[ strategy + 'StrategyImplementation' ];
     var hooks = implementation.hooks;
 
     return executeFunction( hooks, params, cb );
@@ -314,7 +316,7 @@ ControlRuleManager.trigger = function( event, data, callback ) {
     ];
 
     async.each( strategies, executeStrategyHook, function( err ) {
-      if( err ) {
+      if ( err ) {
         log.warn( 'Error on triggering strategy hooks', err );
         return cb( null, task );
       }
@@ -327,7 +329,7 @@ ControlRuleManager.trigger = function( event, data, callback ) {
 
   function checkTask( task, cb ) {
     // Check if the task can trigger events.
-    if( task.status==='CREATED' || ( task.closed && event!=='END_TASK' ) ) {
+    if ( task.status === 'CREATED' || ( task.closed && event !== 'END_TASK' ) ) {
       log.warn( 'Task cannot trigger rule/hook, status is %s', task.status );
       return callback();
     }
@@ -346,7 +348,7 @@ ControlRuleManager.trigger = function( event, data, callback ) {
 
   async.waterfall( actions, function( err ) {
     // In case of error log it and exit.
-    if( err )
+    if ( err )
       log.warn( 'Some error occurred during %s', event, err );
 
     log.trace( 'All triggers are triggered' );
