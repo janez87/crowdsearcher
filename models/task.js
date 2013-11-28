@@ -379,7 +379,77 @@ TaskSchema.methods.close = function( callback ) {
 };
 
 
+// Method that return a clone of the task.
+// The object returned is a plan JavaScript object containing the same properties of
+// the original task a part from the microtasks and the metadata.
+// The objects are cloned
+TaskSchema.methods.clone = function( callback ) {
 
+  log.trace( 'Cloning the task %s', this._id );
+
+  var attributes = [ 'name',
+    'description',
+    'controlrules',
+    'operations',
+    'objects',
+    'platforms',
+    'assignmentStrategy',
+    'implementationStrategy',
+    'invitationStrategy',
+    'splittingStrategy',
+    'job'
+  ];
+
+  this
+    .populate( 'platforms objects operations', function( err, task ) {
+      if ( err ) return callback( err );
+
+      var clonedTask = {};
+
+      // Cloning the plain attributes
+      clonedTask = _.pick( task, attributes );
+
+      log.trace( 'Removing the mongo stuff from the rules' );
+
+      for ( var i = 0; i < clonedTask.controlrules.length; i++ ) {
+        log.trace( 'i=%s', i );
+        var rule = clonedTask.controlrules[ i ];
+        clonedTask.controlrules[ i ] = _.pick( rule, [ 'name', 'params' ] );
+      }
+
+
+      log.trace( 'Removing the mongo stuff from the operations' );
+
+      for ( var i = 0; i < clonedTask.operations.length; i++ ) {
+        log.trace( 'i=%s', i );
+        var operation = clonedTask.operations[ i ];
+        clonedTask.operations[ i ] = _.pick( operation, [ 'name', 'params', 'label' ] );
+      }
+
+
+      log.trace( 'Removing the mongo stuff from the platforms' );
+
+      for ( var i = 0; i < clonedTask.platforms.length; i++ ) {
+        log.trace( 'i=%s', i );
+        var platform = clonedTask.platforms[ i ];
+        clonedTask.platforms[ i ] = _.pick( platform, [ 'name', 'params', 'execution', 'enabled', 'invitation' ] );
+      }
+
+      log.trace( 'Removing the mongo stuff from the objects' );
+
+      for ( var i = 0; i < clonedTask.objects.length; i++ ) {
+        log.trace( 'i=%s', i );
+        var object = clonedTask.objects[ i ];
+        clonedTask.objects[ i ] = _.pick( object, 'data' );
+      }
+
+      log.trace( '%j', clonedTask );
+
+      return callback( null, clonedTask );
+
+
+    } );
+};
 
 // ## Object
 //

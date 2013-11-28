@@ -1,17 +1,17 @@
 // Load libraries
-var _  = require('underscore');
+var _ = require( 'underscore' );
 var util = require( 'util' );
 var async = require( 'async' );
 var CS = require( '../core' );
 
 // Import a child Logger
-var log = CS.log.child( { component: 'Test' } );
+var log = CS.log.child( {
+  component: 'Test'
+} );
 
 // Import Models
-var Execution = CS.models.execution;
 var Job = CS.models.job;
 var Task = CS.models.task;
-var Microtask = CS.models.microtask;
 
 // Generate custom error `GetAnswersError` that inherits
 // from `APIError`
@@ -36,9 +36,14 @@ var API = {
 
 
 // API core function logic. If this function is executed then each check is passed.
-API.logic = function ( req, res, next ) {
-  var platforms = [
-    {
+API.logic = function( req, res, next ) {
+
+  var domain = require( 'domain' ).create();
+  domain.on( 'error', function( err ) {
+    return next( err );
+  } );
+
+  var platforms = [ {
       name: 'tef',
       enabled: true,
       invitation: false,
@@ -61,18 +66,16 @@ API.logic = function ( req, res, next ) {
     }
     */
   ];
-  var operations = [
-    {
-      name: 'like',
-      label: 'asderf'
-    },{
-      name: 'classify',
-      label: 'asde',
-      params: {
-        categories: [ 'red', 'green', 'blue' ]
-      }
+  var operations = [ {
+    name: 'like',
+    label: 'asderf'
+  }, {
+    name: 'classify',
+    label: 'asde',
+    params: {
+      categories: [ 'red', 'green', 'blue' ]
     }
-  ];
+  } ];
   var controlrules = [
     /*
     {
@@ -91,16 +94,18 @@ API.logic = function ( req, res, next ) {
     {
       type: 'CUSTOM',
       name: 'closeTaskOnObjectStatus'
-    },
-    {
+    }, {
       type: 'CUSTOM',
       name: 'closeMicroTaskOnObjectStatus'
     }
   ];
-  var objects = [
-    { data: 'Numero: '+Math.random() },
-    { data: 'Numero: '+Math.random() },
-    { data: 'Numero: '+Math.random() },
+  var objects = [ {
+      data: 'Numero: ' + Math.random()
+    }, {
+      data: 'Numero: ' + Math.random()
+    }, {
+      data: 'Numero: ' + Math.random()
+    },
     /*
     { data: 'Numero: '+Math.random() },
     { data: 'Numero: '+Math.random() },
@@ -120,20 +125,20 @@ API.logic = function ( req, res, next ) {
     */
   ];
 
-  /*
+
   var job = new Job( {
     name: 'Test Job',
     description: '# Hello\n## moto\n`var volo="io"`'
   } );
   job.save();
-  */
+
 
   var rawTask = {
     name: 'Test',
     //private: true,
     description: '# Hello\n## description\n`var volo="Io"`',
-    job: '528ccb7bf47136e027000010',
-    //job: job,
+    //job: '528ccb7bf47136e027000010',
+    job: job,
     controlrules: controlrules,
     assignmentStrategy: {
       name: 'RANDOM'
@@ -159,11 +164,15 @@ API.logic = function ( req, res, next ) {
     //_.bind( task.addObjects, task, objects ),
   ];
 
-  async.series( actions, function ( err, results ) {
-    if( err ) return next( err );
+  async.series( actions, function( err, results ) {
+    if ( err ) return next( err );
 
     log.trace( 'Results are: %j', results );
-    res.send( 'ok' );
+    task.clone( domain.bind( function( err, clonedTask ) {
+      if ( err ) return next( err );
+
+      res.send( clonedTask );
+    } ) );
   } );
 };
 
