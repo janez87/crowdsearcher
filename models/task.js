@@ -44,6 +44,13 @@ var TaskSchema = new Schema( {
     },
 
 
+    // Task Type
+    type: {
+      type: String,
+      trim: true
+    },
+
+
     // ### Markdown-enabled fileds that contains text abount the task.
     //
     // The description of the Task.
