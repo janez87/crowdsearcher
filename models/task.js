@@ -663,8 +663,21 @@ TaskSchema.pre( 'remove', function( next ) {
 
   function removeControlMart( callback ) {
     log.debug( 'Removing control mart' );
-    //log.debug( 'All control mart data removed' );
-    return callback();
+
+    var ControlMart = CS.models.controlmart;
+    ControlMart
+      .find()
+      .where( 'task', _this._id )
+      .exec( function( err, rows ) {
+        if ( err ) return callback( err );
+
+        async.each( rows, remove, function( err ) {
+          if ( err ) return callback( err );
+
+          log.debug( 'All control mart data removed' );
+          return callback();
+        } );
+      } );
   }
 
   var actions = [
