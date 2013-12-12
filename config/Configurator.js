@@ -1,10 +1,10 @@
 // Module loading
-var _  = require('underscore');
-var fs  = require('fs');
-var url = require('url');
-var util  = require('util');
+var _ = require( 'underscore' );
+var fs = require( 'fs' );
+var url = require( 'url' );
+var util = require( 'util' );
 var path = require( 'path' );
-var async = require('async');
+var async = require( 'async' );
 var nconf = require( 'nconf' );
 
 
@@ -49,9 +49,10 @@ Configurator.prototype.load = function() {
     _.bind( this.configPassport, this ),
     _.bind( this.configOperations, this ),
     _.bind( this.configPlatforms, this ),
+    _.bind( this.configTaskTypes, this ),
     _.bind( this.configStrategies, this )
   ], function( err, results ) {
-    if( err ) {
+    if ( err ) {
       _this.emit( 'error', err );
     } else {
       _this.emit( 'ready', results );
@@ -69,8 +70,8 @@ Configurator.prototype.configUnderscore = function( callback ) {
   console.log( 'Configuring underscore' );
 
   // underscore string
-  _.str = require('underscore.string');
-  _.mixin(_.str.exports());
+  _.str = require( 'underscore.string' );
+  _.mixin( _.str.exports() );
 
   _.mixin( {
     isError: util.isError
@@ -87,23 +88,23 @@ Configurator.prototype.configNconf = function( callback ) {
     console.log( 'Configuring nconf' );
     // Load configuration with nconf
     nconf.argv()
-    .env()
-    .file( 'user', OVERRIDE_FILE )
-    .file( 'global', CONFIGURATION_FILE );
+      .env()
+      .file( 'user', OVERRIDE_FILE )
+      .file( 'global', CONFIGURATION_FILE );
 
     // Fix external Applicaiton address
     var externalAddress = nconf.get( 'webserver:externalAddress' );
-    if( !_.isString( externalAddress ) ) {
+    if ( !_.isString( externalAddress ) ) {
       externalAddress = _.clone( nconf.get( 'webserver' ) );
       externalAddress.protocol = 'http';
 
-      nconf.set( 'webserver:externalAddress', url.format( externalAddress )+'/' );
+      nconf.set( 'webserver:externalAddress', url.format( externalAddress ) + '/' );
     }
     console.log( 'External address:', nconf.get( 'webserver:externalAddress' ) );
 
 
     return callback();
-  } catch( err ) {
+  } catch ( err ) {
     console.error( 'Nconf configuration error', err );
     return callback( err );
   }
@@ -115,6 +116,7 @@ Configurator.prototype.configLogger = require( './configLogger' );
 Configurator.prototype.configMongo = require( './configMongo' );
 Configurator.prototype.configPassport = require( './configPassport' );
 Configurator.prototype.configOperations = require( './configOperations' );
+Configurator.prototype.configTaskTypes = require( './configTaskTypes' );
 Configurator.prototype.configStrategies = require( './configStrategies' );
 Configurator.prototype.configPlatforms = require( './configPlatforms' );
 

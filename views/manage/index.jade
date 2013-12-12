@@ -4,8 +4,14 @@ block header
   h1 CS manager
 
 block content
-  p Allow to manage the CS entities!!!
+  p: strong Hello #{user.username}!
+  p With the CS manager UI you can see and change the status of your Tasks, see statistics on the active Tasks and many more cool things!!!
   ul
+    h3 Tasks
+    li: a(href="manage/task/wizard") Create Task based on a TaskType.
+    li: a(href="manage/task/new") Create a new Task 
+      span.label.label-warning ADVANCED
+      | .
+    h3 Jobs
     li: a(href="manage/jobs") See list of jobs.
     li: a(href="manage/job/new") Create a new Job.
-    li: a(href="manage/task/new") Create a new Task.

@@ -1,8 +1,19 @@
 extends layout
 
+
+block append libScripts
+  script(src='libs/d3.v3.min.js')
+  script(src='libs/donut-chart-d3.js')
+  script(src='libs/gantt-chart-d3.js')
+  script(src='libs/line-chart-d3.js')
+  script(src='libs/stacked-bar-chart-d3.js')
+  script(src='libs/underscore.js 1.5.2.js')
+
+block append scripts
+  script(src='javascripts/dashboard.js')
+
 block header
   h1 Dashboard
 
 block content
-  hr
-  pre= JSON.stringify( stats, null, 2 )
+  #graphs

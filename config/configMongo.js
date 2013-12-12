@@ -15,7 +15,7 @@ function importModels() {
   var modelList = fs.readdirSync( modelsDir );
   var modelMatch = /^([a-z]\w*)\.js$/i;
 
-  _.each( modelList, function ( modelName ) {
+  _.each( modelList, function( modelName ) {
 
     if ( !modelName.match( modelMatch ) ) {
       log.trace( 'Skip model from file: %s', modelName );
@@ -69,7 +69,7 @@ function configMongo( callback ) {
       // Import models
       var models = importModels();
       CS.models = {};
-      _.each( models, function ( value, key ) {
+      _.each( models, function( value, key ) {
         log.debug( 'Adding model %s', key );
         var model = db.model( key, value );
 

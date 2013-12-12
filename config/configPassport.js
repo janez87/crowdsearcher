@@ -1,8 +1,8 @@
 // Load libraries
-var _  = require('underscore');
+var _ = require( 'underscore' );
 var nconf = require( 'nconf' );
 var passport = require( 'passport' );
-var async = require('async');
+var async = require( 'async' );
 var CS = require( '../core' );
 
 // URL to update the Access Token
@@ -25,13 +25,13 @@ function linkAccountToUser( req, token, tokenSecret, profile, done ) {
 
   // This function is called last to login as the specified user
   var login = function( err, user ) {
-    if( err ) return done( err );
+    if ( err ) return done( err );
 
 
     // Log in the current user
     req.login( user, function( err ) {
       // If the `from` information is already present or is undefined then exit.
-      if( user.hasMetadata( 'from' ) || _.isUndefined( req.session.from ) ) {
+      if ( user.hasMetadata( 'from' ) || _.isUndefined( req.session.from ) ) {
         return done( err, user );
       } else {
         // Add the `from` information to the user.
@@ -45,33 +45,33 @@ function linkAccountToUser( req, token, tokenSecret, profile, done ) {
 
   // Check if the account and/or the user is present and create it
   var checkAccount = function( err, user ) {
-    if( err ) return done( err );
+    if ( err ) return done( err );
 
     log.trace( 'User is logged? %s', req.isAuthenticated() );
 
     var findAccount = function( callback ) {
-      if( !req.isAuthenticated() )
+      if ( !req.isAuthenticated() )
         return callback();
 
       User
-      .findByAccountId(
-        profile.provider,
-        profile.id,
-        req.wrap( function( err, user ) {
-          if( err ) return callback( err );
+        .findByAccountId(
+          profile.provider,
+          profile.id,
+          req.wrap( function( err, user ) {
+            if ( err ) return callback( err );
 
-          if( !user ) return callback();
+            if ( !user ) return callback();
 
-          if( !user._id.equals( req.user._id ) )
-            return callback( new Error( 'Account belongs to another user!' ) );
+            if ( !user._id.equals( req.user._id ) )
+              return callback( new Error( 'Account belongs to another user!' ) );
 
-          return callback();
-        } )
+            return callback();
+          } )
       );
     };
-    var createUser = function( callback ){
+    var createUser = function( callback ) {
 
-      if( !user ) {
+      if ( !user ) {
         // User not present, create one from the account information
         log.trace( 'Creating user from account' );
 
@@ -80,13 +80,13 @@ function linkAccountToUser( req, token, tokenSecret, profile, done ) {
 
         // Save user
         return req.wrap( 'save', user )( callback );
-      }else{
+      } else {
         // User present, go on.
         return callback();
       }
     };
 
-    var addAccount = function(callback){
+    var addAccount = function( callback ) {
 
       // Find the account for the user
       log.trace( 'User: %s', user._id );
@@ -96,9 +96,9 @@ function linkAccountToUser( req, token, tokenSecret, profile, done ) {
         uid: String( profile.id )
       } );
 
-      log.trace( 'Account found? %s', !!account );
+      log.trace( 'Account found? %s', !! account );
 
-      if( !account ) {
+      if ( !account ) {
         // Account not found for the user, add one.
         user.addAccount( profile.provider, profile );
 
@@ -116,16 +116,16 @@ function linkAccountToUser( req, token, tokenSecret, profile, done ) {
       addAccount
     ];
 
-    async.series(actions,function(err){
-      if(err) return login(err);
+    async.series( actions, function( err ) {
+      if ( err ) return login( err );
 
-      log.trace('Operations completed');
+      log.trace( 'Operations completed' );
       return login( null, user );
-    });
+    } );
   };
 
   // Check if user is logged
-  if( !req.isAuthenticated() ) {
+  if ( !req.isAuthenticated() ) {
     // Not logged in, search for a user with the specified account
     log.trace( 'Find %s, %s', profile.provider, profile.id );
     return User.findByAccountId(
@@ -154,31 +154,35 @@ function configPassport( callback ) {
     passport.deserializeUser( function( id, done ) {
       log.trace( 'Deserializing (%s)', id );
       User
-      .findById( id )
-      .exec( function( err, user ) {
-        if( err ) return done( err );
+        .findById( id )
+        .exec( function( err, user ) {
+          if ( err ) return done( err );
 
-        return done( null, user );
-      } );
+          return done( null, user );
+        } );
     } );
 
     // Local
     var localAuthUser = function( req, username, password, done ) {
       log.trace( 'Autenticating with local credentials user %s', username );
       User
-      .findOne()
-      .where( 'username', username )
-      .exec( function( err, user ) {
-        if( err ) return done( err );
+        .findOne()
+        .where( 'username', username )
+        .exec( function( err, user ) {
+          if ( err ) return done( err );
 
-        if( !user )
-          return done( null, false, { message: 'User not found.' } );
+          if ( !user )
+            return done( null, false, {
+              message: 'User not found.'
+            } );
 
-        if( !user.validPass( password ) )
-          return done( null, false, { message: 'Incorrect credentials.' } );
+          if ( !user.validPass( password ) )
+            return done( null, false, {
+              message: 'Incorrect credentials.'
+            } );
 
-        return done( null, user );
-      } );
+          return done( null, user );
+        } );
     };
 
     passport.use( new LocalStrategy( {
@@ -192,12 +196,12 @@ function configPassport( callback ) {
     CS.social = {};
     var socialMap = nconf.get( 'social' );
     _.each( socialMap, function( config, name ) {
-      var packageName = config[ 'package' ] || 'passport-'+name;
+      var packageName = config[ 'package' ] || 'passport-' + name;
       var strategyConfig = config.strategyConfig || {};
       var strategyProperty = config.strategyName || 'Strategy';
 
       strategyConfig = _.defaults( {
-        callbackURL: baseURL+'connect/'+name+'/callback',
+        callbackURL: baseURL + 'connect/' + name + '/callback',
         passReqToCallback: true
       }, strategyConfig );
 
@@ -205,11 +209,11 @@ function configPassport( callback ) {
       passport.use( new Strategy( strategyConfig, linkAccountToUser ) );
 
       // Add the socual network to the CS.
-      CS.social[ name] = config;
+      CS.social[ name ] = config;
     } );
 
     return callback();
-  } catch( err ) {
+  } catch ( err ) {
     console.error( 'Passport configuration error', err );
     return callback( err );
   }

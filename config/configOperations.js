@@ -1,5 +1,5 @@
 // Load libraries
-var _  = require('underscore');
+var _ = require( 'underscore' );
 var nconf = require( 'nconf' );
 var glob = require( 'glob' );
 var CS = require( '../core' );
@@ -28,9 +28,9 @@ function configOperations( callback ) {
 
     // Read all the files inside the `opBaseDir` asynchronusly
     glob( '*', options, function( err, files ) {
-      if( err ) return callback( err );
+      if ( err ) return callback( err );
 
-      if( !files ) return callback();
+      if ( !files ) return callback();
 
       var operations = {};
 
@@ -38,7 +38,7 @@ function configOperations( callback ) {
         //var platform = file.slice( 0, -3 );
         var operation = file;
 
-        file = '../'+opBaseDir + '/' + file;
+        file = '../' + opBaseDir + '/' + file;
         log.trace( 'Loading %s operation', operation );
 
 
@@ -47,9 +47,9 @@ function configOperations( callback ) {
 
       CS.operations = operations;
       return callback();
-    });
+    } );
 
-  } catch( err ) {
+  } catch ( err ) {
     console.error( 'Operations configuration error', err );
     return callback( err );
   }

@@ -10,12 +10,16 @@
   },
 
   "mongo": {
-      "url": "mongodb://localhost/CrowdSearcher",
-      "modelsPath": "models"
+    "url": "mongodb://localhost/CrowdSearcher",
+    "modelsPath": "models"
   },
 
   "rules": {
     "path": "rules"
+  },
+
+  "taskTypes": {
+    "path": "task_types"
   },
 
   "strategies": {

@@ -1,7 +1,7 @@
 // Load libraries
-var _  = require('underscore');
+var _ = require( 'underscore' );
 var nconf = require( 'nconf' );
-var glob = require('glob');
+var glob = require( 'glob' );
 var CS = require( '../core' );
 
 
@@ -29,9 +29,9 @@ function configPlatforms( callback ) {
 
     // Read all the files inside the `platformsBaseDir` asynchronusly
     glob( '*', options, function( err, files ) {
-      if( err ) return callback( err );
+      if ( err ) return callback( err );
 
-      if( !files ) return callback();
+      if ( !files ) return callback();
 
       var platforms = {};
 
@@ -39,7 +39,7 @@ function configPlatforms( callback ) {
         //var platform = file.slice( 0, -3 );
         var platform = file;
 
-        file = '../'+platformsBaseDir + '/' + file;
+        file = '../' + platformsBaseDir + '/' + file;
         log.trace( 'Loading: %s', file );
 
 
@@ -49,9 +49,9 @@ function configPlatforms( callback ) {
       CS.platforms = platforms;
       // files is an array of filenames.
       callback();
-    });
+    } );
 
-  } catch( err ) {
+  } catch ( err ) {
     console.error( 'Operations configuration error', err );
     callback( err );
   }

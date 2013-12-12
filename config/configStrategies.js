@@ -1,9 +1,9 @@
 // Load libraries
-var _  = require('underscore');
+var _ = require( 'underscore' );
 var path = require( 'path' );
 var nconf = require( 'nconf' );
 var async = require( 'async' );
-var glob = require('glob');
+var glob = require( 'glob' );
 var CS = require( '../core' );
 
 
@@ -19,15 +19,15 @@ function configStrategies( callback ) {
       cwd: folder
     };
     glob( '*.js', options, function( err, files ) {
-      if( err ) return cb( err );
+      if ( err ) return cb( err );
 
-      if( !files ) return cb();
+      if ( !files ) return cb();
 
       var requireFolder = path.join( '..', folder );
 
       var mapping = {};
       // Require each retrieved file.
-      _.each( files, function ( file ) {
+      _.each( files, function( file ) {
         // Use the file name without extesion as the key.
         var key = file.slice( 0, -3 );
         // ... and load the file as the value.
@@ -48,12 +48,12 @@ function configStrategies( callback ) {
     var basePath = config.path;
     delete config.path;
 
-    async.map( _.pairs( config ), function ( data, cb ) {
+    async.map( _.pairs( config ), function( data, cb ) {
       var container = data[ 0 ];
       var folder = path.join( basePath, data[ 1 ] );
 
       loadFromFolder( folder, function( err, strategies ) {
-        if( err ) return cb( err );
+        if ( err ) return cb( err );
 
 
         log.trace( '%s have %s strategies in %s: %j', container, _.size( strategies ), folder, strategies );
@@ -68,7 +68,7 @@ function configStrategies( callback ) {
   function loadCustomRules( cb ) {
     var path = nconf.get( 'rules:path' );
     loadFromFolder( path, function( err, mapping ) {
-      if( err ) return cb( err );
+      if ( err ) return cb( err );
 
       // Make the rules public, under the `rules` key.
       CS.rules = mapping;
@@ -81,8 +81,8 @@ function configStrategies( callback ) {
   async.parallel( [
     loadStrategies,
     loadCustomRules
-  ], function ( err ) {
-    if( err ) return callback( err );
+  ], function( err ) {
+    if ( err ) return callback( err );
 
     log.debug( 'Strategy and custom rules loading complete' );
     return callback();

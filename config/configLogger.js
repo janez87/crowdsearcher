@@ -1,9 +1,9 @@
 // Load Libraries
 var path = require( 'path' );
-var fs  = require('fs');
-var _  = require('underscore');
+var fs = require( 'fs' );
+var _ = require( 'underscore' );
 var nconf = require( 'nconf' );
-var Logger = require('bunyan');
+var Logger = require( 'bunyan' );
 var cluster = require( 'cluster' );
 var CS = require( '../core' );
 
@@ -15,7 +15,7 @@ function configLogger( callback ) {
 
     // create dir if missing
     var logPath = path.join( __dirname, '..', loggerConfig.path );
-    if( !fs.existsSync( logPath ) ) {
+    if ( !fs.existsSync( logPath ) ) {
       console.log( 'Creating log folder' );
       fs.mkdirSync( logPath );
     }
@@ -26,9 +26,9 @@ function configLogger( callback ) {
 
       // Do not pollute the config file
       stream = _.clone( stream );
-      if( name==='console' )
+      if ( name === 'console' )
         stream.stream = process.stdout;
-      if( name==='file' ) {
+      if ( name === 'file' ) {
         var filePath = path.join( logPath, stream.filename );
         stream.path = filePath;
       }
@@ -36,8 +36,8 @@ function configLogger( callback ) {
       streams.push( stream );
     } );
     var loggerName = 'CrowdSearcher';
-    if( cluster.isWorker )
-      loggerName += ' Worker '+cluster.worker.id;
+    if ( cluster.isWorker )
+      loggerName += ' Worker ' + cluster.worker.id;
 
     var log = Logger.createLogger( {
       name: loggerName,
@@ -53,7 +53,7 @@ function configLogger( callback ) {
     CS.log = log;
 
     callback();
-  } catch( err ) {
+  } catch ( err ) {
     console.error( 'Logger configuration error', err );
     callback( err );
   }

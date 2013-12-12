@@ -258,6 +258,8 @@ config.once( 'ready', function configReady() {
   app.get( '/manage/job/:id/flows', routes.checkAuth, manager.flows );
   // Tasks
   app.get( '/manage/task/new', routes.checkAuth, manager.newTask );
+  // Wizard
+  app.get( '/manage/task/wizard', routes.checkAuth, manager.wizard );
   //app.post( '/manage/task/new', routes.checkAuth, manager.postTask );
   app.get( '/manage/task/:id', routes.checkAuth, manager.task );
   // Microtasks
@@ -271,6 +273,7 @@ config.once( 'ready', function configReady() {
   // Control Mart
   app.get( '/manage/:entity/:id/controlmart', routes.checkAuth, manager.controlmart );
   app.get( '/manage/:entity/:id/mart', routes.checkAuth, manager.controlmart );
+
 
 
   var accountRedirect = function( req, res ) {

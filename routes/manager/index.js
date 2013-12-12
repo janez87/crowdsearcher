@@ -205,3 +205,17 @@ exports.flows = function( req, res, next ) {
     jobId: req.params.id
   } );
 };
+
+
+// # Wizard
+//
+exports.wizard = function( req, res, next ) {
+  r( baseUrl + 'configuration', function( err, resp, config ) {
+    if ( err ) return next( err );
+
+    res.render( 'manage/wizard', {
+      title: 'Simple Task creation',
+      config: config
+    } );
+  } );
+};
