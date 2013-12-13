@@ -167,9 +167,11 @@ API.logic = function getStats( req, res, next ) {
 
     // Executions
     var executionGroups = _.groupBy( executions, 'status' );
+    executionGroups[ 'CLOSED' ] = executionGroups[ 'CLOSED' ] || [];
+    executionGroups[ 'INVALID' ] = executionGroups[ 'INVALID' ] || [];
     data.executions = executions.length;
-    data.closedExecutions = executionGroups[ 'CLOSED' ] ? executionGroups[ 'CLOSED' ].length : 0;
-    data.invalidExecutions = executionGroups[ 'INVALID' ] ? executionGroups[ 'INVALID' ].length : 0;
+    data.closedExecutions = executionGroups[ 'CLOSED' ].length;
+    data.invalidExecutions = executionGroups[ 'INVALID' ].length;
 
     var executionStat = calcStat( executionGroups[ 'CLOSED' ], 'duration' );
 
