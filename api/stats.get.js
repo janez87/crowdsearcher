@@ -136,7 +136,7 @@ API.logic = function getStats( req, res, next ) {
     data.description = entityObject.description; // Available only for task stats
 
     // Time data
-    data.start = entityObject.openedDate;
+    data.start = entityObject.openedDate || entityObject.createdDate;
     data.end = entityObject.closedDate;
     data.duration = duration( data.start, data.end );
 
@@ -149,17 +149,42 @@ API.logic = function getStats( req, res, next ) {
 
 
     // Platforms
-    var enabledPlatforms;
-    var executionPlatforms;
-    var invitationPlatforms;
+    var enabledPlatforms = [];
+    var executionPlatforms = [];
+    var invitationPlatforms = [];
     _.each( entityObject.platforms, function( platform ) {
-      if ( platform.enabled ) enabledPlatforms++;
-      if ( platform.execution ) executionPlatforms++;
-      if ( platform.invitation ) invitationPlatforms++;
+      if ( platform.enabled ) enabledPlatforms.push( platform );
+      if ( platform.execution ) executionPlatforms.push( platform );
+      if ( platform.invitation ) invitationPlatforms.push( platform );
     } );
-    data.platforms = enabledPlatforms;
-    data.invitationPlatforms = invitationPlatforms;
-    data.executionPlatforms = executionPlatforms;
+    data.platforms = enabledPlatforms.length;
+    data.invitationPlatforms = invitationPlatforms.length;
+    data.executionPlatforms = executionPlatforms.length;
+
+
+
+
+
+    // Executions
+    var executionGroups = _.groupBy( executions, 'status' );
+    data.executions = executions.length;
+    data.closedExecutions = executionGroups[ 'CLOSED' ] ? executionGroups[ 'CLOSED' ].length : 0;
+    data.invalidExecutions = executionGroups[ 'INVALID' ] ? executionGroups[ 'INVALID' ].length : 0;
+
+    var executionStat = calcStat( executionGroups[ 'CLOSED' ], 'duration' );
+
+    var totalDuration = _.reduce( executions, function( m, execution ) {
+      if ( execution.status === 'CLOSED' ) {
+        return m + execution.duration;
+      } else {
+        return m;
+      }
+    }, 0 );
+    data.execution = {
+      duration: totalDuration,
+      avgDuration: executionStat.average,
+      varDuration: executionStat.variance
+    };
 
 
 
@@ -173,23 +198,10 @@ API.logic = function getStats( req, res, next ) {
 
     var performerStat = calcStat( _.values( performerMap ), 'length' );
     data.performer = {
+      avgDuration: data.execution.avgDuration,
+      varDuration: data.execution.varDuration,
       avgExecutions: performerStat.average,
       varExecutions: performerStat.variance
-    };
-
-
-
-    // Executions
-    var executionGroups = _.groupBy( executions, 'status' );
-    data.executions = executions.length;
-    data.closedExecutions = executionGroups[ 'CLOSED' ] ? executionGroups[ 'CLOSED' ].length : 0;
-    data.invalidExecutions = executionGroups[ 'INVALID' ] ? executionGroups[ 'INVALID' ].length : 0;
-
-    var executionStat = calcStat( executionGroups[ 'CLOSED' ], 'duration' );
-
-    data.execution = {
-      avgDuration: executionStat.average,
-      varDuration: executionStat.variance
     };
 
     return data;
@@ -214,19 +226,32 @@ API.logic = function getStats( req, res, next ) {
       var executionsByMicrotask = _.groupBy( executions, function( execution ) {
         return execution.microtask._id;
       } );
-      var closedMicrotasks;
+      var closedMicrotasks = [];
       data.microtaskStats = _.map( entityObject.microtasks, function( microtask ) {
-        if ( microtask.status === 'CLOSED' ) closedMicrotasks++;
-
+        // Replace the id of the objects with the actual objects
         microtask.objects = _.map( microtask.objects, function( objectId ) {
           return objectMap[ objectId ];
         } );
 
+        // Get the list of execution for the current microtask
         var microtaskExecutions = executionsByMicrotask[ microtask._id ];
-        return getBaseData( microtask, microtaskExecutions );
+
+        // Get base data for the microtask
+        var microtaskData = getBaseData( microtask, microtaskExecutions );
+
+        if ( microtask.status === 'CLOSED' ) closedMicrotasks.push( microtaskData );
+        return microtaskData;
       } );
-      // Stats data
-      data.microtask = {};
+      data.closedMicrotasks = closedMicrotasks.length;
+
+      var mTaskDurationStats = calcStat( closedMicrotasks, 'duration' );
+      var mTaskExecutionStats = calcStat( closedMicrotasks, 'executions' );
+      data.microtask = {
+        avgExecutions: mTaskExecutionStats.average,
+        varExecutions: mTaskExecutionStats.variance,
+        avgDuration: mTaskDurationStats.average,
+        varDuration: mTaskDurationStats.variance
+      };
     }
 
 
