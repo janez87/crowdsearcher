@@ -1,6 +1,49 @@
-/* globals d3, baseUrl, _ */
+/* globals baseUrl, _, Highcharts */
 var parts = location.pathname.split( '/' );
 var taskId = parts[ parts.length - 2 ];
+
+var drawNumber = function( label, number ) {
+
+  console.log( number );
+  $( '<div id="number" class="' + label.toLowerCase() + '_number">' ).appendTo( '#graphs' )
+    .highcharts( {
+      title: {
+        text: label
+      },
+      chart: {
+        width: 250,
+        height: 250,
+        style: {
+          'margin-left': 'auto',
+          'margin-right': 'auto'
+        }
+      }
+    }, function( chart ) {
+      chart.renderer.text( 3, 125, 125 )
+        .css( {
+          'font-size': 50,
+          'text-align': 'center'
+        } )
+        .add();
+    } );
+
+  /* var image = new Highcharts.Chart( {
+    chart: {
+      renderTo: 'number',
+      title: {
+        text: 'label'
+      },
+      events: {
+        load: function() {
+          var renderer = this.renderer;
+
+          renderer.text( number, 200, 200 );
+        }
+      }
+    }
+  } );*/
+
+};
 
 var drawPieChart = function( label, sample, status ) {
 
@@ -27,7 +70,7 @@ var drawPieChart = function( label, sample, status ) {
   } );
 
 
-  $( '<div class="donutChart" id="' + label.toLowerCase() + '_donut" >' ).appendTo( '#graphs' )
+  $( '<div class="donutChart" id="' + label.toLowerCase() + '_donut" >' ).appendTo( '#donut' )
     .highcharts( {
       exporting: {
         enabled: false
@@ -102,5 +145,11 @@ $.getJSON( baseUrl + 'api/task/' + taskId + '/stats?raw=true' )
     var microtaskStatuses = [ 'CREATED', 'CLOSED' ];
 
     drawPieChart( 'Microtasks', [ createdMicrotasks, closedMicrotasks ], microtaskStatuses );
+
+    var performers = stats.performers;
+
+    drawNumber( 'Performers', performers );
+
+
 
   } );
