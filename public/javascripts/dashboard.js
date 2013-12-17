@@ -4,9 +4,21 @@ var taskId = parts[ parts.length - 2 ];
 
 var drawPieChart = function( label, sample, status ) {
 
+  var colors = {
+    'CLOSED': '#d9534f',
+    'INVALID': '#f0ad4e',
+    'CREATED': '#5bc0de'
+  };
+
   var data = [];
   for ( var i = 0; i < status.length; i++ ) {
-    data.push( [ status[ i ], sample[ i ] ] );
+    if ( sample[ i ] > 0 ) {
+      data.push( {
+        name: status[ i ],
+        y: sample[ i ],
+        color: colors[ status[ i ] ]
+      } );
+    }
   }
 
   data = data.sort( function( a, b ) {
@@ -19,6 +31,9 @@ var drawPieChart = function( label, sample, status ) {
       exporting: {
         enabled: false
       },
+      credits: {
+        enabled: false
+      },
       chart: {
         plotBackgroundColor: null,
         plotBorderWidth: 0,
@@ -27,11 +42,6 @@ var drawPieChart = function( label, sample, status ) {
         height: 250,
         spacing: [ 0, 0, 0, 0 ]
       },
-      colors: [
-        '#cccccc',
-        '#5cb85c',
-        '#d9534f'
-      ],
       title: {
         text: label,
         align: 'center',
@@ -118,6 +128,19 @@ $.getJSON( baseUrl + 'api/task/' + taskId + '/stats?raw=true' )
 
     drawPieChart( 'Executions', [ createdExecutions, closedExecutions, invalidExecutions ], executionStatuses );
 
+    var objects = stats.objects;
+    var closedObjects = stats.closedObjects;
+    var createdObjects = objects - closedObjects;
+    var objectStatuses = [ 'CREATED', 'CLOSED' ];
+
+    drawPieChart( 'Objects', [ createdObjects, closedObjects ], objectStatuses );
+
+    var microtasks = stats.microtasks;
+    var closedMicrotasks = stats.closedMicrotasks;
+    var createdMicrotasks = microtasks - closedMicrotasks;
+    var microtaskStatuses = [ 'CREATED', 'CLOSED' ];
+
+    drawPieChart( 'Microtasks', [ createdMicrotasks, closedMicrotasks ], microtaskStatuses );
 
     var execList = stats.raw;
     var activeExecutions = [];
