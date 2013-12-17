@@ -1,11 +1,13 @@
 // Load libraries
-var _  = require('underscore');
-var async = require('async');
-var mongo = require('mongoose');
+var _ = require( 'underscore' );
+var async = require( 'async' );
+var mongo = require( 'mongoose' );
 var CS = require( '../core' );
 
 // Create a child logger
-var log = CS.log.child( { component: 'Execution model' } );
+var log = CS.log.child( {
+  component: 'Execution model'
+} );
 
 // Import Mongoose Classes and Objects
 var MongoError = mongo.Error;
@@ -23,106 +25,104 @@ var CRM = require( '../core/CRM' );
 //
 // Mongoose schema for the Execution entity.
 var ExecutionSchema = new Schema( {
-  // ### Status
+    // ### Status
+    //
+    // Current status of the Execution.
+    // The status changes how the Execution behave to some events/requests.
+    status: {
+      type: String,
+      required: true,
+      index: true,
+      uppercase: true,
+      'enum': [
+        // The Execution has been created.
+        'CREATED',
+
+        // The Execution has been closed, it will not accept any `Object` and `Execution`s.
+        // Setting the state to `CLOSED` will trigger the `END_Execution` event and set the `closedDate`
+        // field to the current date.
+        'CLOSED',
+
+        // The Execution has been closed but the results must be considered as invalid.
+        'INVALID'
+      ],
+      'default': 'CREATED'
+    },
+
+    // ### References
+    //
+    // The parent Task of this Execution.
+    task: {
+      required: true,
+      index: true,
+      type: ObjectId,
+      ref: 'task'
+    },
+
+    // The parent Microtask of this Execution.
+    microtask: {
+      required: true,
+      index: true,
+      type: ObjectId,
+      ref: 'microtask'
+    },
+
+    // The Platform of this Execution.
+    platform: {
+      required: true,
+      index: true,
+      type: ObjectId,
+      ref: 'platform'
+    },
+
+    // The Performer of this Execution.
+    performer: {
+      //required: true,
+      index: true,
+      type: ObjectId,
+      ref: 'user'
+    },
+
+
+    // ### Annotations
+    //
+    annotations: {
+      type: [ Annotation ],
+      'default': []
+    },
+
+
+    // ### Time data
+    //
+    // Creation date of the entity. By default it will be the first save of the object.
+    createdDate: {
+      required: true,
+      type: Date,
+      'default': Date.now
+    },
+
+    // Closed date of the entity. Will be available only after **closing** the Execution.
+    closedDate: {
+      type: Date,
+      'default': null
+    },
+
+    // Closed date of the entity. Will be available only after **closing** the Execution.
+    invalidDate: {
+      type: Date,
+      'default': null
+    }
+
+  },
+
+  /// ## Schema options
   //
-  // Current status of the Execution.
-  // The status changes how the Execution behave to some events/requests.
-  status: {
-    type: String,
-    required: true,
-    index: true,
-    uppercase: true,
-    'enum': [
-      // The Execution has been created.
-      'CREATED',
-
-      // The Execution has been closed, it will not accept any `Object` and `Execution`s.
-      // Setting the state to `CLOSED` will trigger the `END_Execution` event and set the `closedDate`
-      // field to the current date.
-      'CLOSED',
-
-      // The Execution has been closed but the results must be considered as invalid.
-      'INVALID'
-    ],
-    'default': 'CREATED'
-  },
-
-  // ### References
-  //
-  // The parent Task of this Execution.
-  task: {
-    required: true,
-    index: true,
-    type: ObjectId,
-    ref: 'task'
-  },
-
-  // The parent Microtask of this Execution.
-  microtask: {
-    required: true,
-    index: true,
-    type: ObjectId,
-    ref: 'microtask'
-  },
-
-  // The Platform of this Execution.
-  platform: {
-    required: true,
-    index: true,
-    type: ObjectId,
-    ref: 'platform'
-  },
-
-  // The Performer of this Execution.
-  performer: {
-    //required: true,
-    index: true,
-    type: ObjectId,
-    ref: 'user'
-  },
-
-
-  // ### Annotations
-  //
-  annotations: {
-    type: [ Annotation ],
-    'default': []
-  },
-
-
-  // ### Time data
-  //
-  // Creation date of the entity. By default it will be the first save of the object.
-  createdDate: {
-    required: true,
-    type: Date,
-    'default': Date.now
-  },
-
-  // Closed date of the entity. Will be available only after **closing** the Execution.
-  closedDate: {
-    type: Date,
-    'default': null
-  },
-
-  // Closed date of the entity. Will be available only after **closing** the Execution.
-  invalidDate: {
-    type: Date,
-    'default': null
-  }
-
-},
-
-/// ## Schema options
-//
-{
-  // Do not allow to add random properties to the model.
-  strict: true,
-  // Disable index check in production.
-  autoIndex: process.env.PRODUCTION? false : true
-} );
-
-
+  {
+    // Do not allow to add random properties to the model.
+    strict: true,
+    // Disable index check in production.
+    autoIndex: process.env.PRODUCTION ? false : true
+  } );
 
 
 
@@ -150,15 +150,15 @@ ExecutionSchema.plugin( require( './plugins/accessKeyPlugin' ) );
 //
 // Boolean indicating if the Execution is created.
 ExecutionSchema.virtual( 'created' ).get( function() {
-  return this.status==='CREATED';
+  return this.status === 'CREATED';
 } );
 // Boolean indicating if the Execution is closed.
 ExecutionSchema.virtual( 'closed' ).get( function() {
-  return this.status==='CLOSED';
+  return this.status === 'CLOSED';
 } );
 // Boolean indicating if the Execution is invalid.
 ExecutionSchema.virtual( 'invalid' ).get( function() {
-  return this.status==='INVALID';
+  return this.status === 'INVALID';
 } );
 // Boolean indicating if the Execution is editable.
 ExecutionSchema.virtual( 'editable' ).get( function() {
@@ -182,13 +182,13 @@ ExecutionSchema.virtual( 'editable' ).get( function() {
 // and a `microtask` containing the current Microtask id and a
 // `execution` key containing the current Execution id.
 ExecutionSchema.methods.fire = function( event, data, callback ) {
-  if( !_.isFunction( callback ) ) {
+  if ( !_.isFunction( callback ) ) {
     callback = data;
     data = {};
   }
   return CRM.trigger( event, _.defaults( {
-    task: this.task._id? this.task._id : this.task,
-    microtask: this.microtask._id? this.microtask._id : this.microtask,
+    task: this.task._id ? this.task._id : this.task,
+    microtask: this.microtask._id ? this.microtask._id : this.microtask,
     execution: this._id
   }, data ), callback );
 };
@@ -199,8 +199,8 @@ ExecutionSchema.methods.close = function( callback ) {
   var _this = this;
 
   // Skip if not editable.
-  if( !this.editable )
-    return callback( new MongoError( 'Execution not editable, status is '+this.status ) );
+  if ( !this.editable )
+    return callback( new MongoError( 'Execution not editable, status is ' + this.status ) );
 
   log.debug( 'Closing execution', this._id );
 
@@ -208,7 +208,7 @@ ExecutionSchema.methods.close = function( callback ) {
   this.set( 'closedDate', Date.now() );
 
   this.save( function( err ) {
-    if( err ) return callback( err );
+    if ( err ) return callback( err );
 
     _this.fire( 'END_EXECUTION', callback );
   } );
@@ -218,7 +218,7 @@ ExecutionSchema.methods.close = function( callback ) {
 // status field to `INVALID`.
 ExecutionSchema.methods.makeInvalid = function( callback ) {
   // Skip if already `invalid`.
-  if( this.invalid )
+  if ( this.invalid )
     return callback( new MongoError( 'The Execution is already invalid' ) );
 
   log.debug( 'Invalidating execution', this._id );
@@ -227,7 +227,7 @@ ExecutionSchema.methods.makeInvalid = function( callback ) {
   this.set( 'invalidDate', Date.now() );
 
   this.save( function( err ) {
-    if( err ) return callback( err );
+    if ( err ) return callback( err );
 
     return callback();
   } );
@@ -239,13 +239,13 @@ ExecutionSchema.methods.makeInvalid = function( callback ) {
 ExecutionSchema.methods.createAnnotations = function( responses, callback ) {
   var populated = this.populated( 'microtask' );
 
-  if( _.isUndefined( populated ) ) {
+  if ( _.isUndefined( populated ) ) {
     return this
-    .populate( 'microtask', function( err, execution ) {
-      if( err ) return callback( err );
+      .populate( 'microtask', function( err, execution ) {
+        if ( err ) return callback( err );
 
-      return execution.createAnnotations( responses, callback );
-    } );
+        return execution.createAnnotations( responses, callback );
+      } );
   }
 
   var _this = this;
@@ -255,12 +255,12 @@ ExecutionSchema.methods.createAnnotations = function( responses, callback ) {
     var operationId = response.operation;
 
     microtask.getOperationById( operationId, function( err, operation ) {
-      if( err ) return cb( err );
+      if ( err ) return cb( err );
 
       var implementation = operation.implementation;
-      if( implementation && implementation.create ) {
+      if ( implementation && implementation.create ) {
         return implementation.create( response, operation, function( err, annotations ) {
-          if( err ) return cb( err );
+          if ( err ) return cb( err );
 
           // Add the annotations to the execution object.
           _this.annotations.push.apply( _this.annotations, annotations );

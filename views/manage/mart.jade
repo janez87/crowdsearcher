@@ -17,7 +17,6 @@ block append css
       table-layout: fixed;
       .link-column
         text-align center
-        width 7%
         overflow: hidden
         text-overflow: ellipsis
 
@@ -40,8 +39,8 @@ block content
       th(title='Platform').link-column Platform
       th(title='Performer').link-column Performer
       th(title='Object').link-column Object
-      th(title='Name') Name
-      th(title='Data') Data
+      th(title='Name',width='25%') Name
+      th(title='Data',width='25%') Data
     tbody
       if mart && mart.length>0
         each row in mart

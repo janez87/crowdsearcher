@@ -165,7 +165,7 @@ API.logic = function getStats( req, res, next ) {
 
 
 
-    // Executions
+    // executionStat
     var executionGroups = _.groupBy( executions, 'status' );
     executionGroups[ 'CLOSED' ] = executionGroups[ 'CLOSED' ] || [];
     executionGroups[ 'INVALID' ] = executionGroups[ 'INVALID' ] || [];
@@ -177,11 +177,11 @@ API.logic = function getStats( req, res, next ) {
 
     var totalDuration = _.reduce( executions, function( m, execution ) {
       if ( execution.status === 'CLOSED' ) {
-        return m + execution.duration;
+        return m ? m : 0 + execution.duration;
       } else {
         return m;
       }
-    }, 0 );
+    }, null );
     data.execution = {
       duration: totalDuration,
       avgDuration: executionStat.average,
@@ -236,7 +236,7 @@ API.logic = function getStats( req, res, next ) {
         } );
 
         // Get the list of execution for the current microtask
-        var microtaskExecutions = executionsByMicrotask[ microtask._id ];
+        var microtaskExecutions = executionsByMicrotask[ microtask._id ] || [];
 
         // Get base data for the microtask
         var microtaskData = getBaseData( microtask, microtaskExecutions );
