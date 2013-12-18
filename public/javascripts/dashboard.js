@@ -1,18 +1,22 @@
 /* globals d3, baseUrl, _ */
 var parts = location.pathname.split( '/' );
-var taskId = parts[ parts.length - 2 ];
+var entity = parts[ parts.length - 3 ];
+var entityId = parts[ parts.length - 2 ];
 
-var drawPieChart = function( label, sample, status ) {
+var colors = {
+  'CLOSED': '#5cb85c',
+  'INVALID': '#d9534f',
+  'CREATED': 'lightgray'
+};
 
-  var colors = {
-    'CLOSED': '#d9534f',
-    'INVALID': '#f0ad4e',
-    'CREATED': '#5bc0de'
-  };
+var drawPieChart = function( label, sample, status, selector ) {
+
+  var total = 0;
 
   var data = [];
   for ( var i = 0; i < status.length; i++ ) {
     if ( sample[ i ] > 0 ) {
+      total += sample[ i ];
       data.push( {
         name: status[ i ],
         y: sample[ i ],
@@ -26,67 +30,134 @@ var drawPieChart = function( label, sample, status ) {
   } );
 
 
-  $( '<div class="donutChart" id="' + label.toLowerCase() + '_donut" >' ).appendTo( '#graphs' )
-    .highcharts( {
-      exporting: {
-        enabled: false
-      },
-      credits: {
-        enabled: false
-      },
-      chart: {
-        plotBackgroundColor: null,
-        plotBorderWidth: 0,
-        plotShadow: false,
-        width: 300,
-        height: 250,
-        spacing: [ 0, 0, 0, 0 ]
-      },
-      title: {
-        text: label,
-        align: 'center',
-        verticalAlign: 'middle',
-        y: 25
-      },
-      plotOptions: {
-        pie: {
-          dataLabels: {
-            enabled: true,
-            distance: -15,
-            formatter: function() {
-              return this.point.y;
-            },
-            style: {
-              fontWeight: 'bold',
-              color: 'white',
-              textShadow: '0px 1px 2px black',
-            }
+  $( selector ).highcharts( {
+    credits: {
+      enabled: false
+    },
+    chart: {
+      height: 250,
+      spacing: [ 0, 0, 0, 0 ]
+    },
+    title: {
+      text: '<b>' + total + '</b><br>' + label,
+      align: 'center',
+      verticalAlign: 'middle',
+      y: 25
+    },
+    plotOptions: {
+      pie: {
+        dataLabels: {
+          distance: -22,
+          formatter: function() {
+            return this.y;
           },
-          startAngle: -90,
-          endAngle: 90,
-          center: [ '50%', '75%' ]
-        }
-      },
-      series: [ {
-        type: 'pie',
-        name: label,
-        innerSize: '70%',
-        data: data
-      } ]
-    } );
+          style: {
+            fontWeight: 'bold',
+            color: 'white',
+            textShadow: '0px 1px 2px black',
+          }
+        },
+        startAngle: -90,
+        endAngle: 90,
+        center: [ '50%', '72%' ]
+      }
+    },
+    series: [ {
+      type: 'pie',
+      name: label,
+      innerSize: '70%',
+      data: data
+    } ]
+  } );
 
 };
 
 
 
-function drawLineChart( activeExecutions, activeObjects ) {
-  $( '#other' ).highcharts( {
+function drawPerformers( performers ) {
+  var ids = $.map( performers, function( p ) {
+    return p.id;
+  } );
+
+  var created = $.map( performers, function( p ) {
+    return p.executions - p.invalidExecutions - p.closedExecutions;
+  } );
+  var closed = $.map( performers, function( p ) {
+    return p.closedExecutions;
+  } );
+  var invalid = $.map( performers, function( p ) {
+    return p.invalidExecutions;
+  } );
+  $( '#performers' ).highcharts( {
     chart: {
-      zoomType: 'x',
-      type: 'spline'
+      type: 'column'
+    },
+    credits: {
+      enabled: false
     },
     title: {
-      text: 'Executions'
+      text: 'Top 15 performers'
+    },
+    xAxis: {
+      categories: ids,
+      labels: {
+        overflow: 'justify',
+        //rotation: -90,
+        formatter: function() {
+          return '<span title="' + this.value + '">' + this.value.slice( 0, 10 ) + '...</span>';
+        }
+      }
+    },
+    yAxis: {
+      min: 0,
+      title: {
+        text: 'Total number of executions'
+      },
+      stackLabels: {
+        enabled: true,
+        style: {
+          fontWeight: 'bold'
+        }
+      }
+    },
+    plotOptions: {
+      column: {
+        stacking: 'normal',
+        dataLabels: {
+          enabled: true,
+          formatter: function() {
+            return ( this.y > 0 ) ? this.y : '';
+          }
+        }
+      }
+    },
+    series: [ {
+      name: 'Created',
+      data: created,
+      color: colors[ 'CREATED' ]
+    }, {
+      name: 'Closed',
+      data: closed,
+      color: colors[ 'CLOSED' ]
+    }, {
+      name: 'Invalid',
+      data: invalid,
+      color: colors[ 'INVALID' ]
+    } ]
+  } );
+}
+
+function drawActiveVsClosed( activeExecutions, closedObjects ) {
+
+  $( '#executions' ).highcharts( {
+    chart: {
+      zoomType: 'x'
+    },
+    credits: {
+      enabled: false
+    },
+    title: {
+      text: 'Active executions and closed objects'
     },
     xAxis: {
       type: 'datetime'
@@ -95,55 +166,72 @@ function drawLineChart( activeExecutions, activeObjects ) {
       title: {
         text: 'Active executions (#)'
       },
-      tickInterval: 1,
+      //tickInterval: 1,
       min: 0
     }, {
       title: {
-        text: 'Active objects (#)'
+        text: 'Closed objects (#)'
       },
-      tickInterval: 1,
+      //tickInterval: 1,
       opposite: true,
+      gridLineWidth: 0,
       min: 0
     } ],
     series: [ {
       name: 'Active executions',
       data: activeExecutions,
-      yaxis: 0
+      type: 'area',
+      marker: {
+        enabled: false
+      },
+      //color: '#AA4643',
+      zIndex: 1,
+      yAxis: 0
     }, {
-      name: 'Active objects',
-      data: activeObjects,
-      yaxis: 1
+      name: 'Closed objects',
+      data: closedObjects,
+      type: 'area',
+      marker: {
+        enabled: false
+      },
+      color: colors[ 'CLOSED' ],
+      zIndex: 0,
+      yAxis: 1
     } ]
   } );
 }
 
-$.getJSON( baseUrl + 'api/task/' + taskId + '/stats?raw=true' )
+$.getJSON( baseUrl + 'api/' + entity + '/' + entityId + '/stats?raw=true' )
   .done( function( stats ) {
+    var val;
 
+    // #############
+    // DONUTS
     var executions = stats.executions;
     var closedExecutions = stats.closedExecutions;
     var invalidExecutions = stats.invalidExecutions;
     var createdExecutions = executions - closedExecutions - invalidExecutions;
     var executionStatuses = [ 'CREATED', 'CLOSED', 'INVALID' ];
-
-    drawPieChart( 'Executions', [ createdExecutions, closedExecutions, invalidExecutions ], executionStatuses );
+    drawPieChart( 'Executions', [ createdExecutions, closedExecutions, invalidExecutions ], executionStatuses, '#donut-executions' );
 
     var objects = stats.objects;
     var closedObjects = stats.closedObjects;
     var createdObjects = objects - closedObjects;
     var objectStatuses = [ 'CREATED', 'CLOSED' ];
 
-    drawPieChart( 'Objects', [ createdObjects, closedObjects ], objectStatuses );
+    drawPieChart( 'Objects', [ createdObjects, closedObjects ], objectStatuses, '#donut-objects' );
 
     var microtasks = stats.microtasks;
     var closedMicrotasks = stats.closedMicrotasks;
     var createdMicrotasks = microtasks - closedMicrotasks;
     var microtaskStatuses = [ 'CREATED', 'CLOSED' ];
 
-    drawPieChart( 'Microtasks', [ createdMicrotasks, closedMicrotasks ], microtaskStatuses );
+    drawPieChart( 'Microtasks', [ createdMicrotasks, closedMicrotasks ], microtaskStatuses, '#donut-microtasks' );
 
-    var execList = stats.raw;
+    var execList = stats.raw.executions;
+    var entityObject = stats.raw.entity;
     var activeExecutions = [];
+    var closedObjectList = [];
 
     function toUTC( dateString ) {
       var date = new Date( dateString );
@@ -151,17 +239,24 @@ $.getJSON( baseUrl + 'api/task/' + taskId + '/stats?raw=true' )
       //return date;
     }
 
+
+
+    // #############
+    // EXECUTIONS
+    val = 0;
     $.each( execList, function() {
       var exec = this;
       activeExecutions.push( {
         date: toUTC( exec.createdDate ),
-        value: 1
+        value: 1,
+        perf: exec.performer
       } );
 
       if ( exec.status !== 'CREATED' ) {
         activeExecutions.push( {
           date: toUTC( exec.closedDate || exec.invalidDate ),
-          value: -1
+          value: -1,
+          perf: exec.performer
         } );
       }
 
@@ -170,19 +265,52 @@ $.getJSON( baseUrl + 'api/task/' + taskId + '/stats?raw=true' )
     activeExecutions.sort( function( a, b ) {
       return a.date - b.date;
     } );
-
-    var val = 0;
     activeExecutions = $.map( activeExecutions, function( exec ) {
       val += exec.value;
+
       return {
         x: exec.date,
-        y: val,
-        marker: {
-          enabled: false
-        }
+        y: val
       };
     } );
 
-    var activeObjects = [];
-    drawLineChart( activeExecutions, activeObjects );
+
+    // #############
+    // OBJECTS
+    val = 0;
+    closedObjectList = $.map( entityObject.objects, function( object ) {
+      if ( object.status === 'CLOSED' ) {
+        return {
+          x: toUTC( object.closedDate )
+        };
+      }
+      return undefined;
+    } );
+
+    closedObjectList.sort( function( a, b ) {
+      return a.x - b.x;
+    } );
+    closedObjectList = $.map( closedObjectList, function( object, i ) {
+      object.y = i + 1;
+      return object;
+    } );
+
+    drawActiveVsClosed( activeExecutions, closedObjectList );
+
+
+
+    // #############
+    // PERFORMERS
+    val = 0;
+    // Sort performers
+    var performers = stats.performerStats;
+    performers.sort( function( a, b ) {
+      return a.executions - b.executions;
+    } ).reverse();
+    var topPerformers = performers.slice( 0, 15 );
+
+    drawPerformers( topPerformers );
+
+
+
   } );

@@ -52,6 +52,21 @@ API.logic = function getStats( req, res, next ) {
 
   log.trace( 'Stats for %s with id %s', entity, entityId );
 
+  function convertStatus( status ) {
+    if ( status === 0 )
+      return 'CREATED';
+    else if ( status === 10 )
+      return 'OPENED';
+    else if ( status === 20 )
+      return 'FINALIZED';
+    else if ( status === 30 )
+      return 'WAIT';
+    else if ( status === 40 )
+      return 'SUSPENDED';
+    else if ( status === 50 )
+      return 'CLOSED';
+  }
+
   function getEntity( callback ) {
     if ( entity !== 'task' && entity !== 'microtask' )
       return callback( new GetStatsError( GetStatsError.BAD_ENTITY, 'The entity "' + entity + '" cannot have stats' ) );
@@ -70,6 +85,22 @@ API.logic = function getStats( req, res, next ) {
 
         if ( !entityObject )
           return callback( new GetStatsError( GetStatsError.NO_ENTITY, 'No entity with id ' + entityId ) );
+
+        // -- BEGIN BACK COMPATIBILITY
+        if ( entityObject.creationDate ) {
+
+          if ( entityObject.creationDate )
+            entityObject.createdDate = entityObject.creationDate;
+
+          entityObject.status = convertStatus( entityObject.status );
+
+          // Fix objects
+          entityObject.objects = _.map( entityObject.objects, function( object ) {
+            object.status = convertStatus( object.status );
+            return object;
+          } );
+        }
+        // -- END BACK COMPATIBILITY
 
         return callback( null, entityObject );
       } );
@@ -90,17 +121,42 @@ API.logic = function getStats( req, res, next ) {
         _.each( executions, function( execution ) {
           var endDate = execution.closedDate || execution.invalidDate;
 
-          // -- BEGIN BACK COMPATIBILITY
-          if ( execution.creationDate )
-            execution.createdDate = execution.creationDate;
 
+
+          // -- BEGIN BACK COMPATIBILITY
           if ( _.isUndefined( execution.status ) ) {
             execution.status = 'CREATED';
 
+            if ( execution.creationDate )
+              execution.createdDate = execution.creationDate;
+
+            // Find worker
+            var worker = _.find( execution.metadata, function( data ) {
+              return data.key === 'worker';
+            } );
+
+            if ( worker ) {
+              execution.performer = {
+                _id: worker.value
+              };
+            }
+
             if ( execution.closed )
               execution.status = 'CLOSED';
+
+            execution.microtasks = _.map( execution.microtasks, function( microtask ) {
+              microtask.status = convertStatus( microtask.status );
+              return microtask;
+            } );
           }
           // -- END BACK COMPATIBILITY
+
+
+          if ( !execution.performer ) {
+            execution.performer = {
+              _id: 'guest'
+            };
+          }
 
 
           if ( execution.status !== 'CREATED' && endDate ) {
@@ -212,13 +268,53 @@ API.logic = function getStats( req, res, next ) {
     data.performers = _.size( performerMap );
 
 
-    var performerStat = calcStat( _.values( performerMap ), 'length' );
-    data.performer = {
-      avgDuration: data.execution.avgDuration,
-      varDuration: data.execution.varDuration,
-      avgExecutions: performerStat.average,
-      varExecutions: performerStat.variance
-    };
+    // If i have only anonymous performers then dont calculate stats
+    if ( data.performers === 1 && performerMap[ 'guest' ] ) {
+      delete data.performers;
+    } else {
+      var performerStat = calcStat( _.values( performerMap ), 'length' );
+      data.performer = {
+        avgDuration: data.execution.avgDuration,
+        varDuration: data.execution.varDuration,
+        avgExecutions: performerStat.average,
+        varExecutions: performerStat.variance
+      };
+
+      data.performerStats = _.map( performerMap, function( executions, performerId ) {
+        var performerStat = {};
+        // General info
+        performerStat.id = performerId;
+
+        // Execution stats
+        var executionByStatus = _.groupBy( executions, 'status' );
+        executionByStatus[ 'CLOSED' ] = executionByStatus[ 'CLOSED' ] || [];
+        executionByStatus[ 'INVALID' ] = executionByStatus[ 'INVALID' ] || [];
+        performerStat.executions = executions.length;
+        performerStat.closedExecutions = executionByStatus[ 'CLOSED' ].length;
+        performerStat.invalidExecutions = executionByStatus[ 'INVALID' ].length;
+
+        var executionStat = calcStat( executionByStatus[ 'CLOSED' ], 'duration' );
+
+        performerStat.avgDuration = executionStat.average;
+        performerStat.varDuration = executionStat.variance;
+
+
+        // Microtask stats
+        var microtaskById = _.groupBy( executions, function( microtask ) {
+          return microtask._id;
+        } );
+        performerStat.microtasks = _.size( microtaskById );
+        var microtaskStat = calcStat( _.values( microtaskById ), 'length' );
+        performerStat.microtask = {
+          avgExecutions: microtaskStat.average,
+          varExecutions: microtaskStat.variance
+        };
+
+        return performerStat;
+      } );
+    }
+
+
 
     return data;
   }
@@ -272,7 +368,10 @@ API.logic = function getStats( req, res, next ) {
 
 
     if ( raw )
-      data.raw = executions;
+      data.raw = {
+        entity: entityObject,
+        executions: executions
+      };
 
     return callback( null, data );
   }

@@ -4,15 +4,41 @@ block append css
   link(rel='stylesheet', href='stylesheets/dashboard.css')
 
 block append libScripts
-  //script(src='libs/underscore.js 1.5.2.js')
   script(src='libs/highcharts.js')
 
 block append scripts
   script(src='javascripts/dashboard.js')
 
 block header
-  h1 Dashboard
+  .row
+    .col-md-6
+      h1 Dashboard 
+        small= stats.name
+
+    .col-md-6.text-right
+      code= stats.id
+      p
+      .btn-group
+        if stats.name
+          a.btn.btn-sm.btn-default(href='manage/task/'+stats.id)
+            i.fa.fa-folder-open
+            |  Task
+        else
+          a.btn.btn-sm.btn-default(href='manage/microtask/'+stats.id)
+            i.fa.fa-folder-open
+            |  Microtask
+      
 
 block content
-  #graphs
-  #other
+  
+  .row
+    #donut-executions.col-md-3
+    #donut-objects.col-md-3
+    #donut-microtasks.col-md-3
+    #donut-performers.col-md-3
+  
+  .row
+    #executions.col-md-12
+  
+  .row
+    #performers.col-md-12
