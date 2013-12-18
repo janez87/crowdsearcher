@@ -1,78 +1,14 @@
-/* globals d3, baseUrl, _ */
+/* globals baseUrl */
 var parts = location.pathname.split( '/' );
 var entity = parts[ parts.length - 3 ];
 var entityId = parts[ parts.length - 2 ];
+
 
 var colors = {
   'CLOSED': '#5cb85c',
   'INVALID': '#d9534f',
   'CREATED': 'lightgray'
 };
-
-var drawPieChart = function( label, sample, status, selector ) {
-
-  var total = 0;
-
-  var data = [];
-  for ( var i = 0; i < status.length; i++ ) {
-    if ( sample[ i ] > 0 ) {
-      total += sample[ i ];
-      data.push( {
-        name: status[ i ],
-        y: sample[ i ],
-        color: colors[ status[ i ] ]
-      } );
-    }
-  }
-
-  data = data.sort( function( a, b ) {
-    return a[ 0 ] - b[ 0 ];
-  } );
-
-
-  $( selector ).highcharts( {
-    credits: {
-      enabled: false
-    },
-    chart: {
-      height: 250,
-      spacing: [ 0, 0, 0, 0 ]
-    },
-    title: {
-      text: '<b>' + total + '</b><br>' + label,
-      align: 'center',
-      verticalAlign: 'middle',
-      y: 25
-    },
-    plotOptions: {
-      pie: {
-        dataLabels: {
-          distance: -22,
-          formatter: function() {
-            return this.y;
-          },
-          style: {
-            fontWeight: 'bold',
-            color: 'white',
-            textShadow: '0px 1px 2px black',
-          }
-        },
-        startAngle: -90,
-        endAngle: 90,
-        center: [ '50%', '72%' ]
-      }
-    },
-    series: [ {
-      type: 'pie',
-      name: label,
-      innerSize: '70%',
-      data: data
-    } ]
-  } );
-
-};
-
-
 
 function drawPerformers( performers ) {
   var ids = $.map( performers, function( p ) {
@@ -201,6 +137,75 @@ function drawActiveVsClosed( activeExecutions, closedObjects ) {
   } );
 }
 
+
+var drawPieChart = function( label, sample, status, selector ) {
+  var total = 0;
+  var data = [];
+  for ( var i = 0; i < status.length; i++ ) {
+    if ( sample[ i ] > 0 ) {
+      total += sample[ i ];
+      data.push( {
+        name: status[ i ],
+        y: sample[ i ],
+        color: colors[ status[ i ] ]
+      } );
+    }
+  }
+
+  data = data.sort( function( a, b ) {
+    return a[ 0 ] - b[ 0 ];
+  } );
+
+
+  $( selector ).highcharts( {
+    credits: {
+      enabled: false
+    },
+    chart: {
+      height: 250,
+      spacing: [ 0, 0, 0, 0 ]
+    },
+    title: {
+      text: label,
+    },
+    subtitle: {
+      text: total,
+      verticalAlign: 'middle',
+      floating: true,
+      y: 50,
+      style: {
+        fontWeight: 'bold',
+        fontSize: '20px'
+      }
+    },
+    plotOptions: {
+      pie: {
+        dataLabels: {
+          distance: -18,
+          formatter: function() {
+            return this.y;
+          },
+          style: {
+            fontWeight: 'bold',
+            color: 'white',
+            textShadow: '0px 1px 2px black',
+          }
+        },
+        startAngle: -90,
+        endAngle: 90,
+        center: [ '50%', '72%' ]
+      }
+    },
+    series: [ {
+      type: 'pie',
+      name: label,
+      innerSize: '70%',
+      data: data
+    } ]
+  } );
+};
+
+
 $.getJSON( baseUrl + 'api/' + entity + '/' + entityId + '/stats?raw=true' )
   .done( function( stats ) {
     var val;
@@ -230,6 +235,14 @@ $.getJSON( baseUrl + 'api/' + entity + '/' + entityId + '/stats?raw=true' )
 
     var execList = stats.raw.executions;
     var entityObject = stats.raw.entity;
+    var performers = stats.performers;
+
+    drawPieChart( 'Performers', [ performers ], [ 'CREATED' ], '#donut-performers' );
+
+
+
+
+    var execList = stats.raw.executions;
     var activeExecutions = [];
     var closedObjectList = [];
 
@@ -274,7 +287,6 @@ $.getJSON( baseUrl + 'api/' + entity + '/' + entityId + '/stats?raw=true' )
       };
     } );
 
-
     // #############
     // OBJECTS
     val = 0;
@@ -310,7 +322,5 @@ $.getJSON( baseUrl + 'api/' + entity + '/' + entityId + '/stats?raw=true' )
     var topPerformers = performers.slice( 0, 15 );
 
     drawPerformers( topPerformers );
-
-
 
   } );
