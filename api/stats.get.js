@@ -89,6 +89,20 @@ API.logic = function getStats( req, res, next ) {
 
         _.each( executions, function( execution ) {
           var endDate = execution.closedDate || execution.invalidDate;
+
+          // -- BEGIN BACK COMPATIBILITY
+          if ( execution.creationDate )
+            execution.createdDate = execution.creationDate;
+
+          if ( _.isUndefined( execution.status ) ) {
+            execution.status = 'CREATED';
+
+            if ( execution.closed )
+              execution.status = 'CLOSED';
+          }
+          // -- END BACK COMPATIBILITY
+
+
           if ( execution.status !== 'CREATED' && endDate ) {
             // Difference in milliseconds
             execution.duration = endDate - execution.createdDate;

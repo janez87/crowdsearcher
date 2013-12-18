@@ -5,43 +5,56 @@ var taskId = parts[ parts.length - 2 ];
 var drawNumber = function( label, number ) {
 
   console.log( number );
-  $( '<div id="number" class="' + label.toLowerCase() + '_number">' ).appendTo( '#graphs' )
+  $( '<div id="number" class="' + label.toLowerCase() + '_number">' ).appendTo( '#performers' )
     .highcharts( {
+      credits: {
+        enabled: false
+      },
       title: {
         text: label
       },
       chart: {
-        width: 250,
         height: 250,
+        width: 250,
         style: {
           'margin-left': 'auto',
-          'margin-right': 'auto'
+          'margin-right': 'auto',
         }
       }
     }, function( chart ) {
-      chart.renderer.text( 3, 125, 125 )
-        .css( {
-          'font-size': 50,
-          'text-align': 'center'
-        } )
-        .add();
-    } );
+      var textX = chart.plotLeft + ( chart.plotWidth * 0.5 );
+      var textY = chart.plotTop + ( chart.plotHeight * 0.5 );
+      if ( !_.isUndefined( number ) ) {
+        var text = chart.renderer.text( number, textX, textY )
+          .css( {
+            'font-size': 60,
+            'text-align': 'center',
+            'margin-left': 'auto',
+            'margin-right': 'auto',
+            'vertical-align': 'middle',
+            'floating': true
+          } )
+          .add();
 
-  /* var image = new Highcharts.Chart( {
-    chart: {
-      renderTo: 'number',
-      title: {
-        text: 'label'
-      },
-      events: {
-        load: function() {
-          var renderer = this.renderer;
+        text.attr( {
+          transform: 'translate(' + ( -text.element.clientWidth * 0.5 ) + ',' + 0 + ')'
+        } );
+      } else {
+        var text = chart.renderer.text( 'Undefined', textX, textY )
+          .css( {
+            'font-size': 30,
+            'text-align': 'center',
+            'margin-left': 'auto',
+            'margin-right': 'auto',
 
-          renderer.text( number, 200, 200 );
-        }
+          } )
+          .add();
+
+        text.attr( {
+          transform: 'translate(' + ( -text.element.clientWidth * 0.5 ) + ',' + 0 + ')'
+        } );
       }
-    }
-  } );*/
+    } );
 
 };
 
@@ -64,9 +77,8 @@ var drawPieChart = function( label, sample, status ) {
     }
   }
 
-
-  data = _.sortBy( data, function( d ) {
-    return d.name;
+  data = data.sort( function( a, b ) {
+    return a[ 0 ] - b[ 0 ];
   } );
 
 
@@ -121,6 +133,46 @@ var drawPieChart = function( label, sample, status ) {
 
 };
 
+
+
+function drawLineChart( activeExecutions, activeObjects ) {
+  $( '#other' ).highcharts( {
+    chart: {
+      zoomType: 'x',
+      type: 'spline'
+    },
+    title: {
+      text: 'Executions'
+    },
+    xAxis: {
+      type: 'datetime'
+    },
+    yAxis: [ {
+      title: {
+        text: 'Active executions (#)'
+      },
+      tickInterval: 1,
+      min: 0
+    }, {
+      title: {
+        text: 'Active objects (#)'
+      },
+      tickInterval: 1,
+      opposite: true,
+      min: 0
+    } ],
+    series: [ {
+      name: 'Active executions',
+      data: activeExecutions,
+      yaxis: 0
+    }, {
+      name: 'Active objects',
+      data: activeObjects,
+      yaxis: 1
+    } ]
+  } );
+}
+
 $.getJSON( baseUrl + 'api/task/' + taskId + '/stats?raw=true' )
   .done( function( stats ) {
 
@@ -152,4 +204,49 @@ $.getJSON( baseUrl + 'api/task/' + taskId + '/stats?raw=true' )
 
 
 
+
+    var execList = stats.raw;
+    var activeExecutions = [];
+
+    function toUTC( dateString ) {
+      var date = new Date( dateString );
+      return Date.UTC( date.getUTCFullYear(), date.getUTCMonth() - 1, date.getUTCDate(), date.getUTCHours(), date.getUTCMinutes(), date.getUTCSeconds(), date.getUTCMilliseconds() );
+      //return date;
+    }
+
+    $.each( execList, function() {
+      var exec = this;
+      activeExecutions.push( {
+        date: toUTC( exec.createdDate ),
+        value: 1
+      } );
+
+      if ( exec.status !== 'CREATED' ) {
+        activeExecutions.push( {
+          date: toUTC( exec.closedDate || exec.invalidDate ),
+          value: -1
+        } );
+      }
+
+    } );
+
+    activeExecutions.sort( function( a, b ) {
+      return a.date - b.date;
+    } );
+
+    var val = 0;
+    activeExecutions = $.map( activeExecutions, function( exec ) {
+      val += exec.value;
+      return {
+        x: exec.date,
+        y: val,
+        marker: {
+          enabled: false
+        }
+      };
+    } );
+
+    var activeObjects = [];
+
+    drawLineChart( activeExecutions, activeObjects );
   } );
