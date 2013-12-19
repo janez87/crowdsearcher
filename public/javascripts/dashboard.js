@@ -3,6 +3,11 @@ var parts = location.pathname.split( '/' );
 var entity = parts[ parts.length - 3 ];
 var entityId = parts[ parts.length - 2 ];
 
+function toUTC( dateString ) {
+  var date = new Date( dateString );
+  return Date.UTC( date.getUTCFullYear(), date.getUTCMonth() - 1, date.getUTCDate(), date.getUTCHours(), date.getUTCMinutes(), date.getUTCSeconds(), date.getUTCMilliseconds() );
+  //return date;
+}
 
 var colors = {
   'CLOSED': '#5cb85c',
@@ -52,7 +57,9 @@ function drawPerformers( performers ) {
       stackLabels: {
         enabled: true,
         style: {
-          fontWeight: 'bold'
+          fontWeight: 'bold',
+          color: 'black',
+          textShadow: '0px 1px 2px lightgray',
         }
       }
     },
@@ -63,6 +70,11 @@ function drawPerformers( performers ) {
           enabled: true,
           formatter: function() {
             return ( this.y > 0 ) ? this.y : '';
+          },
+          style: {
+            fontWeight: 'bold',
+            color: 'white',
+            textShadow: '0px 1px 2px black',
           }
         }
       }
@@ -83,7 +95,9 @@ function drawPerformers( performers ) {
   } );
 }
 
-function drawActiveVsClosed( activeExecutions, closedObjects ) {
+function drawActiveVsClosed( activeExecutions, closedObjects, stats ) {
+
+  console.log( stats );
 
   $( '#executions' ).highcharts( {
     chart: {
@@ -96,7 +110,30 @@ function drawActiveVsClosed( activeExecutions, closedObjects ) {
       text: 'Active executions and closed objects'
     },
     xAxis: {
-      type: 'datetime'
+      type: 'datetime',
+      min: toUTC( stats.start ),
+      //max: toUTC( stats.end ),
+      plotLines: [ {
+        value: toUTC( stats.end ),
+        color: 'red',
+        width: 2,
+        label: {
+          text: 'Closed date',
+          style: {
+            color: 'black'
+          }
+        }
+      }, {
+        value: toUTC( stats.start ),
+        color: 'green',
+        width: 2,
+        label: {
+          text: 'Open date',
+          style: {
+            color: 'black'
+          }
+        }
+      } ]
     },
     yAxis: [ {
       title: {
@@ -246,13 +283,6 @@ $.getJSON( baseUrl + 'api/' + entity + '/' + entityId + '/stats?raw=true' )
     var activeExecutions = [];
     var closedObjectList = [];
 
-    function toUTC( dateString ) {
-      var date = new Date( dateString );
-      return Date.UTC( date.getUTCFullYear(), date.getUTCMonth() - 1, date.getUTCDate(), date.getUTCHours(), date.getUTCMinutes(), date.getUTCSeconds(), date.getUTCMilliseconds() );
-      //return date;
-    }
-
-
 
     // #############
     // EXECUTIONS
@@ -307,7 +337,7 @@ $.getJSON( baseUrl + 'api/' + entity + '/' + entityId + '/stats?raw=true' )
       return object;
     } );
 
-    drawActiveVsClosed( activeExecutions, closedObjectList );
+    drawActiveVsClosed( activeExecutions, closedObjectList, stats );
 
 
 
