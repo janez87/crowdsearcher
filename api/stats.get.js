@@ -11,15 +11,12 @@ var log = CS.log.child( {
 
 // Import Models
 var Execution = CS.models.execution;
-var Microtask = CS.models.microtask;
-var Task = CS.models.task;
-var ObjectSchema = CS.models.object;
-var Platform = CS.models.platform;
 
 // Generate custom error `GetStatsError` that inherits
 // from `APIError`
 var APIError = require( './error' );
 var GetStatsError = function( id, message, status ) {
+  /* jshint camelcase: false */
   GetStatsError.super_.call( this, id, message, status );
 };
 util.inherits( GetStatsError, APIError );

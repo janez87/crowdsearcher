@@ -64,4 +64,5 @@ html(prefix="og: http://ogp.me/ns#")
       footer.row: .col-md-12
         include ../includes/footer
     
-    script(src='javascripts/manager.js')
+    block lateScripts
+      script(src='javascripts/manager.js')

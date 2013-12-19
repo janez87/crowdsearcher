@@ -7,6 +7,10 @@ block append libScripts
   script(src='libs/highcharts.js')
 
 block append scripts
+  script.
+    var stats = !{JSON.stringify(stats)};
+
+block append lateScripts
   script(src='javascripts/dashboard.js')
 
 block header

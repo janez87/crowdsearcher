@@ -1,8 +1,4 @@
-/* globals baseUrl */
-var parts = location.pathname.split( '/' );
-var entity = parts[ parts.length - 3 ];
-var entityId = parts[ parts.length - 2 ];
-
+/* global stats*/
 function toUTC( dateString ) {
   var date = new Date( dateString );
   return Date.UTC( date.getUTCFullYear(), date.getUTCMonth() - 1, date.getUTCDate(), date.getUTCHours(), date.getUTCMinutes(), date.getUTCSeconds(), date.getUTCMilliseconds() );
@@ -12,7 +8,8 @@ function toUTC( dateString ) {
 var colors = {
   'CLOSED': '#5cb85c',
   'INVALID': '#d9534f',
-  'CREATED': 'lightgray'
+  'CREATED': '#5bc0de',
+  'ACTIVE': 'lightgray'
 };
 
 function drawPerformers( performers ) {
@@ -95,9 +92,7 @@ function drawPerformers( performers ) {
   } );
 }
 
-function drawActiveVsClosed( activeExecutions, closedObjects, stats ) {
-
-  console.log( stats );
+function drawActiveVsClosed( activeExecutions, closedObjects ) {
 
   $( '#executions' ).highcharts( {
     chart: {
@@ -217,6 +212,7 @@ var drawPieChart = function( label, sample, status, selector ) {
     },
     plotOptions: {
       pie: {
+        //allowPointSelect: true,
         dataLabels: {
           distance: -18,
           formatter: function() {
@@ -243,114 +239,118 @@ var drawPieChart = function( label, sample, status, selector ) {
 };
 
 
-$.getJSON( baseUrl + 'api/' + entity + '/' + entityId + '/stats?raw=true' )
-  .done( function( stats ) {
-    var val;
-
-    // #############
-    // DONUTS
-    var executions = stats.executions;
-    var closedExecutions = stats.closedExecutions;
-    var invalidExecutions = stats.invalidExecutions;
-    var createdExecutions = executions - closedExecutions - invalidExecutions;
-    var executionStatuses = [ 'CREATED', 'CLOSED', 'INVALID' ];
-    drawPieChart( 'Executions', [ createdExecutions, closedExecutions, invalidExecutions ], executionStatuses, '#donut-executions' );
-
-    var objects = stats.objects;
-    var closedObjects = stats.closedObjects;
-    var createdObjects = objects - closedObjects;
-    var objectStatuses = [ 'CREATED', 'CLOSED' ];
-
-    drawPieChart( 'Objects', [ createdObjects, closedObjects ], objectStatuses, '#donut-objects' );
-
-    var microtasks = stats.microtasks;
-    var closedMicrotasks = stats.closedMicrotasks;
-    var createdMicrotasks = microtasks - closedMicrotasks;
-    var microtaskStatuses = [ 'CREATED', 'CLOSED' ];
-
-    drawPieChart( 'Microtasks', [ createdMicrotasks, closedMicrotasks ], microtaskStatuses, '#donut-microtasks' );
-
-    var execList = stats.raw.executions;
-    var entityObject = stats.raw.entity;
-    var performers = stats.performers;
-
-    drawPieChart( 'Performers', [ performers ], [ 'CREATED' ], '#donut-performers' );
 
 
 
 
-    var execList = stats.raw.executions;
-    var activeExecutions = [];
-    var closedObjectList = [];
+// #############
+// ENTRY POINT
 
 
-    // #############
-    // EXECUTIONS
-    val = 0;
-    $.each( execList, function() {
-      var exec = this;
-      activeExecutions.push( {
-        date: toUTC( exec.createdDate ),
-        value: 1,
-        perf: exec.performer
-      } );
+var val;
 
-      if ( exec.status !== 'CREATED' ) {
-        activeExecutions.push( {
-          date: toUTC( exec.closedDate || exec.invalidDate ),
-          value: -1,
-          perf: exec.performer
-        } );
-      }
+// #############
+// DONUTS
+var executions = stats.executions;
+var closedExecutions = stats.closedExecutions;
+var invalidExecutions = stats.invalidExecutions;
+var createdExecutions = executions - closedExecutions - invalidExecutions;
+var executionStatuses = [ 'CREATED', 'CLOSED', 'INVALID' ];
+drawPieChart( 'Executions', [ createdExecutions, closedExecutions, invalidExecutions ], executionStatuses, '#donut-executions' );
 
-    } );
+var objects = stats.objects;
+var closedObjects = stats.closedObjects;
+var createdObjects = objects - closedObjects;
+var objectStatuses = [ 'CREATED', 'CLOSED' ];
 
-    activeExecutions.sort( function( a, b ) {
-      return a.date - b.date;
-    } );
-    activeExecutions = $.map( activeExecutions, function( exec ) {
-      val += exec.value;
+drawPieChart( 'Objects', [ createdObjects, closedObjects ], objectStatuses, '#donut-objects' );
 
-      return {
-        x: exec.date,
-        y: val
-      };
-    } );
+var microtasks = stats.microtasks;
+var closedMicrotasks = stats.closedMicrotasks;
+var createdMicrotasks = microtasks - closedMicrotasks;
+var microtaskStatuses = [ 'CREATED', 'CLOSED' ];
 
-    // #############
-    // OBJECTS
-    val = 0;
-    closedObjectList = $.map( entityObject.objects, function( object ) {
-      if ( object.status === 'CLOSED' ) {
-        return {
-          x: toUTC( object.closedDate )
-        };
-      }
-      return undefined;
-    } );
+drawPieChart( 'Microtasks', [ createdMicrotasks, closedMicrotasks ], microtaskStatuses, '#donut-microtasks' );
 
-    closedObjectList.sort( function( a, b ) {
-      return a.x - b.x;
-    } );
-    closedObjectList = $.map( closedObjectList, function( object, i ) {
-      object.y = i + 1;
-      return object;
-    } );
+var execList = stats.raw.executions;
+var entityObject = stats.raw.entity;
+var performers = stats.performers;
 
-    drawActiveVsClosed( activeExecutions, closedObjectList, stats );
+drawPieChart( 'Performers', [ performers ], [ 'ACTIVE' ], '#donut-performers' );
 
 
 
-    // #############
-    // PERFORMERS
-    val = 0;
-    // Sort performers
-    var performers = stats.performerStats;
-    performers.sort( function( a, b ) {
-      return a.executions - b.executions;
-    } ).reverse();
-    var topPerformers = performers.slice( 0, 15 );
 
-    drawPerformers( topPerformers );
+var execList = stats.raw.executions;
+var activeExecutions = [];
+var closedObjectList = [];
 
+
+// #############
+// EXECUTIONS
+val = 0;
+$.each( execList, function() {
+  var exec = this;
+  activeExecutions.push( {
+    date: toUTC( exec.createdDate ),
+    value: 1,
+    perf: exec.performer
   } );
+
+  if ( exec.status !== 'CREATED' ) {
+    activeExecutions.push( {
+      date: toUTC( exec.closedDate || exec.invalidDate ),
+      value: -1,
+      perf: exec.performer
+    } );
+  }
+
+} );
+
+activeExecutions.sort( function( a, b ) {
+  return a.date - b.date;
+} );
+activeExecutions = $.map( activeExecutions, function( exec ) {
+  val += exec.value;
+
+  return {
+    x: exec.date,
+    y: val
+  };
+} );
+
+// #############
+// OBJECTS
+val = 0;
+closedObjectList = $.map( entityObject.objects, function( object ) {
+  if ( object.status === 'CLOSED' ) {
+    return {
+      x: toUTC( object.closedDate )
+    };
+  }
+  return undefined;
+} );
+
+closedObjectList.sort( function( a, b ) {
+  return a.x - b.x;
+} );
+closedObjectList = $.map( closedObjectList, function( object, i ) {
+  object.y = i + 1;
+  return object;
+} );
+
+drawActiveVsClosed( activeExecutions, closedObjectList );
+
+
+
+// #############
+// PERFORMERS
+val = 0;
+// Sort performers
+var performers = stats.performerStats;
+performers.sort( function( a, b ) {
+  return a.executions - b.executions;
+} ).reverse();
+var topPerformers = performers.slice( 0, 15 );
+
+drawPerformers( topPerformers );
