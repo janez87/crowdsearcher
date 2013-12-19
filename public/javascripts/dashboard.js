@@ -242,6 +242,25 @@ var drawPieChart = function( label, sample, status, selector ) {
   } );
 };
 
+var drawExecutionInfo = function( execution ) {
+  var info = $( '#executionInfo' );
+
+  info.append( '<h5>Average Execution Duration</h5>' + ( execution.avgDuration !== null ? execution.avgDuration.toFixed( 2 ) : 'N/A' ) + ( execution.varDuration !== null ? '(' + execution.varDuration.toFixed( 2 ) + ')' : '' ) );
+};
+
+var drawMicrotaskInfo = function( microtask ) {
+  var info = $( '#microtaskInfo' );
+
+  info.append( '<h5>Average Microtask Duration</h5>' + ( microtask.avgDuration !== null ? microtask.avgDuration.toFixed( 2 ) : 'N/A' ) + ( microtask.varDuration !== null ? '(' + microtask.varDuration.toFixed( 2 ) + ')' : '' ) );
+  info.append( '<h5>Average Microtask Execution Number</h5>' + ( microtask.avgExecutions !== null ? microtask.avgExecutions.toFixed( 2 ) : 'N/A' ) + ( microtask.varExecutions !== null ? '(' + microtask.varExecutions.toFixed( 2 ) + ')' : '' ) );
+};
+
+var drawPerformerInfo = function( performer ) {
+  var info = $( '#performerInfo' );
+
+  info.append( '<h5>Average Time spent on execution</h5>' + ( performer.avgDuration !== null ? performer.avgDuration.toFixed( 2 ) : 'N/A' ) + ( performer.varDuration !== null ? '(' + performer.varDuration.toFixed( 2 ) + ')' : '' ) );
+  info.append( '<h5>Average number of executions</h5>' + ( performer.avgExecutions !== null ? performer.avgExecutions.toFixed( 2 ) : 'N/A' ) + ( performer.varExecutions !== null ? '(' + performer.varExecutions.toFixed( 2 ) + ')' : '' ) );
+};
 
 $.getJSON( baseUrl + 'api/' + entity + '/' + entityId + '/stats?raw=true' )
   .done( function( stats ) {
@@ -353,4 +372,10 @@ $.getJSON( baseUrl + 'api/' + entity + '/' + entityId + '/stats?raw=true' )
 
     drawPerformers( topPerformers );
 
+    // #############
+    // INFO
+
+    drawExecutionInfo( stats.execution );
+    drawMicrotaskInfo( stats.microtask );
+    drawPerformerInfo( stats.performer );
   } );
