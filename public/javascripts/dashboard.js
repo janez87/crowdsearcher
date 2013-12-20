@@ -184,9 +184,14 @@ var drawPieChart = function( label, sample, status, selector ) {
     }
   }
 
-  data = data.sort( function( a, b ) {
-    return a[ 0 ] - b[ 0 ];
-  } );
+  /*data = data.sort( function( a, b ) {
+    if ( a.name === 'CLOSED' && b.name === 'CREATED' )
+      return 1;
+    else if ( a.name === 'CLOSED' && b.name === 'INVALID' )
+      return 1;
+    else if ( a.name === 'CREATED' && b.name === 'INVALID' )
+      return -1;
+  } );*/
 
 
   $( selector ).highcharts( {
@@ -238,6 +243,25 @@ var drawPieChart = function( label, sample, status, selector ) {
   } );
 };
 
+var drawExecutionInfo = function( execution ) {
+  var info = $( '#executionInfo' );
+
+  info.append( '<p><h5>Average execution duration</h5></p><p> &#956;: ' + ( execution.avgDuration !== null ? execution.avgDuration.toFixed( 2 ) + ' s' : 'N/A' ) + ( execution.varDuration !== null ? ' ( &#963;: ' + execution.varDuration.toFixed( 2 ) + ' s )' : '' ) + '</p>' );
+};
+
+var drawMicrotaskInfo = function( microtask ) {
+  var info = $( '#microtaskInfo' );
+
+  info.append( '<p><h5>Average microtask duration</h5></p> &#956;: ' + ( microtask.avgDuration !== null ? microtask.avgDuration.toFixed( 2 ) + ' s' : 'N/A' ) + ( microtask.varDuration !== null ? ' ( &#963;: ' + microtask.varDuration.toFixed( 2 ) + ' s )' : '' ) + '</p>' );
+  info.append( '<p><h5>Average number of execution per microtask</h5></p><p> &#956;: ' + ( microtask.avgExecutions !== null ? microtask.avgExecutions.toFixed( 2 ) : 'N/A' ) + ( microtask.varExecutions !== null ? ' ( &#963;: ' + microtask.varExecutions.toFixed( 2 ) + ' ) ' : '' ) + '</p>' );
+};
+
+var drawPerformerInfo = function( performer ) {
+  var info = $( '#performerInfo' );
+
+  info.append( '<h5>Average time spent on execution</h5>' + ( performer.avgDuration !== null ? performer.avgDuration.toFixed( 2 ) + ' s' : 'N/A' ) + ( performer.varDuration !== null ? ' ( ' + performer.varDuration.toFixed( 2 ) + ' s )' : '' ) );
+  info.append( '<h5>Average number of executions per performer</h5>' + ( performer.avgExecutions !== null ? performer.avgExecutions.toFixed( 2 ) : 'N/A' ) + ( performer.varExecutions !== null ? ' ( ' + performer.varExecutions.toFixed( 2 ) + ' ) ' : '' ) );
+};
 
 
 
@@ -354,3 +378,9 @@ performers.sort( function( a, b ) {
 var topPerformers = performers.slice( 0, 15 );
 
 drawPerformers( topPerformers );
+// #############
+// INFO
+
+drawExecutionInfo( stats.execution );
+drawMicrotaskInfo( stats.microtask );
+drawPerformerInfo( stats.performer );
