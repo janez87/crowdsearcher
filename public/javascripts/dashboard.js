@@ -1,4 +1,4 @@
-/* global stats*/
+/* global stats, Highcharts */
 function toUTC( dateString ) {
   var date = new Date( dateString );
   return Date.UTC( date.getUTCFullYear(), date.getUTCMonth() - 1, date.getUTCDate(), date.getUTCHours(), date.getUTCMinutes(), date.getUTCSeconds(), date.getUTCMilliseconds() );
@@ -94,6 +94,12 @@ function drawPerformers( performers ) {
 
 function drawActiveVsClosed( activeExecutions, closedObjects ) {
 
+  var startExecutionColor = Highcharts.getOptions().colors[ 0 ];
+  var endExecutionColor = Highcharts.Color( startExecutionColor ).setOpacity( 0 ).get( 'rgba' );
+
+  var startObjectsColor = colors[ 'CLOSED' ];
+  var endObjectsColor = Highcharts.Color( startObjectsColor ).setOpacity( 0 ).get( 'rgba' );
+
   $( '#executions' ).highcharts( {
     chart: {
       zoomType: 'x'
@@ -134,7 +140,7 @@ function drawActiveVsClosed( activeExecutions, closedObjects ) {
       title: {
         text: 'Active executions (#)'
       },
-      //tickInterval: 1,
+      minTickInterval: 1,
       min: 0
     }, {
       title: {
@@ -149,10 +155,21 @@ function drawActiveVsClosed( activeExecutions, closedObjects ) {
       name: 'Active executions',
       data: activeExecutions,
       type: 'area',
+      fillColor: {
+        linearGradient: {
+          x1: 0,
+          y1: 0,
+          x2: 0,
+          y2: 1
+        },
+        stops: [
+          [ 0, startExecutionColor ],
+          [ 1, endExecutionColor ]
+        ]
+      },
       marker: {
         enabled: false
       },
-      //color: '#AA4643',
       zIndex: 1,
       yAxis: 0
     }, {
@@ -164,7 +181,19 @@ function drawActiveVsClosed( activeExecutions, closedObjects ) {
       },
       color: colors[ 'CLOSED' ],
       zIndex: 0,
-      yAxis: 1
+      yAxis: 1,
+      fillColor: {
+        linearGradient: {
+          x1: 0,
+          y1: 0,
+          x2: 0,
+          y2: 1
+        },
+        stops: [
+          [ 0, startObjectsColor ],
+          [ 1, endObjectsColor ]
+        ]
+      },
     } ]
   } );
 }
@@ -183,16 +212,6 @@ var drawPieChart = function( label, sample, status, selector ) {
       } );
     }
   }
-
-  /*data = data.sort( function( a, b ) {
-    if ( a.name === 'CLOSED' && b.name === 'CREATED' )
-      return 1;
-    else if ( a.name === 'CLOSED' && b.name === 'INVALID' )
-      return 1;
-    else if ( a.name === 'CREATED' && b.name === 'INVALID' )
-      return -1;
-  } );*/
-
 
   $( selector ).highcharts( {
     credits: {
@@ -243,24 +262,221 @@ var drawPieChart = function( label, sample, status, selector ) {
   } );
 };
 
-var drawExecutionInfo = function( execution ) {
-  var info = $( '#executionInfo' );
 
-  info.append( '<p><h5>Average execution duration</h5></p><p> &#956;: ' + ( execution.avgDuration !== null ? execution.avgDuration.toFixed( 2 ) + ' s' : 'N/A' ) + ( execution.varDuration !== null ? ' ( &#963;: ' + execution.varDuration.toFixed( 2 ) + ' s )' : '' ) + '</p>' );
+
+function drawAvgDistribution( config, selector ) {
+  var rawData = config.data;
+  var property = config.property;
+  var average = config.average;
+  var variance = config.variance;
+  var title = config.title;
+
+  var xLabel = config.xLabel;
+  var xUnit = config.xUnit;
+  var yLabel = config.yLabel;
+  var yUnit = config.yUnit;
+
+  var groups = config.groups || 10;
+  var std = Math.sqrt( variance );
+
+  var data = $.map( rawData, function( value ) {
+    return value[ property ];
+  } );
+
+  var min = Math.min.apply( Math, data );
+  var max = Math.max.apply( Math, data ) + 1;
+  var step = ( max - min ) / groups;
+
+  var values = [];
+  for ( var i = 0; i < groups; i++ )
+    values.push( 0 );
+
+  $.each( data, function( i, duration ) {
+    duration = duration - min;
+    var index = Math.floor( duration / step );
+    values[ index ]++;
+  } );
+
+  values = $.map( values, function( value, i ) {
+    var y = value / data.length;
+    var x = min + i * step + step / 2;
+    return {
+      x: x,
+      y: y
+    };
+  } );
+
+  $( selector ).highcharts( {
+    chart: {
+      inverted: true
+    },
+    credits: {
+      enabled: false
+    },
+    plotOptions: {
+      column: {
+        pointWidth: 20
+      }
+    },
+    xAxis: {
+      min: min,
+      max: max,
+      labels: {
+        rotation: 90,
+        align: 'center',
+        x: -15
+      },
+      title: {
+        text: xLabel + ' (' + xUnit + ')',
+        rotation: 90,
+        x: -20
+      },
+      plotLines: [ {
+        value: average,
+        color: 'red',
+        width: 2,
+        label: {
+          text: average.toFixed( 3 ) + xUnit,
+          align: 'right'
+        },
+        zIndex: 4,
+      } ],
+      plotBands: [ {
+        from: average - std / 2,
+        to: average + std / 2,
+        color: '#f9f2f4',
+        //zIndex: 8
+      } ]
+    },
+    yAxis: {
+      min: 0,
+      tickInterval: 0.25,
+      max: 1,
+      title: {
+        text: yLabel + ' (' + yUnit + ')',
+      }
+    },
+    title: {
+      text: title,
+    },
+    tooltip: {
+      shared: true,
+      crosshairs: {
+        width: 1,
+        color: 'gray',
+        dashStyle: 'shortdot'
+      },
+      formatter: function() {
+        var s = '<b>' + xLabel + ': ' + this.x.toFixed( 0 ) + xUnit + '</b>';
+
+        var point = this.points[ 0 ];
+        s += '<br/>' + yLabel + ': ' + point.y.toFixed( 2 ) + yUnit;
+
+        return s;
+      },
+    },
+    subtitle: {
+      text: '&#956;: ' + average.toFixed( 3 ) + xUnit + ' &#963;: ' + std.toFixed( 3 ) + xUnit,
+      useHTML: true
+    },
+    legend: {
+      enabled: false
+    },
+    series: [ {
+      type: 'column',
+      color: 'lightgray',
+      data: values
+    }, {
+      type: 'spline',
+      //color: 'lightgray',
+      data: values
+    } ]
+  } );
+
+}
+
+var drawExecutionInfo = function() {
+  var config = {
+    average: stats.execution.avgDuration,
+    variance: stats.execution.varDuration,
+    data: stats.raw.executions,
+    property: 'duration',
+    title: 'Execution duration',
+    xLabel: 'Duration',
+    xUnit: 's',
+    yLabel: 'Executions',
+    yUnit: '%'
+  };
+
+  var selector = '#executionInfo';
+
+  drawAvgDistribution( config, selector );
 };
 
-var drawMicrotaskInfo = function( microtask ) {
-  var info = $( '#microtaskInfo' );
+var drawMicrotaskInfo = function() {
+  var config = {
+    average: stats.microtask.avgDuration,
+    variance: stats.microtask.varDuration,
+    data: stats.microtaskStats,
+    property: 'duration',
+    title: 'Microtask duration',
+    xLabel: 'Duration',
+    xUnit: 's',
+    yLabel: 'Microtasks',
+    yUnit: '%'
+  };
 
-  info.append( '<p><h5>Average microtask duration</h5></p> &#956;: ' + ( microtask.avgDuration !== null ? microtask.avgDuration.toFixed( 2 ) + ' s' : 'N/A' ) + ( microtask.varDuration !== null ? ' ( &#963;: ' + microtask.varDuration.toFixed( 2 ) + ' s )' : '' ) + '</p>' );
-  info.append( '<p><h5>Average number of execution per microtask</h5></p><p> &#956;: ' + ( microtask.avgExecutions !== null ? microtask.avgExecutions.toFixed( 2 ) : 'N/A' ) + ( microtask.varExecutions !== null ? ' ( &#963;: ' + microtask.varExecutions.toFixed( 2 ) + ' ) ' : '' ) + '</p>' );
+  var selector = '#microtaskDuration';
+
+  drawAvgDistribution( config, selector );
+
+
+  var config1 = {
+    average: stats.microtask.avgExecutions,
+    variance: stats.microtask.varExecutions,
+    data: stats.microtaskStats,
+    property: 'executions',
+    title: 'Microtask executions',
+    xLabel: 'Execution',
+    xUnit: '',
+    yLabel: 'Microtasks',
+    yUnit: '%'
+  };
+
+  drawAvgDistribution( config1, '#microtaskExecutions' );
 };
 
-var drawPerformerInfo = function( performer ) {
-  var info = $( '#performerInfo' );
+var drawPerformerInfo = function() {
+  var config = {
+    average: stats.performer.avgDuration,
+    variance: stats.performer.varDuration,
+    data: stats.performerStats,
+    property: 'avgDuration',
+    title: 'Performer duration',
+    xLabel: 'Duration',
+    xUnit: 's',
+    yLabel: 'Performer',
+    yUnit: '%'
+  };
 
-  info.append( '<h5>Average time spent on execution</h5>' + ( performer.avgDuration !== null ? performer.avgDuration.toFixed( 2 ) + ' s' : 'N/A' ) + ( performer.varDuration !== null ? ' ( ' + performer.varDuration.toFixed( 2 ) + ' s )' : '' ) );
-  info.append( '<h5>Average number of executions per performer</h5>' + ( performer.avgExecutions !== null ? performer.avgExecutions.toFixed( 2 ) : 'N/A' ) + ( performer.varExecutions !== null ? ' ( ' + performer.varExecutions.toFixed( 2 ) + ' ) ' : '' ) );
+  var selector = '#performerDuration';
+
+  drawAvgDistribution( config, selector );
+
+
+  var config1 = {
+    average: stats.performer.avgExecutions,
+    variance: stats.performer.varExecutions,
+    data: stats.performerStats,
+    property: 'executions',
+    title: 'Performer executions',
+    xLabel: 'Execution',
+    xUnit: '',
+    yLabel: 'Performer',
+    yUnit: '%'
+  };
+
+  drawAvgDistribution( config1, '#performerExecutions' );
 };
 
 
