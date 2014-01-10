@@ -1,0 +1,5 @@
+mixin printMarkdown( markdown )
+  if markdown && markdown.length>0
+    .markdown!= md( markdown )
+  else
+    blockquote Missing data.

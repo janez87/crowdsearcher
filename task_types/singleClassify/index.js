@@ -6,31 +6,31 @@ var CS = require( '../../core' );
 
 // Import a child logger
 var log = CS.log.child( {
-  component: 'HotOrNot TT'
+  component: 'SingleClassify TT'
 } );
 
 
-// Create the HotOrNot class
+// Create the SingleClassify class
 var CSError = CS.error;
-// Create the HotOrNot class
-var HotOrNot = function( id, message ) {
+// Create the SingleClassify class
+var SingleClassify = function( id, message ) {
   /* jshint camelcase: false */
-  HotOrNot.super_.call( this, id, message );
+  SingleClassify.super_.call( this, id, message );
 };
 // Make it subclass Error
-util.inherits( HotOrNot, CSError );
-HotOrNot.prototype.name = 'HotOrNot';
+util.inherits( SingleClassify, CSError );
+SingleClassify.prototype.name = 'SingleClassify';
 // Custom errors
-//HotOrNot.CLASSIFY_BAD_CATEGORIES = 'CLASSIFY_BAD_CATEGORIES';
+//SingleClassify.CLASSIFY_BAD_CATEGORIES = 'CLASSIFY_BAD_CATEGORIES';
 
 
 // Define the Operation Object
 var TaskType = {
-  name: 'Hot or Not',
-  description: 'Compare 2 object at time.',
+  name: 'Single classify',
+  description: 'Categorize each object with 1 category.',
   template: fs.readFileSync( __dirname + '/template.hbs', 'utf8' ),
   defaults: {},
-  useCases: [ 'Ranking' ],
+  useCases: [ 'Classification' ],
   params: {
     categories: {
       type: [ 'string' ],

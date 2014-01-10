@@ -197,7 +197,7 @@ exports.controlmart = function( req, res, next ) {
   } );
 };
 
-// # Control Mart handler
+// # Flows handler
 //
 exports.flows = function( req, res, next ) {
   res.render( 'manage/flows', {
@@ -207,15 +207,47 @@ exports.flows = function( req, res, next ) {
 };
 
 
+
+
 // # Wizard
 //
+var pageMap = {
+  'object_declaration': 'Object declaration',
+  'task_type': 'Task Type',
+  'invitation': 'Invitation',
+  'execution': 'Execution',
+  'adaptation': 'Adaptation',
+  'review': 'Review'
+};
+var pageList = [
+  'object_declaration',
+  'task_type',
+  'execution',
+  'invitation',
+  'adaptation',
+  'review'
+];
 exports.wizard = function( req, res, next ) {
+  var page = req.params.page;
+
+  var idx = _.indexOf( pageList, page );
+  if ( idx === -1 )
+    return next( new Error( 'Wrong page name: ' + page ) );
+
+  var nextPage = pageList[ idx + 1 ];
+  var prevPage = pageList[ idx - 1 ];
+
   r( baseUrl + 'configuration', function( err, resp, config ) {
     if ( err ) return next( err );
 
-    res.render( 'manage/wizard', {
-      title: 'Simple Task creation',
-      config: config
+    res.render( 'manage/wizard/' + page, {
+      title: pageMap[ page ],
+      config: config,
+      pageList: pageList,
+      pageMap: pageMap,
+      index: idx,
+      nextPage: nextPage,
+      prevPage: prevPage
     } );
   } );
 };

@@ -41,6 +41,8 @@ html(prefix="og: http://ogp.me/ns#")
 
       .collapse.navbar-collapse.navbar-top-collapse
         ul.nav.navbar-nav
+          li: a(href='manage/wizard') Wizard 
+            i.fa.fa-magic
           li: a(href='manage/jobs') Job list 
             i.fa.fa-list
           li: a(href='manage/job/new') Job 
@@ -62,7 +64,8 @@ html(prefix="og: http://ogp.me/ns#")
       section.row: .col-md-12
         block content
       footer.row: .col-md-12
-        include ../includes/footer
+        block footer
+          include ../includes/footer
     
     block lateScripts
       script(src='javascripts/manager.js')

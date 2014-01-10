@@ -1,0 +1,5 @@
+extends ./layout
+
+block content
+  h2 Review
+  pre!= JSON.stringify( req.session.wizard, null, 2 )

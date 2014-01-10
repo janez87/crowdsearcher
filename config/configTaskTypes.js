@@ -40,8 +40,8 @@ function configTaskTypes( callback ) {
         file = '../' + TTBaseDir + '/' + file;
         log.trace( 'Loading %s Task Type', taskType );
 
-
         taskTypes[ taskType ] = require( file );
+        taskTypes[ taskType ].id = taskType;
       } );
 
       CS.taskTypes = taskTypes;

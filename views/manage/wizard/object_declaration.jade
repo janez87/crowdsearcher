@@ -1,0 +1,31 @@
+extends ./layout
+
+block append lateScripts
+  script(src='javascripts/dropzone.js')
+  script(src='javascripts/object_declaration.js')
+
+block content
+  h2 Input files
+
+  .row
+    .col-md-8
+
+      form.form-horizontal
+        .form-group
+          label.col-md-3.control-label(for='file_type') File type: 
+          .col-md-9
+            select.form-control#file_type
+              option(value='.json') JSON
+              option(value='.*') TODO: CSV
+              option(value='.*') TODO: XML
+              option(value='.*') TODO: XLS
+        .form-group
+          label.col-md-3.control-label(for='file') File select: 
+          .col-md-9
+            input.form-control#file(type='file',title='Select a file')
+
+    .col-md-4
+      .dropzone
+
+  h3 Schema definition
+  #schema

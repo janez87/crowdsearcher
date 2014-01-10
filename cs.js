@@ -156,7 +156,8 @@ app.use( function( req, res, next ) {
   if ( req.path.split( '/' )[ 1 ] !== 'api' ) {
     // Add th user to the views object
     app.locals( {
-      user: req.user
+      user: req.user,
+      req: req
     } );
   }
 
@@ -248,31 +249,38 @@ config.once( 'ready', function configReady() {
   app.get( '/', routes.index );
 
   // CS Manager
+  // Check auth on each url under `/manage`
+  app.get( '/manage*', routes.checkAuth );
   var manager = require( './routes/manager' );
-  app.get( '/manage', routes.checkAuth, manager.index );
+  app.get( '/manage', manager.index );
   // Jobs
-  app.get( '/manage/jobs', routes.checkAuth, manager.jobs );
-  app.get( '/manage/job/new', routes.checkAuth, manager.newJob );
-  //app.post( '/manage/job/new', routes.checkAuth, manager.postJob );
-  app.get( '/manage/job/:id', routes.checkAuth, manager.job );
-  app.get( '/manage/job/:id/flows', routes.checkAuth, manager.flows );
+  app.get( '/manage/jobs', manager.jobs );
+  app.get( '/manage/job/new', manager.newJob );
+  //app.post( '/manage/job/new', manager.postJob );
+  app.get( '/manage/job/:id', manager.job );
+  app.get( '/manage/job/:id/flows', manager.flows );
+
+  // Task Types wizard
+  app.get( '/manage/wizard', function( req, res ) {
+    res.redirect( '/manage/wizard/object_declaration' );
+  } );
+  app.get( '/manage/wizard/:page', manager.wizard );
+
   // Tasks
-  app.get( '/manage/task/new', routes.checkAuth, manager.newTask );
-  // Wizard
-  app.get( '/manage/task/wizard', routes.checkAuth, manager.wizard );
-  //app.post( '/manage/task/new', routes.checkAuth, manager.postTask );
-  app.get( '/manage/task/:id', routes.checkAuth, manager.task );
+  app.get( '/manage/task/new', manager.newTask );
+  //app.post( '/manage/task/new', manager.postTask );
+  app.get( '/manage/task/:id', manager.task );
   // Microtasks
-  app.get( '/manage/microtask/:id', routes.checkAuth, manager.microtask );
+  app.get( '/manage/microtask/:id', manager.microtask );
   // Objects
-  app.get( '/manage/object/:id', routes.checkAuth, manager.object );
+  app.get( '/manage/object/:id', manager.object );
   // Answers
-  app.get( '/manage/answers', routes.checkAuth, manager.answers );
+  app.get( '/manage/answers', manager.answers );
   // Dashboard
-  app.get( '/manage/:entity/:id/dashboard', routes.checkAuth, manager.dashboard );
+  app.get( '/manage/:entity/:id/dashboard', manager.dashboard );
   // Control Mart
-  app.get( '/manage/:entity/:id/controlmart', routes.checkAuth, manager.controlmart );
-  app.get( '/manage/:entity/:id/mart', routes.checkAuth, manager.controlmart );
+  app.get( '/manage/:entity/:id/controlmart', manager.controlmart );
+  app.get( '/manage/:entity/:id/mart', manager.controlmart );
 
 
 

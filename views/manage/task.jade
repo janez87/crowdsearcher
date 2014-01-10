@@ -87,7 +87,7 @@ block content
     .col-md-6
       h3 Control rules
       if task.controlrules.length==0
-        .alert.alert-info Sorry, no control rules found.
+        blockquote Sorry, no control rules found.
       else
         .list-group
           for controlrule in task.controlrules
@@ -113,7 +113,7 @@ block content
     .col-md-6
       h3 Microtask list
       if task.microtasks.length==0
-        .alert.alert-info No microtasks available.
+        blockquote No microtasks available.
       else
         - var classMap = { 'CREATED': 'info', 'OPENED': 'success', 'FINALIZED': 'warning', 'CLOSED': 'danger' };
         

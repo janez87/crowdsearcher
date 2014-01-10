@@ -1,0 +1,120 @@
+extends ./layout
+
+block append lateScripts
+  script.
+    $( '.btn-reset-use-case' ).on( 'click', function() {
+      $('.info-bar .use-case-info').text( 'None' );
+      $('.info-bar .task-type-info').text( 'None' );
+
+      $('.use-case-div' ).show();
+      $('.task-types-div,.task-type-div' ).hide();
+    } );
+
+    $( '.btn-reset-task-type' ).on( 'click', function() {
+      var useCase = $('.info-bar .use-case-info').text();
+      $( '.use-case[data-use-case="'+useCase+'"]' ).click();
+    } );
+
+    $( '.use-case' ).on( 'click', function( ) {
+      var useCase = $(this).data( 'useCase' );
+      $('.info-bar .use-case-info').text( useCase );
+
+      $( '.task-type:not(.uc-'+useCase+')' ).hide();
+      $( '.task-type.uc-'+useCase ).show();
+      
+      $('.use-case-div').slideUp();
+      $('.task-types-div').slideDown();
+      $('.task-type-div' ).hide();
+    } );
+    
+    $( '.task-type-btn' ).on( 'click', function( ) {
+      var taskType = $(this).closest('.task-type').data( 'taskType' );
+      $('.info-bar .task-type-info').text( taskType );
+      
+      $('.use-case-div' ).hide();
+      
+      $('.task-types-div').slideUp();
+      $('.task-type-div').slideDown();
+
+      $( '.tt' ).hide();
+      $( '#tt_'+taskType ).show();
+    } );
+
+block append css
+  style(type='text/css').
+    .use-case {
+      cursor: pointer;
+      font-size: 2em;
+      text-align: center;
+      border-bottom: 1px solid;
+      padding: 0.5em;
+    }
+    .use-case:hover {
+      background-color: #eee;
+    }
+    .task-type .panel-title {
+      font-size: 1.7em;
+    }
+
+block content
+  .row.info-bar
+    .col-md-6
+      h2 Use-case: 
+        span.use-case-info.text-muted None
+        |  
+        button(type='button').btn.btn-default.btn-reset-use-case
+          i.fa.fa-edit
+    .col-md-6
+      h2 Task Type: 
+        span.task-type-info.text-muted None
+        |  
+        button(type='button').btn.btn-default.btn-reset-task-type
+          i.fa.fa-edit
+
+  hr
+
+  .use-case-div
+    h2 Select the use-case:
+    for use_cases, name in config.useCases
+      .use-case(data-use-case=name)= name
+  
+  .task-types-div.collapse
+    h2 Select the Task Type:
+    for taskType in config.taskTypes
+      - var cases = 'uc-'+taskType.useCases.join( ' uc-' )
+      .panel.panel-default.task-type(data-task-type=taskType.id,class=cases)
+        
+        .panel-heading
+          h3.panel-title= taskType.name
+
+        .panel-body
+          .row
+            // Description
+            .col-md-8
+              if taskType.description && taskType.description.length>0
+                p!= md( taskType.description )
+              else
+                p.text-muted No description available
+            
+            // Image
+            .col-md-4
+              if taskType.image && taskType.image.length>0
+                img.image.img-responsive(src=taskType.image)
+              else
+                img.img-responsive(src='http://placehold.it/350x150&text=Missing+image')
+        
+        .panel-footer.text-right
+          button(type='button').task-type-btn.btn.btn-success Select
+    
+  .task-type-div.collapse
+    h2 Task Type configuration
+
+    for taskType in config.taskTypes
+      div.tt(id='tt_'+taskType.id)
+        h3= taskType.name
+        
+        if _.size( taskType.defaults )>0
+          pre= JSON.stringify( taskType.defaults, null, 2 )
+
+        if _.size( taskType.params )>0
+          p Params

@@ -5,6 +5,4 @@ mixin printMetadata( metadata )
         dt(title=data.key) #{data.key}:
         dd: code= data.value
   else
-    .alert.alert-info
-      strong Info: 
-      | No metadata...
+    blockquote Missing data.

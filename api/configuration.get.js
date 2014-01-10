@@ -1,10 +1,12 @@
 // Load libraries
-var _  = require('underscore');
-var util  = require('util');
+var _ = require( 'underscore' );
+var util = require( 'util' );
 var CS = require( '../core' );
 
 // Import a child Logger
-var log = CS.log.child( { component: 'Get Configuration' } );
+var log = CS.log.child( {
+  component: 'Get Configuration'
+} );
 
 
 
@@ -39,10 +41,10 @@ API.logic = function getConfiguration( req, res ) {
   var force = !property;
   var data = {};
 
-  log.trace( 'Getting %s from configuration', force? 'all properties' : property );
+  log.trace( 'Getting %s from configuration', force ? 'all properties' : property );
 
   // Compute and return the platforms
-  if( property==='platforms' || force ) {
+  if ( property === 'platforms' || force ) {
     var platforms = [];
     _.each( CS.platforms, function( platform, name ) {
       platforms.push( {
@@ -50,10 +52,10 @@ API.logic = function getConfiguration( req, res ) {
         params: platform.params,
         invitation: _.isFunction( platform.invite ),
         execution: _.isFunction( platform.execute ),
-        enabled: !!platform.enabled
+        enabled: !! platform.enabled
       } );
     } );
-    if( force ) {
+    if ( force ) {
       data.platforms = platforms;
     } else {
       data = platforms;
@@ -62,7 +64,7 @@ API.logic = function getConfiguration( req, res ) {
 
 
   // Compute and return the invitation strategies
-  if( property==='invitation' || force ) {
+  if ( property === 'invitation' || force ) {
     var invitation = [];
     _.each( CS.invitation, function( strategy, name ) {
       invitation.push( {
@@ -71,7 +73,7 @@ API.logic = function getConfiguration( req, res ) {
         triggerOn: strategy.triggerOn
       } );
     } );
-    if( force ) {
+    if ( force ) {
       data.invitation = invitation;
     } else {
       data = invitation;
@@ -79,7 +81,7 @@ API.logic = function getConfiguration( req, res ) {
   }
 
   // Compute and return the splitting strategies
-  if( property==='splitting' || force ) {
+  if ( property === 'splitting' || force ) {
     var splitting = [];
     _.each( CS.splitting, function( strategy, name ) {
       splitting.push( {
@@ -88,7 +90,7 @@ API.logic = function getConfiguration( req, res ) {
         triggerOn: strategy.triggerOn
       } );
     } );
-    if( force ) {
+    if ( force ) {
       data.splitting = splitting;
     } else {
       data = splitting;
@@ -96,7 +98,7 @@ API.logic = function getConfiguration( req, res ) {
   }
 
   // Compute and return the Microtask assignment strategies
-  if( property==='taskAssignment' || force ) {
+  if ( property === 'taskAssignment' || force ) {
     var taskAssignments = [];
     _.each( CS.taskAssignment, function( strategy, name ) {
       taskAssignments.push( {
@@ -105,7 +107,7 @@ API.logic = function getConfiguration( req, res ) {
         triggerOn: strategy.triggerOn
       } );
     } );
-    if( force ) {
+    if ( force ) {
       data.taskAssignments = taskAssignments;
     } else {
       data = taskAssignments;
@@ -113,7 +115,7 @@ API.logic = function getConfiguration( req, res ) {
   }
 
   // Compute and return the Microtask assignment strategies
-  if( property==='assignment' || force ) {
+  if ( property === 'assignment' || force ) {
     var assignment = [];
     _.each( CS.assignment, function( strategy, name ) {
       assignment.push( {
@@ -122,7 +124,7 @@ API.logic = function getConfiguration( req, res ) {
         triggerOn: strategy.triggerOn
       } );
     } );
-    if( force ) {
+    if ( force ) {
       data.assignment = assignment;
     } else {
       data = assignment;
@@ -130,7 +132,7 @@ API.logic = function getConfiguration( req, res ) {
   }
 
   // Compute and return the implementation strategies
-  if( property==='implementation' || force ) {
+  if ( property === 'implementation' || force ) {
     var implementation = [];
     _.each( CS.implementation, function( strategy, name ) {
       implementation.push( {
@@ -139,7 +141,7 @@ API.logic = function getConfiguration( req, res ) {
         triggerOn: strategy.triggerOn
       } );
     } );
-    if( force ) {
+    if ( force ) {
       data.implementation = implementation;
     } else {
       data = implementation;
@@ -148,7 +150,7 @@ API.logic = function getConfiguration( req, res ) {
 
 
   // Compute and return the task types
-  if( property==='operations' || force ) {
+  if ( property === 'operations' || force ) {
     var operations = [];
     _.each( CS.operations, function( operation, name ) {
       operations.push( {
@@ -156,7 +158,7 @@ API.logic = function getConfiguration( req, res ) {
         params: operation.params
       } );
     } );
-    if( force ) {
+    if ( force ) {
       data.operations = operations;
     } else {
       data = operations;
@@ -165,24 +167,21 @@ API.logic = function getConfiguration( req, res ) {
 
 
   // Compute and return the object control strategies
-  if( property==='objectControlStrategies' || force ) {
+  if ( property === 'objectControlStrategies' || force ) {
     var objectControlStrategies = [];
 
     //TODO: FIx temp hack
     objectControlStrategies.push( {
       name: 'Check object status',
-      actions: [
-        {
-          name: 'closeMicroTaskOnObjectStatus',
-        },
-        {
-          name: 'closeTaskOnObjectStatus',
-        },
-      ]
+      actions: [ {
+        name: 'closeMicroTaskOnObjectStatus',
+      }, {
+        name: 'closeTaskOnObjectStatus',
+      }, ]
     } );
 
 
-    if( force ) {
+    if ( force ) {
       data.objectControlStrategies = objectControlStrategies;
     } else {
       data = objectControlStrategies;
@@ -190,9 +189,9 @@ API.logic = function getConfiguration( req, res ) {
   }
 
   // Compute and return the performer control strategies
-  if( property==='performerControlStrategies' || force ) {
+  if ( property === 'performerControlStrategies' || force ) {
     var performerControlStrategies = [];
-    if( force ) {
+    if ( force ) {
       data.performerControlStrategies = performerControlStrategies;
     } else {
       data = performerControlStrategies;
@@ -225,9 +224,9 @@ API.logic = function getConfiguration( req, res ) {
   }
 
   // Compute and return the task control strategies
-  if( property==='taskControlStrategies' || force ) {
+  if ( property === 'taskControlStrategies' || force ) {
     var taskControlStrategies = [];
-    if( force ) {
+    if ( force ) {
       data.taskControlStrategies = taskControlStrategies;
     } else {
       data = taskControlStrategies;
@@ -252,7 +251,7 @@ API.logic = function getConfiguration( req, res ) {
 
 
   // Return the available events
-  if( property==='events' || force ) {
+  if ( property === 'events' || force ) {
     data.events = [
       'OPEN_TASK',
       'EOF_TASK',
@@ -266,11 +265,35 @@ API.logic = function getConfiguration( req, res ) {
 
       'END_EXECUTION'
     ];
-
   }
 
+
+  // Compute and return the Task Types
+  if ( property === 'taskTypes' || force ) {
+    var taskTypes = [];
+    var useCases = {};
+    _.each( CS.taskTypes, function( taskType, name ) {
+      taskTypes.push( taskType );
+
+      _.each( taskType.useCases, function( useCase ) {
+        useCases[ useCase ] = useCases[ useCase ] || [];
+        useCases[ useCase ].push( name );
+      } );
+    } );
+    if ( force ) {
+      data.taskTypes = taskTypes;
+      data.useCases = useCases;
+    } else {
+      data = {
+        taskTypes: taskTypes,
+        useCases: useCases
+      };
+    }
+  }
+
+
   // Compute and return the list of available custom control rules
-  if( property==='rules' || force ) {
+  if ( property === 'rules' || force ) {
     data.rules = [];
     _.each( CS.rules, function( customRule, name ) {
       data.rules.push( {

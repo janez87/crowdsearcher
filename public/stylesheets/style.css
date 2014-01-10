@@ -34,20 +34,18 @@ footer {
 }
 .dropzone {
   cursor: pointer;
-  border-width: 0.5em;
+  border-width: 0.3em;
   border-style: dashed;
   text-align: center;
   padding: 2em 1em;
-  border-color: RoyalBlue;
-  background-color: LightCyan;
+  border-color: #808080;
+  background-color: #d3d3d3;
 }
 .dropzone.error {
   border-color: #f00;
-  background-color: MistyRose;
 }
 .dropzone.active {
   border-color: #008000;
-  background-color: PaleGreen;
 }
 .dropzone input[type='file'] {
   width: 0;
