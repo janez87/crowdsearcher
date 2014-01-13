@@ -1,5 +1,7 @@
 extends ./layout
 
+include ../../includes/params
+
 block append lateScripts
   script.
     $( '.btn-reset-use-case' ).on( 'click', function() {
@@ -78,6 +80,8 @@ block content
     for use_cases, name in config.useCases
       .use-case(data-use-case=name)= name
   
+
+  
   .task-types-div.collapse
     h2 Select the Task Type:
     for taskType in config.taskTypes
@@ -106,15 +110,16 @@ block content
         .panel-footer.text-right
           button(type='button').task-type-btn.btn.btn-success Select
     
+
+
+
   .task-type-div.collapse
     h2 Task Type configuration
 
     for taskType in config.taskTypes
       div.tt(id='tt_'+taskType.id)
-        h3= taskType.name
-        
         if _.size( taskType.defaults )>0
-          pre= JSON.stringify( taskType.defaults, null, 2 )
+          +printParams( taskType.defaults )
 
         if _.size( taskType.params )>0
-          p Params
+          +printParamsInput( taskType.params, 'tt_'+taskType.id )

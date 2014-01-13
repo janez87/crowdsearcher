@@ -44,6 +44,8 @@ function configPlatforms( callback ) {
 
 
         platforms[ platform ] = require( file );
+        if ( !platforms[ platform ].name )
+          platforms[ platform ].name = platform;
       } );
 
       CS.platforms = platforms;

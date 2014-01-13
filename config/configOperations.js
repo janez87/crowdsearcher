@@ -43,6 +43,9 @@ function configOperations( callback ) {
 
 
         operations[ operation ] = require( file );
+        if ( !operations[ operation ].name )
+          operations[ operation ].name = operation;
+
       } );
 
       CS.operations = operations;

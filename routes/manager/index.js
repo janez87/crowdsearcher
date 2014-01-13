@@ -214,6 +214,7 @@ exports.flows = function( req, res, next ) {
 var pageMap = {
   'object_declaration': 'Object declaration',
   'task_type': 'Task Type',
+  'add_operations': 'Add operations',
   'invitation': 'Invitation',
   'execution': 'Execution',
   'adaptation': 'Adaptation',
@@ -222,6 +223,7 @@ var pageMap = {
 var pageList = [
   'object_declaration',
   'task_type',
+  'add_operations',
   'execution',
   'invitation',
   'adaptation',

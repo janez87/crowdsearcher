@@ -1,12 +1,13 @@
-
 // Load libraries
-var _ = require('underscore');
-var util = require('util');
-var domain = require('domain');
+var _ = require( 'underscore' );
+var util = require( 'util' );
+var domain = require( 'domain' );
 var CS = require( '../../core' );
 
 // Import a child logger
-var log = CS.log.child( { component: 'Like operation' } );
+var log = CS.log.child( {
+  component: 'Like operation'
+} );
 
 
 // Import the Annotation model
@@ -14,10 +15,10 @@ var Annotation = CS.models.annotation;
 var MicroTask = CS.models.microtask;
 
 // Create the LikeError class
-var CSError = require('../../core/error');
+var CSError = require( '../../core/error' );
 // Create the LikeError class
 var LikeError = function( id, message ) {
-  LikeError.super_.call( this, id, message);
+  LikeError.super_.call( this, id, message );
 };
 // Make it subclass Error
 util.inherits( LikeError, CSError );
@@ -32,11 +33,11 @@ function checkData( data, operation ) {
   log.debug( 'Checking %j', data );
 
   // Empty data sent, no object liked.. everything ok
-  if( !_.isObject( data ) )
+  if ( !_.isObject( data ) )
     return;
 
   // Data sent but in wrong format
-  if( !_.isArray( data ) )
+  if ( !_.isArray( data ) )
     return new LikeError( LikeError.LIKE_BAD_FORMAT, 'Data not sent as array' );
 }
 
@@ -59,6 +60,10 @@ function create( data, operation, callback ) {
 
 // Define the Operation Object
 var Like = {
+  name: 'Like',
+  description: 'Provide a preference on a set of objects',
+  image: '',
+
   checkData: checkData,
   create: create
 };

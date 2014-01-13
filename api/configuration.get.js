@@ -45,15 +45,13 @@ API.logic = function getConfiguration( req, res ) {
 
   // Compute and return the platforms
   if ( property === 'platforms' || force ) {
-    var platforms = [];
+    var platforms = {};
+
     _.each( CS.platforms, function( platform, name ) {
-      platforms.push( {
-        name: name,
-        params: platform.params,
-        invitation: _.isFunction( platform.invite ),
-        execution: _.isFunction( platform.execute ),
-        enabled: !! platform.enabled
-      } );
+      platforms[ name ] = _.clone( platform );
+      platforms[ name ].invitation = _.isFunction( platform.invite );
+      platforms[ name ].execution = _.isFunction( platform.execute );
+      platforms[ name ].enabled = !! platform.enabled;
     } );
     if ( force ) {
       data.platforms = platforms;
@@ -151,13 +149,7 @@ API.logic = function getConfiguration( req, res ) {
 
   // Compute and return the task types
   if ( property === 'operations' || force ) {
-    var operations = [];
-    _.each( CS.operations, function( operation, name ) {
-      operations.push( {
-        name: name,
-        params: operation.params
-      } );
-    } );
+    var operations = CS.operations;
     if ( force ) {
       data.operations = operations;
     } else {

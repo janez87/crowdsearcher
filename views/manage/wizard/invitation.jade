@@ -1,4 +1,53 @@
 extends ./layout
 
+include ../../includes/params
+
+block append css
+  style(type='text/css').
+    .panel {
+      margin-bottom: 0;
+      border: none;
+      box-shadow: none;
+    }
+    .media {
+      border: 1px solid #ddd;
+      border-top: none;
+      padding: 10px 5px;
+      border-bottom-left-radius: 5px;
+      border-bottom-right-radius: 5px;
+    }
+    img.media-object {
+      width: 64px;
+      height: 64px;
+    }
+
 block content
-  h2 Invitation
+  .row
+    .col-md-6
+      h2 Select invitation platform
+      for platform, platId in config.platforms
+        if platform.invitation
+          .media
+            .pull-left
+              if platform.image
+                img.media-object(src=platform.image,alt=platform.name)
+              else
+                img.media-object(src='http://placehold.it/64&text='+platform.name,alt=platform.name)
+            
+            .media-body
+              h4.media-heading= platform.name
+              if platform.description && platform.description.length>0
+                != md(platform.description)
+
+              .text-right
+                a(data-toggle='collapse',
+                  data-parent='#platforms',
+                  href='#plat_'+platId).btn.btn-success.btn-add-platform Select
+    .col-md-6
+      #platforms
+        for platform, platId in config.platforms
+          if platform.invitation
+            .panel: .collapse(id='plat_'+platId)
+              h3 Configure platform #{platform.name}
+              if _.size( platform.params )>0
+                +printParamsInput( platform.params )

@@ -1,0 +1,41 @@
+extends ./layout
+
+include ../../includes/params
+
+block append lateScripts
+  script.
+    $( '.operation' ).on( 'click', '.btn-add-op', function( evt ) {
+      var operation = $( evt.delegateTarget ).data( 'operation' );
+
+      var $li = $( '<li></li>' );
+      $li.addClass( 'list-group-item' );
+      $li.text( operation );
+
+      $( '.additional-operations' ).append( $li );
+    } );
+
+    $( '.additional-operations' ).on( 'click', 'li', function() {
+      $( this ).remove();
+    } )
+
+block content
+  .row
+    .col-md-6
+      h2 Additional operations
+      .list-group
+        for operation, opId in config.operations
+          .list-group-item.operation(data-operation=opId)
+            h3.list-group-item-heading= operation.name
+            .list-group-item-text
+              if operation.description && operation.description.length>0
+                != md(operation.description)
+              hr
+              if _.size( operation.params )>0
+                h4 Parametes
+                +printParamsInput( operation.params )
+              .text-right
+                button(type='button').btn.btn-success.btn-add-op Add 
+                  i.fa.fa-plus
+    .col-md-6
+      h2 Added operations
+      ul.list-group.additional-operations
