@@ -4,6 +4,43 @@ $file.on( 'click', function() {
   $file.attr( 'accept', $fileType.val() );
 } );
 
+function createTableEditor( data, schema ) {
+  var $header = $( '#header' );
+
+  function createSelect( selected ) {
+    var types = [
+      'Array',
+      'Number',
+      'Date',
+      'Boolean',
+      'Object',
+      'String'
+    ];
+    var select = '<select class="form-control">';
+    $.each( types, function( idx, val ) {
+      select += '<option' + ( val === selected ? ' selected' : '' ) + '>' + val + '</option>';
+    } );
+    select += '</select>';
+    return select;
+  }
+
+  $.each( schema, function( prop, type ) {
+    var $th = $( '<th></th>' );
+
+    var $prop = $( '<input type="text"/>' );
+    $prop.addClass( 'form-control input-sm' );
+    $prop.val( prop );
+    $th.append( $prop );
+
+    $th.append( createSelect( type ) );
+    $header.append( $th );
+  } );
+
+  var $data = $( '#data' );
+
+  // Print only 5 rows
+}
+
 function readFile( file ) {
   // Read the file
   var reader = new FileReader();
@@ -13,7 +50,7 @@ function readFile( file ) {
   ext = ext[ 0 ].toLowerCase();
 
   reader.onprogress = function( evt ) {
-    console.log( 'progress', evt.loaded / evt.total );
+    //console.log( 'progress', evt.loaded / evt.total );
   };
   reader.onload = function() {
     var data = reader.result;
@@ -38,7 +75,6 @@ function loadJSON( data ) {
   var json = JSON.parse( data );
   var row = json.data[ 0 ];
   var schema = {};
-  var $schema = $( '#schema' );
 
   $.each( row.data, function( key, val ) {
     var type = 'string';
@@ -46,9 +82,9 @@ function loadJSON( data ) {
     if ( !isNaN( Date.parse( val ) ) ) type = 'Date';
     if ( $.isArray( val ) ) type = 'Array';
     schema[ key ] = type;
-    $schema.append( '<b>' + key + '</b>: ' + type + '<br>' );
   } );
 
+  createTableEditor( json.data, schema );
 }
 
 $file.on( 'change', function() {

@@ -44,12 +44,14 @@ API.logic = function( req, res, next ) {
   } );
 
   var platforms = [ {
-      name: 'tef',
+      name: 'facebook',
       enabled: true,
-      invitation: false,
-      execution: true,
+      invitation: true,
+      execution: false,
       params: {
-        url: 'http://131.175.59.94:8100/'
+        clientID: '-',
+        clientSecret: '-',
+        token: '-'
       }
     }
     /*
@@ -90,7 +92,6 @@ API.logic = function( req, res, next ) {
         maxExecution: 5
       }
     }
-    */
     {
       type: 'CUSTOM',
       name: 'closeTaskOnObjectStatus'
@@ -98,6 +99,7 @@ API.logic = function( req, res, next ) {
       type: 'CUSTOM',
       name: 'closeMicroTaskOnObjectStatus'
     }
+    */
   ];
   var objects = [ {
       data: 'Numero: ' + Math.random()
@@ -127,7 +129,7 @@ API.logic = function( req, res, next ) {
 
 
   var job = new Job( {
-    name: 'Test Job',
+    name: 'Test Job 2',
     description: '# Hello\n## moto\n`var volo="io"`'
   } );
   job.save();
@@ -168,11 +170,14 @@ API.logic = function( req, res, next ) {
     if ( err ) return next( err );
 
     log.trace( 'Results are: %j', results );
+    /*
     task.clone( domain.bind( function( err, clonedTask ) {
       if ( err ) return next( err );
 
       res.send( clonedTask );
     } ) );
+    */
+    return res.send( results );
   } );
 };
 

@@ -44,8 +44,7 @@ function linkAccountToUser( req, token, tokenSecret, profile, done ) {
 
 
   // Check if the account and/or the user is present and create it
-  var checkAccount = function( err, user ) {
-    if ( err ) return done( err );
+  var checkAccount = function( user ) {
 
     log.trace( 'User is logged? %s', req.isAuthenticated() );
 
@@ -124,19 +123,8 @@ function linkAccountToUser( req, token, tokenSecret, profile, done ) {
     } );
   };
 
-  // Check if user is logged
-  if ( !req.isAuthenticated() ) {
-    // Not logged in, search for a user with the specified account
-    log.trace( 'Find %s, %s', profile.provider, profile.id );
-    return User.findByAccountId(
-      profile.provider,
-      profile.id,
-      req.wrap( checkAccount )
-    );
-  } else {
-    // Check if the user has the account associated
-    return checkAccount( null, req.user );
-  }
+  // Check if the user is presest or must be added/created
+  return checkAccount( req.user );
 }
 
 function configPassport( callback ) {

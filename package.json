@@ -4,7 +4,9 @@
   "private": true,
   "scripts": {
     "start": "node cs.js | bunyan -o short",
-    "debug": "node --debug cs.js | bunyan -o short"
+    "debug": "node --debug cs.js | bunyan -o short",
+    "debug-brk": "node --debug-brk cs.js | bunyan -o short",
+    "dev": "nodemon cs.js | bunyan -o short"
   },
   "dependencies": {
     "express": "3.x",
