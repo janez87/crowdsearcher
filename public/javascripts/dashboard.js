@@ -1,8 +1,9 @@
 /* global stats, Highcharts */
 function toUTC( dateString ) {
   var date = new Date( dateString );
-  return Date.UTC( date.getUTCFullYear(), date.getUTCMonth() - 1, date.getUTCDate(), date.getUTCHours(), date.getUTCMinutes(), date.getUTCSeconds(), date.getUTCMilliseconds() );
-  //return date;
+
+  return -date.getTimezoneOffset() * 60000 + Date.UTC( date.getUTCFullYear(), date.getUTCMonth() - 1, date.getUTCDate(), date.getUTCHours(), date.getUTCMinutes(), date.getUTCSeconds(), date.getUTCMilliseconds() );
+
 }
 
 var colors = {
@@ -115,7 +116,7 @@ function drawActiveVsClosed( activeExecutions, closedObjects ) {
       min: toUTC( stats.start ),
       //max: toUTC( stats.end ),
       plotLines: [ {
-        value: toUTC( stats.end ),
+        //value: toUTC( stats.end ),
         color: 'red',
         width: 2,
         label: {
@@ -531,6 +532,7 @@ var closedObjectList = [];
 val = 0;
 $.each( execList, function() {
   var exec = this;
+  console.log( exec.createdDate );
   activeExecutions.push( {
     date: toUTC( exec.createdDate ),
     value: 1,
