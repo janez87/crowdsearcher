@@ -2,29 +2,77 @@ extends ./layout
 
 block append css
   style(type='text/css').
-    .panel {
-      margin-bottom: 0;
-      border: none;
-      box-shadow: none;
+    .condition:first-child .logic-operator {
+      display: none;
+    }
+    
+    .condition .btn-add {
+      display: none;
+    }
+    .condition:last-child .btn-add {
+      display: inline-block;
+    }
+
+    .condition .btn-remove {
+    }
+    .condition:last-child .btn-remove {
+      display: none;
     }
 
 block append lateScripts
   script.
-    $( '#action' ).change( function() {
-      $( '#actions .collapse' ).slideUp();
-      $( '#'+this.value ).slideDown();
+    var $conditions = $( '#conditions' );
+    var $conditionList = $( '#condition_list' );
+    $conditions.on( 'click', '.condition .btn-add', function() {
+      var $template = $( '#template' ).clone();
+      $template.attr( 'id', null );
+      $template.find( 'select' ).attr( 'selectedIndex', null );
+      $template.find( '.value' ).val( null );
+      $conditions.append( $template );
     } );
-    $( '#btn_add_rule' ).click( function() {
-      var $li = $( 'li' );
-      $li.addClass( 'list-group-item' );
-      var when = $( '#when' ).val();
-      var when_op = $( '#when_op' ).val();
-      var when_val = $( '#when_val' ).val();
-      $li.text( when+when_op+when_val );
+    $conditions.on( 'click', '.condition .btn-remove', function( evt ) {
+      $( this ).closest( '.condition' ).remove();
+    } );
 
-      console.log( when, when_op, when_val );
-      $( '#selected_rules' ).append( $li );
+    $( '#add_rule' ).click( function() {
+      var rule = {
+        when: [],
+        'do': {
+          action: '',
+          params: {}
+        }
+      };
+
+      // Conditions
+      $conditions.find( '.condition' ).each( function( idx) {
+        var condition = {};
+        condition.condition = $( '.event', this ).val();
+        condition.operator = $( '.operator', this ).val();
+        // Possible unsafe
+        condition.value = parseFloat( $( '.value', this ).val() );
+        if( idx!=0 )
+          condition.logicOperator = $( '.logic-operator', this ).val();
+
+        rule.when.push( condition );
+      } );
+
+      // Action
+      rule[ 'do' ].action = $( '#action' ).val();
+
+      // Create list item
+      var $li = $( '<li></li>' );
+      $li.addClass( 'list-group-item' );
+      $li.append( '<pre>'+JSON.stringify( rule, null, 2 )+'</pre>' )
+      $conditionList.append( $li );
     } );
+
+    $( '#action' ).change( function() {
+      var val = this.value;
+      $( '.action-config' ).hide();
+      $( '#action_'+val+'_config' ).show();
+    } );
+
+
 
 block content
 
@@ -32,95 +80,87 @@ block content
     .col-md-6
       h2 Adaptation rule:
 
-      table.table.table-condensed.table-bordered
-        thead: tr
-          th: b WHEN:
-      form.form-horizontal
-        .form-group
-          label.col-sm-2.control-label WHEN:
-          #template
-            .col-sm-4
-              select.form-control(title='Selected the condition')
-                option None
-                optgroup(label='Task')
-                  option(value='Task.quality') Task.quality
-                  option(value='Task.#executions') Task.#executions
-                  option(value='Task.#closedExecutions') Task.#closedExecutions
-                  option(value='Task.#invalidExecutions') Task.#invalidExecutions
-                  option(value='Task.activeTime') Task.activeTime
-                  option(value='Task.idleTime') Task.idleTime
-                  option(value='Task.#openObjects') Task.#openObjects
-                  option(value='Task.#closedObjects') Task.#closedObjects
-
-                optgroup(label='Object')
-                  option(value='Object.quality') Object.quality
-                  option(value='Object.#executions') Object.#executions
-                  option(value='Object.#closedExecutions') Object.#closedExecutions
-                  option(value='Object.#invalidExecutions') Object.#invalidExecutions
-                  option(value='Object.#answers') Object.#answers
-
-                optgroup(label='Performer')
-                  option(value='Performer.quality') Performer.quality
-                  option(value='Performer.#executions') Performer.#executions
-                  option(value='Performer.#closedExecutions') Performer.#closedExecutions
-                  option(value='Performer.#invalidExecutions') Performer.#invalidExecutions
-                  option(value='Performer.idleTime') Performer.idleTime
-                  option(value='Performer.activeTime') Performer.activeTime
-
-                optgroup(label='Platform')
-                  option(value='Platform.quality') Platform.quality
-                  option(value='Platform.#executions') Platform.#executions
-                  option(value='Platform.#closedExecutions') Platform.#closedExecutions
-                  option(value='Platform.#invalidExecutions') Platform.#invalidExecutions
-                  option(value='Platform.idleTime') Platform.idleTime
-                  option(value='Platform.activeTime') Platform.activeTime
-
-                optgroup(label='Community')
-                  option(value='Community.quality') Community.quality
-                  option(value='Community.#executions') Community.#executions
-                  option(value='Community.#closedExecutions') Community.#closedExecutions
-                  option(value='Community.#invalidExecutions') Community.#invalidExecutions
-                  option(value='Community.idleTime') Community.idleTime
-                  option(value='Community.activeTime') Community.activeTime
-            .col-sm-2
-              select.form-control(title='Select the operator for the condition')
-                option(value='>') &gt;
-                option(value='<') &lt;
-                option(value='<=') &lt;=
-                option(value='>=') &gt;=
-            .col-sm-3
-              input.form-control(type='number',title='Insert the value')
-            .col-sm-1
-              button(type='button').btn.btn-success.btn-sm
-                i.fa.fa-plus
-        .form-group
-          label.col-sm-2.control-label(for='action') DO:
-          .col-sm-10
-            select#action.form-control(data-parent='#actions')
+      h3 WHEN:
+      #conditions
+        #template.row.condition
+          .col-md-2
+            select.logic-operator.form-control(title='Logic operator')
+              option(value='AND') &amp;&amp;
+              option(value='OR') ||
+          .col-md-3
+            select.event.form-control(title='Selected the condition')
               option None
-              option(value='createTask') createTask
-              option(value='addOperation') addOperation
-              option(value='plan') plan
-              option(value='invite') invite
-              option(value='replan') replan
-              option(value='reinvite') reinvite
-      #actions
-        .panel: div.collapse(id='createTask')
-          h3 Configure params for createTask
-        .panel: div.collapse(id='addOperation')
-          h3 Configure params for addOperation
-        .panel: div.collapse(id='plan')
-          h3 Configure params for plan
-        .panel: div.collapse(id='invite')
-          h3 Configure params for invite
-        .panel: div.collapse(id='replan')
-          h3 Configure params for replan
-        .panel: div.collapse(id='reinvite')
-          h3 Configure params for reinvite
+              optgroup(label='Task')
+                option(value='Task.quality') Task.quality
+                option(value='Task.#executions') Task.#executions
+                option(value='Task.#closedExecutions') Task.#closedExecutions
+                option(value='Task.#invalidExecutions') Task.#invalidExecutions
+                option(value='Task.activeTime') Task.activeTime
+                option(value='Task.idleTime') Task.idleTime
+                option(value='Task.#openObjects') Task.#openObjects
+                option(value='Task.#closedObjects') Task.#closedObjects
+
+              optgroup(label='Object')
+                option(value='Object.quality') Object.quality
+                option(value='Object.#executions') Object.#executions
+                option(value='Object.#closedExecutions') Object.#closedExecutions
+                option(value='Object.#invalidExecutions') Object.#invalidExecutions
+                option(value='Object.#answers') Object.#answers
+
+              optgroup(label='Performer')
+                option(value='Performer.quality') Performer.quality
+                option(value='Performer.#executions') Performer.#executions
+                option(value='Performer.#closedExecutions') Performer.#closedExecutions
+                option(value='Performer.#invalidExecutions') Performer.#invalidExecutions
+                option(value='Performer.idleTime') Performer.idleTime
+                option(value='Performer.activeTime') Performer.activeTime
+
+              optgroup(label='Platform')
+                option(value='Platform.quality') Platform.quality
+                option(value='Platform.#executions') Platform.#executions
+                option(value='Platform.#closedExecutions') Platform.#closedExecutions
+                option(value='Platform.#invalidExecutions') Platform.#invalidExecutions
+                option(value='Platform.idleTime') Platform.idleTime
+                option(value='Platform.activeTime') Platform.activeTime
+
+              optgroup(label='Community')
+                option(value='Community.quality') Community.quality
+                option(value='Community.#executions') Community.#executions
+                option(value='Community.#closedExecutions') Community.#closedExecutions
+                option(value='Community.#invalidExecutions') Community.#invalidExecutions
+                option(value='Community.idleTime') Community.idleTime
+                option(value='Community.activeTime') Community.activeTime
+          .col-md-2
+            select.operator.form-control(title='Select the operator for the condition')
+              option(value='>') &gt;
+              option(value='<') &lt;
+              option(value='<=') &lt;=
+              option(value='>=') &gt;=
+              option(value='==') ==
+          .col-md-3
+            input.value.form-control(type='number',title='Insert the value')
+          .col-md-2.text-right
+            button(type='button',title='Add one more condition').btn.btn-success.btn-sm.btn-add
+              i.fa.fa-plus
+            button(type='button',title='Remove current condition').btn.btn-danger.btn-sm.btn-remove
+              i.fa.fa-minus
+      h3 DO
+      select#action.form-control(title='Actions')
+        option None
+        option(value='replan') Re-plan
+        option(value='migrate') Migrate
+      
+      #configurations
+        .action-config#action_replan_config(style='display: none;')
+          h3 Re-plan parameters
+        .action-config#action_migrate_config(style='display: none;')
+          h3 Migrate parameters
+      hr
+
 
       .text-right
-        button#btn_add_rule(type='button').btn.btn-success Add 
+        button#add_rule(type='button').btn.btn-success Add rule 
           i.fa.fa-plus
     .col-md-6
-      h2 Selected rules
-      ul#selected_rules.list-group
+      h2 Adaptation rules in use:
+      ul#condition_list.list-group

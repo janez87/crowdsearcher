@@ -1,17 +1,19 @@
 // Load libraries
-var nconf = require('nconf');
-var FB = require('fb');
+var nconf = require( 'nconf' );
+var FB = require( 'fb' );
 var CS = require( '../../core' );
 
 // Create a custom logger
-var log = CS.log.child( { component: 'Facebook' } );
+var log = CS.log.child( {
+  component: 'Facebook'
+} );
 
 
 function invite( task, platform, callback ) {
   var params = platform.params;
 
   // Task url
-  var url = nconf.get('webserver:externalAddress') + nconf.get('api:urlPath') + '/landing?task='+task._id;
+  var url = nconf.get( 'webserver:externalAddress' ) + nconf.get( 'api:urlPath' ) + '/landing?task=' + task._id;
 
   var message = 'I just posted a task on CrowdSearcher';
 
@@ -29,8 +31,8 @@ function invite( task, platform, callback ) {
       link: url
     } ],
     access_token: params.token
-  }, function ( res ) {
-    if( res.error )
+  }, function( res ) {
+    if ( res.error )
       return callback( new Error( res.error.message || res.error.code ) );
 
     log.trace( 'Invite sent' );
@@ -40,10 +42,14 @@ function invite( task, platform, callback ) {
 }
 
 var Platform = {
+  name: 'Facebook',
+  description: 'Post on your wall an invitation to the task.',
+  image: 'http://www.africawildtruck.com/upload/in_evidenza/facebook-icon.png',
+
   invite: invite,
-  params : {
-    clientID:'string',
-    clientSecret:'string',
+  params: {
+    clientID: 'string',
+    clientSecret: 'string',
     token: {
       type: 'string',
       'default': ''

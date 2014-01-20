@@ -420,7 +420,7 @@ function handleNotification( req, res ) {
 var Platform = {
   name: 'Amazon Mechanical Turk',
   description: 'AMT platform',
-  image: 'amt.jpg',
+  image: 'http://69.195.111.162/img/soc/amazon.png',
 
   hooks: {
     'OPEN_TASK': onOpenTask,

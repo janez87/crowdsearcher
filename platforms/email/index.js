@@ -1,11 +1,13 @@
 // Load libraries
-var nconf = require('nconf');
-var nodemailer = require('nodemailer');
-var async = require('async');
+var nconf = require( 'nconf' );
+var nodemailer = require( 'nodemailer' );
+var async = require( 'async' );
 var CS = require( '../../core' );
 
 // Create a custom logger
-var log = CS.log.child( { component: 'Email' } );
+var log = CS.log.child( {
+  component: 'Email'
+} );
 
 
 
@@ -25,7 +27,7 @@ function invite( task, platform, callback ) {
 
   // init SMTP
   var smtp;
-  if( service && service.trim()!=='' ){
+  if ( service && service.trim() !== '' ) {
     log.trace( 'Creating the smtp connection to the service %s', service );
 
     smtp = nodemailer.createTransport( service, {
@@ -51,7 +53,7 @@ function invite( task, platform, callback ) {
 
   // Generate URL
   var url = nconf.get( 'webserver:externalAddress' );
-  url += 'api/landing?task='+task.id;
+  url += 'api/landing?task=' + task.id;
 
   // The actual Sandmail
   function send( email, cb ) {
@@ -60,12 +62,12 @@ function invite( task, platform, callback ) {
     var mail = {
       from: from,
       to: email,
-      html: '<p>I posted a task on the CrowdSearcher</p></br><p>Click <a href="'+url+'"  >here</a> to execute it</p>',
+      html: '<p>I posted a task on the CrowdSearcher</p></br><p>Click <a href="' + url + '"  >here</a> to execute it</p>',
       subject: 'CrowdSearcher task'
     };
 
     smtp.sendMail( mail, function( err, status ) {
-      if( err ) {
+      if ( err ) {
         log.error( err );
         return cb();
       }
@@ -76,13 +78,17 @@ function invite( task, platform, callback ) {
   }
 
   async.each( emails, send, function( err ) {
-    if( err ) return callback( err );
+    if ( err ) return callback( err );
     smtp.close();
     return callback();
   } );
 }
 
 var Platform = {
+  name: 'E-mail',
+  description: 'Invite by sending an e-mail to performers.',
+  image: null,
+
   invite: invite,
   params: {
     emails: [ 'string' ],

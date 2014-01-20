@@ -30,7 +30,7 @@ var TaskType = {
   description: 'Categorize each object with 1 category.',
   template: fs.readFileSync( __dirname + '/template.hbs', 'utf8' ),
   defaults: {},
-  useCases: [ 'Classification' ],
+  useCases: [ 'Classification', 'Ranking' ],
   params: {
     categories: {
       type: [ 'string' ],

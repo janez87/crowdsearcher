@@ -1,20 +1,22 @@
 // Load libraries
-var _ = require('underscore');
+var _ = require( 'underscore' );
 var domain = require( 'domain' );
-var url = require('url');
-var util = require('util');
+var url = require( 'url' );
+var util = require( 'util' );
 var CS = require( '../../core' );
 
 // Create a custom logger
-var log = CS.log.child( { component: 'TEF platform' } );
+var log = CS.log.child( {
+  component: 'TEF platform'
+} );
 
 
 // Custom error
 // ---
-var CSError = require('../../core/error');
+var CSError = require( '../../core/error' );
 var TefPlatformError = function( id, message ) {
   /* jshint camelcase: false */
-  TefPlatformError.super_.call( this, id, message);
+  TefPlatformError.super_.call( this, id, message );
 };
 
 util.inherits( TefPlatformError, CSError );
@@ -38,8 +40,8 @@ function execute( task, microtask, execution, platform, callback ) {
 
   // Create the full TEF url to call
   var tefInterface = params.interface || 'default';
-  var tefUrl = url.resolve( params.url, tefInterface )+'/index.html';
-  tefUrl += '?execution='+execution.id;
+  var tefUrl = url.resolve( params.url, tefInterface ) + '/index.html';
+  tefUrl += '?execution=' + execution.id;
 
   log.trace( 'Computed TEF url: %s', tefUrl );
 
@@ -50,16 +52,21 @@ function execute( task, microtask, execution, platform, callback ) {
 function check( config, callback ) {
   log.trace( 'Checking TEF parameters' );
 
-  if( !_.isObject( config ) )
+  if ( !_.isObject( config ) )
     return callback( new TefPlatformError( TefPlatformError.MISSING_PARAMETERS, 'Missing "params" object' ) );
 
-  if( !_.isString( config.url ) )
+  if ( !_.isString( config.url ) )
     return callback( new TefPlatformError( TefPlatformError.WRONG_PARAMETERS, 'Missing or wrong "url" parameter' ) );
 
   return callback();
 }
 
 var Platform = {
+  name: 'Task Execution Framework',
+  description: 'A *simple* web-server with default interfaces for executing simple Tasks.',
+  image: null,
+
+
   execute: execute,
   check: check,
 
