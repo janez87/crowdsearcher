@@ -221,7 +221,8 @@ config.once( 'ready', function configReady() {
 
   // Configure the API's
   try {
-    require( './routes/api' )( app );
+    var bindApi = require( './routes/api' );
+    bindApi( app );
   } catch ( err ) {
     log.error( err, 'API binding error' );
     return config.emit( 'error', err );

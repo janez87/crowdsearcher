@@ -223,7 +223,7 @@ var pageMap = {
 var pageList = [
   'object_declaration',
   'task_type',
-  'add_operations',
+  //'add_operations',
   'execution',
   'invitation',
   'adaptation',
@@ -233,11 +233,13 @@ exports.wizard = function( req, res, next ) {
   var page = req.params.page;
 
   var idx = _.indexOf( pageList, page );
-  if ( idx === -1 )
-    return next( new Error( 'Wrong page name: ' + page ) );
-
   var nextPage = pageList[ idx + 1 ];
   var prevPage = pageList[ idx - 1 ];
+  if ( page === 'add_operations' ) {
+    prevPage = 'task_type';
+    nextPage = 'execution';
+  }
+
 
   r( baseUrl + 'configuration', function( err, resp, config ) {
     if ( err ) return next( err );

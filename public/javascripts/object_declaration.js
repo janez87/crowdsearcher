@@ -4,6 +4,16 @@ $file.on( 'click', function() {
   $file.attr( 'accept', $fileType.val() );
 } );
 
+function dataPreview( data, type ) {
+  var html;
+  if ( type === 'Object' ) {
+    html = '<pre>' + JSON.stringify( data, null, 2 ) + '</pre>';
+  } else {
+    html = '' + data;
+  }
+  return html;
+}
+
 function createTableEditor( data, schema ) {
   var $header = $( '#header' );
 
@@ -37,6 +47,17 @@ function createTableEditor( data, schema ) {
   } );
 
   var $data = $( '#data' );
+  for ( var i = 0; i < 5 && i < data.length; i++ ) {
+    var $tr = $( '<tr></tr>' );
+    $.each( schema, function( prop, type ) {
+      var $td = $( '<td></td>' );
+      var cell = data[ i ][ prop ];
+      $td.attr( 'title', JSON.stringify( cell, null, 2 ) );
+      $td.html( dataPreview( cell, type ) );
+      $tr.append( $td );
+    } );
+    $data.append( $tr );
+  }
 
   // Print only 5 rows
 }
@@ -76,7 +97,7 @@ function loadJSON( data ) {
   var row = json.data[ 0 ];
   var schema = {};
 
-  $.each( row.data, function( key, val ) {
+  $.each( row, function( key, val ) {
     var type = 'string';
     type = toString.call( val ).split( ' ' ).splice( -1 )[ 0 ].slice( 0, -1 );
     if ( !isNaN( Date.parse( val ) ) ) type = 'Date';

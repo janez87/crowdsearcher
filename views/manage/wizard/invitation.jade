@@ -2,19 +2,39 @@ extends ./layout
 
 include ../../includes/params
 
+block append lateScripts
+  script.
+    var $platformConfigs = $( '.platform-config' );
+    var $platforms = $( '.platform' );
+    $platforms.on( 'click', function() {
+      var $this = $( this );
+      $platforms.removeClass( 'active' );
+      $this.addClass( 'active' );
+      $this = $( this );
+      var id = $this.data( 'platform' );
+      $platformConfigs.hide();
+      $( '#plat_'+id ).show();
+    } );
+
 block append css
   style(type='text/css').
-    .panel {
-      margin-bottom: 0;
-      border: none;
-      box-shadow: none;
-    }
-    .media {
-      border: 1px solid #ddd;
+    .platform {
+      cursor: pointer;
+      border: 1px solid #ccc;
       border-top: none;
-      padding: 10px 5px;
       border-bottom-left-radius: 5px;
       border-bottom-right-radius: 5px;
+      padding: 5px 10px;
+    }
+    .platform:hover {
+      background-color: #efefef;
+    }
+    .platform.active {
+      background-color: #ccc;
+      border-color: #999;
+    }
+    .platform.active:hover {
+      background-color: #ddd;
     }
     img.media-object {
       width: 64px;
@@ -24,30 +44,28 @@ block append css
 block content
   .row
     .col-md-6
-      h2 Select invitation platform
+      h2 Select execution platform
       for platform, platId in config.platforms
         if platform.invitation
-          .media
+          .media.platform(data-platform=platId)
             .pull-left
               if platform.image
                 img.media-object(src=platform.image,alt=platform.name)
               else
-                img.media-object(src='http://placehold.it/64&text='+platform.name,alt=platform.name)
+                img.media-object(alt=platform.name,
+                  src='http://placehold.it/64&text='+platId)
             
             .media-body
               h4.media-heading= platform.name
               if platform.description && platform.description.length>0
-                != md(platform.description)
-
-              .text-right
-                a(data-toggle='collapse',
-                  data-parent='#platforms',
-                  href='#plat_'+platId).btn.btn-success.btn-add-platform Select
+                p!= md(platform.description)
+              else
+                p.text-muted No description present.
     .col-md-6
-      #platforms
-        for platform, platId in config.platforms
-          if platform.invitation
-            .panel: .collapse(id='plat_'+platId)
-              h3 Configure platform #{platform.name}
-              if _.size( platform.params )>0
-                +printParamsInput( platform.params )
+      for platform, platId in config.platforms
+        if platform.invitation
+          .platform-config(id='plat_'+platId,
+            style='display: none;')
+            h3 Configure #{platform.name}
+            if _.size( platform.params )>0
+              +printParamsInput( platform.params )

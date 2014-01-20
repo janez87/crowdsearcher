@@ -5,19 +5,26 @@ block header
     for page, idx in pageList
       li(class=idx===index? 'active':'')
         a.text-muted= pageMap[page]
-
-
-block prepend footer
-  .row
-    .col-md-6
-      if prevPage
-        a(href='manage/wizard/'+prevPage).btn.btn-primary Prev
-      else
-        a(href='#', disabled).btn.btn-default Prev
-    .col-md-6.text-right
-      if nextPage
-        a(href='manage/wizard/'+nextPage).btn.btn-primary Next
-      else
-        a(href='#', disabled).btn.btn-default Next
   hr
+  .row
+    .col-md-4
+      .btn-group
+        if prevPage
+          a(href='manage/wizard/'+prevPage).btn.btn-primary Prev
+        else
+          a(href='#', disabled).btn.btn-default Prev
+          
+        if pageList[index]=='execution'
+          a(href='manage/wizard/add_operations').btn.btn-default Add operations
+    .col-md-4.text-center
+      h2= pageMap[ pageList[index] ]
+    .col-md-4.text-right
+      .btn-group
+        if pageList[index]=='task_type'
+          a(href='manage/wizard/add_operations').btn.btn-default Add operations
 
+        if nextPage
+          a(href='manage/wizard/'+nextPage).btn.btn-primary Next
+        else
+          a(href='#', disabled).btn.btn-default Next
+  hr
