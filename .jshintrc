@@ -1,24 +1,29 @@
 {
   "bitwise": true,
   "camelcase": true,
+  "curly": false,
   "eqeqeq": true,
-  "forin": false,
+  "freeze": true,
+  "forin": true,
   "immed": true,
+  "indent": 2,
+  "latedef": true,
   "newcap": true,
   "noarg": true,
+  "noempty": true,
   "nonew": true,
+  "plusplus": false,
   "quotmark": "single",
   "undef": true,
   "unused": true,
   "trailing": true,
-  "maxdepth": 3,
-
+  "maxdepth": 4,
   "debug": true,
-  "shadow": true,
+  "eqnull": true,
+  "esnext": true,
 
   "devel": true,
   "node": true,
 
-
-  "indent": 2
+  "loopfunc": true
 }

@@ -23,20 +23,28 @@ block append lateScripts
   script.
     var $conditions = $( '#conditions' );
     var $conditionList = $( '#condition_list' );
-    $conditions.on( 'click', '.condition .btn-add', function() {
-      var $template = $( '#template' ).clone();
-      $template.attr( 'id', null );
-      $template.find( 'select' ).attr( 'selectedIndex', null );
-      $template.find( '.value' ).val( null );
-      $conditions.append( $template );
+    var $template = $( '#template' );
+    var $actions = $( '#actions' );
+    var $scope = $( '#scope' );
+
+    $template.on( 'click', '.btn-add', function( evt ) {
+      var $clonedTemplate = $template.clone();
+      
+      $clonedTemplate.attr( 'id', null );
+      $clonedTemplate.find( 'select' ).attr( 'selectedIndex', null );
+      $clonedTemplate.find( '.value' ).val( null );
+
+      $conditions.prepend( $clonedTemplate );
     } );
-    $conditions.on( 'click', '.condition .btn-remove', function( evt ) {
+    
+    $conditions.on( 'click', '.btn-remove', function( evt ) {
       $( this ).closest( '.condition' ).remove();
     } );
 
     $( '#add_rule' ).click( function() {
       var rule = {
-        when: [],
+        'scope': '',
+        'when': [],
         'do': {
           action: '',
           params: {}
@@ -57,7 +65,8 @@ block append lateScripts
       } );
 
       // Action
-      rule[ 'do' ].action = $( '#action' ).val();
+      rule[ 'do' ].action = $actions.val();
+      rule.scope = $scope.val();
 
       // Create list item
       var $li = $( '<li></li>' );
@@ -66,11 +75,27 @@ block append lateScripts
       $conditionList.append( $li );
     } );
 
-    $( '#action' ).change( function() {
+    $actions.change( function() {
       var val = this.value;
       $( '.action-config' ).hide();
       $( '#action_'+val+'_config' ).show();
     } );
+
+    $scope.change( function() {
+      var scope = this.value;
+      $conditions.find( '.event' ).val( 'None' );
+      $conditions.find( '.event :not(.'+scope+')' ).hide();
+      $conditions.find( '.event .'+scope ).show();
+      
+      $actions.val( 'None' );
+      $actions.find( ':not(.'+scope+')' ).hide();   
+      $actions.find( '.'+scope ).show();
+    } );
+
+    $scope.change();
+    $actions.change();
+
+
 
 
 
@@ -79,7 +104,14 @@ block content
   .row
     .col-md-6
       h2 Adaptation rule:
-
+      
+      h3 SCOPE:
+      select#scope.form-control(title='Selected the scope for the condition')
+        option None
+        option(value='task') Task
+        option(value='object') Object
+        option(value='performer') Performer
+      
       h3 WHEN:
       #conditions
         #template.row.condition
@@ -89,47 +121,36 @@ block content
               option(value='OR') ||
           .col-md-3
             select.event.form-control(title='Selected the condition')
-              option None
-              optgroup(label='Task')
-                option(value='Task.quality') Task.quality
-                option(value='Task.#executions') Task.#executions
-                option(value='Task.#closedExecutions') Task.#closedExecutions
-                option(value='Task.#invalidExecutions') Task.#invalidExecutions
-                option(value='Task.activeTime') Task.activeTime
-                option(value='Task.idleTime') Task.idleTime
-                option(value='Task.#openObjects') Task.#openObjects
-                option(value='Task.#closedObjects') Task.#closedObjects
+              option.task.object.performer None
+              option.task.object.performer(value='quality') Quality
 
-              optgroup(label='Object')
-                option(value='Object.quality') Object.quality
-                option(value='Object.#executions') Object.#executions
-                option(value='Object.#closedExecutions') Object.#closedExecutions
-                option(value='Object.#invalidExecutions') Object.#invalidExecutions
-                option(value='Object.#answers') Object.#answers
+              option.task.object.performer(value='executions') Total executions
+              option.task.object.performer(value='executions.closed') Closed executions
+              option.task.object.performer(value='executions.invalid') Invalid executions
+              
+              option.object(value='answers') Total answers
+              
+              option.task(value='time.active') Time active
+              option.task(value='time.idle') Time idle
+              
+              option.task(value='objects') Total objects
+              option.task(value='objects.closed') Closed objects
+              option.task(value='objects.invalid') Invalid objects
+              
+              optgroup.task(label='Current platform')
+                option.task(value='current.quality') Quality
+                
+                option.task(value='current.executions') Total executions
+                option.task(value='current.executions.closed') Closed executions
+                option.task(value='current.executions.invalid') Invalid executions
+                
+                option.task(value='current.time.active') Time active
+                option.task(value='current.time.idle') Time idle
+                
+                option.task(value='current.objects') Total objects
+                option.task(value='current.objects.closed') Closed objects
+                option.task(value='current.objects.invalid') Invalid objects
 
-              optgroup(label='Performer')
-                option(value='Performer.quality') Performer.quality
-                option(value='Performer.#executions') Performer.#executions
-                option(value='Performer.#closedExecutions') Performer.#closedExecutions
-                option(value='Performer.#invalidExecutions') Performer.#invalidExecutions
-                option(value='Performer.idleTime') Performer.idleTime
-                option(value='Performer.activeTime') Performer.activeTime
-
-              optgroup(label='Platform')
-                option(value='Platform.quality') Platform.quality
-                option(value='Platform.#executions') Platform.#executions
-                option(value='Platform.#closedExecutions') Platform.#closedExecutions
-                option(value='Platform.#invalidExecutions') Platform.#invalidExecutions
-                option(value='Platform.idleTime') Platform.idleTime
-                option(value='Platform.activeTime') Platform.activeTime
-
-              optgroup(label='Community')
-                option(value='Community.quality') Community.quality
-                option(value='Community.#executions') Community.#executions
-                option(value='Community.#closedExecutions') Community.#closedExecutions
-                option(value='Community.#invalidExecutions') Community.#invalidExecutions
-                option(value='Community.idleTime') Community.idleTime
-                option(value='Community.activeTime') Community.activeTime
           .col-md-2
             select.operator.form-control(title='Select the operator for the condition')
               option(value='>') &gt;
@@ -145,10 +166,16 @@ block content
             button(type='button',title='Remove current condition').btn.btn-danger.btn-sm.btn-remove
               i.fa.fa-minus
       h3 DO
-      select#action.form-control(title='Actions')
+      select#actions.form-control(title='Actions')
         option None
-        option(value='replan') Re-plan
-        option(value='migrate') Migrate
+        option.task(value='invite') Re-invite
+        option.task(value='replan') Re-plan
+        option.task(value='migrate') Migrate
+        
+        option.object(value='redo') Redo
+        option.object(value='cancel') Cancel
+        
+        option.performer(value='ban') Ban
       
       #configurations
         .action-config#action_replan_config(style='display: none;')

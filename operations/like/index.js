@@ -62,7 +62,7 @@ function create( data, operation, callback ) {
 var Like = {
   name: 'Like',
   description: 'Provide a preference on a set of objects',
-  image: '',
+  image: null,
 
   checkData: checkData,
   create: create

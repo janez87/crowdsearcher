@@ -247,11 +247,14 @@ exports.wizard = function( req, res, next ) {
     res.render( 'manage/wizard/' + page, {
       title: pageMap[ page ],
       config: config,
+
       pageList: pageList,
       pageMap: pageMap,
       index: idx,
       nextPage: nextPage,
-      prevPage: prevPage
+      prevPage: prevPage,
+
+      status: req.session.wizard
     } );
   } );
 };

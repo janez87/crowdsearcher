@@ -17,7 +17,8 @@ block header
         if pageList[index]=='execution'
           a(href='manage/wizard/add_operations').btn.btn-default Add operations
     .col-md-4.text-center
-      h2= pageMap[ pageList[index] ]
+      block wizardTitle
+        h2= pageMap[ pageList[index] ]
     .col-md-4.text-right
       .btn-group
         if pageList[index]=='task_type'
