@@ -9,8 +9,7 @@ var log = CS.log.child( {
 } );
 
 
-function invite( task, platform, callback ) {
-  var params = platform.params;
+function invite( params, task, data, callback ) {
 
   // Task url
   var url = nconf.get( 'webserver:externalAddress' ) + nconf.get( 'api:urlPath' ) + '/landing?task=' + task._id;
@@ -42,11 +41,14 @@ function invite( task, platform, callback ) {
 }
 
 var Platform = {
-  name: 'Facebook',
+  name: 'facebook',
   description: 'Post on your wall an invitation to the task.',
   image: 'http://www.africawildtruck.com/upload/in_evidenza/facebook-icon.png',
-
   invite: invite,
+  hooks: {
+    'OPEN_TASK': invite
+  },
+
   params: {
     clientID: 'string',
     clientSecret: 'string',
