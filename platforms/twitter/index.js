@@ -43,6 +43,9 @@ var Platform = {
   image: null,
 
   invite: invite,
+  hooks: {
+    'OPEN_TASK': invite
+  },
   params: {
     clientID: {
       type: 'string',
