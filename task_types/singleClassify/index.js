@@ -29,16 +29,67 @@ var TaskType = {
   name: 'Single classify',
   description: 'Categorize each object with 1 category.',
   template: fs.readFileSync( __dirname + '/template.hbs', 'utf8' ),
-  defaults: {},
+  defaults: {
+    name: '$name$',
+    description: '$description$'
+    operation: {
+      name: 'classify',
+      params: {
+        categories: '$categories$',
+        label: 'mainClassify'
+      }
+    },
+    splitting: {
+      name: 'EQUI_SPLIT',
+      params: {
+        objectsNumber: '$objectsNumber$',
+        shuffle: true
+      }
+    },
+    assignment: {
+      name: 'RANDOM'
+    },
+    execution: {
+      name: 'RANDOM',
+    },
+    rules: [ {
+        name: 'classifyMajority',
+        event: 'END_EXECUTION'.
+        params: {
+          operation: 'mainClassify',
+          answers: '$asnwers$',
+          agreement: '$agreement$'
+        },
+        {
+          name: 'aggregateMajority',
+          event: 'END_EXECUTION',
+          params: {
+            mode: 'SPECIFIC',
+            operations: 'mainClassify'
+          }
+
+        }
+      }
+
+    ]
+  },
   useCases: [ 'Classification', 'Ranking' ],
   params: {
+    name: 'string',
+    description: 'string'
     categories: {
       type: [ 'string' ],
       'default': 'yes,no'
-    }
+    },
+    objectsNumber: {
+      type: 'number',
+      'default': 1
+    },
+    // possono essere calcolate in base al numero di classi?
+    answers: 'number',
+    agreement: 'number'
   }
 };
-
 
 // Export the Operation Object
 module.exports = exports = TaskType;
