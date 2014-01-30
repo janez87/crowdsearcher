@@ -32,32 +32,32 @@ var TaskType = {
   defaults: {
     name: '$name$',
     description: '$description$',
-    operation: {
+    operations: [ {
+      label: 'mainClassify',
       name: 'classify',
       params: {
         categories: '$categories$',
-        label: 'mainClassify'
       }
-    },
-    splitting: {
+    } ],
+    splittingStrategy: {
       name: 'EQUI_SPLIT',
       params: {
         objectsNumber: '$objectsNumber$',
         shuffle: true
       }
     },
-    assignment: {
+    assignmentStrategy: {
       name: 'RANDOM'
     },
-    execution: {
+    implementationStrategy: {
       name: 'RANDOM',
     },
     controlrules: [ {
       name: 'classifyMajority',
       event: 'END_EXECUTION',
       params: {
-        operation: 'mainCl∏assify',
-        answers: '$asnwers$',
+        operation: 'mainClassify',
+        answers: '$answers$',
         agreement: '$agreement$'
       }
     }, {
@@ -67,6 +67,12 @@ var TaskType = {
         mode: 'SPECIFIC',
         operations: 'mainClassify'
       }
+    }, {
+      name: 'closeMicroTaskOnObjectStatus',
+      event: 'CLOSE_OBJECT'
+    }, {
+      name: 'closeTaskOnObjectStatus',
+      event: 'CLOSE_OBJECT'
     } ]
   },
   useCases: [ 'Classification', 'Ranking' ],

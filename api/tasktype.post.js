@@ -41,13 +41,18 @@ var API = {
 API.logic = function postTask( req, res, next ) {
   var data = req.body;
 
+  //TRICK FOR TESTING
+  var job = '52ea5803596b8cdd6500000f';
+
+  log.trace( 'Retrieving the task type %s', data.name );
+
   var taskTypeImpl = CS.taskTypes[ data.name ];
 
   var defaultValues = taskTypeImpl[ 'defaults' ];
-  var objects = data.objects;
-  var params = data.params;
 
-  var task = {};
+  var objects = data.objects;
+  var platforms = data.platforms;
+  var params = data.params;
 
   defaultValues = JSON.stringify( defaultValues );
 
@@ -58,23 +63,22 @@ API.logic = function postTask( req, res, next ) {
     interpolate: delimiter
   };
 
-
   var template = _.template( defaultValues );
 
   //trick 
   for ( var k in params ) {
-    params[ k ] = JSON.stringify( params[ k ] );
+    if ( params.hasOwnProperty( k ) ) {
+      params[ k ] = JSON.stringify( params[ k ] );
+    }
   }
 
-  var task = JSON.parse( template( params ) );
+  var rawTask = JSON.parse( template( params ) );
 
-  // Temp trick to add the objects later
-  /*var objects = rawTask.objects;
+  //add the job
+  rawTask.job = job;
+
   var operations = rawTask.operations;
-  var platforms = rawTask.platforms;
-  delete rawTask.objects;
   delete rawTask.operations;
-  delete rawTask.platforms;
 
   var task = new Task( rawTask );
 
@@ -89,7 +93,7 @@ API.logic = function postTask( req, res, next ) {
 
     log.trace( 'Results are: %j', results );
     res.json( task );
-  } );*/
+  } );
 
 };
 
