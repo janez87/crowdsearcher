@@ -31,7 +31,7 @@ var TaskType = {
   template: fs.readFileSync( __dirname + '/template.hbs', 'utf8' ),
   defaults: {
     name: '$name$',
-    description: '$description$'
+    description: '$description$',
     operation: {
       name: 'classify',
       params: {
@@ -52,31 +52,27 @@ var TaskType = {
     execution: {
       name: 'RANDOM',
     },
-    rules: [ {
-        name: 'classifyMajority',
-        event: 'END_EXECUTION'.
-        params: {
-          operation: 'mainClassify',
-          answers: '$asnwers$',
-          agreement: '$agreement$'
-        },
-        {
-          name: 'aggregateMajority',
-          event: 'END_EXECUTION',
-          params: {
-            mode: 'SPECIFIC',
-            operations: 'mainClassify'
-          }
-
-        }
+    controlrules: [ {
+      name: 'classifyMajority',
+      event: 'END_EXECUTION',
+      params: {
+        operation: 'mainCl∏assify',
+        answers: '$asnwers$',
+        agreement: '$agreement$'
       }
-
-    ]
+    }, {
+      name: 'aggregateMajority',
+      event: 'END_EXECUTION',
+      params: {
+        mode: 'SPECIFIC',
+        operations: 'mainClassify'
+      }
+    } ]
   },
   useCases: [ 'Classification', 'Ranking' ],
   params: {
     name: 'string',
-    description: 'string'
+    description: 'string',
     categories: {
       type: [ 'string' ],
       'default': 'yes,no'
