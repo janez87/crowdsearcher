@@ -18,7 +18,7 @@ function onEndExecution( params, task, data, callback ) {
   var domain = require( 'domain' ).create();
   domain.on( 'error', callback );
 
-  var maxExecution = params.maxExecution;
+  var maxExecutions = params.maxExecutions;
   var execution = data.execution;
 
 
@@ -37,7 +37,7 @@ function onEndExecution( params, task, data, callback ) {
         log.trace( 'Found %s evaluations', count );
 
         // Max reached, close the object
-        if ( count === maxExecution ) {
+        if ( count === maxExecutions ) {
           log.trace( 'Limit reached, closing the object %s', objectId );
           ObjectModel.findById( objectId, domain.bind( function( err, object ) {
             if ( err ) return callback( err );
@@ -71,7 +71,7 @@ var rule = {
   //
   //
   params: {
-    maxExecution: 'number'
+    maxExecutions: 'number'
   },
 
   // ## Check rule
@@ -80,7 +80,7 @@ var rule = {
   check: function checkParams( params, done ) {
     log.trace( 'Checking parameters' );
 
-    if ( _.isUndefined( params.maxExecution ) || params.maxExecution < 0 ) {
+    if ( _.isUndefined( params.maxExecutions ) || params.maxExecutions < 0 ) {
       log.error( 'The maxExecution parameter must be an integer greater than 0' );
       return done( false );
     }
