@@ -12,7 +12,7 @@ include ../../includes/params
           option(value='',selected) None
           each operation,id in config.operations
             option(
-              data-target='#op-'+operation.name,
+              data-target='#op-'+id,
               value=id)= operation.name
         span.input-group-btn
           button.btn.btn-small.btn-success.add(
@@ -29,11 +29,11 @@ include ../../includes/params
         required)
     hr
     #operations-params
-      each operation in config.operations
-        div.collapse(id='op-'+operation.name)
+      each operation,id in config.operations
+        div.collapse(id='op-'+id)
           h4 Operation parameters
           if !_.isEmpty( operation.params ) 
-            +printParamsInput( operation.params, 'op-'+operation.name )
+            +printParamsInput( operation.params, 'op-'+id )
           else
             blockquote No parameters needed
   .col-md-6

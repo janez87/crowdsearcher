@@ -34,18 +34,21 @@ function onEndExecution( params, task, data, callback ) {
       .exec( domain.bind( function( err, count ) {
         if ( err ) return callback( err );
 
+        log.trace( 'Found %s evaluations', count );
+
         // Max reached, close the object
         if ( count === maxExecution ) {
-
-          ObjectModel.find( objectId, domain.bind( function( object, err ) {
+          log.trace( 'Limit reached, closing the object %s', objectId );
+          ObjectModel.findById( objectId, domain.bind( function( err, object ) {
             if ( err ) return callback( err );
 
-            return object.close( domain.bind( callback ) );
+            return object.close( callback );
           } ) );
+        } else {
+          // No problem, go ahead
+          return callback();
         }
 
-        // No problem, go ahead
-        return callback();
       } ) );
   };
 

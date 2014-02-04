@@ -62,7 +62,7 @@ function check( config, callback ) {
 }
 
 var Platform = {
-  name: 'Task Execution Framework',
+  name: 'TaskExecutionFramework',
   description: 'A *simple* web-server with default interfaces for executing simple Tasks.',
   image: null,
 

@@ -12,7 +12,7 @@ include ../../includes/params
           option(value='',selected) None
           each platform,id in config.platforms
             option(
-              data-target='#pl-'+platform.name,
+              data-target='#pl-'+id,
               data-enabled=''+platform.enabled,
               data-invitation=''+platform.invitation,
               data-execution=''+platform.execution,
@@ -46,11 +46,11 @@ include ../../includes/params
       label(for='platform-invitation') Invitaition
     hr
     #platforms-params
-      each platform in config.platforms
-        div.collapse(id='pl-'+platform.name)
+      each platform,id in config.platforms
+        div.collapse(id='pl-'+id)
           h4 Platform parameters
           if !_.isEmpty( platform.params ) 
-            +printParamsInput( platform.params, 'pl-'+platform.name )
+            +printParamsInput( platform.params, 'pl-'+id )
           else
             blockquote No parameters needed
   .col-md-6
