@@ -10,10 +10,10 @@ include ../../includes/params
           data-toggle='collapse',
           data-parent='#operations-params')
           option(value='',selected) None
-          each operation in config.operations
+          each operation,id in config.operations
             option(
               data-target='#op-'+operation.name,
-              value=operation.name)= operation.name
+              value=id)= operation.name
         span.input-group-btn
           button.btn.btn-small.btn-success.add(
             data-type='operation',

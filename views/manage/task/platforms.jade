@@ -10,13 +10,13 @@ include ../../includes/params
           data-toggle='collapse',
           data-parent='#platforms-params')
           option(value='',selected) None
-          each platform in config.platforms
+          each platform,id in config.platforms
             option(
               data-target='#pl-'+platform.name,
               data-enabled=''+platform.enabled,
               data-invitation=''+platform.invitation,
               data-execution=''+platform.execution,
-              value=platform.name)= platform.name
+              value=id)= platform.name
         span.input-group-btn
           button.btn.btn-small.btn-success.add(
             data-type='platform',
