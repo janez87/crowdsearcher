@@ -6,38 +6,34 @@ var CS = require( '../../core' );
 
 // Import a child logger
 var log = CS.log.child( {
-  component: 'Score TT'
+  component: 'Like TT'
 } );
 
 
-// Create the Score class
+// Create the Like class
 var CSError = CS.error;
-// Create the Score class
-var Score = function( id, message ) {
+// Create the Like class
+var Like = function( id, message ) {
   /* jshint camelcase: false */
-  Score.super_.call( this, id, message );
+  Like.super_.call( this, id, message );
 };
 // Make it subclass Error
-util.inherits( Score, CSError );
-Score.prototype.name = 'Score';
+util.inherits( Like, CSError );
+Like.prototype.name = 'Like';
 // Custom errors
-//Score.CLASSIFY_BAD_CATEGORIES = 'CLASSIFY_BAD_CATEGORIES';
 
 
 // Define the Operation Object
 var TaskType = {
-  name: 'Score',
-  description: 'Rate an object by giving a score',
+  name: 'Like',
+  description: 'Rate an object by giving a Like',
   template: fs.readFileSync( __dirname + '/template.hbs', 'utf8' ),
   defaults: {
     name: '$name$',
     description: '$description$',
     operations: [ {
-      label: 'score',
-      name: 'classify',
-      params: {
-        categories: '$categories$'
-      }
+      label: 'Like',
+      name: 'like'
     } ],
     splittingStrategy: {
       name: 'EQUI_SPLIT',
@@ -70,10 +66,6 @@ var TaskType = {
   params: {
     name: 'string',
     description: 'string',
-    categories: {
-      type: [ 'string' ],
-      'default': '1,2,3,4,5'
-    },
     objectsNumber: {
       type: 'number',
       'default': 1
