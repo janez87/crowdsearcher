@@ -1,5 +1,4 @@
 // Load libraries
-var _ = require( 'underscore' );
 var fs = require( 'fs' );
 var util = require( 'util' );
 var CS = require( '../../core' );
