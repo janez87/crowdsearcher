@@ -20,6 +20,21 @@ block append css
     }
 
 block content
+
+  //.alert.alert-info.alert-dismissable
+  .well
+    button.close(type='button',data-dismiss='alert',aria-hidden='true') &times;
+    strong Info:
+    .md.
+      The steps are:
+
+      1. Selecting the use case will highlight the corresponding Task types.
+        Once you selected a use case click on it to block the selection.
+      2. Click on the chosen task type to show the configuration options.
+      3. Configure the task type and click on **confirm**.
+
+  hr
+  
   h2 Input files
 
   .row

@@ -195,6 +195,7 @@ app.on( 'error', serverError );
 // Load the configuration
 var config = new Configurator( app );
 
+
 // If error while configuring, then exit
 config.on( 'error', function configError( err ) {
   console.error( 'Error while configuring the app' );
