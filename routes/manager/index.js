@@ -232,6 +232,13 @@ var pageList = [
 exports.wizard = function( req, res, next ) {
   var page = req.params.page;
 
+  if ( !req.session.wizard )
+    req.session.wizard = {};
+
+  if ( req.body.data )
+    req.session.wizard[ req.body.name ] = JSON.parse( req.body.data );
+
+
   var idx = _.indexOf( pageList, page );
   var nextPage = pageList[ idx + 1 ];
   var prevPage = pageList[ idx - 1 ];

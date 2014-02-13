@@ -266,7 +266,7 @@ config.once( 'ready', function configReady() {
   app.get( '/manage/wizard', function( req, res ) {
     res.redirect( '/manage/wizard/object_declaration' );
   } );
-  app.get( '/manage/wizard/:page', manager.wizard );
+  app.all( '/manage/wizard/:page', manager.wizard );
 
   // Tasks
   app.get( '/manage/task/new', manager.newTask );

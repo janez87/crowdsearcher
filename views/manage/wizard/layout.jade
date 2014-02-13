@@ -1,11 +1,29 @@
 extends ../layout
 
+
+block append lateScripts
+  script.
+    var $btnSend = $( '.submit' );
+    var $form = $( '#form' );
+
+    function sendData( evt ) {
+      evt.preventDefault();
+      $form.prop( 'action', this.href );
+      $form.submit();
+      return false;
+    }
+
 block header
   ul.nav.nav-tabs.nav-justified
     for page, idx in pageList
       li(class=idx===index? 'active':'')
         a.text-muted= pageMap[page]
   hr
+  
+  form#form(method='POST')
+    input(type='hidden', name='name', value=pageList[index])
+    input.wzData(type='hidden', name='data', value='null')
+
   .row
     .col-md-4
       .btn-group
@@ -16,15 +34,17 @@ block header
           
         if pageList[index]=='execution'
           a(href='manage/wizard/add_operations').btn.btn-default Add operations
+    
     .col-md-4.text-center
       block wizardTitle
         h2= pageMap[ pageList[index] ]
+    
     .col-md-4.text-right
       .btn-group
         if pageList[index]=='task_type'
-          a(href='manage/wizard/add_operations').btn.btn-default Add operations
+          a(href='manage/wizard/add_operations').submit.btn.btn-default Add operations
 
         if nextPage
-          a(href='manage/wizard/'+nextPage).btn.btn-primary Next
+          a(href='manage/wizard/'+nextPage).submit.btn.btn-primary Next
         else
           a(href='#', disabled).btn.btn-default Next

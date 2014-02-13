@@ -21,6 +21,21 @@ block append css
 
 block append lateScripts
   script.
+    function saveData( data ) {
+      if ( data )
+        $( '.wzData' ).val( JSON.stringify( data ) );
+    }
+
+    $btnSend.click( function( evt ) {
+      var rules = $( '#condition_list .rule' ).map( function() {
+        return $( this ).data( 'rule' )
+      } ).get();
+
+      saveData( rules );
+
+      return sendData.call( this, evt );
+    } );
+
     var $conditions = $( '#conditions' );
     var $conditionList = $( '#condition_list' );
     var $template = $( '#template' );
@@ -71,6 +86,8 @@ block append lateScripts
       // Create list item
       var $li = $( '<li></li>' );
       $li.addClass( 'list-group-item' );
+      $li.addClass( 'rule' );
+      $li.attr( 'data-rule', JSON.stringify( rule, null, 2 ) );
       $li.append( '<pre>'+JSON.stringify( rule, null, 2 )+'</pre>' )
       $conditionList.append( $li );
     } );

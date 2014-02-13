@@ -1,7 +1,21 @@
+/* global $btnSend, sendData */
 var $file = $( '#file' );
 var $fileType = $( '#file_type' );
 $file.on( 'click', function() {
   $file.attr( 'accept', $fileType.val() );
+} );
+
+
+function saveData( data, schema ) {
+  if ( data )
+    $( '.wzData' ).val( JSON.stringify( {
+      data: data,
+      schema: schema
+    } ) );
+}
+
+$btnSend.click( function( evt ) {
+  return sendData.call( this, evt );
 } );
 
 function dataPreview( data, type ) {
@@ -47,6 +61,7 @@ function createTableEditor( data, schema ) {
   } );
 
   var $data = $( '#data' );
+  // Print only 5 rows
   for ( var i = 0; i < 5 && i < data.length; i++ ) {
     var $tr = $( '<tr></tr>' );
     $.each( schema, function( prop, type ) {
@@ -59,7 +74,8 @@ function createTableEditor( data, schema ) {
     $data.append( $tr );
   }
 
-  // Print only 5 rows
+  // Save data
+  saveData( data, schema );
 }
 
 function readFile( file ) {
@@ -70,9 +86,6 @@ function readFile( file ) {
   ext = ext.splice( -1 );
   ext = ext[ 0 ].toLowerCase();
 
-  reader.onprogress = function( evt ) {
-    //console.log( 'progress', evt.loaded / evt.total );
-  };
   reader.onload = function() {
     var data = reader.result;
     var parser = parse[ ext ];
@@ -114,3 +127,6 @@ $file.on( 'change', function() {
 
   readFile( file );
 } );
+
+
+saveData();

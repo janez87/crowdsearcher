@@ -16,6 +16,24 @@ block append lateScripts
       $( '#plat_'+id ).show();
     } );
 
+    function saveData( data ) {
+      if ( data )
+        $( '.wzData' ).val( JSON.stringify( data ) );
+    }
+
+    $btnSend.click( function( evt ) {
+      var $container = $( '.platform-config:visible' );
+      var name = $container.data( 'name' );
+      var params = getParams( $container );
+
+      saveData( {
+        name: name,
+        params: params
+      } );
+
+      return sendData.call( this, evt );
+    } );
+
 block append css
   style(type='text/css').
     .platform {
@@ -64,7 +82,9 @@ block content
     .col-md-6
       for platform, platId in config.platforms
         if platform.invitation
-          .platform-config(id='plat_'+platId,
+          .platform-config(
+            id='plat_'+platId,
+            data-name=platId,
             style='display: none;')
             h3 Configure #{platform.name}
             if _.size( platform.params )>0

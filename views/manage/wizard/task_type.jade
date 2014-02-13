@@ -4,6 +4,26 @@ include ../../includes/params
 
 block append lateScripts
   script.
+
+    $btnSend.click( function( evt ) {
+      var $container = $( '.task-type-config:visible' );
+      var name = $container.data( 'name' );
+      var params = getParams( $container );
+
+      saveData( {
+        name: name,
+        params: params
+      } );
+
+      return sendData.call( this, evt );
+    } );
+
+    function saveData( data ) {
+      if ( data )
+        $( '.wzData' ).val( JSON.stringify( data ) );
+    }
+
+
     var $useCases = $( '.use-cases' );
     var $useCaseList = $( '.use-case' );
     var $taskTypes = $( '.task-type' );
@@ -127,6 +147,7 @@ block content
   for taskType in config.taskTypes
     .row.task-type-config(
       id='tt_'+taskType.id+'_config',
+      data-name=taskType.id,
       style='display: none;')
       h2 #{taskType.name} configuration
       .col-md-6
