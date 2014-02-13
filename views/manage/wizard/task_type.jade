@@ -149,7 +149,8 @@ block content
       id='tt_'+taskType.id+'_config',
       data-name=taskType.id,
       style='display: none;')
-      h2 #{taskType.name} configuration
+      .col-md-12
+        h2 #{taskType.name} configuration
       .col-md-6
         h3 Parameters
         if _.size( taskType.params )>0

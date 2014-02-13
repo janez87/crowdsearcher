@@ -6,23 +6,24 @@ var CS = require( '../core' );
 
 // Import the required Models
 var Task = CS.models.task;
+var Job = CS.models.job;
 
 // Use a child logger
 var log = CS.log.child( {
-  component: 'Post Task'
+  component: 'Post Task Type'
 } );
 
-// Generate custom error `PostTaskError` that inherits
+// Generate custom error `PostTaskTypeError` that inherits
 // from `APIError`
 var APIError = require( './error' );
-var PostTaskError = function( id, message, status ) {
-  PostTaskError.super_.call( this, id, message, status );
+var PostTaskTypeError = function( id, message, status ) {
+  PostTaskTypeError.super_.call( this, id, message, status );
 };
-util.inherits( PostTaskError, APIError );
+util.inherits( PostTaskTypeError, APIError );
 
-PostTaskError.prototype.name = 'PostTaskError';
+PostTaskTypeError.prototype.name = 'PostTaskTypeError';
 // Custom error IDs
-PostTaskError.WRONG_JOB_ID = 'WRONG_JOB_ID';
+PostTaskTypeError.WRONG_JOB_ID = 'WRONG_JOB_ID';
 
 
 // API object returned by the file
@@ -39,21 +40,43 @@ var API = {
 
 // API core function logic. If this function is executed then each check is passed.
 API.logic = function postTask( req, res, next ) {
-  var data = req.body;
+  /* jshint camelcase: false */
+  var data = req.session.wizard;
 
-  //TRICK FOR TESTING
-  var job = '52ea5803596b8cdd6500000f';
 
-  log.trace( 'Retrieving the task type %s', data.name );
+  var taskType = data.task_type;
+  var name = taskType.name;
+  var params = taskType.params;
+  var objects = _.map( data.object_declaration.data, function( val, i ) {
+    return {
+      name: val.id || 'Object ' + i,
+      data: val
+    };
+  } );
 
-  var taskTypeImpl = CS.taskTypes[ data.name ];
+  var platforms = [];
+  if ( !_.isEmpty( data.execution ) ) {
+    var execution = data.execution;
+    execution.execution = true;
+    execution.invitation = false;
+    execution.enabled = true;
+    platforms.push( execution );
+  }
+  if ( !_.isEmpty( data.invitation ) ) {
+    _.each( [ data.invitation ], function( val ) {
+      val.execution = false;
+      val.invitation = true;
+      val.enabled = true;
+      platforms.push( val );
+    } );
+  }
+  //var adaptation = data.adaptation;
 
-  var defaultValues = taskTypeImpl[ 'defaults' ];
 
-  var objects = data.objects;
-  var platforms = data.platforms;
-  var params = data.params;
 
+  log.trace( 'Retrieving the task type %s', name );
+  var taskTypeImpl = CS.taskTypes[ name ];
+  var defaultValues = taskTypeImpl.defaults;
   defaultValues = JSON.stringify( defaultValues );
 
   //in order to use the "$  $" simbol as delimiter
@@ -65,17 +88,27 @@ API.logic = function postTask( req, res, next ) {
 
   var template = _.template( defaultValues );
 
-  //trick 
-  for ( var k in params ) {
-    if ( params.hasOwnProperty( k ) ) {
-      params[ k ] = JSON.stringify( params[ k ] );
+  // Stringify every value in the object
+  function stringify( params ) {
+    for ( var k in params ) {
+      if ( params.hasOwnProperty( k ) ) {
+        params[ k ] = JSON.stringify( params[ k ] );
+      }
     }
+
+    return params;
   }
 
-  var rawTask = JSON.parse( template( params ) );
+  var rawTask = JSON.parse( template( stringify( params ) ) );
+
+  //TRICK FOR TESTING
+  var job = new Job( {
+    name: 'Task type job',
+  } );
+  job.save();
 
   //add the job
-  rawTask.job = job;
+  rawTask.job = job.id;
 
   var operations = rawTask.operations;
   delete rawTask.operations;
@@ -88,10 +121,9 @@ API.logic = function postTask( req, res, next ) {
     _.bind( task.addObjects, task, objects )
   ];
 
-  async.series( actions, function( err, results ) {
+  async.series( actions, function( err ) {
     if ( err ) return next( err );
 
-    log.trace( 'Results are: %j', results );
     res.json( task );
   } );
 

@@ -1,5 +1,27 @@
 extends ./layout
 
+block append lateScripts
+  script.
+    $( '.send' ).click( function( evt ) {
+      var $btn = $( this );
+      $btn.button( 'loading' );
+
+      var url = baseUrl+'api/tasktype';
+      $.post( url )
+      .fail( function( err ) {
+        console.error( err );
+      } )
+      .done( function( task ) {
+        location.href = baseUrl+'manage/task/'+task._id
+      } )
+      .always( function() {
+        $btn.button( 'reset' );
+      } );
+    } );
+
 block content
   h2 Review
+  .text-right
+    button.send.btn.btn-success.btn-lg(type='button') Create!
+
   pre!= JSON.stringify( req.session.wizard, null, 2 )

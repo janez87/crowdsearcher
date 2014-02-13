@@ -23,13 +23,16 @@ block append lateScripts
 
     $btnSend.click( function( evt ) {
       var $container = $( '.platform-config:visible' );
-      var name = $container.data( 'name' );
-      var params = getParams( $container );
 
-      saveData( {
-        name: name,
-        params: params
-      } );
+      if( $container.length!==0 ) {
+        var name = $container.data( 'name' );
+        var params = getParams( $container );
+
+        saveData( [{
+          name: name,
+          params: params
+        }] );
+      }
 
       return sendData.call( this, evt );
     } );
