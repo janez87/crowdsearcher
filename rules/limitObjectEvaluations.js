@@ -41,6 +41,7 @@ function onAddMicrotasks( params, task, data, callback ) {
 }
 
 function onEndExecution( params, task, data, callback ) {
+  debugger;
   log.trace( 'Executing the rule' );
 
   var domain = require( 'domain' ).create();
@@ -53,23 +54,23 @@ function onEndExecution( params, task, data, callback ) {
 
   var objectIds = microtask.objects;
 
-  var closeObject = function( objectId, callback ) {
+  var closeObject = function( objectId, cb ) {
 
     log.trace( 'Retrieving the object %s', objectId );
-    ObjectModel.findById( objectId, function( err, object ) {
-      if ( err ) return callback( err );
+    return ObjectModel.findById( objectId, function( err, object ) {
+      if ( err ) return cb( err );
 
       log.trace( 'Closing the object' );
 
-      return object.close( callback );
+      return object.close( cb );
     } );
   };
 
-  var updateEvaluations = function( tuple, callback ) {
-    return ControlMart.insert( tuple, callback );
+  var updateEvaluations = function( tuple, cb ) {
+    return ControlMart.insert( tuple, cb );
   };
 
-  var checkObject = function( objectId, callback ) {
+  var checkObject = function( objectId, cb ) {
 
     var query = {
       task: taskId,
@@ -80,7 +81,7 @@ function onEndExecution( params, task, data, callback ) {
 
 
     ControlMart.get( query, function( err, tuple ) {
-      if ( err ) return callback( err );
+      if ( err ) return cb( err );
 
       tuple = tuple[ 0 ];
       tuple.data++;
@@ -90,18 +91,18 @@ function onEndExecution( params, task, data, callback ) {
 
         return async.series( [
           _.partial( updateEvaluations, tuple ), _.partial( closeObject, objectId )
-        ], callback );
+        ], cb );
 
       } else {
         log.trace( 'Max executions (%s) not reached (%s)', maxExecutions, tuple.data );
-        return updateEvaluations( tuple, callback );
+        return updateEvaluations( tuple, cb );
       }
     } );
 
   };
 
 
-  return async.each( objectIds, checkObject, callback );
+  return async.series( objectIds, checkObject, callback );
 
 }
 

@@ -25,7 +25,7 @@ var ControlRuleManager = {};
 ControlRuleManager.trigger = function( event, data, callback ) {
   // The task id must be available in the data object.
   var taskId = data.task._id ? data.task._id : data.task;
-
+  debugger;
   log.debug( 'CRM event %s', event );
 
   if ( !taskId )

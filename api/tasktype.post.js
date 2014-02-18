@@ -63,7 +63,7 @@ API.logic = function postTask( req, res, next ) {
     platforms.push( execution );
   }
   if ( !_.isEmpty( data.invitation ) ) {
-    _.each( [ data.invitation ], function( val ) {
+    _.each( data.invitation, function( val ) {
       val.execution = false;
       val.invitation = true;
       val.enabled = true;
@@ -103,29 +103,32 @@ API.logic = function postTask( req, res, next ) {
 
   //TRICK FOR TESTING
   var job = new Job( {
-    name: 'Task type job',
+    name: rawTask.name
   } );
-  job.save();
 
-  //add the job
-  rawTask.job = job.id;
-
-  var operations = rawTask.operations;
-  delete rawTask.operations;
-
-  var task = new Task( rawTask );
-
-  var actions = [
-    _.bind( task.addPlatforms, task, platforms ),
-    _.bind( task.addOperations, task, operations ),
-    _.bind( task.addObjects, task, objects )
-  ];
-
-  async.series( actions, function( err ) {
+  job.save( function( err, job ) {
     if ( err ) return next( err );
+    //add the job
+    rawTask.job = job.id;
 
-    res.json( task );
+    var operations = rawTask.operations;
+    delete rawTask.operations;
+
+    var task = new Task( rawTask );
+
+    var actions = [
+      _.bind( task.addPlatforms, task, platforms ),
+      _.bind( task.addOperations, task, operations ),
+      _.bind( task.addObjects, task, objects )
+    ];
+
+    async.series( actions, function( err ) {
+      if ( err ) return next( err );
+
+      res.json( task );
+    } );
   } );
+
 
 };
 
