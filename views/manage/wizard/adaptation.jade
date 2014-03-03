@@ -98,15 +98,49 @@ block append lateScripts
       $( '#action_'+val+'_config' ).show();
     } );
 
+
+    var $actionOptions = $actions.find( 'option' ).detach();
+    var actions = {
+      'task': $actionOptions.filter( '.task' ).get(),
+      'object': $actionOptions.filter( '.object' ).get(),
+      'performer': $actionOptions.filter( '.performer' ).get()
+    };
+
+    
+    var $options = $conditions.find( '.event option' ).detach();
+    var options = {
+      'task': $options.filter( '.task' ).get(),
+      'object': $options.filter( '.object' ).get(),
+      'performer': $options.filter( '.performer' ).get()
+    };
+
     $scope.change( function() {
       var scope = this.value;
-      $conditions.find( '.event' ).val( 'None' );
-      $conditions.find( '.event :not(.'+scope+')' ).hide();
-      $conditions.find( '.event .'+scope ).show();
       
+      $conditions.find( '.event' ).empty();
+      $conditions.find( '.event' ).append( '<option>None</option>' );
+      $.each(options[ scope ] || [], function() {
+        $conditions.find( '.event' ).append( this );
+      } );
+      $conditions.find( '.event' ).val( 'None' );
+
+
+
+      $actions.empty();
+      $actions.append( '<option>None</option>' );
+      $.each(actions[ scope ] || [], function() {
+        $actions.append( this );
+      } );
       $actions.val( 'None' );
-      $actions.find( ':not(.'+scope+')' ).hide();   
-      $actions.find( '.'+scope ).show();
+      
+      /*
+      $conditions.find( '.event :not(.'+scope+')' ).wrap( '<span class="hidden"></span>' );
+      $conditions.find( '.event .'+scope ).unwrap();
+
+      $actions.val( 'None' );
+      $actions.find( ':not(.'+scope+')' ).wrap( '<span class="hidden"></span>' );
+      $actions.find( '.'+scope ).unwrap();
+      */
     } );
 
     $scope.change();
@@ -138,7 +172,6 @@ block content
               option(value='OR') ||
           .col-md-3
             select.event.form-control(title='Selected the condition')
-              option.task.object.performer None
               option.task.object.performer(value='quality') Quality
 
               option.task.object.performer(value='executions') Total executions
@@ -154,19 +187,19 @@ block content
               option.task(value='objects.closed') Closed objects
               option.task(value='objects.invalid') Invalid objects
               
-              optgroup.task(label='Current platform')
-                option.task(value='current.quality') Quality
-                
-                option.task(value='current.executions') Total executions
-                option.task(value='current.executions.closed') Closed executions
-                option.task(value='current.executions.invalid') Invalid executions
-                
-                option.task(value='current.time.active') Time active
-                option.task(value='current.time.idle') Time idle
-                
-                option.task(value='current.objects') Total objects
-                option.task(value='current.objects.closed') Closed objects
-                option.task(value='current.objects.invalid') Invalid objects
+              option.disabled.task(value='',disabled) -- CURRENT PLATFORM --
+              option.task(value='current.quality') Quality
+              
+              option.task(value='current.executions') Total executions
+              option.task(value='current.executions.closed') Closed executions
+              option.task(value='current.executions.invalid') Invalid executions
+              
+              option.task(value='current.time.active') Time active
+              option.task(value='current.time.idle') Time idle
+              
+              option.task(value='current.objects') Total objects
+              option.task(value='current.objects.closed') Closed objects
+              option.task(value='current.objects.invalid') Invalid objects
 
           .col-md-2
             select.operator.form-control(title='Select the operator for the condition')
@@ -184,7 +217,6 @@ block content
               i.fa.fa-minus
       h3 DO
       select#actions.form-control(title='Actions')
-        option None
         option.task(value='invite') Re-invite
         option.task(value='replan') Re-plan
         option.task(value='migrate') Migrate
