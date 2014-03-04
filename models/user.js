@@ -258,6 +258,21 @@ UserSchema.statics.createWithAccount = function( accountName, data ) {
   return user;
 };
 
+// Ban the user for the given task
+UserSchema.statics.ban = function( userId, taskId, callback ) {
+  log.trace( 'Banning the user %s from the task %s', userId, taskId );
+  var ControlMart = this.model( 'controlmart' );
+
+  var tuple = {
+    data: true,
+    name: 'banned',
+    task: taskId,
+    performer: userId
+  };
+
+  return ControlMart.insert( tuple, callback );
+};
+
 exports = module.exports = UserSchema;
 
 
