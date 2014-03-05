@@ -272,8 +272,6 @@ function drawAvgDistribution( config, selector ) {
   var variance = config.variance;
   var title = config.title;
 
-  if( !average ) return;
-
   var xLabel = config.xLabel;
   var xUnit = config.xUnit;
   var yLabel = config.yLabel;
@@ -290,24 +288,52 @@ function drawAvgDistribution( config, selector ) {
   var max = Math.max.apply( Math, data ) + 1;
   var step = ( max - min ) / groups;
 
+
   var values = [];
-  for ( var i = 0; i < groups; i++ )
-    values.push( 0 );
+  var plotBands = [];
+  var plotLines = [];
+  var subtitle = '---';
+  if ( average ) {
+    for ( var i = 0; i < groups; i++ )
+      values.push( 0 );
 
-  $.each( data, function( i, duration ) {
-    duration = duration - min;
-    var index = Math.floor( duration / step );
-    values[ index ]++;
-  } );
+    $.each( data, function( i, duration ) {
+      duration = duration - min;
+      var index = Math.floor( duration / step );
+      values[ index ]++;
+    } );
 
-  values = $.map( values, function( value, i ) {
-    var y = value / data.length;
-    var x = min + i * step + step / 2;
-    return {
-      x: x,
-      y: y
-    };
-  } );
+    values = $.map( values, function( value, i ) {
+      var y = value / data.length;
+      var x = min + i * step + step / 2;
+      return {
+        x: x,
+        y: y
+      };
+    } );
+
+    plotBands = [ {
+      from: average - std / 2,
+      to: average + std / 2,
+      color: '#f9f2f4',
+      //zIndex: 8
+    } ];
+
+    plotLines = [ {
+      value: average,
+      color: 'red',
+      width: 2,
+      label: {
+        text: average.toFixed( 3 ) + xUnit,
+        align: 'right'
+      },
+      zIndex: 4,
+    } ];
+    subtitle = '&#956;: ' + average.toFixed( 3 ) + xUnit + ' &#963;: ' + std.toFixed( 3 ) + xUnit;
+  }
+
+
+
 
   $( selector ).highcharts( {
     chart: {
@@ -334,22 +360,8 @@ function drawAvgDistribution( config, selector ) {
         rotation: 90,
         x: -20
       },
-      plotLines: [ {
-        value: average,
-        color: 'red',
-        width: 2,
-        label: {
-          text: average.toFixed( 3 ) + xUnit,
-          align: 'right'
-        },
-        zIndex: 4,
-      } ],
-      plotBands: [ {
-        from: average - std / 2,
-        to: average + std / 2,
-        color: '#f9f2f4',
-        //zIndex: 8
-      } ]
+      plotLines: plotLines,
+      plotBands: plotBands
     },
     yAxis: {
       min: 0,
@@ -379,7 +391,7 @@ function drawAvgDistribution( config, selector ) {
       },
     },
     subtitle: {
-      text: '&#956;: ' + average.toFixed( 3 ) + xUnit + ' &#963;: ' + std.toFixed( 3 ) + xUnit,
+      text: subtitle,
       useHTML: true
     },
     legend: {
@@ -429,10 +441,7 @@ var drawMicrotaskInfo = function() {
     yUnit: '%'
   };
 
-  console.log( 'Microtask duration',config );
-
   var selector = '#microtaskDuration';
-
   drawAvgDistribution( config, selector );
 
 
@@ -443,13 +452,10 @@ var drawMicrotaskInfo = function() {
     property: 'executions',
     title: 'Microtask executions',
     xLabel: 'Execution',
-    xUnit: '',
+    xUnit: '#',
     yLabel: 'Microtasks',
     yUnit: '%'
   };
-
-  console.log( 'Microtask executions',config1 );
-
   drawAvgDistribution( config1, '#microtaskExecutions' );
 };
 
@@ -465,12 +471,9 @@ var drawPerformerInfo = function() {
     yLabel: 'Performer',
     yUnit: '%'
   };
-  console.log( 'Performer duration',config );
 
   var selector = '#performerDuration';
-
   drawAvgDistribution( config, selector );
-
 
   var config1 = {
     average: stats.performer.avgExecutions,
@@ -479,11 +482,10 @@ var drawPerformerInfo = function() {
     property: 'executions',
     title: 'Performer executions',
     xLabel: 'Execution',
-    xUnit: '',
+    xUnit: '#',
     yLabel: 'Performer',
     yUnit: '%'
   };
-  console.log( 'Performer executions',config1 );
 
   drawAvgDistribution( config1, '#performerExecutions' );
 };
@@ -595,7 +597,7 @@ drawActiveVsClosed( activeExecutions, closedObjectList );
 
 // #############
 // PERFORMERS
-if( stats.performerStats ) {
+if ( stats.performerStats ) {
   val = 0;
   // Sort performers
   var performers = stats.performerStats;
@@ -605,10 +607,12 @@ if( stats.performerStats ) {
   var topPerformers = performers.slice( 0, 15 );
 
   drawPerformers( topPerformers );
+} else {
+  $( '#performers' ).closest( '.panel' ).hide();
 }
 // #############
 // INFO
 
-if( stats.execution ) drawExecutionInfo( stats.execution );
-if( stats.microtask ) drawMicrotaskInfo( stats.microtask );
-if( stats.performer ) drawPerformerInfo( stats.performer );
+drawExecutionInfo( stats.execution );
+drawMicrotaskInfo( stats.microtask );
+if ( stats.performer ) drawPerformerInfo( stats.performer );
