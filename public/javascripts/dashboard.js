@@ -272,6 +272,8 @@ function drawAvgDistribution( config, selector ) {
   var variance = config.variance;
   var title = config.title;
 
+  if( !average ) return;
+
   var xLabel = config.xLabel;
   var xUnit = config.xUnit;
   var yLabel = config.yLabel;
@@ -427,6 +429,8 @@ var drawMicrotaskInfo = function() {
     yUnit: '%'
   };
 
+  console.log( 'Microtask duration',config );
+
   var selector = '#microtaskDuration';
 
   drawAvgDistribution( config, selector );
@@ -444,6 +448,8 @@ var drawMicrotaskInfo = function() {
     yUnit: '%'
   };
 
+  console.log( 'Microtask executions',config1 );
+
   drawAvgDistribution( config1, '#microtaskExecutions' );
 };
 
@@ -459,6 +465,7 @@ var drawPerformerInfo = function() {
     yLabel: 'Performer',
     yUnit: '%'
   };
+  console.log( 'Performer duration',config );
 
   var selector = '#performerDuration';
 
@@ -476,6 +483,7 @@ var drawPerformerInfo = function() {
     yLabel: 'Performer',
     yUnit: '%'
   };
+  console.log( 'Performer executions',config1 );
 
   drawAvgDistribution( config1, '#performerExecutions' );
 };
@@ -532,7 +540,7 @@ var closedObjectList = [];
 val = 0;
 $.each( execList, function() {
   var exec = this;
-  console.log( exec.createdDate );
+  //console.log( exec.createdDate );
   activeExecutions.push( {
     date: toUTC( exec.createdDate ),
     value: 1,
@@ -587,18 +595,20 @@ drawActiveVsClosed( activeExecutions, closedObjectList );
 
 // #############
 // PERFORMERS
-val = 0;
-// Sort performers
-var performers = stats.performerStats;
-performers.sort( function( a, b ) {
-  return a.executions - b.executions;
-} ).reverse();
-var topPerformers = performers.slice( 0, 15 );
+if( stats.performerStats ) {
+  val = 0;
+  // Sort performers
+  var performers = stats.performerStats;
+  performers.sort( function( a, b ) {
+    return a.executions - b.executions;
+  } ).reverse();
+  var topPerformers = performers.slice( 0, 15 );
 
-drawPerformers( topPerformers );
+  drawPerformers( topPerformers );
+}
 // #############
 // INFO
 
-drawExecutionInfo( stats.execution );
-drawMicrotaskInfo( stats.microtask );
-drawPerformerInfo( stats.performer );
+if( stats.execution ) drawExecutionInfo( stats.execution );
+if( stats.microtask ) drawMicrotaskInfo( stats.microtask );
+if( stats.performer ) drawPerformerInfo( stats.performer );
