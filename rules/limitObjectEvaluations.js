@@ -60,6 +60,8 @@ function onEndExecution( params, task, data, callback ) {
     return ObjectModel.findById( objectId, function( err, object ) {
       if ( err ) return cb( err );
 
+      if ( object.closed ) return cb();
+
       log.trace( 'Closing the object' );
 
       return object.close( cb );

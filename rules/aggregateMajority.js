@@ -51,7 +51,7 @@ function onEndExecution( params, task, data, callback ) {
 
     // If the object is already close do nothing
     log.trace( 'Evaluating the majority' );
-    if ( object.status === 'CLOSED' ) {
+    if ( object.closed ) {
       log.trace( 'Object %s already closed', object._id );
       return callback();
     }

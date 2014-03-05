@@ -58,7 +58,9 @@ var ObjectSchema = new Schema( {
         'CREATED',
 
         // The Object has been closed, it will not accept any modification.
-        'CLOSED'
+        'CLOSED',
+        'CLOSED_GOOD',
+        'CLOSED_BAD'
       ],
       'default': 'CREATED'
     },
@@ -115,7 +117,7 @@ ObjectSchema.virtual( 'created' ).get( function() {
 } );
 // Boolean indicating if the object is closed.
 ObjectSchema.virtual( 'closed' ).get( function() {
-  return this.status === 'CLOSED';
+  return this.status === 'CLOSED' || this.status === 'CLOSED_GOOD' || this.status === 'CLOSED_BAD';
 } );
 // Boolean indicating if the object is editable.
 ObjectSchema.virtual( 'editable' ).get( function() {
@@ -146,16 +148,26 @@ ObjectSchema.methods.fire = function( event, data, callback ) {
 
 // Closes the current object. The `CLOSE_OBJECT` event will be triggered **after** setting the
 // status field to `CLOSED`.
-ObjectSchema.methods.close = function( callback ) {
-  debugger;
+ObjectSchema.methods.close = function( bad, callback ) {
   var _this = this;
+
+  if ( _.isFunction( bad ) ) {
+    callback = bad;
+    bad = false;
+  }
+
   // Skip if already closed.
   if ( this.closed )
     return callback( new MongoError( 'Already closed' ) );
 
   log.debug( 'Closing object', this._id );
 
-  this.set( 'status', 'CLOSED' );
+  if ( bad ) {
+    this.set( 'status', 'CLOSED_BAD' );
+  } else {
+    this.set( 'status', 'CLOSED_GOOD' );
+  }
+
   this.set( 'closedDate', Date.now() );
 
   this.save( function( err ) {

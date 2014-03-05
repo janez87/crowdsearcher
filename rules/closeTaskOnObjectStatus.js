@@ -1,33 +1,35 @@
-
 // Load libraries
 var CS = require( '../core' );
 
 // Create a child logger
-var log = CS.log.child( { component: 'Close Task' } );
+var log = CS.log.child( {
+  component: 'Close Task'
+} );
 
 // Models
 var ObjectModel = CS.models.object;
 
 function onCloseObject( params, task, data, callback ) {
 
-  if( task.closed==='CLOSED' )
+  if ( task.closed )
     return callback();
 
   var objectsNumber = task.objects.length;
 
   ObjectModel
-  .find()
-  .where( 'task', task._id )
-  .where( 'status', 'CLOSED' )
-  .count()
-  .exec( function( err, count ) {
-    if( err ) return callback( err );
+    .find()
+    .where( 'task', task._id )
+    .where( 'status' ). in ( [ 'CLOSED', 'CLOSED_GOOD', 'CLOSED_BAD' ] )
+    .count()
+    .exec( function( err, count ) {
+      if ( err ) return callback( err );
 
-    if( count===objectsNumber )
-      return task.close( callback );
+      log.trace( 'Found %s closed objects', count );
+      if ( count === objectsNumber )
+        return task.close( callback );
 
-    return callback();
-  } );
+      return callback();
+    } );
 }
 
 // # Rule definition
