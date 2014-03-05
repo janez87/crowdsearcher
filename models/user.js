@@ -3,6 +3,7 @@ var _ = require( 'underscore' );
 var mongo = require( 'mongoose' );
 var crypto = require( 'crypto' );
 var CS = require( '../core' );
+var CRM = require( '../core/CRM' );
 
 // Create a child logger
 var log = CS.log.child( {
@@ -270,7 +271,15 @@ UserSchema.statics.ban = function( userId, taskId, callback ) {
     performer: userId
   };
 
-  return ControlMart.insert( tuple, callback );
+  return ControlMart.insert( tuple, function( err ) {
+    if ( err ) return callback( err );
+
+    return CRM.trigger( 'PERFORMER_BANNED', _.defaults( {
+      user: userId
+    }, {
+      task: taskId
+    } ), callback );
+  } );
 };
 
 exports = module.exports = UserSchema;
