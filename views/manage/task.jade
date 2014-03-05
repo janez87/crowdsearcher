@@ -94,7 +94,11 @@ block content
             - var ruleId = 'rule_'+controlrule._id;
             .list-group-item
               .list-group-item-heading
-                a(data-toggle='collapse',href='#'+ruleId)= controlrule.name
+                if controlrule.event
+                  a(data-toggle='collapse',href='#'+ruleId)= controlrule.action || controlrule.type
+                    span.pull-right.label.label-default= controlrule.event
+                else
+                  a(data-toggle='collapse',href='#'+ruleId)= controlrule.name
               .list-group-item-text.collapse(id=ruleId)
                 +printParams( controlrule.params )
 
@@ -115,8 +119,6 @@ block content
       if task.microtasks.length==0
         blockquote No microtasks available.
       else
-        - var classMap = { 'CREATED': 'info', 'OPENED': 'success', 'FINALIZED': 'warning', 'CLOSED': 'danger' };
-        
         table.table.table-striped.table-condensed.table-bordered.table-hover.dt#microtasks
           thead
             tr
@@ -124,6 +126,7 @@ block content
               th(style='width: 60%') Creation/Closed date
               th(style='width: 20%') Actions
           tbody
+            - var classMap = { 'CREATED': '', 'CLOSED': 'danger' };
             for microtask in task.microtasks
               tr(class=classMap[ microtask.status ])
                 td(title=microtask._id): +printStatus( microtask.status )

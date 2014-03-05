@@ -125,6 +125,39 @@ ObjectSchema.virtual( 'editable' ).get( function() {
 
 
 
+
+
+// # Retro compatibility
+// 
+// add getters to changed attributes to normalize behaviour
+ObjectSchema.path( 'createdDate' ).get( function( date ) {
+  if ( this.toObject().creationDate )
+    return this.toObject().creationDate;
+  else
+    return date;
+} );
+ObjectSchema.path( 'status' ).get( function( status ) {
+  if ( status === '0' )
+    return 'CREATED';
+  else if ( status === '10' )
+    return 'OPENED';
+  else if ( status === '20' )
+    return 'FINALIZED';
+  else if ( status === '30' )
+    return 'WAIT';
+  else if ( status === '40' )
+    return 'SUSPENDED';
+  else if ( status === '50' )
+    return 'CLOSED';
+  else
+    return status;
+} );
+
+
+
+
+
+
 // # Object instance methods
 //
 
