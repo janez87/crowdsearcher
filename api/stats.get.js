@@ -49,21 +49,6 @@ API.logic = function getStats( req, res, next ) {
 
   log.trace( 'Stats for %s with id %s', entity, entityId );
 
-  function convertStatus( status ) {
-    if ( status === 0 )
-      return 'CREATED';
-    else if ( status === 10 )
-      return 'OPENED';
-    else if ( status === 20 )
-      return 'FINALIZED';
-    else if ( status === 30 )
-      return 'WAIT';
-    else if ( status === 40 )
-      return 'SUSPENDED';
-    else if ( status === 50 )
-      return 'CLOSED';
-  }
-
   function getEntity( callback ) {
     if ( entity !== 'task' && entity !== 'microtask' )
       return callback( new GetStatsError( GetStatsError.BAD_ENTITY, 'The entity "' + entity + '" cannot have stats' ) );
@@ -76,28 +61,15 @@ API.logic = function getStats( req, res, next ) {
     EntityModel
       .findById( entityId )
       .populate( 'objects operations platforms' + ( entity === 'task' ? ' microtasks' : '' ) )
-      .lean()
       .exec( function( err, entityObject ) {
         if ( err ) return callback( err );
 
         if ( !entityObject )
           return callback( new GetStatsError( GetStatsError.NO_ENTITY, 'No entity with id ' + entityId ) );
 
-        // -- BEGIN BACK COMPATIBILITY
-        if ( entityObject.creationDate ) {
-
-          if ( entityObject.creationDate )
-            entityObject.createdDate = entityObject.creationDate;
-
-          entityObject.status = convertStatus( entityObject.status );
-
-          // Fix objects
-          entityObject.objects = _.map( entityObject.objects, function( object ) {
-            object.status = convertStatus( object.status );
-            return object;
-          } );
-        }
-        // -- END BACK COMPATIBILITY
+        entityObject = entityObject.toObject( {
+          getters: true
+        } );
 
         return callback( null, entityObject );
       } );
@@ -141,10 +113,12 @@ API.logic = function getStats( req, res, next ) {
             if ( execution.closed )
               execution.status = 'CLOSED';
 
+            /*
             execution.microtasks = _.map( execution.microtasks, function( microtask ) {
               microtask.status = convertStatus( microtask.status );
               return microtask;
             } );
+            */
           }
           // -- END BACK COMPATIBILITY
 

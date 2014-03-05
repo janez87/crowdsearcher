@@ -1,11 +1,12 @@
-
-
 // Load libraries
+var _ = require( 'underscore' );
 var util = require( 'util' );
 var CS = require( '../core' );
 
 // Use a child logger
-var log = CS.log.child( { component: 'Get Task List' } );
+var log = CS.log.child( {
+  component: 'Get Task List'
+} );
 
 // Import CS models
 var Task = CS.models.task;
@@ -47,14 +48,21 @@ API.logic = function getJob( req, res, next ) {
   var jobID = req.query.job;
   log.trace( 'Getting all the tasks for the job: %s', jobID );
 
+  //.lean()
   Task
-  .find( { job: jobID } )
-  .lean()
-  .exec( req.wrap( function( err, tasks ) {
-    if( err ) return next( err );
+    .find( {
+      job: jobID
+    } )
+    .exec( req.wrap( function( err, tasks ) {
+      if ( err ) return next( err );
 
-    res.json( tasks );
-  } ) );
+      tasks = _.map( tasks, function( task ) {
+        return task.toObject( {
+          getters: true
+        } );
+      } );
+      res.json( tasks );
+    } ) );
 };
 
 
