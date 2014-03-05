@@ -417,6 +417,15 @@ function handleNotification( req, res ) {
 }
 
 
+function blockWorker( params, task, data, callback ) {
+
+  var user = data.user;
+
+  log.trace( 'Blocking the worker corresponding to the user %s', user );
+
+  return callback();
+}
+
 var Platform = {
   name: 'Amazon Mechanical Turk',
   description: 'AMT platform',
@@ -426,7 +435,8 @@ var Platform = {
     'OPEN_TASK': onOpenTask,
     'END_TASK': onEndTask,
     'ADD_MICROTASKS': onAddMicrotasks,
-    'END_MICROTASK': onEndMicrotask
+    'END_MICROTASK': onEndMicrotask,
+    'PERFORMER_BANNED': blockWorker
   },
 
   execute: execute,

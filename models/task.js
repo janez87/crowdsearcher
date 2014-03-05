@@ -524,6 +524,27 @@ TaskSchema.methods.addObjects = function( objects, callback ) {
 };
 
 
+TaskSchema.methods.isBanned = function( performer, callback ) {
+  var ControlMart = this.model( 'controlmart' );
+
+  var tuple = {
+    task: this._id,
+    performer: performer,
+    name: 'banned'
+  };
+
+  ControlMart.get( tuple, function( err, tuple ) {
+    if ( err ) return callback( err );
+
+    if ( tuple.length === 0 ) {
+      return callback( null, false );
+    }
+
+    var banned = tuple[ 0 ].data;
+
+    return callback( null, banned );
+  } );
+};
 
 
 // ## Microtask
