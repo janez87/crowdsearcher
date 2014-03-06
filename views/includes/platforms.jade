@@ -2,7 +2,7 @@ mixin printPlatforms( platforms )
   if platforms.length==0
     .alert.alert-info Sorry, no platforms specified.
   else
-    .list-group
+    .list-group.scrollable
       for platform in platforms
         - var platformId = 'plat_'+platform._id;
         .list-group-item

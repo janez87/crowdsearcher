@@ -172,6 +172,36 @@ ExecutionSchema.virtual( 'editable' ).get( function() {
 
 
 
+
+// # Retro compatibility
+// 
+// add getters to changed attributes to normalize behaviour
+ExecutionSchema.path( 'createdDate' ).get( function( date ) {
+  if ( _.isUndefined( this.get( 'creationDate' ) ) ) {
+    return date;
+  } else {
+    // OLD verison
+    return this.get( 'creationDate' );
+
+  }
+} );
+ExecutionSchema.path( 'status' ).get( function( status ) {
+  if ( _.isUndefined( this.get( 'creationDate' ) ) ) {
+    return status;
+  } else {
+    // OLD verison
+    if ( this.closedDate )
+      return 'CLOSED';
+    else
+      return 'CREATED';
+  }
+} );
+
+
+
+
+
+
 // # Execution instance methods
 //
 

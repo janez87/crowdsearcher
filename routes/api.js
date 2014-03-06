@@ -158,14 +158,16 @@ var apiOperations = function( req, res, next ) {
     if ( !_.isArray( selectedFields ) )
       selectedFields = [ selectedFields ];
 
-
+    log.trace( 'Selected fields: %j', selectedFields );
     // Join the array of fields to populate with a `space`.
     query
-      .select( '+' + selectedFields.join( ' +' ) );
+      .select( selectedFields.join( ' ' ) );
   }
 
+  /*
   if ( req.bulk )
     query.lean();
+  */
 
   query.exec( req.wrap( function( err, data ) {
     if ( err ) return next( err );
@@ -186,14 +188,19 @@ var apiOperations = function( req, res, next ) {
       if ( !_.isArray( shuffleFields ) )
         shuffleFields = [ shuffleFields ];
 
-      // Dhuffle each `shuffleFields`
+      // Shuffle each `shuffleFields`
       _.each( shuffleFields, function( field ) {
         if ( _.isArray( data[ field ] ) )
           data[ field ] = _.shuffle( data[ field ] );
       } );
     }
 
-    if ( req.bulk ) {
+    if ( _.isArray( data ) ) {
+      data = _.map( data, function( e ) {
+        return e.toObject( {
+          getters: true
+        } );
+      } );
       res.json( data );
     } else {
       res.json( data.toObject( {

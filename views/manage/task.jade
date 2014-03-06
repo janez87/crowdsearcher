@@ -89,7 +89,7 @@ block content
       if task.controlrules.length==0
         blockquote Sorry, no control rules found.
       else
-        .list-group
+        .list-group.scrollable
           for controlrule in task.controlrules
             - var ruleId = 'rule_'+controlrule._id;
             .list-group-item
@@ -119,22 +119,35 @@ block content
       if task.microtasks.length==0
         blockquote No microtasks available.
       else
-        table.table.table-striped.table-condensed.table-bordered.table-hover.dt#microtasks
-          thead
-            tr
-              th(style='width: 10%') Status
-              th(style='width: 60%') Creation/Closed date
-              th(style='width: 20%') Actions
-          tbody
-            - var classMap = { 'CREATED': '', 'CLOSED': 'danger' };
+        - var completedMicrotasks = _.countBy(task.microtasks, 'status').CLOSED || 0;
+        - var totalMicrotasks = task.microtasks.length
+        - var percCompl = (completedMicrotasks/totalMicrotasks)*100;
+        .progress
+          .progress-bar.progress-bar-success(
+            role='progressbar',
+            aria-valuemin=0,
+            aria-valuemax=100,
+            style="width: #{percCompl}%;"
+            aria-valuenow=percCompl) #{percCompl}%
+        
+        #microtasks.entity-list
+          .header
+            .row
+              .col-xs-3.cell Status
+              .col-xs-7.cell Creation/Closed date
+              .col-xs-2.cell Actions
+          .scrollable(style="max-height: 250px;"): .content
             for microtask in task.microtasks
-              tr(class=classMap[ microtask.status ])
-                td(title=microtask._id): +printStatus( microtask.status )
-                td= moment( microtask.closedDate || microtask.creationDate ).format( 'YYYY-MM-DD HH:mm' )
-                td.text-right
+              .row(class=microtask.status.toLowerCase())
+                .col-xs-3.cell(title=microtask._id): +printStatus( microtask.status )
+                .col-xs-7.cell= moment( microtask.closedDate || microtask.creationDate ).format( 'YYYY-MM-DD HH:mm' )
+                .col-xs-2.cell.text-right
                   a.btn.btn-xs.btn-default(href='manage/microtask/'+microtask._id)
-                    i.fa.fa-folder-open
-                    |  Details
+                    .visible-lg
+                      i.fa.fa-folder-open
+                      |  Details
+                    .hidden-lg
+                      i.fa.fa-folder-open
     .col-md-6
       h3 Objects
       +printObjects( task.objects )

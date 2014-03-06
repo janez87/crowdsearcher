@@ -80,25 +80,22 @@ API.logic = function getStats( req, res, next ) {
     Execution
       .find( filter )
       .populate( 'microtask performer ' )
-      .lean()
       .exec( function( err, executions ) {
         if ( err ) return callback( err );
 
         if ( !executions )
           return callback( new GetStatsError( GetStatsError.NO_EXECUTIONS, 'No executions available' ) );
 
-        _.each( executions, function( execution ) {
+        executions = _.map( executions, function( execution ) {
+
+          execution = execution.toObject( {
+            getters: true
+          } );
+
           var endDate = execution.closedDate || execution.invalidDate;
 
 
-
-          // -- BEGIN BACK COMPATIBILITY
-          if ( _.isUndefined( execution.status ) ) {
-            execution.status = 'CREATED';
-
-            if ( execution.creationDate )
-              execution.createdDate = execution.creationDate;
-
+          if ( !execution.performer ) {
             // Find worker
             var worker = _.find( execution.metadata, function( data ) {
               return data.key === 'worker';
@@ -109,18 +106,7 @@ API.logic = function getStats( req, res, next ) {
                 _id: worker.value
               };
             }
-
-            if ( execution.closed )
-              execution.status = 'CLOSED';
-
-            /*
-            execution.microtasks = _.map( execution.microtasks, function( microtask ) {
-              microtask.status = convertStatus( microtask.status );
-              return microtask;
-            } );
-            */
           }
-          // -- END BACK COMPATIBILITY
 
 
           if ( !execution.performer ) {
@@ -136,6 +122,8 @@ API.logic = function getStats( req, res, next ) {
             // Convert to seconds
             execution.duration = duration( execution.createdDate, endDate );
           }
+
+          return execution;
         } );
 
         return callback( null, entityObject, executions );
