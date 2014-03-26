@@ -27,9 +27,32 @@ HotOrNot.prototype.name = 'HotOrNot';
 // Define the Operation Object
 var TaskType = {
   name: 'Hot or Not',
-  description: 'Compare 2 object at time.',
+  description: 'Compare 2 objects at time.',
   template: fs.readFileSync( __dirname + '/template.hbs', 'utf8' ),
-  defaults: {},
+  defaults: {
+    name: '$name$',
+    description: '$description$',
+    operations: [ {
+      label: 'Like',
+      name: 'like'
+    } ],
+    splittingStrategy: {
+      name: 'HOT_OR_NOT'
+    },
+    assignmentStrategy: {
+      name: 'RANDOM'
+    },
+    implementationStrategy: {
+      name: 'RANDOM'
+    },
+    controlrules: [ {
+      name: 'limitMicroTaskExecutions',
+      event: 'END_EXECUTION',
+      params: {
+        maxExecutions: '$maxExecutions$'
+      }
+    } ]
+  },
   useCases: [ 'Ranking' ],
   params: {
     categories: {
