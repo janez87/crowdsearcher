@@ -522,7 +522,7 @@ TaskSchema.methods.addObjects = function( objects, callback ) {
 
   // Filter invalid object and add the task parameter to all the elements in
   // the array, so they became valid `Object` entities.
-  var objects = _.filter( objects, function( object ) {
+  objects = _.filter( objects, function( object ) {
     if ( ( object instanceof ObjectModel ) || _.isObject( object ) ) {
       object.task = _this._id;
       return true;
