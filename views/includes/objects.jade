@@ -10,12 +10,20 @@ mixin printObjects( objects )
           th Creation/Closed date
           th Actions
       tbody
-        for object in objects
-          tr(class=classMap[ object.status ])
-            td(title=object._id): +printStatus( object.status )
-            td= moment( object.closedDate || object.creationDate ).format( 'YYYY-MM-DD HH:mm' )
-            td.text-right
-              .btn-group
-                a.btn.btn-xs.btn-default(href='manage/object/'+object._id)
-                  i.fa.fa-folder-open
-                  |  Details
+    - var completedObjects = _.countBy(objects, 'status').CLOSED || 0;
+    - var totalObjects = objects.length
+    - var percCompl = (completedObjects/totalObjects)*100;
+    .progress
+      .progress-bar.progress-bar-success(
+        role='progressbar',
+        aria-valuemin=0,
+        aria-valuemax=100,
+        style="width: #{percCompl}%;"
+        aria-valuenow=percCompl) #{percCompl}%
+    #objects.entity-list
+      .header
+        .row
+          .col-xs-3.cell Status
+          .col-xs-7.cell Creation/Closed date
+          .col-xs-2.cell Actions
+      .scrollable(style="max-height: 250px;"): .content

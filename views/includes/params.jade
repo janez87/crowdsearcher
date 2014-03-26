@@ -1,9 +1,9 @@
 mixin printParams( params )
   if params
-    dl.dl-horizontal
+    dl.dl-horizontal.params
       each value, key in params
         dt(title=key)= key
-        dd
+        dd(title=value)
           if _.isObject( value )
             pre= JSON.stringify( value, null, 2 )
           else

@@ -246,6 +246,48 @@ TaskSchema.virtual( 'editable' )
 
 
 
+
+
+// # Retro compatibility
+// 
+// add getters to changed attributes to normalize behaviour
+TaskSchema.path( 'openedDate' ).get( function( date ) {
+  if ( this.toObject().creationDate )
+    return this.toObject().creationDate;
+  else
+    return date;
+} );
+TaskSchema.path( 'createdDate' ).get( function( date ) {
+  if ( this.toObject().creationDate )
+    return this.toObject().creationDate;
+  else
+    return date;
+} );
+TaskSchema.path( 'status' ).get( function( status ) {
+  if ( status === '0' )
+    return 'CREATED';
+  else if ( status === '10' )
+    return 'OPENED';
+  else if ( status === '20' )
+    return 'FINALIZED';
+  else if ( status === '30' )
+    return 'WAIT';
+  else if ( status === '40' )
+    return 'SUSPENDED';
+  else if ( status === '50' )
+    return 'CLOSED';
+  else
+    return status;
+} );
+
+
+
+
+
+
+
+
+
 // # Task instance methods
 //
 // ## Checks
@@ -480,7 +522,7 @@ TaskSchema.methods.addObjects = function( objects, callback ) {
 
   // Filter invalid object and add the task parameter to all the elements in
   // the array, so they became valid `Object` entities.
-  var objects = _.filter( objects, function( object ) {
+  objects = _.filter( objects, function( object ) {
     if ( ( object instanceof ObjectModel ) || _.isObject( object ) ) {
       object.task = _this._id;
       return true;
@@ -601,38 +643,6 @@ TaskSchema.methods.addMicrotasks = function( microtasks, callback ) {
   } );
 };
 
-
-// # Retro compatibility
-// 
-// add getters to changed attributes to normalize behaviour
-TaskSchema.path( 'openedDate' ).get( function( date ) {
-  if ( this.toObject().creationDate )
-    return this.toObject().creationDate;
-  else
-    return date;
-} );
-TaskSchema.path( 'createdDate' ).get( function( date ) {
-  if ( this.toObject().creationDate )
-    return this.toObject().creationDate;
-  else
-    return date;
-} );
-TaskSchema.path( 'status' ).get( function( status ) {
-  if ( status === '0' )
-    return 'CREATED';
-  else if ( status === '10' )
-    return 'OPENED';
-  else if ( status === '20' )
-    return 'FINALIZED';
-  else if ( status === '30' )
-    return 'WAIT';
-  else if ( status === '40' )
-    return 'SUSPENDED';
-  else if ( status === '50' )
-    return 'CLOSED';
-  else
-    return status;
-} );
 
 // # Middlewares
 //

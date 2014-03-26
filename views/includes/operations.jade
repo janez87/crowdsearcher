@@ -4,7 +4,7 @@ mixin printOperations( operations )
   if operations.length==0
     .alert.alert-info Sorry, no operations specified.
   else
-    .list-group
+    .list-group.scrollable
       for operation in operations
         - var operationId = 'op_'+operation._id;
         .list-group-item

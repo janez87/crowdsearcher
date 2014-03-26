@@ -35,6 +35,88 @@ footer
 
 
 
+.scrollable
+  max-height: 150px;
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  &.list-group
+    border 1px solid #ddd
+    border-radius 4px
+    .list-group-item
+      border none
+      border-top 1px solid #ddd
+      &:first-child
+        border-top none
+
+.params
+  dd
+    overflow-x hidden
+    text-overflow ellipsis
+    word-break break-all
+    white-space nowrap
+
+.status
+  
+  
+
+.entity-list
+  border 1px solid #ddd
+  .scrollable
+    overflow-y: scroll;
+
+  .row
+    margin-left 0
+    margin-right 0
+
+    &.created
+    &.opened
+      background-color #DFF0D8
+      &:hover
+        background-color #D0E9C6
+    &.finalized
+    &.closed
+      background-color #F2DEDE
+      &:hover
+        background-color #EBCCCC
+    &.closed_bad
+      background-color #F2DEDE
+      &:hover
+        background-color #EBCCCC
+    &.closed_good
+      background-color #F2DEDE
+      &:hover
+        background-color #EBCCCC
+
+  .cell
+    overflow-x hidden
+    text-overflow ellipsis
+    word-break break-all
+    white-space nowrap
+
+
+    padding 5px
+    border-bottom 1px solid #ddd
+    border-right 1px solid #ddd
+    &:last-child
+      border-right none
+
+  .header
+    .row
+      margin-right 15px
+    .cell
+      font-weight bold
+      text-align center
+
+  .content
+    .row:last-child
+      .cell
+        border-bottom none
+      
+    .cell
+      min-height 2.5em;
+
+
 .dropzone
   cursor pointer
 

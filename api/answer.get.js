@@ -1,10 +1,12 @@
 // Load libraries
-var _  = require('underscore');
-var util  = require('util');
+var _ = require( 'underscore' );
+var util = require( 'util' );
 var CS = require( '../core' );
 
 // Import a child Logger
-var log = CS.log.child( { component: 'Get Answer' } );
+var log = CS.log.child( {
+  component: 'Get Answer'
+} );
 
 // Import Models
 var Execution = CS.models.execution;
@@ -48,8 +50,8 @@ API.logic = function getAnswer( req, res, next ) {
   log.trace( 'Get answer' );
 
   // At least one the parameters must be passed
-  if( _.isUndefined(req.query.task) && _.isUndefined(req.query.microtask) && _.isUndefined(req.query.execution) ){
-    log.error('At least one parameter must be specified');
+  if ( _.isUndefined( req.query.task ) && _.isUndefined( req.query.microtask ) && _.isUndefined( req.query.execution ) ) {
+    log.error( 'At least one parameter must be specified' );
     return next( new GetAnswersError(
       GetAnswersError.MISSING_PARAMETERS,
       'All the parameter are undefined',
@@ -58,14 +60,14 @@ API.logic = function getAnswer( req, res, next ) {
 
 
   var filter = {};
-  if( req.query.task )
+  if ( req.query.task )
     filter.task = req.query.task;
-  if( req.query.microtask )
+  if ( req.query.microtask )
     filter.microtask = req.query.microtask;
-  if( req.query.execution )
+  if ( req.query.execution )
     filter._id = req.query.execution;
 
-  req.bulk = true;
+  //req.bulk = true;
   req.queryObject = Execution.find( filter ).sort( 'createdDate' );
   //.populate( 'performer platform annotations.operation' )
   return next();
