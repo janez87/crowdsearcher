@@ -215,6 +215,7 @@ ObjectSchema.methods.redo = function( callback ) {
 
   var clone = _.pick( this, [ 'data' ] );
   var _this = this;
+  log.trace( 'Clone %j', clone );
 
   this.close( true, function( err ) {
     if ( err ) return callback( err );

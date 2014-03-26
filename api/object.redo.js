@@ -36,8 +36,8 @@ API.logic = function redoObject( req, res, next ) {
   var id = req.params.id;
   log.trace( 'Redoing the object %s', id );
 
-  var CrowObject = CS.models.object;
-  CrowObject
+  var ObjectModel = CS.models.object;
+  ObjectModel
     .findById( id )
     .exec( req.wrap( function( err, object ) {
       if ( err ) return next( err );
