@@ -210,6 +210,28 @@ ObjectSchema.methods.close = function( bad, callback ) {
   } );
 };
 
+ObjectSchema.methods.redo = function( callback ) {
+  log.trace( 'Redoing the object %s', this._id );
+
+  var clone = _.pick( this, [ 'data' ] );
+  var _this = this;
+
+  this.close( true, function( err ) {
+    if ( err ) return callback( err );
+
+    _this.model( 'task' )
+      .findOne()
+      .where( 'objects', _this._id )
+      .exec( function( err, task ) {
+        if ( err ) return callback( err );
+
+        if ( !task ) return callback( new Error( 'Task not found' ) );
+
+        log.trace( clone );
+        return task.addObjects( clone, callback );
+      } );
+  } );
+};
 
 // Export the schema.
 exports = module.exports = ObjectSchema;
