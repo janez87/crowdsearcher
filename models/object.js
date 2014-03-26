@@ -217,7 +217,22 @@ ObjectSchema.methods.redo = function( callback ) {
   var _this = this;
   log.trace( 'Clone %j', clone );
 
-  this.close( true, function( err ) {
+  _this.model( 'task' )
+    .findOne()
+    .where( 'objects', this._id )
+    .exec( function( err, task ) {
+      if ( err ) return callback( err );
+
+      if ( !task ) return callback( new Error( 'Task not found' ) );
+
+      task.addObjects( clone, function( err ) {
+        if ( err ) return callback( err );
+
+        return _this.close( true, callback );
+      } );
+    } );
+
+  /*this.close( true, function( err ) {
     if ( err ) return callback( err );
 
     _this.model( 'task' )
@@ -231,7 +246,7 @@ ObjectSchema.methods.redo = function( callback ) {
         log.trace( clone );
         return task.addObjects( clone, callback );
       } );
-  } );
+  } );*/
 };
 
 // Export the schema.
