@@ -36,7 +36,7 @@ function onOpenTask( params, task, data, callback ) {
   ObjectModel
     .find()
     .where( 'task', task._id )
-    .where( 'status' ).nin( 'CLOSED', 'CLOSED_BAD', 'CLOSED_GOOD' )
+    .where( 'status', 'CREATED' )
     .select( '_id' )
     .lean()
     .exec( function( err, objects ) {

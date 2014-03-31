@@ -45,6 +45,7 @@ function onOpenTask( params, task, data, callback ) {
     .exec( function( err, objects ) {
       if ( err ) return callback( err );
 
+
       if ( objects.length <= 1 ) {
         return callback( new HotOrNotError( HotOrNotError.NOT_ENOUGH_OBJECTS, 'The Task does not have enough open objects' ) );
       }
@@ -70,7 +71,7 @@ function onOpenTask( params, task, data, callback ) {
         }
       }
 
-      return  task.addMicrotasks( microTaskList, domain.bind( callback ) );
+      return task.addMicrotasks( microTaskList, domain.bind( callback ) );
 
     } );
 
