@@ -249,7 +249,7 @@ TaskSchema.virtual( 'editable' )
 
 
 // # Retro compatibility
-// 
+//
 // add getters to changed attributes to normalize behaviour
 TaskSchema.path( 'openedDate' ).get( function( date ) {
   if ( this.toObject().creationDate )

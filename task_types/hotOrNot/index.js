@@ -1,5 +1,4 @@
 // Load libraries
-var _ = require( 'underscore' );
 var fs = require( 'fs' );
 var util = require( 'util' );
 var CS = require( '../../core' );
@@ -37,7 +36,7 @@ var TaskType = {
       name: 'like'
     } ],
     splittingStrategy: {
-      name: 'HOT_OR_NOT'
+      name: 'HOTORNOT'
     },
     assignmentStrategy: {
       name: 'RANDOM'
@@ -46,19 +45,21 @@ var TaskType = {
       name: 'RANDOM'
     },
     controlrules: [ {
-      name: 'limitMicroTaskExecutions',
+      name: 'limitMicrotaskExecution',
       event: 'END_EXECUTION',
       params: {
-        maxExecutions: '$maxExecutions$'
+        maxExecution: '$maxExecution$'
       }
+    }, {
+      name: 'closeTaskOnMicrotaskStatus',
+      event: 'END_MICROTASK'
     } ]
   },
   useCases: [ 'Ranking' ],
   params: {
-    categories: {
-      type: [ 'string' ],
-      'default': 'yes,no'
-    }
+    name: 'string',
+    description: 'string',
+    maxExecution: 'number'
   }
 };
 

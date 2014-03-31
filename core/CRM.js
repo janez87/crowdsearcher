@@ -202,7 +202,7 @@ ControlRuleManager.trigger = function( event, data, callback ) {
 
     async.mapSeries( rules, executeRule, function( err, results ) {
       if ( err ) {
-        log.warn( 'Error on triggering platform hooks', err );
+        log.warn( 'Error on control rule hooks', err );
         return cb( null, results );
       }
 

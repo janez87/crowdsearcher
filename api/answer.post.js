@@ -11,7 +11,6 @@ var log = CS.log.child( { component: 'Post Answer' } );
 
 // Import CS antities
 var Execution = CS.models.execution;
-var Operation = CS.models.operation;
 
 // Generate custom error `PostAnswerError` that inherits
 // from `APIError`
