@@ -56,6 +56,8 @@ var ObjectSchema = new Schema( {
       'enum': [
         // The Object has been posted to the CS.
         'CREATED',
+        // The object is assigned to a microtask
+        'ASSIGNED',
 
         // The Object has been closed, it will not accept any modification.
         'CLOSED',
@@ -208,6 +210,13 @@ ObjectSchema.methods.close = function( bad, callback ) {
 
     _this.fire( 'CLOSE_OBJECT', callback );
   } );
+};
+
+ObjectSchema.methods.cancel = function( callback ) {
+  log.trace( 'Cancelling the object' );
+
+  return this.close( true, callback );
+
 };
 
 ObjectSchema.methods.redo = function( callback ) {

@@ -250,7 +250,7 @@ TaskSchema.virtual( 'editable' )
 
 
 // # Retro compatibility
-// 
+//
 // add getters to changed attributes to normalize behaviour
 TaskSchema.path( 'openedDate' ).get( function( date ) {
   if ( this.toObject().creationDate )
@@ -611,10 +611,11 @@ TaskSchema.methods.addMicrotasks = function( microtasks, callback ) {
   log.debug( 'Adding %s microtasks to the task %s', microtasks.length, this._id );
 
   // Add the application key and the Task reference to each microtask.
-  _.each( microtasks, function( microtask ) {
+  // Commentato perchè non serve ora
+  /*_.each( microtasks, function( microtask ) {
     microtask.applicationKey = _this.applicationKey;
     microtask.task = _this._id;
-  } );
+  } );*/
 
   // Bulk create the tasks
   Microtask.create( microtasks, function( err ) {
@@ -770,6 +771,56 @@ TaskSchema.pre( 'remove', function( next ) {
 
 
 
+TaskSchema.methods.reinvite = function( platformNames, callback ) {
+  log.trace( 'Reinviting the performer for the task %s', this._id );
+
+  if ( _.isUndefined( platformNames ) ) {
+    callback = platformNames;
+  } else if ( !_.isArray( platformNames ) ) {
+    platformNames = [ platformNames ];
+  }
+
+  var platforms = this.platforms;
+
+  var _this = this;
+  var getPlatform = function( id, cb ) {
+    var Platform = _this.model( 'platform' );
+
+    Platform
+      .findById( id )
+      .exec( function( err, platform ) {
+        if ( err ) return cb( err );
+        if ( !platform ) return cb( new Error( 'Not platform found' ) );
+
+        if ( platformNames.length > 0 && platformNames.indexOf( platform.name ) === -1 ) {
+          log.trace( 'Platform %s not selected', platform.name );
+          return cb();
+        }
+
+        if ( platform.enabled && platform.invitation ) {
+          var implementation = CS.platforms[ platform.name ];
+
+          log.trace( 'Reinviting the user on %s', platform.name );
+          return implementation.invite( platform.params, _this, {}, function( err ) {
+            if ( err ) return cb( err );
+
+            log.trace( 'bla' );
+
+            return cb();
+          } );
+        } else {
+          log.trace( '%s not a valid platform for the invitation', platform.name );
+          return cb();
+        }
+
+      } );
+  };
+
+
+  return async.each( platforms, getPlatform, callback );
+
+
+};
 
 
 
@@ -782,39 +833,6 @@ TaskSchema.pre( 'remove', function( next ) {
 // Perform the invitation strategy.
 // If no data is passed then it performs the current strategy
 // Otherwise it will use the new strategy passed in the strategy object
-TaskSchema.methods.invite = function( strategy, callback ) {
-
-  if ( !strategy || _.isUndefined( strategy ) || _.isEmpty( strategy ) ) {
-    log.trace( 'Re-executiong the same invitation strategy' );
-
-    var data = {};
-    data.task = this;
-    this.performInvitationStrategy( data, callback );
-
-  } else {
-
-    log.trace( 'A new strategy %j has been selected', strategy );
-    var _this = this;
-
-    var setNewStrategy = function( callback ) {
-      log.trace( 'Setting the new strategy' );
-      _this.setInvitationStrategy( strategy, callback );
-    };
-
-    var performStrategy = function( callback ) {
-      log.trace( 'Performing the new strategy' );
-      var data = {};
-      data.task = _this;
-      _this.performInvitationStrategy( data, callback );
-    };
-
-    var actions = [ setNewStrategy, performStrategy ];
-
-    async.series( actions, callback );
-  }
-
-
-};
 
 // Perform the splitting strategy and replan the task on other platform (if needed)
 TaskSchema.methods.replan = function( strategy, platformName, callback ) {
