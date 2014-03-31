@@ -157,7 +157,7 @@ exports.object = function( req, res, next ) {
 //
 exports.answers = function( req, res, next ) {
   var qs = querystring.stringify( _.defaults( {
-    populate: [ 'platform', 'performer', 'annotations.operation' ]
+    populate: [ 'platform', 'performer', 'annotations.operation' ],
   }, req.query ) );
   r( baseUrl + 'answer?' + qs, function( err, resp, answers ) {
     if ( err ) return next( err );

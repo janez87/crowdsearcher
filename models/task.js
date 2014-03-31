@@ -3,6 +3,7 @@ var _ = require( 'underscore' );
 var mongo = require( 'mongoose' );
 var async = require( 'async' );
 var domain = require( 'domain' );
+var moment = require( 'moment' );
 var CS = require( '../core' );
 
 // Create a child logger
@@ -45,7 +46,7 @@ var TaskSchema = new Schema( {
 
 
     // Task Type
-    type: {
+    taskType: {
       type: String,
       trim: true
     },
@@ -931,6 +932,193 @@ TaskSchema.methods.replan = function( strategy, platformName, callback ) {
   async.waterfall( actions, callback );
 };
 
+
+
+
+
+
+
+/*
+ * INFO Section
+ */
+
+TaskSchema.methods.getInfo = function( name, callback ) {
+  var doAll = false;
+  if( arguments.length===1 ) {
+    callback = name;
+    doAll = true;
+  }
+
+  if( arguments.length===2 )
+    name = name.toLowerCase();
+
+  log.trace( 'Getting "%s" info for task %s', name, this._id );
+
+
+  return callback( new Error( 'Not implemented' ) );
+
+  /*
+  switch( name ) {
+    case 'quality':
+      this.getQuality( callback );
+      break;
+    
+    case 'executions':
+      this.getExecutionsInfo( callback );
+      break;
+
+    case 'lifecycle':
+      this.getLifecycleInfo( callback );
+      break;
+
+    case 'objects':
+      this.getObjectsInfo( callback );
+      break;
+
+    default:
+      break;
+  }
+  */
+};
+
+TaskSchema.methods.getQuality = function( callback ) {
+  return callback( new Error( 'Not implemented' ) );
+};
+TaskSchema.methods.getExecutionsInfo = function( callback ) {
+  var Execution = CS.models.execution;
+
+  Execution
+  .getExecutionsInfo( this, callback );
+};
+TaskSchema.methods.getAnswersCount = function( callback ) {
+  var Execution = CS.models.execution;
+
+  Execution
+  .getAnswersCount( this, callback );
+};
+TaskSchema.methods.getObjectsInfo = function( callback ) {
+  var ObjectModel = CS.models.object;
+
+  ObjectModel
+  .getObjectsInfo( this, callback );
+};
+TaskSchema.methods.getLifecycleInfo = function( callback ) {
+  var Execution = CS.models.execution;
+  var _this = this;
+
+  Execution
+  .findOne()
+  .where( 'task', this._id )
+  .sort( '-invalidDate -closedDate -createdDate' )
+  .select( 'closedDate invalidDate createdDate' )
+  .lean()
+  .exec( function( err, data ) {
+    if( err ) return callback( err );
+
+    var creationDate = moment( _this.get( 'createdDate' ) );
+    var endDate = data.invalidDate || data.closedDate || data.createdDate;
+    // Last activity or closedDate or createdDate
+    var lastActivity = moment( endDate || _this.get( 'closedDate' ) || _this.get( 'createdDate' ) );
+    var taskEnd = moment( _.max( [
+      _this.get( 'closedDate' ),
+      lastActivity.toDate()
+    ] ) );
+
+    var lifecycle = {};
+    lifecycle.active = lastActivity.diff( creationDate, 'seconds' );
+    lifecycle.idle = taskEnd.diff( lastActivity, 'seconds' );
+
+    return callback( null, lifecycle );
+  } );
+};
+TaskSchema.methods.updateInfo = function( name, callback ) {
+  var doAll = false;
+  if( arguments.length===1 ) {
+    callback = name;
+    doAll = true;
+    log.trace( 'Updating all infos for task %s', this._id );
+  }
+
+  if( arguments.length===2 ) {
+    name = name.toLowerCase();
+    log.trace( 'Updating %s for task %s', name, this._id );
+  }
+
+
+  // Add the first function
+  var actions = [
+    function passData( cb ) {
+      return cb( null, {} );
+    }
+  ];
+
+  var _this = this;
+
+
+  if( doAll || name==='executions' ) {
+    log.trace( 'Updating execution' );
+    actions.push( function( data, cb ) {
+      log.trace( 'Getting execution info' );
+
+      _this
+      .getExecutionsInfo( function( err, results ) {
+        if( err ) return cb( err );
+
+        data.executions = results;
+        return cb( null,  data );
+      });
+    } );
+  }
+
+  if( doAll || name==='answers' ) {
+    log.trace( 'Updating answers' );
+    actions.push( function( data, cb ) {
+      log.trace( 'Getting answers info' );
+
+      _this
+      .getAnswersCount( function( err, results ) {
+        if( err ) return cb( err );
+
+        data.answers = results;
+        return cb( null,  data );
+      });
+    } );
+  }
+
+  if( doAll || name==='objects' ) {
+    log.trace( 'Updating objects' );
+    actions.push( function( data, cb ) {
+      log.trace( 'Getting objects info' );
+
+      _this
+      .getObjectsInfo( function( err, results ) {
+        if( err ) return cb( err );
+
+        data.objects = results;
+        return cb( null,  data );
+      });
+    } );
+  }
+
+  if( doAll || name==='lifecycle' ) {
+    log.trace( 'Updating lifecycle' );
+    actions.push( function( data, cb ) {
+      log.trace( 'Getting lifecycle info' );
+
+      _this
+      .getLifecycleInfo( function( err, results ) {
+        if( err ) return cb( err );
+
+        data.lifecycle = results;
+        return cb( null,  data );
+      });
+    } );
+  }
+
+
+
+  return async.waterfall( actions, callback );
+};
 
 // Export the schema.
 exports = module.exports = TaskSchema;

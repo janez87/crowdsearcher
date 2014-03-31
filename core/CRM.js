@@ -25,7 +25,7 @@ var ControlRuleManager = {};
 ControlRuleManager.trigger = function( event, data, callback ) {
   // The task id must be available in the data object.
   var taskId = data.task._id ? data.task._id : data.task;
-  debugger;
+  //debugger;
   log.debug( 'CRM event %s', event );
 
   if ( !taskId )
@@ -338,16 +338,33 @@ ControlRuleManager.trigger = function( event, data, callback ) {
   }
 
 
+  function updateCounters( task, cb ) {
+    // Update counters only on tasks with a defined taskType execution closed events
+    /*
+    if( task.get( 'taskType' )===null && event!=='END_EXECUTION' )
+      return cb( null, task );
+    */
+
+    return task.updateInfo( function( err ) {
+      if( err ) {
+        return cb( err, null );
+      } else {
+        return cb( null, task );
+      }
+    } );
+  }
+
   var actions = [
     retrieveData,
     checkTask,
+    updateCounters, // Available only for END_EXECUTION on taskTypes
     triggerPlatformRules,
     triggerStrategyRules,
     triggerControlRules
   ];
 
   async.waterfall( actions, function( err ) {
-    // In case of error log it and exit.
+    // In case of error log it, dont exit.
     if ( err )
       log.warn( 'Some error occurred during %s', event, err );
 

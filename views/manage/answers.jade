@@ -15,6 +15,7 @@ block header
             |  Task
 
 block content
+  - function f( date ) { return moment( date ).format( 'YYYY-MM-DD HH:mm:ss' ); };
   if answers.length===0
     blockquote
       p No answers found in the database.
@@ -38,9 +39,9 @@ block content
                 |  on 
                 span.label.label-info= execution.platform.name
               .col-md-6.text-right
-                span.label(class='label-'+classMap[ execution.status ] )= execution.status
+                +printStatus( execution.status, classMap )
                 |  @ 
-                code= moment( execution[ execution.status.toLowerCase()+'Date' ] ).format( 'YYYY-MM-DD HH:mm' )
+                code= f( execution[ execution.status.toLowerCase()+'Date' ] )
           div(id=execution._id).panel-collapse.collapse
             .panel-body
               .row
@@ -52,13 +53,13 @@ block content
                   p: a(href='manage/microtask/'+execution.microtask) Microtask
                 .col-md-4.text-right
                   p Created:
-                    code= moment( execution.createdDate ).format( 'YYYY-MM-DD HH:mm' )
+                    code= f( execution.createdDate )
                   if execution.status==='CLOSED'
                     p Closed:
-                      code= moment( execution.createdDate ).format( 'YYYY-MM-DD HH:mm' )
+                      code= f( execution.createdDate )
                   if execution.status==='INVALID'
                     p Closed:
-                      code= moment( execution.invalidDate ).format( 'YYYY-MM-DD HH:mm' )
+                      code= f( execution.invalidDate )
               h4 Annotations
               if execution.annotations.length===0
                 blockquote

@@ -110,6 +110,8 @@ API.logic = function postTask( req, res, next ) {
     if ( err ) return next( err );
     //add the job
     rawTask.job = job.id;
+    rawTask.taskType = name;
+
 
     var operations = rawTask.operations;
     delete rawTask.operations;

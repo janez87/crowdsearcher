@@ -68,7 +68,7 @@ API.logic = function getAnswer( req, res, next ) {
     filter._id = req.query.execution;
 
   //req.bulk = true;
-  req.queryObject = Execution.find( filter ).sort( 'createdDate' );
+  req.queryObject = Execution.find( filter ).sort( '-createdDate' );
   //.populate( 'performer platform annotations.operation' )
   return next();
 };

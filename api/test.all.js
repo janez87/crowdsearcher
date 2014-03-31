@@ -37,7 +37,39 @@ var API = {
 
 // API core function logic. If this function is executed then each check is passed.
 API.logic = function( req, res, next ) {
+  /*
+  var Execution = CS.models.execution;
+  
+  Execution
+  .findOne()
+  .where( 'task', req.query.task )
+  .sort( '-invalidDate -closedDate -createdDate' )
+  .select( 'closedDate invalidDate createdDate' )
+  .lean()
+  .exec( function( err, plain ) {
+    if( err ) return next( err );
 
+    res.json( plain );
+  } );
+  */
+
+  var Task = CS.models.task;
+  Task
+  .findById( req.query.task )
+  .exec( function( err, task ) {
+    if( err ) return next( err );
+    
+    task.updateInfo( function( err, data ) {
+      if( err ) return next( err );
+      
+
+      log.trace( 'Yeah %j', data );
+      return res.json( data );
+    } );
+  });
+
+
+  /*
   var domain = require( 'domain' ).create();
   domain.on( 'error', function( err ) {
     return next( err );
@@ -54,19 +86,17 @@ API.logic = function( req, res, next ) {
         token: '-'
       }
     }
-    /*
-    {
-      name: 'amt',
-      enabled: true,
-      invitation: false,
-      execution: true,
-      params: {
-        accessKeyId: 'AKIAIJEW5UG5SRI2TUQA',
-        secretAccessKey: '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',
-        price: 10
-      }
-    }
-    */
+//    ,{
+//      name: 'amt',
+//      enabled: true,
+//      invitation: false,
+//      execution: true,
+//      params: {
+//        accessKeyId: 'AKIAIJEW5UG5SRI2TUQA',
+//        secretAccessKey: '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',
+//        price: 10
+//      }
+//    }
   ];
   var operations = [ {
     name: 'like',
@@ -79,27 +109,26 @@ API.logic = function( req, res, next ) {
     }
   } ];
   var controlrules = [
-    /*
-    {
-      name: 'limitMicrotaskExecution',
-      params: {
-        maxExecution: 1
-      }
-    },
-    {
-      name: 'limitTaskExecution',
-      params: {
-        maxExecution: 5
-      }
-    }
-    {
-      type: 'CUSTOM',
-      name: 'closeTaskOnObjectStatus'
-    }, {
-      type: 'CUSTOM',
-      name: 'closeMicroTaskOnObjectStatus'
-    }
-    */
+//    {
+//      name: 'limitMicrotaskExecution',
+//      params: {
+//        maxExecution: 1
+//      }
+//    },
+//    {
+//      name: 'limitTaskExecution',
+//      params: {
+//        maxExecution: 5
+//      }
+//    }
+//    {
+//      type: 'CUSTOM',
+//      name: 'closeTaskOnObjectStatus'
+//    },
+//    {
+//      type: 'CUSTOM',
+//      name: 'closeMicroTaskOnObjectStatus'
+//    }
   ];
   var objects = [ {
       data: 'Numero: ' + Math.random()
@@ -108,28 +137,26 @@ API.logic = function( req, res, next ) {
     }, {
       data: 'Numero: ' + Math.random()
     },
-    /*
-    { data: 'Numero: '+Math.random() },
-    { data: 'Numero: '+Math.random() },
-    { data: 'Numero: '+Math.random() },
-    { data: 'Numero: '+Math.random() },
-    { data: 'Numero: '+Math.random() },
-    { data: 'Numero: '+Math.random() },
-    { data: 'Numero: '+Math.random() },
-    { data: 'Numero: '+Math.random() },
-    { data: 'Numero: '+Math.random() },
-    { data: 'Numero: '+Math.random() },
-    { data: 'Numero: '+Math.random() },
-    { data: 'Numero: '+Math.random() },
-    { data: 'Numero: '+Math.random() },
-    { data: 'Numero: '+Math.random() },
-    { data: 'Numero: '+Math.random() }
-    */
+    // { data: 'Numero: '+Math.random() },
+    // { data: 'Numero: '+Math.random() },
+    // { data: 'Numero: '+Math.random() },
+    // { data: 'Numero: '+Math.random() },
+    // { data: 'Numero: '+Math.random() },
+    // { data: 'Numero: '+Math.random() },
+    // { data: 'Numero: '+Math.random() },
+    // { data: 'Numero: '+Math.random() },
+    // { data: 'Numero: '+Math.random() },
+    // { data: 'Numero: '+Math.random() },
+    // { data: 'Numero: '+Math.random() },
+    // { data: 'Numero: '+Math.random() },
+    // { data: 'Numero: '+Math.random() },
+    // { data: 'Numero: '+Math.random() },
+    // { data: 'Numero: '+Math.random() }
   ];
 
 
   var job = new Job( {
-    name: 'Test Job 2',
+    name: 'Test Job',
     description: '# Hello\n## moto\n`var volo="io"`'
   } );
   job.save();
@@ -159,26 +186,25 @@ API.logic = function( req, res, next ) {
   var task = new Task( rawTask );
 
   var actions = [
-    _.bind( task.addPlatforms, task, platforms ),
-    _.bind( task.addOperations, task, operations ),
-    _.bind( task.addObjects, task, objects ),
-    _.bind( task.open, task )
+    _.bind( task.save, task )
     //_.bind( task.addObjects, task, objects ),
   ];
 
   async.series( actions, function( err, results ) {
     if ( err ) return next( err );
 
-    log.trace( 'Results are: %j', results );
-    /*
-    task.clone( domain.bind( function( err, clonedTask ) {
+    var task = results[0];
+
+    log.trace( 'Results are: %j', task );
+    
+    task.updateInfo( function( err, data ) {
       if ( err ) return next( err );
 
-      res.send( clonedTask );
-    } ) );
-    */
-    return res.send( results );
+      log.trace( 'Data out: %j', data );
+      return res.json( results );
+    });
   } );
+*/
 };
 
 

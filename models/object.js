@@ -249,5 +249,41 @@ ObjectSchema.methods.redo = function( callback ) {
   } );*/
 };
 
+
+
+
+
+
+
+ObjectSchema.statics.getObjectsInfo = function( task, callback ) {
+  return this
+  .aggregate()
+  .match( {
+    task: task._id
+  } )
+  .group( {
+    _id: '$status',
+    number: {
+      $sum: 1
+    }
+  } )
+  .exec( function( err, results ) {
+    if( err ) return callback( err );
+    
+    results = _.indexBy( results, '_id' );
+
+    var objects = {};
+    objects.created = results[ 'CREATED' ]? results[ 'CREATED' ].number : 0;
+    var closed = 0;
+    closed += results[ 'CLOSED' ]? results[ 'CLOSED' ].number : 0;
+    closed += results[ 'CLOSED_BAD' ]? results[ 'CLOSED_BAD' ].number : 0;
+    closed += results[ 'CLOSED_GOOD' ]? results[ 'CLOSED_GOOD' ].number : 0;
+    objects.closed = closed;
+    objects.total = objects.created+objects.closed;
+
+    return callback( null, objects );
+  } );
+};
+
 // Export the schema.
 exports = module.exports = ObjectSchema;

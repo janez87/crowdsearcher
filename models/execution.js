@@ -309,5 +309,92 @@ ExecutionSchema.methods.createAnnotations = function( responses, callback ) {
 
 
 
+ExecutionSchema.statics.getExecutionsInfo = function( task, callback ) {
+  return this
+  .aggregate()
+  .match( {
+    task: task._id
+  } )
+  .group( {
+    _id: '$status',
+    number: {
+      $sum: 1
+    }
+  } )
+  .exec( function( err, results ) {
+    if( err ) return callback( err );
+    
+    results = _.indexBy( results, '_id' );
+
+    var executions = {};
+    executions.created = results[ 'CREATED' ]? results[ 'CREATED' ].number : 0;
+    executions.closed = results[ 'CLOSED' ]? results[ 'CLOSED' ].number : 0;
+    executions.invalid = results[ 'INVALID' ]? results[ 'INVALID' ].number : 0;
+    executions.total = executions.created+executions.closed+executions.invalid;
+
+    return callback( null, executions );
+  } );
+};
+ExecutionSchema.statics.getAnswersCount = function( task, callback ) {
+  return this
+  .count()
+  .where( 'task', task._id )
+  .where( 'annotations._id' ).exists()
+  .exec( function( err, results ) {
+    if( err ) return callback( err );
+
+    //var number = results.length? results[0].number : 0;
+    //return callback( null, number );
+    return callback( null, results );
+  } );
+};
+ExecutionSchema.statics.getClosedCount = function( task, callback ) {
+  return this
+  .find()
+  .where( 'task', task._id || task )
+  .where( 'status', 'CLOSED' )
+  .count()
+  .exec( callback );
+};
+ExecutionSchema.statics.getClosed = function( task, callback ) {
+  return this
+  .find()
+  .where( 'task', task._id || task )
+  .where( 'status', 'CLOSED' )
+  .exec( callback );
+};
+
+ExecutionSchema.statics.getInvalidCount = function( task, callback ) {
+  return this
+  .find()
+  .where( 'task', task._id || task )
+  .where( 'status', 'INVALID' )
+  .count()
+  .exec( callback );
+};
+ExecutionSchema.statics.getInvalid = function( task, callback ) {
+  return this
+  .find()
+  .where( 'task', task._id || task )
+  .where( 'status', 'INVALID' )
+  .exec( callback );
+};
+
+ExecutionSchema.statics.getAllExecutionCount = function( task, callback ) {
+  return this
+  .find()
+  .where( 'task', task._id || task )
+  .count()
+  .exec( callback );
+};
+ExecutionSchema.statics.getAllExecution = function( task, callback ) {
+  return this
+  .find()
+  .where( 'task', task._id || task )
+  .exec( callback );
+};
+
+
+
 
 exports = module.exports = ExecutionSchema;
