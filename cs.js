@@ -98,7 +98,7 @@ app.use( function( req, res, next ) {
 } );
 
 // Use icon
-app.use( express.favicon() );
+//app.use( express.favicon() );
 
 // Log all the requests?
 //app.use(express.logger('dev'));

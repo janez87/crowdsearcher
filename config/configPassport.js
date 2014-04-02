@@ -20,7 +20,7 @@ function linkAccountToUser( req, token, tokenSecret, profile, done ) {
   var User = CS.models.user;
 
   log.trace( 'Connecting provider %s (%s)', profile.provider, profile.id );
-  //log.trace( 'Profile data for (%s): %j', profile.username, profile );
+  log.trace( 'Profile data for (%s): %j', profile.username, profile );
 
 
   // This function is called last to login as the specified user

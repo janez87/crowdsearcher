@@ -234,8 +234,11 @@ UserSchema.statics.findByAccountId = function( accountName, accountId, callback 
     .exec( function( err, user ) {
       if ( err ) return callback( err );
 
-      if ( !user )
-        return callback( new MongoError( 'No user retrieved' ) );
+      /*
+    if( !user )
+      return callback( new MongoError( 'No user retrieved' ) );
+    */
+
 
       return callback( null, user );
     } );
