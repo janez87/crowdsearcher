@@ -612,10 +612,10 @@ TaskSchema.methods.addMicrotasks = function( microtasks, callback ) {
 
   // Add the application key and the Task reference to each microtask.
   // Commentato perchè non serve ora
-  /*_.each( microtasks, function( microtask ) {
-    microtask.applicationKey = _this.applicationKey;
+  _.each( microtasks, function( microtask ) {
+    //microtask.applicationKey = _this.applicationKey;
     microtask.task = _this._id;
-  } );*/
+  } );
 
   // Bulk create the tasks
   Microtask.create( microtasks, function( err ) {

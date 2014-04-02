@@ -31,8 +31,10 @@ function onEndMicrotask( params, task, data, callback ) {
 }
 
 function onEndExecution( params, task, data, callback ) {
-  log.trace( 'onEndExecution', params, data );
-  log.trace( 'Task', task );
+  var ruleList = params;
+  
+
+  
 
   return callback();
 }
