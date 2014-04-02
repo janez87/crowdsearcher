@@ -44,41 +44,42 @@ function linkAccountToUser( req, token, tokenSecret, profile, done ) {
 
 
   // Check if the account and/or the user is present and create it
-  var checkAccount = function( user ) {
+  var checkAccount = function( loggedUser ) {
 
     log.trace( 'User is logged? %s', req.isAuthenticated() );
 
     var findAccount = function( callback ) {
-      if ( !req.isAuthenticated() )
-        return callback();
-
       User
-        .findByAccountId(
-          profile.provider,
-          profile.id,
-          req.wrap( function( err, user ) {
-            if ( err ) return callback( err );
+      .findByAccountId(
+        profile.provider,
+        profile.id,
+        req.wrap( function( err, userForAccount ) {
+          if( err ) return callback( err );
 
-            if ( !user ) return callback();
+          if( !userForAccount ) return callback();
 
-            if ( !user._id.equals( req.user._id ) )
-              return callback( new Error( 'Account belongs to another user!' ) );
+          if( loggedUser && !userForAccount._id.equals( loggedUser._id ) )
+            return callback( new Error( 'Account belongs to another user!' ) );
 
-            return callback();
-          } )
+          loggedUser = userForAccount;
+
+          return callback();
+        } )
       );
     };
+
+
     var createUser = function( callback ) {
 
-      if ( !user ) {
+      if ( !loggedUser ) {
         // User not present, create one from the account information
         log.trace( 'Creating user from account' );
 
         // Create the user
-        user = User.createWithAccount( profile.provider, profile );
+        loggedUser = User.createWithAccount( profile.provider, profile );
 
         // Save user
-        return req.wrap( 'save', user )( callback );
+        return req.wrap( 'save', loggedUser )( callback );
       } else {
         // User present, go on.
         return callback();
@@ -88,21 +89,21 @@ function linkAccountToUser( req, token, tokenSecret, profile, done ) {
     var addAccount = function( callback ) {
 
       // Find the account for the user
-      log.trace( 'User: %s', user._id );
+      log.trace( 'User: %s', loggedUser._id );
 
-      var account = _.findWhere( user.accounts, {
+      var account = _.findWhere( loggedUser.accounts, {
         provider: String( profile.provider ),
         uid: String( profile.id )
       } );
 
-      log.trace( 'Account found? %s', !! account );
+      log.trace( 'Account found? %s', !!account );
 
-      if ( !account ) {
+      if( !account ) {
         // Account not found for the user, add one.
-        user.addAccount( profile.provider, profile );
+        loggedUser.addAccount( profile.provider, profile );
 
         // Save user
-        return req.wrap( 'save', user )( callback );
+        return req.wrap( 'save', loggedUser )( callback );
       } else {
         // Account present go on.
         return callback();
@@ -119,7 +120,7 @@ function linkAccountToUser( req, token, tokenSecret, profile, done ) {
       if ( err ) return login( err );
 
       log.trace( 'Operations completed' );
-      return login( null, user );
+      return login( null, loggedUser );
     } );
   };
 

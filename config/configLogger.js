@@ -37,7 +37,7 @@ function configLogger( callback ) {
     } );
     var loggerName = 'CrowdSearcher';
     if ( cluster.isWorker )
-      loggerName += ' Worker ' + cluster.worker.id;
+      loggerName = 'CS Worker ' + cluster.worker.id;
 
     var log = Logger.createLogger( {
       name: loggerName,

@@ -70,7 +70,8 @@ API.logic = function postTask( req, res, next ) {
       platforms.push( val );
     } );
   }
-  //var adaptation = data.adaptation;
+
+  var adaptation = data.adaptation;
 
 
 
@@ -118,11 +119,18 @@ API.logic = function postTask( req, res, next ) {
 
     var task = new Task( rawTask );
 
+    // Add the adaptation rule as the last one
+    task.controlrules.push( {
+      name: 'adaptationRule',
+      params: adaptation
+    } );
+
     var actions = [
       _.bind( task.addPlatforms, task, platforms ),
       _.bind( task.addOperations, task, operations ),
       _.bind( task.addObjects, task, objects )
     ];
+
 
     async.series( actions, function( err ) {
       if ( err ) return next( err );

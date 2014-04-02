@@ -1035,6 +1035,9 @@ TaskSchema.methods.getLifecycleInfo = function( callback ) {
   .exec( function( err, data ) {
     if( err ) return callback( err );
 
+    if( !data )
+      return callback( null, { active: 0, idle: 0 } );
+
     var creationDate = moment( _this.get( 'createdDate' ) );
     var endDate = data.invalidDate || data.closedDate || data.createdDate;
     // Last activity or closedDate or createdDate
