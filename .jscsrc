@@ -108,9 +108,7 @@
     "*",
     "=",
     "==",
-    "===",
-    "!=",
-    "!=="
+    "!="
   ],
   "requireSpaceAfterBinaryOperators": [
     "+",
@@ -119,9 +117,7 @@
     "*",
     "=",
     "==",
-    "===",
-    "!=",
-    "!=="
+    "!="
   ],
   "requireRightStickedOperators": ["!"],
   "requireLeftStickedOperators": [","],

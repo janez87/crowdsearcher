@@ -66,6 +66,10 @@ var ControlMartSchema = new Schema( {
 
 // ## Static methods for the `ControlMart` class
 // ---
+
+
+
+/*
 // Return the tuple matching the condition in a 'user friendly' format
 ControlMartSchema.statics.select = function( rawTuple, callback ) {
 
@@ -73,7 +77,7 @@ ControlMartSchema.statics.select = function( rawTuple, callback ) {
 
   // Retrieves the instance
   this
-    .find( rawTuple )
+  .find( rawTuple )
   // Retrieves pure javascript objects
   .lean()
     .exec( function( err, controlMartTuples ) {
@@ -154,13 +158,41 @@ ControlMartSchema.statics.select = function( rawTuple, callback ) {
     } );
 
 };
+*/
+
+ControlMartSchema.statics.select = function( filter, names, callback ) {
+  if( !_.isArray( names ) )
+    names = [ names ];
+  
+  // Just in case
+  delete filter[ 'data' ];
+  delete filter[ 'name' ];
+
+  // If no names specified just call the get.
+  if( names.length===0 )
+    return this.get( filter, callback );
+
+  this
+  .find( filter )
+  .where( 'name' ).in( names )
+  .sort( '-_id' )
+  .lean()
+  .exec( function( err, controlmart ) {
+    if( err ) return callback( err );
+    
+    log.trace( '%s tuples selected', controlmart.length );
+
+    return callback( null, controlmart );
+  } );
+};
 
 // Return the tuple matching the condition in its original format
 ControlMartSchema.statics.get = function( rawTuple, callback ) {
   log.trace( 'Retrieving the controlmart tuple of %j', rawTuple );
 
   this
-    .find( rawTuple )
+  .find( rawTuple )
+  .sort( '-_id' )
   // Pure javascript object
   .lean()
     .exec( function( err, controlmart ) {

@@ -955,10 +955,11 @@ TaskSchema.methods.replan = function( strategy, platformName, callback ) {
 
 
 
-
-/*
- * INFO Section
- */
+// # Info methods
+//
+// ## getInfo
+// Get the specified information about the task.
+// name can be one of `executions`, `answers`, `objects`, `lifecycle` and `quality`
 
 TaskSchema.methods.getInfo = function( name, callback ) {
   var doAll = false;
@@ -973,30 +974,31 @@ TaskSchema.methods.getInfo = function( name, callback ) {
   log.trace( 'Getting "%s" info for task %s', name, this._id );
 
 
-  return callback( new Error( 'Not implemented' ) );
+  var fields = [];
 
-  /*
-  switch( name ) {
-    case 'quality':
-      this.getQuality( callback );
-      break;
+  if( doAll || name==='executions' )
+    fields.push( 'executions' );
+  if( doAll || name==='answers' )
+    fields.push( 'answers' );
+  if( doAll || name==='objects' )
+    fields.push( 'objects' );
+  if( doAll || name==='lifecycle' )
+    fields.push( 'lifecycle' );
+
+  var ControlMart = CS.models.controlmart;
+
+  ControlMart.select( {
+    task: this._id
+  }, fields, function( err, controlmart ) {
+    if( err ) return callback( err );
+
+    var output = {};
+    _.each( controlmart, function( v ) {
+      output[ v.name ] = v.data;
+    } );
     
-    case 'executions':
-      this.getExecutionsInfo( callback );
-      break;
-
-    case 'lifecycle':
-      this.getLifecycleInfo( callback );
-      break;
-
-    case 'objects':
-      this.getObjectsInfo( callback );
-      break;
-
-    default:
-      break;
-  }
-  */
+    return callback( err, output );
+  } );
 };
 
 TaskSchema.methods.getQuality = function( callback ) {
@@ -1049,6 +1051,11 @@ TaskSchema.methods.getLifecycleInfo = function( callback ) {
     return callback( null, lifecycle );
   } );
 };
+
+
+// ## updateInfo
+// 
+// Updates the info in the control mart. This function is likely to be called on each event.
 TaskSchema.methods.updateInfo = function( name, callback ) {
   var doAll = false;
   if( arguments.length===1 ) {
@@ -1071,7 +1078,6 @@ TaskSchema.methods.updateInfo = function( name, callback ) {
   ];
 
   var _this = this;
-
 
   if( doAll || name==='executions' ) {
     log.trace( 'Updating execution' );
@@ -1133,7 +1139,27 @@ TaskSchema.methods.updateInfo = function( name, callback ) {
     } );
   }
 
+  function updateMart( data, cb ) {
+    var ControlMart = CS.models.controlmart;
 
+    var tuples = [];
+    _.each( data, function( v, k ) {
+      var tuple = {
+        task: _this._id,
+        name: k,
+        data: v
+      };
+      tuples.push( tuple );
+    } );
+
+    ControlMart.insert( tuples, function( err ) {
+      if( err ) return cb( err );
+
+      return cb( null, data );
+    } );
+  }
+
+  actions.push( updateMart );
 
   return async.waterfall( actions, callback );
 };

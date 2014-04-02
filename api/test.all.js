@@ -59,7 +59,7 @@ API.logic = function( req, res, next ) {
   .exec( function( err, task ) {
     if( err ) return next( err );
     
-    task.updateInfo( function( err, data ) {
+    task.getInfo( function( err, data ) {
       if( err ) return next( err );
       
 

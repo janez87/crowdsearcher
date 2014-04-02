@@ -53,13 +53,13 @@ block content
             td.text-center: +printData( row, 'performer' )
             td.text-center: +printData( row, 'object' )
             td.text-center= row[ 'name' ]
-            td.text-center
+            td
               - var data = row.data;
               if !_.isUndefined( data )
                 if _.isObject( data )
                   pre= JSON.stringify( data, null, 2 )
                 else
-                  code= data
+                  .text-center: code= data
       else
         tr.warning: td.text-center(colspan=9)
           p.text-warning No data present
