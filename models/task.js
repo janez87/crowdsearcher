@@ -966,12 +966,14 @@ TaskSchema.methods.getInfo = function( name, callback ) {
   if( arguments.length===1 ) {
     callback = name;
     doAll = true;
+    log.trace( 'Getting all info for task %s', this._id );
   }
 
-  if( arguments.length===2 )
+  if( arguments.length===2 ) {
     name = name.toLowerCase();
+    log.trace( 'Getting "%s" info for task %s', name, this._id );
+  }
 
-  log.trace( 'Getting "%s" info for task %s', name, this._id );
 
 
   var fields = [];

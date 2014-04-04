@@ -208,6 +208,7 @@ block content
               option(value='<=') &lt;=
               option(value='>=') &gt;=
               option(value='==') ==
+              option(value='!=') !=
           .col-md-3
             input.value.form-control(type='number',title='Insert the value')
           .col-md-2.text-right
@@ -215,17 +216,46 @@ block content
               i.fa.fa-plus
             button(type='button',title='Remove current condition').btn.btn-danger.btn-sm.btn-remove
               i.fa.fa-minus
+      
+
       h3 DO
       select#actions.form-control(title='Actions')
         option.task(value='invite') Re-invite
         option.task(value='replan') Re-plan
         option.task(value='migrate') Migrate
+        option.task(value='close') Close
         
         option.object(value='redo') Redo
         option.object(value='cancel') Cancel
         
         option.performer(value='ban') Ban
       
+      
+
+      h3 RULE TYPE:
+      .row
+        .col-md-6
+          .radio
+            label
+              input(name='adaptationType',
+                checked,
+                type='radio')
+              |  ONE SHOT
+          .alert.alert-info
+            strong Info:
+            p.
+              The one shot rules are executed only <u>once</u> per scope.
+        .col-md-6
+          .radio
+            label
+              input(name='adaptationType',
+                type='radio')
+              |  REPEATING
+          .alert.alert-warning
+            strong Warning:
+            p.
+              The repeating rules are executed every time the conditions are met.
+
       #configurations
         .action-config#action_replan_config(style='display: none;')
           h3 Re-plan parameters

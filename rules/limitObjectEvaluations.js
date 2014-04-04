@@ -41,7 +41,7 @@ function onAddMicrotasks( params, task, data, callback ) {
 }
 
 function onEndExecution( params, task, data, callback ) {
-  debugger;
+  //debugger;
   log.trace( 'Executing the rule' );
 
   var domain = require( 'domain' ).create();
