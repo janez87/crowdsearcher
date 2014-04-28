@@ -59,6 +59,7 @@ block append lateScripts
     $( '#add_rule' ).click( function() {
       var rule = {
         'scope': '',
+        'type': '',
         'when': [],
         'do': {
           action: '',
@@ -82,6 +83,7 @@ block append lateScripts
       // Action
       rule[ 'do' ].action = $actions.val();
       rule.scope = $scope.val();
+      rule.type = $( 'input[name=adaptationType]:checked' ).val();
 
       // Create list item
       var $li = $( '<li></li>' );
@@ -239,22 +241,24 @@ block content
             label
               input(name='adaptationType',
                 checked,
+                value='one-shot',
                 type='radio')
               |  ONE SHOT
           .alert.alert-info
             strong Info:
             p.
-              The one shot rules are executed only <u>once</u> per scope.
+              The one shot rules are <u>executed only the first time</u>, per scope, the condition is met.
         .col-md-6
           .radio
             label
               input(name='adaptationType',
+                value='repeat',
                 type='radio')
               |  REPEATING
           .alert.alert-warning
             strong Warning:
             p.
-              The repeating rules are executed every time the conditions are met.
+              The repeating rules are <u>executed every time</u> the conditions are met.
 
       #configurations
         .action-config#action_replan_config(style='display: none;')

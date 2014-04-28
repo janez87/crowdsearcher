@@ -34,14 +34,17 @@ function onEndMicrotask( params, task, data, callback ) {
 
 function parseRule( task, info, rule, callback ) {
   var scope = rule.scope;
+  var type = rule.type;
   var action = rule.do? rule.do.action : 'none';
-  var params = rule.do? rule.do.params : {};
-  var conditionList = rule.when || [];
+  var params = rule.do? rule.do.params : { };
+  var conditionList = rule.when || [ ];
 
   var result;
 
+  log.trace( 'Parsing %s rule for %s', type, scope );
+
   for (var j = 0; j < conditionList.length; j++) {
-    var conditionObject = conditionList[j];
+    var conditionObject = conditionList[ j ];
     var value = conditionObject.value;
     var operator = conditionObject.operator;
     var condition = conditionObject.condition;
@@ -50,7 +53,7 @@ function parseRule( task, info, rule, callback ) {
 
     var dataValue = info;
     for( var i=0; i<conditionParts.length; i++ ) {
-      dataValue = dataValue[ conditionParts[i] ];
+      dataValue = dataValue[ conditionParts[ i ] ];
     }
 
     log.trace( 'Computing condition %d', j );
@@ -125,13 +128,17 @@ function onEndExecution( params, task, data, callback ) {
 
   // Get all the info from the task
   task.getInfo( function( err, info ) {
-    if( err ) return callback( err );
+    if( err ) {
+      return callback( err );
+    }
     
     // Pre apply the task info and the task itself
     var fn = _.partial( parseRule, task, info );
 
     async.each( ruleList, fn, function( err ) {
-      if( err ) return callback( err );
+      if( err ) {
+        return callback( err );
+      }
       
       log.debug( 'Adaptation completed' );
       return callback();
@@ -173,7 +180,7 @@ var rule = {
   // ## Parameters
   //
   //
-  params: {},
+  params: { },
 
   // ## Check rule
   //

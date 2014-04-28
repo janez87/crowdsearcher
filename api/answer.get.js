@@ -59,13 +59,16 @@ API.logic = function getAnswer( req, res, next ) {
   }
 
 
-  var filter = {};
-  if ( req.query.task )
+  var filter = { };
+  if( req.query.task ) {
     filter.task = req.query.task;
-  if ( req.query.microtask )
+  }
+  if( req.query.microtask ) {
     filter.microtask = req.query.microtask;
-  if ( req.query.execution )
+  }
+  if( req.query.execution ) {
     filter._id = req.query.execution;
+  }
 
   //req.bulk = true;
   req.queryObject = Execution.find( filter ).sort( '-createdDate' );

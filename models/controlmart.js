@@ -226,16 +226,16 @@ ControlMartSchema.statics.insert = function( rawTuples, callback ) {
 
       if ( controlmart ) {
         // Update the data
-        log.trace( 'The tuple already exists' );
+        //log.trace( 'The tuple already exists' );
         controlmart.data = tuple.data;
       } else {
         // Create a new tuple
-        log.trace( 'New tuple' );
+        //log.trace( 'New tuple' );
         var ControlMart = _this.model( 'controlmart' );
         controlmart = new ControlMart( tuple );
       }
 
-      log.trace( 'Saving the tuple' );
+      //log.trace( 'Saving the tuple' );
       return controlmart.save( callback );
     } );
   };
