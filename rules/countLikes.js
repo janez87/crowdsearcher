@@ -5,7 +5,7 @@ var CS = require( '../core' );
 
 // Create a child logger
 var log = CS.log.child( {
-  component: 'Limit Object Evaluations'
+  component: 'Count likes'
 } );
 
 // Models
@@ -21,7 +21,7 @@ function onAddMicrotasks( params, task, data, callback ) {
       task: task._id,
       microtask: microtaskId,
       object: objectId,
-      name: 'evaluations',
+      name: 'likes',
       data: 0
     };
 
@@ -47,64 +47,40 @@ function onEndExecution( params, task, data, callback ) {
   var domain = require( 'domain' ).create();
   domain.on( 'error', callback );
 
-  var maxExecutions = params.maxExecutions;
   var execution = data.execution;
+  var annotations = execution.annotations;
   var microtask = execution.microtask;
   var taskId = task._id;
-
-  var objectIds = microtask.objects;
-
-  var closeObject = function( objectId, cb ) {
-
-    log.trace( 'Retrieving the object %s', objectId );
-    return ObjectModel.findById( objectId, function( err, object ) {
-      if ( err ) return cb( err );
-
-      if ( object.closed ) return cb();
-
-      log.trace( 'Closing the object' );
-
-      return object.close( cb );
-    } );
-  };
 
   var updateEvaluations = function( tuple, cb ) {
     return ControlMart.insert( tuple, cb );
   };
 
-  var checkObject = function( objectId, cb ) {
+  var updateLike = function( annotation, cb ) {
 
+    var objectId = annotation.object;
     var query = {
       task: taskId,
       object: objectId,
-      name: 'evaluations',
+      name: 'likes',
       microtask: microtask._id
     };
 
 
-    ControlMart.get( query, function( err, tuple ) {
+    ControlMart.get( query, function( err, tuples ) {
       if ( err ) return cb( err );
 
-      tuple = tuple[ 0 ];
+      var tuple = tuples[ 0 ];
+
       tuple.data++;
 
-      if ( tuple.data === maxExecutions ) {
-        log.trace( 'Max executions reached for object %s', objectId );
-
-        return async.series( [
-          _.partial( updateEvaluations, tuple ), _.partial( closeObject, objectId )
-        ], cb );
-
-      } else {
-        log.trace( 'Max executions (%s) not reached (%s)', maxExecutions, tuple.data );
-        return updateEvaluations( tuple, cb );
-      }
+      log.trace( 'Object %s has %s likes', objectId, tuple.data );
+      return updateEvaluations( tuple, cb );
     } );
 
   };
 
-
-  return async.each( objectIds, checkObject, callback );
+  return async.each( annotations, updateLike, callback );
 
 }
 
@@ -121,23 +97,12 @@ var rule = {
     'ADD_MICROTASKS': onAddMicrotasks
   },
 
-  // ## Parameters
-  //
-  //
-  params: {
-    maxExecutions: 'number'
-  },
 
   // ## Check rule
   //
   // Description of the constraints of the rule parameters.
   check: function checkParams( params, done ) {
     log.trace( 'Checking parameters' );
-
-    if ( _.isUndefined( params.maxExecutions ) || params.maxExecutions < 0 ) {
-      log.error( 'The maxExecution parameter must be an integer greater than 0' );
-      return done( false );
-    }
 
     // Everything went better then expected...
     return done( true );

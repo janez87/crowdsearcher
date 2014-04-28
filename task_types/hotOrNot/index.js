@@ -45,14 +45,14 @@ var TaskType = {
       name: 'RANDOM'
     },
     controlrules: [ {
+      name: 'countLikes'
+    }, {
       name: 'limitMicrotaskExecution',
-      event: 'END_EXECUTION',
       params: {
         maxExecution: '$maxExecution$'
       }
     }, {
-      name: 'closeTaskOnMicrotaskStatus',
-      event: 'END_MICROTASK'
+      name: 'closeTaskOnMicrotaskStatus'
     } ]
   },
   useCases: [ 'Ranking' ],

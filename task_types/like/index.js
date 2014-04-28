@@ -48,17 +48,16 @@ var TaskType = {
       name: 'RANDOM'
     },
     controlrules: [ {
+      name: 'countLikes',
+    }, {
       name: 'limitObjectEvaluations',
-      event: 'END_EXECUTION',
       params: {
         maxExecutions: '$maxExecutions$'
       }
     }, {
-      name: 'closeMicroTaskOnObjectStatus',
-      event: 'CLOSE_OBJECT'
+      name: 'closeMicroTaskOnObjectStatus'
     }, {
-      name: 'closeTaskOnObjectStatus',
-      event: 'CLOSE_OBJECT'
+      name: 'closeTaskOnObjectStatus'
     } ]
   },
   useCases: [ 'Ranking' ],
