@@ -25,7 +25,7 @@ function createMart( task, objects, params, callback ) {
   } );
 
   var createControlMart = function( objectId, callback ) {
-    log.trace( 'Creating the control mart for the object %s', objectId );
+    //log.trace( 'Creating the control mart for the object %s', objectId );
     var martToBeCreated = [];
 
     // Update the control mart
@@ -36,7 +36,7 @@ function createMart( task, objects, params, callback ) {
       data: undefined,
       operation: operation._id
     };
-    log.trace( 'Creating the mart for the result' );
+    //log.trace( 'Creating the mart for the result' );
     martToBeCreated.push( resultMart );
 
     var statustMart = {
@@ -46,7 +46,7 @@ function createMart( task, objects, params, callback ) {
       data: 'OPENED',
       operation: operation._id
     };
-    log.trace( 'Creating the mart for the status' );
+    //log.trace( 'Creating the mart for the status' );
     martToBeCreated.push( statustMart );
 
     var evaluationtMart = {
@@ -57,11 +57,11 @@ function createMart( task, objects, params, callback ) {
       operation: operation._id
     };
 
-    log.trace( 'Creating the mart for the evalutations' );
+    //log.trace( 'Creating the mart for the evalutations' );
     martToBeCreated.push( evaluationtMart );
 
     _.each( operation.params.categories, function( category ) {
-      log.trace( 'Creating the mart for the category %s', category );
+      //log.trace( 'Creating the mart for the category %s', category );
       var categorytMart = {
         task: task._id,
         object: objectId,

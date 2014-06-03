@@ -21,7 +21,7 @@ block header
   hr
   
   form#form(method='POST')
-    input(type='hidden', name='name', value=pageList[index])
+    input(type='hidden', name='name', value=pageList[index]||'add_operations')
     input.wzData(type='hidden', name='data', value='null')
 
   .row

@@ -73,6 +73,13 @@ API.logic = function postTask( req, res, next ) {
 
   var adaptation = data.adaptation;
 
+  var additionalOperations = data.add_operations;
+  additionalOperations = additionalOperations.map( function( v ) {
+    v.label = v.name;
+    v.name = v.id;
+    return v;
+  } );
+
 
 
   log.trace( 'Retrieving the task type %s', name );
@@ -115,6 +122,7 @@ API.logic = function postTask( req, res, next ) {
 
 
     var operations = rawTask.operations;
+    operations = operations.concat( additionalOperations );
     delete rawTask.operations;
 
     var task = new Task( rawTask );

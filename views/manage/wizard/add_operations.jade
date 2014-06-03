@@ -39,6 +39,29 @@ block append lateScripts
     } );
 
 
+    function saveData( data ) {
+      if ( data )
+        $( '.wzData' ).val( JSON.stringify( data ) );
+    }
+
+    $btnSend.click( function( evt ) {
+      var $operations = $( '.additional-operations li' );
+
+      if( $operations.length!==0 ) {
+
+        var addOps = [];
+        $operations.each(  function( ) {
+          var op = $( this ).data( 'value' );
+          addOps.push( op );
+        } );
+
+        saveData( addOps );
+      }
+
+      return sendData.call( this, evt );
+    } );
+
+
 block append css
   style(type='text/css').
     .operation {
