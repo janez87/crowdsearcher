@@ -28,7 +28,9 @@ var JobSchema = new Schema( {
       required: true,
       trim: true
     },
+
     // Alias for the job.
+    /*
     alias: {
       type: String,
       lowercase: true,
@@ -37,6 +39,7 @@ var JobSchema = new Schema( {
       index: true,
       match: /^[a-z\-0-9]+$/
     },
+    */
 
     // ### Markdown-enabled fileds that contains text about the job.
     //

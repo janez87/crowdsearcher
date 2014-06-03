@@ -74,11 +74,13 @@ API.logic = function postTask( req, res, next ) {
   var adaptation = data.adaptation;
 
   var additionalOperations = data.add_operations;
-  additionalOperations = additionalOperations.map( function( v ) {
-    v.label = v.name;
-    v.name = v.id;
-    return v;
-  } );
+  if( additionalOperations ) {
+    additionalOperations = additionalOperations.map( function( v ) {
+      v.label = v.name;
+      v.name = v.id;
+      return v;
+    } );
+  }
 
 
 
@@ -122,8 +124,11 @@ API.logic = function postTask( req, res, next ) {
 
 
     var operations = rawTask.operations;
-    operations = operations.concat( additionalOperations );
+    if( additionalOperations )
+      operations = operations.concat( additionalOperations );
     delete rawTask.operations;
+
+    log.trace( 'Raw task: %j', rawTask );
 
     var task = new Task( rawTask );
 
@@ -132,6 +137,10 @@ API.logic = function postTask( req, res, next ) {
       name: 'adaptationRule',
       params: adaptation
     } );
+
+    log.trace( 'platforms: %j', platforms );
+    log.trace( 'operations: %j', operations );
+    //log.trace( 'objects: %j', objects );
 
     var actions = [
       _.bind( task.addPlatforms, task, platforms ),

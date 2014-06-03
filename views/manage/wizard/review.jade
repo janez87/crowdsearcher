@@ -4,16 +4,23 @@ block append lateScripts
   script.
     $( '.send' ).click( function( evt ) {
       var $btn = $( this );
+      $loadingModal = $( '#loadingModal' );
       $btn.button( 'loading' );
+      $loadingModal.modal( 'show' );
 
       var url = baseUrl+'api/tasktype';
       $.post( url )
-      .fail( function( err ) {
-        console.error( err );
+      .fail( function( xhr, type, message ) {
+        $loadingModal.find( '.modal-title' ).text( type );
+        $loadingModal.find( '.modal-body p' ).text( message );
+        $loadingModal.find( '.modal-footer' ).removeClass( 'hide' );
       } )
+      
       .done( function( task ) {
         location.href = baseUrl+'manage/task/'+task._id
+        $loadingModal.modal( 'hide' );
       } )
+
       .always( function() {
         $btn.button( 'reset' );
       } );
@@ -21,7 +28,23 @@ block append lateScripts
 
 block content
   h2 Review
-  .text-right
-    button.send.btn.btn-success.btn-lg(type='button') Create!
+  .text-center
+    button.send.btn.btn-success.btn-lg(type='button')
+      i.fa.fa-paper-plane-o
+      |  Create Task! 
+      i.fa.fa-paper-plane-o
 
+  #loadingModal.modal.fade(data-keyboard=false,data-backdrop='static')
+    .modal-dialog.modal-sm
+      .modal-content
+        .modal-header
+          h4.modal-title Info
+        .modal-body
+          p Wait please, creating task...
+        .modal-footer.hide
+          button.btn.btn-danger(type='button',
+            data-dismiss='modal') Close
+
+
+  hr
   pre!= JSON.stringify( req.session.wizard, null, 2 )
