@@ -264,7 +264,7 @@ config.once( 'ready', function configReady() {
 
   // Task Types wizard
   app.get( '/manage/wizard', function( req, res ) {
-    res.redirect( '/manage/wizard/object_declaration' );
+    res.redirect( nconf.set( 'webserver:externalAddress' )+'manage/wizard/object_declaration' );
   } );
   app.all( '/manage/wizard/:page', manager.wizard );
 
