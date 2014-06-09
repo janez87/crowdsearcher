@@ -72,11 +72,9 @@ module.exports = exports = function( schema ) {
   schema.methods.getOperationByLabel = function( label, callback ) {
     var populated = this.populated( 'operations' );
 
-    log.trace( 'Populated: %s', populated );
     if ( _.isUndefined( populated ) || !populated ) {
       return this.populate( 'operations', function( err, entity ) {
         if ( err ) return callback( err );
-        log.trace( 'Populating the operations' );
         entity.getOperationByLabel( label, callback );
       } );
     }
@@ -86,7 +84,6 @@ module.exports = exports = function( schema ) {
     var operation = _.findWhere( this.operations, {
       label: label
     } );
-    log.trace( 'Operation %s found', operation._id );
     return callback( null, operation );
   };
   // Find an operation by id.

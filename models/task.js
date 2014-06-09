@@ -562,7 +562,8 @@ TaskSchema.methods.addObjects = function( objects, callback ) {
     _this.getOperationByLabel( rawGt.operation, function( err, operation ) {
       if ( err ) return callback( err );
 
-      if ( !operation ) return callback( new Error( 'Operation with label ' + rawGt.operation + ' found' ) );
+      if ( !operation ) return callback( new Error( 'Operation with label ' + rawGt.operation + ' found' ) )
+
       rawGt.operation = operation._id;
       return callback( null, rawGt );
     } );
@@ -605,7 +606,7 @@ TaskSchema.methods.addObjects = function( objects, callback ) {
           var opLabel = gt[ name ].operation;
 
           rawTuples.push( {
-            name: name,
+            name: 'gt_value',
             data: value,
             object: objectIds[ i ],
             operation: opLabel,

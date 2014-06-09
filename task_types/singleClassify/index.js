@@ -68,6 +68,9 @@ var TaskType = {
         operations: 'mainClassify'
       }
     }, {
+      name: 'checkGroundTruth',
+      event: 'END_EXECUTION'
+    }, {
       name: 'closeMicroTaskOnObjectStatus',
       event: 'CLOSE_OBJECT'
     }, {

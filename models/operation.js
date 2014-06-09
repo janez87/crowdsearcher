@@ -34,7 +34,9 @@ var OperationSchema = new Schema( {
       required: true
     },
     // Operation instance parameters.
-
+    params: {
+      type: 'mixed'
+    },
 
 
     // ### Time data
