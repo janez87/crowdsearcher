@@ -47,7 +47,37 @@ API.logic = function postTask( req, res, next ) {
   var taskType = data.task_type;
   var name = taskType.name;
   var params = taskType.params;
+
+  log.trace( 'Retrieving the task type %s', name );
+  var taskTypeImpl = CS.taskTypes[ name ];
+  var defaultValues = taskTypeImpl.defaults;
+
+  var trueColumn;
+
+  var keys = _.keys( data.object_declaration.schema );
+  log.trace( keys );
+  for ( var i = 0; i < keys.length; i++ ) {
+    var key = keys[ i ];
+    if ( data.object_declaration.schema[ key ] === 'Object' ) {
+      log.trace( 'The gt is in the column %s', key );
+      trueColumn = key;
+      break;
+    }
+  }
+
+  log.trace( 'Creating the new field containing the gt' );
   var objects = _.map( data.object_declaration.data, function( val, i ) {
+
+    if ( !_.isUndefined( trueColumn ) ) {
+      var gt = {
+        operation: defaultValues.operations[ 0 ].label,
+        value: val[ trueColumn ]
+      };
+      val[ '_gt_tasktype' ] = gt;
+
+      delete val[ trueColumn ];
+    }
+
     return {
       name: val.id || 'Object ' + i,
       data: val
@@ -74,7 +104,7 @@ API.logic = function postTask( req, res, next ) {
   var adaptation = data.adaptation;
 
   var additionalOperations = data.add_operations;
-  if( additionalOperations ) {
+  if ( additionalOperations ) {
     additionalOperations = additionalOperations.map( function( v ) {
       v.label = v.name;
       v.name = v.id;
@@ -82,13 +112,7 @@ API.logic = function postTask( req, res, next ) {
     } );
   }
 
-
-
-  log.trace( 'Retrieving the task type %s', name );
-  var taskTypeImpl = CS.taskTypes[ name ];
-  var defaultValues = taskTypeImpl.defaults;
   defaultValues = JSON.stringify( defaultValues );
-
   //in order to use the "$  $" simbol as delimiter
   var delimiter = /"\$(\w+)\$"/;
 
@@ -98,7 +122,7 @@ API.logic = function postTask( req, res, next ) {
 
   var template = _.template( defaultValues );
 
-  // Stringify every value in the object
+  // Stringify every value in the taskype
   function stringify( params ) {
     for ( var k in params ) {
       if ( params.hasOwnProperty( k ) ) {
@@ -124,7 +148,7 @@ API.logic = function postTask( req, res, next ) {
 
 
     var operations = rawTask.operations;
-    if( additionalOperations )
+    if ( additionalOperations )
       operations = operations.concat( additionalOperations );
     delete rawTask.operations;
 

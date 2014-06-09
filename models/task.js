@@ -414,7 +414,7 @@ TaskSchema.methods.close = function( callback ) {
   Microtask
     .find()
     .where( '_id' )
-    . in ( microtaskIds )
+    .in( microtaskIds )
     .where( 'status' )
     .ne( 'CLOSED' )
     .exec( function( err, microtasks ) {
@@ -538,6 +538,36 @@ TaskSchema.methods.addObjects = function( objects, callback ) {
 
   log.debug( 'Adding %s objects to the task %s', objects.length, _this._id );
 
+  var groundTruths = [];
+  var regexp = /^_gt_/i;
+  objects = _.map( objects, function( value ) {
+
+    // Looking for the fields containing the gt
+    var gt = _.filter( _.keys( value.data ), function( k ) {
+      var match = k.match( regexp );
+      return match !== null;
+    } );
+
+    //Need to insert a empty object in order to handel partial gt
+    groundTruths.push( _.pick( value.data, gt ) || {} );
+
+    //Remove the field containing the metadata from the object
+    value.data = _.omit( value.data, gt );
+    return value;
+
+  } );
+
+
+  var transformGt = function( rawGt, callback ) {
+    _this.getOperationByLabel( rawGt.operation, function( err, operation ) {
+      if ( err ) return callback( err );
+
+      if ( !operation ) return callback( new Error( 'Operation with label ' + rawGt.operation + ' found' ) );
+      rawGt.operation = operation._id;
+      return callback( null, rawGt );
+    } );
+  };
+
   // Bulk create `Object` entities using mongoose create method.
   ObjectModel.create( objects, function( err ) {
     if ( err ) return callback( err );
@@ -559,10 +589,46 @@ TaskSchema.methods.addObjects = function( objects, callback ) {
         return object._id;
       } );
 
-      // Once all the changes are saved trigger the `ADD_OBJECTS`.
-      _this.fire( 'ADD_OBJECTS', {
-        objects: objectIds
-      }, callback );
+      var rawTuples = [];
+      for ( var i = 0; i < groundTruths.length; i++ ) {
+        var gt = groundTruths[ i ];
+
+        if ( _.isEmpty( gt ) ) {
+          continue;
+        }
+
+        var keys = _.keys( gt );
+
+        for ( var j = 0; j < keys.length; j++ ) {
+          var name = keys[ j ];
+          var value = gt[ name ].value;
+          var opLabel = gt[ name ].operation;
+
+          rawTuples.push( {
+            name: name,
+            data: value,
+            object: objectIds[ i ],
+            operation: opLabel,
+            task: _this._id
+          } );
+        }
+
+
+      }
+
+      return async.mapSeries( rawTuples, transformGt, function( err, results ) {
+        if ( err ) return callback( err );
+
+        var ControlMart = _this.model( 'controlmart' );
+        return ControlMart.insert( results, function( err ) {
+          if ( err ) return callback( err );
+
+          // Once all the changes are saved trigger the `ADD_OBJECTS`.
+          _this.fire( 'ADD_OBJECTS', {
+            objects: objectIds
+          }, callback );
+        } );
+      } );
     } );
   } );
 };
@@ -963,13 +1029,13 @@ TaskSchema.methods.replan = function( strategy, platformName, callback ) {
 
 TaskSchema.methods.getInfo = function( name, callback ) {
   var doAll = false;
-  if( arguments.length===1 ) {
+  if ( arguments.length === 1 ) {
     callback = name;
     doAll = true;
     log.trace( 'Getting all info for task %s', this._id );
   }
 
-  if( arguments.length===2 ) {
+  if ( arguments.length === 2 ) {
     name = name.toLowerCase();
     log.trace( 'Getting "%s" info for task %s', name, this._id );
   }
@@ -978,13 +1044,13 @@ TaskSchema.methods.getInfo = function( name, callback ) {
 
   var fields = [];
 
-  if( doAll || name==='executions' )
+  if ( doAll || name === 'executions' )
     fields.push( 'executions' );
-  if( doAll || name==='answers' )
+  if ( doAll || name === 'answers' )
     fields.push( 'answers' );
-  if( doAll || name==='objects' )
+  if ( doAll || name === 'objects' )
     fields.push( 'objects' );
-  if( doAll || name==='lifecycle' )
+  if ( doAll || name === 'lifecycle' )
     fields.push( 'lifecycle' );
 
   var ControlMart = CS.models.controlmart;
@@ -992,13 +1058,13 @@ TaskSchema.methods.getInfo = function( name, callback ) {
   ControlMart.select( {
     task: this._id
   }, fields, function( err, controlmart ) {
-    if( err ) return callback( err );
+    if ( err ) return callback( err );
 
     var output = {};
     _.each( controlmart, function( v ) {
       output[ v.name ] = v.data;
     } );
-    
+
     return callback( err, output );
   } );
 };
@@ -1010,51 +1076,54 @@ TaskSchema.methods.getExecutionsInfo = function( callback ) {
   var Execution = CS.models.execution;
 
   Execution
-  .getExecutionsInfo( this, callback );
+    .getExecutionsInfo( this, callback );
 };
 TaskSchema.methods.getAnswersCount = function( callback ) {
   var Execution = CS.models.execution;
 
   Execution
-  .getAnswersCount( this, callback );
+    .getAnswersCount( this, callback );
 };
 TaskSchema.methods.getObjectsInfo = function( callback ) {
   var ObjectModel = CS.models.object;
 
   ObjectModel
-  .getObjectsInfo( this, callback );
+    .getObjectsInfo( this, callback );
 };
 TaskSchema.methods.getLifecycleInfo = function( callback ) {
   var Execution = CS.models.execution;
   var _this = this;
 
   Execution
-  .findOne()
-  .where( 'task', this._id )
-  .sort( '-invalidDate -closedDate -createdDate' )
-  .select( 'closedDate invalidDate createdDate' )
-  .lean()
-  .exec( function( err, data ) {
-    if( err ) return callback( err );
+    .findOne()
+    .where( 'task', this._id )
+    .sort( '-invalidDate -closedDate -createdDate' )
+    .select( 'closedDate invalidDate createdDate' )
+    .lean()
+    .exec( function( err, data ) {
+      if ( err ) return callback( err );
 
-    if( !data )
-      return callback( null, { active: 0, idle: 0 } );
+      if ( !data )
+        return callback( null, {
+          active: 0,
+          idle: 0
+        } );
 
-    var creationDate = moment( _this.get( 'createdDate' ) );
-    var endDate = data.invalidDate || data.closedDate || data.createdDate;
-    // Last activity or closedDate or createdDate
-    var lastActivity = moment( endDate || _this.get( 'closedDate' ) || _this.get( 'createdDate' ) );
-    var taskEnd = moment( _.max( [
-      _this.get( 'closedDate' ),
-      lastActivity.toDate()
-    ] ) );
+      var creationDate = moment( _this.get( 'createdDate' ) );
+      var endDate = data.invalidDate || data.closedDate || data.createdDate;
+      // Last activity or closedDate or createdDate
+      var lastActivity = moment( endDate || _this.get( 'closedDate' ) || _this.get( 'createdDate' ) );
+      var taskEnd = moment( _.max( [
+        _this.get( 'closedDate' ),
+        lastActivity.toDate()
+      ] ) );
 
-    var lifecycle = {};
-    lifecycle.active = lastActivity.diff( creationDate, 'seconds' );
-    lifecycle.idle = taskEnd.diff( lastActivity, 'seconds' );
+      var lifecycle = {};
+      lifecycle.active = lastActivity.diff( creationDate, 'seconds' );
+      lifecycle.idle = taskEnd.diff( lastActivity, 'seconds' );
 
-    return callback( null, lifecycle );
-  } );
+      return callback( null, lifecycle );
+    } );
 };
 
 
@@ -1063,13 +1132,13 @@ TaskSchema.methods.getLifecycleInfo = function( callback ) {
 // Updates the info in the control mart. This function is likely to be called on each event.
 TaskSchema.methods.updateInfo = function( name, callback ) {
   var doAll = false;
-  if( arguments.length===1 ) {
+  if ( arguments.length === 1 ) {
     callback = name;
     doAll = true;
     log.trace( 'Updating all infos for task %s', this._id );
   }
 
-  if( arguments.length===2 ) {
+  if ( arguments.length === 2 ) {
     name = name.toLowerCase();
     log.trace( 'Updating %s for task %s', name, this._id );
   }
@@ -1077,6 +1146,7 @@ TaskSchema.methods.updateInfo = function( name, callback ) {
 
   // Add the first function
   var actions = [
+
     function passData( cb ) {
       return cb( null, {} );
     }
@@ -1084,63 +1154,63 @@ TaskSchema.methods.updateInfo = function( name, callback ) {
 
   var _this = this;
 
-  if( doAll || name==='executions' ) {
+  if ( doAll || name === 'executions' ) {
     log.trace( 'Updating execution' );
     actions.push( function( data, cb ) {
       log.trace( 'Getting execution info' );
 
       _this
-      .getExecutionsInfo( function( err, results ) {
-        if( err ) return cb( err );
+        .getExecutionsInfo( function( err, results ) {
+          if ( err ) return cb( err );
 
-        data.executions = results;
-        return cb( null,  data );
-      });
+          data.executions = results;
+          return cb( null, data );
+        } );
     } );
   }
 
-  if( doAll || name==='answers' ) {
+  if ( doAll || name === 'answers' ) {
     log.trace( 'Updating answers' );
     actions.push( function( data, cb ) {
       log.trace( 'Getting answers info' );
 
       _this
-      .getAnswersCount( function( err, results ) {
-        if( err ) return cb( err );
+        .getAnswersCount( function( err, results ) {
+          if ( err ) return cb( err );
 
-        data.answers = results;
-        return cb( null,  data );
-      });
+          data.answers = results;
+          return cb( null, data );
+        } );
     } );
   }
 
-  if( doAll || name==='objects' ) {
+  if ( doAll || name === 'objects' ) {
     log.trace( 'Updating objects' );
     actions.push( function( data, cb ) {
       log.trace( 'Getting objects info' );
 
       _this
-      .getObjectsInfo( function( err, results ) {
-        if( err ) return cb( err );
+        .getObjectsInfo( function( err, results ) {
+          if ( err ) return cb( err );
 
-        data.objects = results;
-        return cb( null,  data );
-      });
+          data.objects = results;
+          return cb( null, data );
+        } );
     } );
   }
 
-  if( doAll || name==='lifecycle' ) {
+  if ( doAll || name === 'lifecycle' ) {
     log.trace( 'Updating lifecycle' );
     actions.push( function( data, cb ) {
       log.trace( 'Getting lifecycle info' );
 
       _this
-      .getLifecycleInfo( function( err, results ) {
-        if( err ) return cb( err );
+        .getLifecycleInfo( function( err, results ) {
+          if ( err ) return cb( err );
 
-        data.lifecycle = results;
-        return cb( null,  data );
-      });
+          data.lifecycle = results;
+          return cb( null, data );
+        } );
     } );
   }
 
@@ -1158,7 +1228,7 @@ TaskSchema.methods.updateInfo = function( name, callback ) {
     } );
 
     ControlMart.insert( tuples, function( err ) {
-      if( err ) return cb( err );
+      if ( err ) return cb( err );
 
       return cb( null, data );
     } );
