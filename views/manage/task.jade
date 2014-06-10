@@ -112,7 +112,6 @@ block content
     .col-md-6
       h3 Platforms
       +printPlatforms( task.platforms )
-  hr
   .row
     .col-md-6
       h3 Microtask list
@@ -140,7 +139,7 @@ block content
             for microtask in task.microtasks
               .row(class=microtask.status.toLowerCase())
                 .col-xs-3.cell(title=microtask._id): +printStatus( microtask.status )
-                .col-xs-7.cell= moment( microtask.closedDate || microtask.creationDate ).format( 'YYYY-MM-DD HH:mm' )
+                .col-xs-7.cell= moment( microtask.closedDate || microtask.createdDate ).format( 'YYYY-MM-DD HH:mm' )
                 .col-xs-2.cell.text-right
                   a.btn.btn-xs.btn-default(href='manage/microtask/'+microtask._id)
                     .visible-lg

@@ -22,7 +22,7 @@ mixin printObjects( objects )
         for object in objects
           .row(class=object.status.toLowerCase())
             .col-xs-3.cell(title=object._id): +printStatus( object.status )
-            .col-xs-7.cell= moment( object.closedDate || object.creationDate ).format( 'YYYY-MM-DD HH:mm' )
+            .col-xs-7.cell= moment( object.closedDate || object.createdDate ).format( 'YYYY-MM-DD HH:mm' )
             .col-xs-2.cell.text-right
               a.btn.btn-xs.btn-default(href='manage/object/'+object._id)
                 .visible-lg
