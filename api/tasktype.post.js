@@ -42,7 +42,7 @@ var API = {
 API.logic = function postTask( req, res, next ) {
   /* jshint camelcase: false */
   var data = req.session.wizard;
-
+  req.connection.setTimeout( 0 );
 
   var taskType = data.task_type;
   var name = taskType.name;

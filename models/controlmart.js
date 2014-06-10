@@ -148,7 +148,7 @@ ControlMartSchema.statics.insert = function( rawTuples, callback ) {
     } );
   };
 
-  return async.eachSeries( rawTuples, insertOrUpdate, callback );
+  return async.each( rawTuples, insertOrUpdate, callback );
 };
 
 
