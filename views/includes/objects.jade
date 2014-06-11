@@ -1,9 +1,9 @@
-mixin printObjects( objects )
+mixin printObjects( objects, limit )
   if objects.length==0
     .alert.alert-info No objects available.
   else
     - var completedObjects = _.countBy(objects, 'status').CLOSED || 0;
-    - var totalObjects = objects.length
+    - var totalObjects = objects.length;
     - var percCompl = (completedObjects/totalObjects)*100;
     .progress
       .progress-bar.progress-bar-success(
@@ -19,14 +19,18 @@ mixin printObjects( objects )
           .col-xs-7.cell Creation/Closed date
           .col-xs-2.cell Actions
       .scrollable(style="max-height: 250px;"): .content
-        for object in objects
-          .row(class=object.status.toLowerCase())
-            .col-xs-3.cell(title=object._id): +printStatus( object.status )
-            .col-xs-7.cell= moment( object.closedDate || object.creationDate ).format( 'YYYY-MM-DD HH:mm' )
-            .col-xs-2.cell.text-right
-              a.btn.btn-xs.btn-default(href='manage/object/'+object._id)
-                .visible-lg
-                  i.fa.fa-folder-open
-                  |  Details
-                .hidden-lg
-                  i.fa.fa-folder-open
+        for object, i in objects
+          if i<limit
+            .row(class=object.status.toLowerCase())
+              .col-xs-3.cell(title=object._id): +printStatus( object.status )
+              .col-xs-7.cell= moment( object.closedDate || object.creationDate ).format( 'YYYY-MM-DD HH:mm' )
+              .col-xs-2.cell.text-right
+                a.btn.btn-xs.btn-default(href='manage/object/'+object._id)
+                  .visible-lg
+                    i.fa.fa-folder-open
+                    |  Details
+                  .hidden-lg
+                    i.fa.fa-folder-open
+          else if i==limit
+            .row
+              .col-xs-12.text-center ...

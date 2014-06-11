@@ -96,7 +96,7 @@ Configurator.prototype.configNconf = function( callback ) {
     var externalAddress = nconf.get( 'webserver:externalAddress' );
     if ( !_.isString( externalAddress ) ) {
       externalAddress = _.clone( nconf.get( 'webserver' ) );
-      externalAddress.protocol = 'http';
+      externalAddress.protocol = 'https';
 
       nconf.set( 'webserver:externalAddress', url.format( externalAddress ) + '/' );
     }

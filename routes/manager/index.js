@@ -17,6 +17,7 @@ var baseUrl = nconf.get( 'webserver:externalAddress' );
 baseUrl += 'api/';
 var r = request.defaults( {
   json: true,
+  strictSSL: false
 } );
 
 // Mongoose Classes and Objects
