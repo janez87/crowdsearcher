@@ -15,6 +15,29 @@ function saveData( data, schema ) {
 }
 
 $btnSend.click( function( evt ) {
+
+  var data = JSON.parse( $( '.wzData' ).val() );
+
+  var $ids = $( '#header > th input' );
+
+  var ids = $.map( $ids, function( element ) {
+    return $( element ).val();
+  } );
+
+  var $types = $( '#header > th select option:selected' );
+
+  var types = $.map( $types, function( element ) {
+    return $( element ).val();
+  } );
+
+  var schema = {};
+
+  for ( var i = 0; i < ids.length; i++ ) {
+    schema[ ids[ i ] ] = types[ i ];
+  }
+
+  saveData( data.data, schema );
+
   return sendData.call( this, evt );
 } );
 

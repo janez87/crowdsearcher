@@ -68,122 +68,30 @@ var ControlMartSchema = new Schema( {
 // ---
 
 
-
-/*
-// Return the tuple matching the condition in a 'user friendly' format
-ControlMartSchema.statics.select = function( rawTuple, callback ) {
-
-  log.trace( 'Retrieving the controlmart tuple of %j', rawTuple );
-
-  // Retrieves the instance
-  this
-  .find( rawTuple )
-  // Retrieves pure javascript objects
-  .lean()
-    .exec( function( err, controlMartTuples ) {
-      if ( err ) return callback( err );
-
-      log.trace( '%s tuples retrieved', controlMartTuples.length );
-
-      // Output variable
-      var output = {};
-
-      // Keys in hierarchical order
-      var keys = [
-        'name',
-        'job',
-        'task',
-        'microtask',
-        'performer',
-        'operation',
-        'object',
-        'platform',
-        'data'
-      ];
-
-      var transformedTuples = [];
-      // Transform each tuple in a javascript object organized in a hiearchy imposed by the order of the `keys` array
-      _.each( controlMartTuples, function( tuple ) {
-        var path = {};
-        var existing = [];
-
-        // Get only the keys present in the tuple
-        _.each( keys, function( key ) {
-          if ( !_.isUndefined( tuple[ key ] ) ) {
-            existing.push( key );
-          }
-        } );
-
-        // Pointer to the last position
-        var temp = path;
-        _.each( existing, function( key ) {
-          if ( key === 'data' ) {
-            // In case of the `data` key I need to set the value
-            temp[ key ] = tuple[ key ];
-          } else {
-            temp[ tuple[ key ] ] = {};
-            temp = temp[ tuple[ key ] ];
-          }
-        } );
-
-        transformedTuples.push( path );
-
-      } );
-
-      // It recursively merge all the transformed tuple
-      var merge = function( obj1, obj2 ) {
-        var result = {};
-
-        for ( var i in obj1 ) {
-          result[ i ] = obj1[ i ];
-          if ( ( i in obj2 ) && ( typeof obj1[ i ] === 'object' ) && ( i !== null ) ) {
-            result[ i ] = merge( obj1[ i ], obj2[ i ] );
-          }
-        }
-
-        for ( var i in obj2 ) {
-          if ( i in result ) { //conflict
-            continue;
-          }
-          result[ i ] = obj2[ i ];
-        }
-        return result;
-      };
-
-      _.each( transformedTuples, function( tuple ) {
-        output = merge( output, tuple );
-      } );
-
-      return callback( null, output );
-    } );
-
-};
-*/
-
 ControlMartSchema.statics.select = function( filter, names, callback ) {
-  if( !_.isArray( names ) )
+  if ( !_.isArray( names ) )
     names = [ names ];
-  
+
   // Just in case
   delete filter[ 'data' ];
   delete filter[ 'name' ];
 
   // If no names specified just call the get.
-  if( names.length===0 )
+  if ( names.length === 0 )
     return this.get( filter, callback );
 
   this
-  .find( filter )
-  .where( 'name' ).in( names )
-  .sort( '-_id' )
-  .lean()
-  .exec( function( err, controlmart ) {
-    if( err ) return callback( err );
-    
-    log.trace( '%s tuples selected', controlmart.length );
+    .find( filter )
+    .where( 'name' ).in( names )
+    .sort( '-_id' )
+    .lean()
+    .exec( function( err, controlmart ) {
+      if ( err ) return callback( err );
 
-    return callback( null, controlmart );
-  } );
+      log.trace( '%s tuples selected', controlmart.length );
+
+      return callback( null, controlmart );
+    } );
 };
 
 // Return the tuple matching the condition in its original format
@@ -191,8 +99,8 @@ ControlMartSchema.statics.get = function( rawTuple, callback ) {
   log.trace( 'Retrieving the controlmart tuple of %j', rawTuple );
 
   this
-  .find( rawTuple )
-  .sort( '-_id' )
+    .find( rawTuple )
+    .sort( '-_id' )
   // Pure javascript object
   .lean()
     .exec( function( err, controlmart ) {
@@ -240,7 +148,7 @@ ControlMartSchema.statics.insert = function( rawTuples, callback ) {
     } );
   };
 
-  return async.eachSeries( rawTuples, insertOrUpdate, callback );
+  return async.each( rawTuples, insertOrUpdate, callback );
 };
 
 
