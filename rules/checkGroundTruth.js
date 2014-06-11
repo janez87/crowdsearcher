@@ -56,7 +56,7 @@ var createMart = function( params, task, data, callback ) {
     }
   }
 
-  return ControlMart.insert( martToBeCreated, callback );
+  return ControlMart.create( martToBeCreated, callback );
 
 };
 
