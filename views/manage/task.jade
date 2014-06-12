@@ -80,7 +80,7 @@ block content
           i.fa.fa-trash-o
           |  Remove
         if task.opened || task.finalized
-          a.btn.btn-sm.btn-primary(href='api/run?task='+task._id) Execute 
+          a.btn.btn-sm.btn-primary(href='api/run?task='+task._id,target='_blank') Execute 
             i.fa.fa-play
   hr
   .row
@@ -118,8 +118,9 @@ block content
       if task.microtasks.length==0
         blockquote No microtasks available.
       else
+        - var limit = 20;
         - var completedMicrotasks = _.countBy(task.microtasks, 'status').CLOSED || 0;
-        - var totalMicrotasks = task.microtasks.length
+        - var totalMicrotasks = task.microtasks.length;
         - var percCompl = (completedMicrotasks/totalMicrotasks)*100;
         .progress
           .progress-bar.progress-bar-success(
@@ -136,17 +137,21 @@ block content
               .col-xs-7.cell Creation/Closed date
               .col-xs-2.cell Actions
           .scrollable(style="max-height: 250px;"): .content
-            for microtask in task.microtasks
-              .row(class=microtask.status.toLowerCase())
-                .col-xs-3.cell(title=microtask._id): +printStatus( microtask.status )
-                .col-xs-7.cell= moment( microtask.closedDate || microtask.createdDate ).format( 'YYYY-MM-DD HH:mm' )
-                .col-xs-2.cell.text-right
-                  a.btn.btn-xs.btn-default(href='manage/microtask/'+microtask._id)
-                    .visible-lg
-                      i.fa.fa-folder-open
-                      |  Details
-                    .hidden-lg
-                      i.fa.fa-folder-open
+            for microtask, i in task.microtasks
+              if i<limit
+                .row(class=microtask.status.toLowerCase())
+                  .col-xs-3.cell(title=microtask._id): +printStatus( microtask.status )
+                  .col-xs-7.cell= moment( microtask.closedDate || microtask.createdDate ).format( 'YYYY-MM-DD HH:mm' )
+                  .col-xs-2.cell.text-right
+                    a.btn.btn-xs.btn-default(href='manage/microtask/'+microtask._id)
+                      .visible-lg
+                        i.fa.fa-folder-open
+                        |  Details
+                      .hidden-lg
+                        i.fa.fa-folder-open
+              else if i==limit
+                .row
+                  .col-xs-12.text-center ...
     .col-md-6
       h3 Objects
-      +printObjects( task.objects )
+      +printObjects( task.objects, 20 )

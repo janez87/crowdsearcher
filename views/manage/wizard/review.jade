@@ -1,5 +1,10 @@
 extends ./layout
 
+
+block inputData
+  input(type='hidden', name='name', value=pageList[index] || 'add_operations')
+  input.wzData(type='hidden', name='data', value=JSON.stringify( req.session.wizard))
+
 block append lateScripts
   script.
     $( '.send' ).click( function( evt ) {
@@ -9,7 +14,17 @@ block append lateScripts
       $loadingModal.modal( 'show' );
 
       var url = baseUrl+'api/tasktype';
-      $.post( url )
+      var data = $( '.wzData' ).val();
+      $.ajax( {
+        url: url,
+        data: data,
+        type: 'POST',
+        dataType: 'json',
+        contentType: "application/json",
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
       .fail( function( xhr, type, message ) {
         $loadingModal.find( '.modal-title' ).text( type );
         $loadingModal.find( '.modal-body p' ).text( message );
@@ -18,7 +33,7 @@ block append lateScripts
       
       .done( function( task ) {
         location.href = baseUrl+'manage/task/'+task._id
-        $loadingModal.modal( 'hide' );
+        //$loadingModal.modal( 'hide' );
       } )
 
       .always( function() {
@@ -27,7 +42,6 @@ block append lateScripts
     } );
 
 block content
-  h2 Review
   .text-center
     button.send.btn.btn-success.btn-lg(type='button')
       i.fa.fa-paper-plane-o
@@ -47,4 +61,4 @@ block content
 
 
   hr
-  pre!= JSON.stringify( req.session.wizard, null, 2 )
+  //pre!= JSON.stringify( req.session.wizard, null, 2 )
