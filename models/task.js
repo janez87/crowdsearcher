@@ -573,6 +573,7 @@ TaskSchema.methods.addObjects = function( objects, callback ) {
   ObjectModel.create( objects, function( err ) {
     if ( err ) return callback( err );
 
+    log.trace( 'Objects created' );
     // Convert into plain array.
     var args = _.toArray( arguments );
     // Remove the `err` param and get all the created objects.
@@ -586,6 +587,7 @@ TaskSchema.methods.addObjects = function( objects, callback ) {
     _this.save( function( err ) {
       if ( err ) return callback( err );
 
+      log.trace( 'Objects added to the task' );
       // Send the Ids
       var objectIds = _.map( args, function( object ) {
         return object._id;
@@ -622,7 +624,7 @@ TaskSchema.methods.addObjects = function( objects, callback ) {
         if ( err ) return callback( err );
 
         var ControlMart = _this.model( 'controlmart' );
-        return ControlMart.insert( results, function( err ) {
+        return ControlMart.create( results, function( err ) {
           if ( err ) return callback( err );
 
           // Once all the changes are saved trigger the `ADD_OBJECTS`.
