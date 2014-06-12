@@ -7,6 +7,37 @@ include ../includes/operations
 include ../includes/platforms
 include ../includes/params
 
+block append scripts
+  script(src='libs/qrcode.min.js')
+
+block append css
+  style(type='text/css')
+    #qrcode {
+      text-align: center;
+      display: none;
+    }
+    #qrcode > * {
+      margin: auto;
+    }
+
+block append lateScripts
+  script
+    new QRCode( 'qrcode', {
+      text: baseUrl+'api/run?task=#{task._id}',
+      width: 256,
+      height: 256,
+      correctLevel: QRCode.CorrectLevel.H
+    } );
+    $( '#qrcode_link' ).click( function( evt ) {
+      evt.preventDefault();
+
+      $( '#qrcode' ).slideToggle();
+      $( 'i', this ).toggleClass( 'fa-chevron-down' );
+      $( 'i', this ).toggleClass( 'fa-chevron-up' );
+      
+      return false;
+    } );
+
 block header
   .row
     .col-md-4
@@ -19,6 +50,12 @@ block header
     .col-md-4.text-center
       h3: +printStatus( task.status )
       code= moment( task[ task.status.toLowerCase()+'Date' ] ).format( 'YYYY-MM-DD HH:mm' )
+      if task.opened || task.finalized
+        div
+          a#qrcode_link(href='#') Show QR code 
+            i.fa.fa-chevron-down
+          #qrcode
+
     .col-md-4.text-right
       code= task._id
       p
