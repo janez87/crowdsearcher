@@ -77,59 +77,6 @@ function createMart( task, objects, params, callback ) {
   return ControlMart.create( martToBeCreated, callback );
 }
 
-/*var createControlMart = function( objectId, callback ) {
-    //log.trace( 'Creating the control mart for the object %s', objectId );
-    var martToBeCreated = [];
-
-    // Update the control mart
-    var resultMart = {
-      task: task._id,
-      object: objectId,
-      name: 'result',
-      data: undefined,
-      operation: operation._id
-    };
-    //log.trace( 'Creating the mart for the result' );
-    martToBeCreated.push( resultMart );
-
-    var statustMart = {
-      task: task._id,
-      object: objectId,
-      name: 'status',
-      data: 'OPENED',
-      operation: operation._id
-    };
-    //log.trace( 'Creating the mart for the status' );
-    martToBeCreated.push( statustMart );
-
-    var evaluationtMart = {
-      task: task._id,
-      object: objectId,
-      name: 'evaluations',
-      data: 0,
-      operation: operation._id
-    };
-
-    //log.trace( 'Creating the mart for the evalutations' );
-    martToBeCreated.push( evaluationtMart );
-
-    _.each( operation.params.categories, function( category ) {
-      //log.trace( 'Creating the mart for the category %s', category );
-      var categorytMart = {
-        task: task._id,
-        object: objectId,
-        name: category,
-        data: 0,
-        operation: operation._id
-      };
-      martToBeCreated.push( categorytMart );
-    } );
-
-    return ControlMart.insert( martToBeCreated, callback );*/
-
-
-//return async.each( objects, createControlMart, callback );
-
 function onOpenTask( params, task, data, callback ) {
   // In the open task the rule creates the controlmart
 
