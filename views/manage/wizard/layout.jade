@@ -21,8 +21,9 @@ block header
   hr
   
   form#form(method='POST')
-    input(type='hidden', name='name', value=pageList[index]||'add_operations')
-    input.wzData(type='hidden', name='data', value='null')
+    block inputData
+      input(type='hidden', name='name', value=pageList[index]||'add_operations')
+      input.wzData(type='hidden', name='data', value='null')
 
   .row
     .col-md-4

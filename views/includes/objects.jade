@@ -1,4 +1,5 @@
 mixin printObjects( objects, limit )
+  - limit = limit || 20
   if objects.length==0
     .alert.alert-info No objects available.
   else

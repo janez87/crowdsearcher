@@ -41,8 +41,8 @@ var API = {
 // API core function logic. If this function is executed then each check is passed.
 API.logic = function postTask( req, res, next ) {
   /* jshint camelcase: false */
-  var data = req.session.wizard;
-  req.connection.setTimeout( 0 );
+  var data = req.body;
+  //req.connection.setTimeout( 0 );
 
   var taskType = data.task_type;
   var name = taskType.name;
@@ -52,18 +52,8 @@ API.logic = function postTask( req, res, next ) {
   var taskTypeImpl = CS.taskTypes[ name ];
   var defaultValues = taskTypeImpl.defaults;
 
-  var trueColumn;
-
-  var keys = _.keys( data.object_declaration.schema );
-  log.trace( keys );
-  for ( var i = 0; i < keys.length; i++ ) {
-    var key = keys[ i ];
-    if ( data.object_declaration.schema[ key ] === 'Object' ) {
-      log.trace( 'The gt is in the column %s', key );
-      trueColumn = key;
-      break;
-    }
-  }
+  var trueColumn = data.object_declaration.gt;
+  log.trace( 'Ground truth field: %s', trueColumn );
 
   log.trace( 'Creating the new field containing the gt' );
   var objects = _.map( data.object_declaration.data, function( val, i ) {
@@ -122,20 +112,22 @@ API.logic = function postTask( req, res, next ) {
 
   var template = _.template( defaultValues );
 
-  // Stringify every value in the taskype
-  function stringify( params ) {
-    for ( var k in params ) {
-      if ( params.hasOwnProperty( k ) ) {
-        params[ k ] = JSON.stringify( params[ k ] );
-      }
-    }
+  var parsedParams = {};
+  _.each( params, function( v, k ) {
+    if( _.isNumber( v ) || _.isBoolean( v ) )
+      parsedParams[ k ] = v;
+    else
+      parsedParams[ k ] = JSON.stringify( v );
+  } );
 
-    return params;
-  }
+  //log.trace( 'Params: %j', params );
+  //log.trace( 'ParsedParams: %j', parsedParams );
 
-  var rawTask = JSON.parse( template( stringify( params ) ) );
+  var str = template( parsedParams );
+  //log.trace( 'string: ', str );
+  var rawTask = JSON.parse( str );
 
-  //TRICK FOR TESTING
+  // TRICK FOR TESTING
   var job = new Job( {
     name: rawTask.name
   } );

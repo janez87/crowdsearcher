@@ -6,11 +6,12 @@ $file.on( 'click', function() {
 } );
 
 
-function saveData( data, schema ) {
+function saveData( data, schema, gt ) {
   if ( data )
     $( '.wzData' ).val( JSON.stringify( {
       data: data,
-      schema: schema
+      schema: schema,
+      gt: gt
     } ) );
 }
 
@@ -36,7 +37,9 @@ $btnSend.click( function( evt ) {
     schema[ ids[ i ] ] = types[ i ];
   }
 
-  saveData( data.data, schema );
+  var gt = $( '#header > th input:radio:checked' ).val();
+
+  saveData( data.data, schema, gt );
 
   return sendData.call( this, evt );
 } );
@@ -78,7 +81,7 @@ function createTableEditor( data, schema ) {
     $prop.addClass( 'form-control input-sm' );
     $prop.val( prop );
 
-    var $container = $( '<div class="input-group"><span class="input-group-addon" title="Ground truth"><input type="radio" name="gt"></span></div>' );
+    var $container = $( '<div class="input-group"><span class="input-group-addon" title="Ground truth"><input type="radio" name="gt" value="'+prop+'"></span></div>' );
     $container.append( $prop );
 
     $th.append( $container );
