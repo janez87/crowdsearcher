@@ -119,7 +119,7 @@ block content
         blockquote No microtasks available.
       else
         - var limit = 20;
-        - var completedMicrotasks = _.countBy(task.microtasks, 'status').CLOSED || 0;
+        - var completedMicrotasks = _.countBy(task.microtasks, 'closed')[ 'true' ] || 0;
         - var totalMicrotasks = task.microtasks.length;
         - var percCompl = (completedMicrotasks/totalMicrotasks)*100;
         .progress

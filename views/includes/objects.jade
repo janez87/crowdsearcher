@@ -3,7 +3,7 @@ mixin printObjects( objects, limit )
   if objects.length==0
     .alert.alert-info No objects available.
   else
-    - var completedObjects = _.countBy(objects, 'status').CLOSED || 0;
+    - var completedObjects = _.countBy(objects, 'closed')[ 'true' ] || 0;
     - var totalObjects = objects.length;
     - var percCompl = (completedObjects/totalObjects)*100;
     .progress

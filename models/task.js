@@ -579,7 +579,8 @@ TaskSchema.methods.addObjects = function( objects, callback ) {
     args.shift();
 
     // Add all the objects to the current task.
-    _this.objects.addToSet.apply( _this.objects, args );
+    //_this.objects.addToSet.apply( _this.objects, args );
+    _this.objects.push.apply( _this.objects, args );
 
     // Persist the changes.
     _this.save( function( err ) {
@@ -694,7 +695,8 @@ TaskSchema.methods.addMicrotasks = function( microtasks, callback ) {
     args.shift();
 
     // Add all the microtasks to the current task.
-    _this.microtasks.addToSet.apply( _this.microtasks, args );
+    //_this.microtasks.addToSet.apply( _this.microtasks, args );
+    _this.microtasks.push.apply( _this.microtasks, args );
 
     // Persist the changes
     _this.save( function( err ) {
