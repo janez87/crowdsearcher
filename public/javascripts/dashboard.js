@@ -575,7 +575,7 @@ activeExecutions = $.map( activeExecutions, function( exec ) {
 // OBJECTS
 val = 0;
 closedObjectList = $.map( entityObject.objects, function( object ) {
-  if ( object.status === 'CLOSED' ) {
+  if ( object.status === 'CLOSED' || object.closed ) {
     return {
       x: toUTC( object.closedDate )
     };

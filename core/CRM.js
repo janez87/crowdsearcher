@@ -144,7 +144,7 @@ ControlRuleManager.trigger = function( event, data, callback ) {
   function retrieveMicrotasks( ids, cb ) {
     Microtask
       .find()
-      .where( '_id' ). in ( ids )
+      .where( '_id' ).in( ids )
       .populate( 'operations platforms' )
       .exec( function( err, microtasks ) {
         if ( err ) return cb( err );
@@ -170,7 +170,7 @@ ControlRuleManager.trigger = function( event, data, callback ) {
 
   function retrieveObjects( ids, cb ) {
     ObjectModel
-      .where( '_id' ). in ( ids )
+      .where( '_id' ).in( ids )
       .exec( function( err, objects ) {
         if ( err ) return cb( err );
 
@@ -206,7 +206,7 @@ ControlRuleManager.trigger = function( event, data, callback ) {
         return cb( null, results );
       }
 
-      log.debug( '%s completed, no error were rised', event );
+      log.debug( '%s completed (comtrol rules), no error were rised', event );
       return cb( null, results );
     } );
   }
@@ -286,7 +286,7 @@ ControlRuleManager.trigger = function( event, data, callback ) {
         return cb( null, task );
       }
 
-      log.debug( '%s completed, no error were rised', event );
+      log.debug( '%s completed (platform hooks), no error were rised', event );
       return cb( null, task );
     } );
   }
@@ -321,7 +321,7 @@ ControlRuleManager.trigger = function( event, data, callback ) {
         return cb( null, task );
       }
 
-      log.debug( '%s completed, no error were rised', event );
+      log.debug( '%s completed (strategy hooks), no error were rised', event );
       return cb( null, task );
     } );
   }
@@ -346,7 +346,7 @@ ControlRuleManager.trigger = function( event, data, callback ) {
     */
 
     return task.updateInfo( function( err ) {
-      if( err ) {
+      if ( err ) {
         return cb( err, null );
       } else {
         return cb( null, task );
