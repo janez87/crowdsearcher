@@ -2,6 +2,7 @@
 var _ = require( 'underscore' );
 var fs = require( 'fs' );
 var path = require( 'path' );
+var semver = require( 'semver' );
 var nconf = require( 'nconf' );
 var mongo = require( 'mongoose' );
 var CS = require( '../core' );
@@ -60,6 +61,16 @@ function configMongo( callback ) {
     } );
     db.once( 'open', function mongoOpen() {
       log.debug( 'Connected to Mongo!' );
+
+      var admin = new mongo.mongo.Admin( db.db );
+
+      admin.buildInfo( function( err, info ) {
+        log.trace( 'MongoDB info %j', info );
+        log.trace( 'MongoDB version %s', info.version );
+        CS.mongoVersion = info.version;
+        if( semver.gt( CS.mongoVersion, '2.1.0' ) )
+          log.trace( 'Aggregation framework enabled!' );
+      } );
 
       db.removeAllListeners( 'error' );
 

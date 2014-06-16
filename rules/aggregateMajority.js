@@ -47,13 +47,13 @@ function onEndExecution( params, task, data, callback ) {
   var mode = params.mode;
 
   // For each object it evaluate the status of the majorities
-  var evaluateMajority = function( microtask, object, callback ) {
+  var evaluateMajority = function( microtask, object, cb ) {
 
     // If the object is already close do nothing
     log.trace( 'Evaluating the majority' );
     if ( object.closed ) {
       log.trace( 'Object %s already closed', object._id );
-      return callback();
+      return cb();
     }
 
     // Retrieve the control mart related to the status of the object
@@ -62,7 +62,7 @@ function onEndExecution( params, task, data, callback ) {
         object: object._id,
         name: 'status'
       }, function( err, controlmart ) {
-        if ( err ) return callback( err );
+        if ( err ) return cb( err );
 
         log.trace( 'controlmart: %j', controlmart );
 
@@ -77,18 +77,18 @@ function onEndExecution( params, task, data, callback ) {
           // Close the object if at least 1 operation is closed
           if ( closed.length >= 1 ) {
             log.trace( 'Closing object %s', object._id );
-            return object.close( callback );
+            return object.close( cb );
           } else {
-            return callback();
+            return cb();
           }
         }
         if ( mode === 'ALL' ) {
           // Close the object if all the operation are closed
           if ( closed.length === microtask.operations.length ) {
             log.trace( 'Closing object %s', object._id );
-            return object.close( callback );
+            return object.close( cb );
           } else {
-            return callback();
+            return cb();
           }
         }
         if ( mode === 'SPECIFIC' ) {
@@ -121,14 +121,14 @@ function onEndExecution( params, task, data, callback ) {
 
           // If it's completed, close the object
           if ( completed ) {
-            return object.close( callback );
+            return object.close( cb );
           } else {
-            return callback();
+            return cb();
           }
         }
 
         log.trace( 'Not supported mode selected' );
-        return callback();
+        return cb();
       } );
 
   };

@@ -134,12 +134,15 @@ function onEndExecution( params, task, data, callback ) {
         label: operationLabel
       } );
 
+      if( !operation ) {
+        log.warn( 'No operation with label %s found', operationLabel );
+        return callback();
+      }
+
       log.trace( 'Performing the rule for the operation %s', operation.label );
 
       // Select only annotations of the current operation
       annotations = _.filter( annotations, function( annotation ) {
-        log.trace( 'Operation (%s): %j', annotation.operation );
-        log.trace( 'Operation: %j', annotation.operation );
         return annotation.operation.equals( operation._id );
       } );
 

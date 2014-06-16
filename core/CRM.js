@@ -1,5 +1,6 @@
 // Load libraries.
 var _ = require( 'underscore' );
+var semver = require( 'semver' );
 var async = require( 'async' );
 var domain = require( 'domain' );
 var CS = require( '../core' );
@@ -356,12 +357,17 @@ ControlRuleManager.trigger = function( event, data, callback ) {
 
   var actions = [
     retrieveData,
-    checkTask,
-    updateCounters, // Available only for END_EXECUTION on taskTypes
+    checkTask
+  ];
+
+  if( semver.gt( CS.mongoVersion, '2.1.0' ) )
+    actions.push( updateCounters ); // Available only for END_EXECUTION on taskTypes
+  
+  actions = actions.concat( [
     triggerPlatformRules,
     triggerStrategyRules,
     triggerControlRules
-  ];
+  ] );
 
   async.waterfall( actions, function( err ) {
     // In case of error log it, dont exit.

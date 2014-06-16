@@ -84,7 +84,7 @@ function onEndExecution( params, task, data, callback ) {
 
       var annotations = execution.annotations;
 
-      var checkGT = function( annotation, callback ) {
+      var checkGT = function( annotation, cb ) {
         var response = annotation.response;
 
         var tuple = {
@@ -93,11 +93,11 @@ function onEndExecution( params, task, data, callback ) {
           object: annotation.object
         };
         ControlMart.select( tuple, [ 'gt_value', 'gt_evaluations', 'gt_wrong', 'gt_right' ], function( err, tuples ) {
-          if ( err ) return callback( err );
+          if ( err ) return cb( err );
 
           if ( tuples.length === 0 ) {
             log.trace( 'No tuples found' );
-            return callback();
+            return cb();
           }
 
           var gt = _.findWhere( tuples, {
@@ -106,7 +106,7 @@ function onEndExecution( params, task, data, callback ) {
 
           if ( _.isUndefined( gt ) || _.isUndefined( gt.data ) ) {
             log.trace( 'No ground truth specfied for the object %s', annotation.object );
-            return callback();
+            return cb();
           }
 
           var evaluations = _.findWhere( tuples, {
@@ -129,19 +129,21 @@ function onEndExecution( params, task, data, callback ) {
             wrong.data++;
           }
 
+          /*
           log.trace( evaluations );
           log.trace( right );
           log.trace( wrong );
+          */
 
           var updatedTuples = [ evaluations, right, wrong ];
 
-          return ControlMart.insert( updatedTuples, callback );
+          return ControlMart.insert( updatedTuples, cb );
 
 
         } );
       };
 
-      return async.each( annotations, checkGT, callback );
+      return async.eachSeries( annotations, checkGT, callback );
     } );
 
 }

@@ -1,8 +1,8 @@
 {
   "webserver": {
-    "protocol": "https",
+    "protocol": "http",
     "hostname": "localhost",
-    "port": 443
+    "port": 2100
   },
 
   "api": {

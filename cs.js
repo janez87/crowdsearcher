@@ -32,6 +32,7 @@ var _ = require( 'underscore' );
 var fs = require( 'fs' );
 var url = require( 'url' );
 var path = require( 'path' );
+var http = require( 'http' );
 var https = require( 'https' );
 var flash = require( 'connect-flash' );
 var nconf = require( 'nconf' );
@@ -343,14 +344,19 @@ config.once( 'ready', function configReady() {
     } );
   } );
 
-  // Eventually START SERVER!
-  log.debug( 'Starting server on port ' + config.getPort() );
+  var protocol = config.getProtocol() || 'http';
+  log.debug( 'Starting %s server on port %s', protocol, config.getPort() );
 
-  var options = {
-    cert: fs.readFileSync( './certificate.pem' ).toString(),
-    key: fs.readFileSync( './privatekey.pem' ).toString()
-  };
-  https.createServer( options, app ).listen( config.getPort() );
+
+  if( protocol==='https' ) {
+    var options = {
+      cert: fs.readFileSync( './certificate.pem' ).toString(),
+      key: fs.readFileSync( './privatekey.pem' ).toString()
+    };
+    https.createServer( options, app ).listen( config.getPort() );
+  } else {
+    http.createServer( app ).listen( config.getPort() );
+  }
 } );
 
 

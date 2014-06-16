@@ -122,7 +122,7 @@ ControlMartSchema.statics.insert = function( rawTuples, callback ) {
     rawTuples = [ rawTuples ];
   }
 
-  var insertOrUpdate = function( tuple, callback ) {
+  var insertOrUpdate = function( tuple, cb ) {
 
     var tupleToSearch = _.clone( tuple );
 
@@ -130,7 +130,7 @@ ControlMartSchema.statics.insert = function( rawTuples, callback ) {
 
     // Verify if the tuple already exists
     _this.findOne( tupleToSearch, function( err, controlmart ) {
-      if ( err ) return callback( err );
+      if ( err ) return cb( err );
 
       if ( controlmart ) {
         // Update the data
@@ -144,7 +144,7 @@ ControlMartSchema.statics.insert = function( rawTuples, callback ) {
       }
 
       //log.trace( 'Saving the tuple' );
-      return controlmart.save( callback );
+      return controlmart.save( cb );
     } );
   };
 

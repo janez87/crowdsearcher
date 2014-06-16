@@ -33,7 +33,7 @@ var API = {
 
 // API core function logic. If this function is executed then each check is passed.
 API.logic = function openTask( req, res, next ) {
-  req.connection.setTimeout( 0 );
+  //req.connection.setTimeout( 0 );
   var id = req.params.id;
   log.trace( 'Opening task %s', id );
 

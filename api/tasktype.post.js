@@ -1,6 +1,7 @@
 // Load libraries
 var _ = require( 'underscore' );
 var util = require( 'util' );
+var semver = require( 'semver' );
 var async = require( 'async' );
 var CS = require( '../core' );
 
@@ -149,10 +150,12 @@ API.logic = function postTask( req, res, next ) {
     var task = new Task( rawTask );
 
     // Add the adaptation rule as the last one
-    task.controlrules.push( {
-      name: 'adaptationRule',
-      params: adaptation
-    } );
+    if( semver.gt( CS.mongoVersion, '2.1.0' ) ) {
+      task.controlrules.push( {
+        name: 'adaptationRule',
+        params: adaptation
+      } );
+    }
 
     log.trace( 'platforms: %j', platforms );
     log.trace( 'operations: %j', operations );

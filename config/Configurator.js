@@ -63,6 +63,9 @@ Configurator.prototype.load = function() {
 Configurator.prototype.getPort = function() {
   return nconf.get( 'webserver:port' );
 };
+Configurator.prototype.getProtocol = function() {
+  return nconf.get( 'webserver:protocol' );
+};
 
 
 // Configuration functions
@@ -96,7 +99,7 @@ Configurator.prototype.configNconf = function( callback ) {
     var externalAddress = nconf.get( 'webserver:externalAddress' );
     if ( !_.isString( externalAddress ) ) {
       externalAddress = _.clone( nconf.get( 'webserver' ) );
-      externalAddress.protocol = 'https';
+      //externalAddress.protocol = 'https';
 
       nconf.set( 'webserver:externalAddress', url.format( externalAddress ) + '/' );
     }
