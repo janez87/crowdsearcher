@@ -215,6 +215,7 @@ exports.flows = function( req, res, next ) {
 var pageMap = {
   'object_declaration': 'Object declaration',
   'task_type': 'Task Type',
+  'gt_declaration': 'Groundtruth Declaration',
   'add_operations': 'Add operations',
   'invitation': 'Invitation',
   'execution': 'Execution',
@@ -224,12 +225,14 @@ var pageMap = {
 var pageList = [
   'object_declaration',
   'task_type',
+  'gt_declaration',
   //'add_operations',
   'execution',
   'invitation',
   'adaptation',
   'review'
 ];
+
 exports.wizard = function( req, res, next ) {
   var page = req.params.page;
 

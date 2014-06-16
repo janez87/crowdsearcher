@@ -173,7 +173,10 @@ API.logic = function getStats( req, res, next ) {
 
     // Objects
     data.objects = entityObject.objects.length || 0;
-    data.closedObjects = _.countBy( entityObject.objects, 'status' ).CLOSED || 0;
+    //data.closedObjects = _.countBy( entityObject.objects, 'status' ).CLOSED || 0;
+    data.closedObjects = _.filter( entityObject.objects, function( o ) {
+      return o.closed;
+    } ).length;
 
 
 

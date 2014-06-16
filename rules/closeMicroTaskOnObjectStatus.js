@@ -20,13 +20,13 @@ function onCloseObject( params, task, data, callback ) {
     .find()
     .where( 'task', task._id )
     .where( 'status' ).ne( 'CLOSED' )
-    .where( 'objects' ). in ( [ objectId ] )
+    .where( 'objects' ).in( [ objectId ] )
     .populate( 'objects' )
     .exec( function( err, microtasks ) {
       if ( err ) return callback( err );
 
       // Ok go on
-      if ( !microtasks )
+      if ( !microtasks || microtasks.length === 0 )
         return callback();
 
       // Get all the non-closed objects for each microtask
@@ -53,7 +53,6 @@ function onCloseObject( params, task, data, callback ) {
         } );
     } );
 
-  return callback();
 }
 
 // # Rule definition

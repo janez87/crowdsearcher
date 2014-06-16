@@ -19,7 +19,7 @@ function onCloseObject( params, task, data, callback ) {
   ObjectModel
     .find()
     .where( 'task', task._id )
-    .where( 'status' ). in ( [ 'CLOSED', 'CLOSED_GOOD', 'CLOSED_BAD' ] )
+    .where( 'status' ).in( [ 'CLOSED', 'CLOSED_GOOD', 'CLOSED_BAD' ] )
     .count()
     .exec( function( err, count ) {
       if ( err ) return callback( err );

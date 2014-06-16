@@ -43,7 +43,6 @@ var API = {
 API.logic = function postTask( req, res, next ) {
   /* jshint camelcase: false */
   var data = req.body;
-  //req.connection.setTimeout( 0 );
 
   var taskType = data.task_type;
   var name = taskType.name;
@@ -53,28 +52,40 @@ API.logic = function postTask( req, res, next ) {
   var taskTypeImpl = CS.taskTypes[ name ];
   var defaultValues = taskTypeImpl.defaults;
 
-  var trueColumn = data.object_declaration.gt;
-  log.trace( 'Ground truth field: %s', trueColumn );
-
-  log.trace( 'Creating the new field containing the gt' );
+  //log.trace( 'Ground truth field: %s', trueColumn );
   var objects = _.map( data.object_declaration.data, function( val, i ) {
-
-    if ( !_.isUndefined( trueColumn ) ) {
-      var gt = {
-        operation: defaultValues.operations[ 0 ].label,
-        value: val[ trueColumn ]
-      };
-      val[ '_gt_tasktype' ] = gt;
-
-      delete val[ trueColumn ];
-    }
-
     return {
       name: val.id || 'Object ' + i,
       data: val
     };
   } );
 
+  log.trace( 'Creating the new field containing the gt' );
+  var trueObjects = [];
+  var trueColumn = data.gt_declaration.gt;
+  if ( data.gt_declaration ) {
+    trueObjects = _.map( data.gt_declaration.data, function( val, i ) {
+
+      if ( !_.isUndefined( trueColumn ) ) {
+        var gt = {
+          operation: defaultValues.operations[ 0 ].label,
+          value: val[ trueColumn ]
+        };
+        val[ '_gt_tasktype' ] = gt;
+
+        delete val[ trueColumn ];
+      }
+
+      return {
+        name: val.id || 'Object ' + i,
+        data: val
+      };
+    } );
+  }
+
+  log.trace( 'Found %s objects with ground truth', trueObjects.length );
+
+  objects = objects.concat( trueObjects );
   var platforms = [];
   if ( !_.isEmpty( data.execution ) ) {
     var execution = data.execution;
@@ -115,7 +126,7 @@ API.logic = function postTask( req, res, next ) {
 
   var parsedParams = {};
   _.each( params, function( v, k ) {
-    if( _.isNumber( v ) || _.isBoolean( v ) )
+    if ( _.isNumber( v ) || _.isBoolean( v ) )
       parsedParams[ k ] = v;
     else
       parsedParams[ k ] = JSON.stringify( v );
