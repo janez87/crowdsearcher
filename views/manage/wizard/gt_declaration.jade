@@ -1,0 +1,63 @@
+extends ./layout
+
+block append lateScripts
+  script(src='javascripts/dropzone.js')
+  script(src='javascripts/gt_declaration.js')
+
+block append css
+  style(type='text/css').
+    .table {
+      table-layout: fixed;
+    }
+    .table>tbody>tr {
+      height: 3em;
+      max-height: 3em;
+      white-space: nowrap;
+    }
+    .table>tbody>tr>td {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+block content
+
+  //.alert.alert-info.alert-dismissable
+  //.well
+    button.close(type='button',data-dismiss='alert',aria-hidden='true') &times;
+    strong Info:
+    .md.
+      The steps are:
+
+      1. Selecting the use case will highlight the corresponding Task types.
+        Once you selected a use case click on it to block the selection.
+      2. Click on the chosen task type to show the configuration options.
+      3. Configure the task type and click on **confirm**.
+
+  hr
+  
+  h2 Input files
+
+  .row
+    .col-md-8
+
+      form.form-horizontal
+        .form-group
+          label.col-md-3.control-label(for='file_type') File type: 
+          .col-md-9
+            select.form-control#file_type
+              option(value='.json') JSON
+              option(value='.*') CSV
+              option(value='.*') XML
+              option(value='.*') XLS
+        .form-group
+          label.col-md-3.control-label(for='file') File select: 
+          .col-md-9
+            input.form-control#file(type='file',title='Select a file')
+
+    .col-md-4
+      .dropzone
+
+  h3 Data preview
+  table.table.table-bordered.table-hover.table-condensed
+    thead: tr#header
+    tbody#data
