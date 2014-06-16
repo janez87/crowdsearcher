@@ -63,7 +63,8 @@ app.locals( {
   title: 'CrowdSearcher',
   md: markdown.toHTML,
   moment: moment,
-  _: _
+  _: _,
+  CS: CS
 } );
 
 

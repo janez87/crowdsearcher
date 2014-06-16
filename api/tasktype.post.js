@@ -62,8 +62,8 @@ API.logic = function postTask( req, res, next ) {
 
   log.trace( 'Creating the new field containing the gt' );
   var trueObjects = [];
-  var trueColumn = data.gt_declaration.gt;
   if ( data.gt_declaration ) {
+    var trueColumn = data.gt_declaration.gt;
     trueObjects = _.map( data.gt_declaration.data, function( val, i ) {
 
       if ( !_.isUndefined( trueColumn ) ) {

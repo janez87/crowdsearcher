@@ -1,4 +1,4 @@
-/* global $btnSend, sendData */
+/* global $btnSend, sendData, objSchema */
 var $file = $( '#file' );
 var $fileType = $( '#file_type' );
 $file.on( 'click', function() {
@@ -57,23 +57,6 @@ function dataPreview( data, type ) {
 function createTableEditor( data, schema ) {
   var $header = $( '#header' );
 
-  function createSelect( selected ) {
-    var types = [
-      'Array',
-      'Number',
-      'Date',
-      'Boolean',
-      'Object',
-      'String'
-    ];
-    var select = '<select class="form-control">';
-    $.each( types, function( idx, val ) {
-      select += '<option' + ( val === selected ? ' selected' : '' ) + '>' + val + '</option>';
-    } );
-    select += '</select>';
-    return select;
-  }
-
   $.each( schema, function( prop, type ) {
     var $th = $( '<th></th>' );
 
@@ -85,9 +68,36 @@ function createTableEditor( data, schema ) {
     $container.append( $prop );
 
     $th.append( $container );
-    $th.append( createSelect( type ) );
+    $th.append( '<input class="form-control" id="disabledInput" type="text" placeholder="'+type+'" disabled>' );
     $header.append( $th );
   } );
+
+  // Add the GT at the end
+  // with different color???
+  var objFieldNames = $.map( objSchema, function( v, k ) { return k; } );
+  var gtFieldNames = $.map( data[0], function( v, k ) { return k; } );
+  
+  // GT field
+  var gtField = $.grep( gtFieldNames , function( v ) {
+    return $.inArray( v, objFieldNames )===-1;
+  } )[0];
+
+  var $th = $( '<th></th>' );
+  var $prop = $( '<input type="text"/>' );
+  $prop.addClass( 'form-control input-sm' );
+  $prop.val( gtField );
+
+  var $container = $( '<div class="input-group"><span class="input-group-addon" title="Ground truth"><input type="radio" name="gt" value="' + gtField + '" checked></span></div>' );
+  $container.append( $prop );
+
+  $th.append( $container );
+  $th.append( '<input class="form-control" id="disabledInput" type="text" placeholder="Ground truth" disabled>' );
+  $header.append( $th );
+
+
+
+  schema[ gtField ] = 'string';
+
 
   var $data = $( '#data' );
   // Print only 5 rows
@@ -136,18 +146,8 @@ var parse = {
 
 function loadJSON( data ) {
   var json = JSON.parse( data );
-  var row = json.data[ 0 ];
-  var schema = {};
-  //console.log( JSON.stringify( data ) );
-  $.each( row, function( key, val ) {
-    var type = 'string';
-    type = toString.call( val ).split( ' ' ).splice( -1 )[ 0 ].slice( 0, -1 );
-    if ( !isNaN( Date.parse( val ) ) ) type = 'Date';
-    if ( $.isArray( val ) ) type = 'Array';
-    schema[ key ] = type;
-  } );
 
-  createTableEditor( json.data, schema );
+  createTableEditor( json.data, objSchema );
 }
 
 $file.on( 'change', function() {

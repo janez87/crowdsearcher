@@ -215,7 +215,7 @@ exports.flows = function( req, res, next ) {
 var pageMap = {
   'object_declaration': 'Object declaration',
   'task_type': 'Task Type',
-  'gt_declaration': 'Groundtruth Declaration',
+  'gt_declaration': 'GT Declaration',
   'add_operations': 'Add operations',
   'invitation': 'Invitation',
   'execution': 'Execution',
@@ -255,6 +255,14 @@ exports.wizard = function( req, res, next ) {
   r( baseUrl + 'configuration', function( err, resp, config ) {
     if ( err ) return next( err );
 
+    var accounts = {};
+    if( req.user ) {
+      var userAccounts = req.user.accounts;
+      _.each( userAccounts, function( account ) {
+        accounts[ account.provider ] = account;
+      } );
+    }
+
     res.render( 'manage/wizard/' + page, {
       title: pageMap[ page ],
       config: config,
@@ -265,7 +273,8 @@ exports.wizard = function( req, res, next ) {
       nextPage: nextPage,
       prevPage: prevPage,
 
-      status: req.session.wizard
+      status: req.session.wizard,
+      accounts: accounts
     } );
   } );
 };

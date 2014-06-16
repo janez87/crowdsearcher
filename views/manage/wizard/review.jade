@@ -11,6 +11,10 @@ block append lateScripts
       var $btn = $( this );
       $loadingModal = $( '#loadingModal' );
       $btn.button( 'loading' );
+
+      $loadingModal.find( '.modal-title' ).text( 'Info' );
+      $loadingModal.find( '.modal-body p' ).text( 'Wait please, creating task...' );
+      $loadingModal.find( '.modal-footer' ).hide();
       $loadingModal.modal( 'show' );
 
       var url = baseUrl+'api/tasktype';
@@ -28,7 +32,7 @@ block append lateScripts
       .fail( function( xhr, type, message ) {
         $loadingModal.find( '.modal-title' ).text( type );
         $loadingModal.find( '.modal-body p' ).text( message );
-        $loadingModal.find( '.modal-footer' ).removeClass( 'hide' );
+        $loadingModal.find( '.modal-footer' ).show();
       } )
       
       .done( function( task ) {
@@ -52,13 +56,12 @@ block content
     .modal-dialog.modal-sm
       .modal-content
         .modal-header
-          h4.modal-title Info
-        .modal-body
-          p Wait please, creating task...
-        .modal-footer.hide
+          h4.modal-title
+        .modal-body: p
+        .modal-footer
           button.btn.btn-danger(type='button',
             data-dismiss='modal') Close
 
 
   hr
-  //pre!= JSON.stringify( req.session.wizard, null, 2 )
+  pre!= JSON.stringify( req.session.wizard, null, 2 )

@@ -11,7 +11,7 @@ block append scripts
   script(src='libs/qrcode.min.js')
 
 block append css
-  style(type='text/css')
+  style(type='text/css').
     #qrcode {
       text-align: center;
       display: none;
@@ -20,23 +20,6 @@ block append css
       margin: auto;
     }
 
-block append lateScripts
-  script
-    new QRCode( 'qrcode', {
-      text: baseUrl+'api/run?task=#{task._id}',
-      width: 256,
-      height: 256,
-      correctLevel: QRCode.CorrectLevel.H
-    } );
-    $( '#qrcode_link' ).click( function( evt ) {
-      evt.preventDefault();
-
-      $( '#qrcode' ).slideToggle();
-      $( 'i', this ).toggleClass( 'fa-chevron-down' );
-      $( 'i', this ).toggleClass( 'fa-chevron-up' );
-      
-      return false;
-    } );
 
 block header
   .row
@@ -55,6 +38,22 @@ block header
           a#qrcode_link(href='#') Show QR code 
             i.fa.fa-chevron-down
           #qrcode
+          script.
+            new QRCode( 'qrcode', {
+              text: baseUrl+'api/run?task=#{task._id}',
+              width: 256,
+              height: 256,
+              correctLevel: QRCode.CorrectLevel.H
+            } );
+            $( '#qrcode_link' ).click( function( evt ) {
+              evt.preventDefault();
+
+              $( '#qrcode' ).slideToggle();
+              $( 'i', this ).toggleClass( 'fa-chevron-down' );
+              $( 'i', this ).toggleClass( 'fa-chevron-up' );
+              
+              return false;
+            } );
 
     .col-md-4.text-right
       code= task._id

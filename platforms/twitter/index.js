@@ -10,31 +10,49 @@ var log = CS.log.child( {
   component: 'Facebook'
 } );
 
+var request = require( 'request' );
 
-function invite( task, platform, callback ) {
-  var params = platform.params;
 
+function invite( params, task, data, callback ) {
   // Task url
   var url = nconf.get( 'webserver:externalAddress' ) + nconf.get( 'api:urlPath' ) + '/landing?task=' + task._id;
 
-  var message = 'I just posted a task on CrowdSearcher\n' + url;
-
   var twit = new Twit( {
-    consumer_key: params.clientID,
-    consumer_secret: params.clientSecret,
+    consumer_key: params.consumerKey,
+    consumer_secret: params.consumerSecret,
     access_token: params.token,
     access_token_secret: params.tokenSecret
   } );
 
-  twit.post( 'statuses/update', {
-    status: message,
-    includes_entities: true
-  }, function( err ) {
-    if ( err ) return callback( err );
 
-    log.trace( 'Message posted on twitter' );
-    return callback();
+  // Generate short url
+  request( {
+    url: 'http://is.gd/create.php',
+    json: true,
+    qs: {
+      format: 'json',
+      url: url
+    }
+  }, function( err, res, body ) {
+    if( err ) log.warn( err );
+    
+    url  = body.shorturl || url;
+    
+    // Make configurable
+    var message = 'I just posted a task on CrowdSearcher\n' + url;
+
+    twit.post( 'statuses/update', {
+      status: message,
+      includes_entities: true
+    }, function( err ) {
+      if ( err ) return callback( err );
+
+      log.trace( 'Message posted on twitter' );
+      return callback();
+    } );
+
   } );
+
 }
 
 var Platform = {
@@ -47,11 +65,11 @@ var Platform = {
     'OPEN_TASK': invite
   },
   params: {
-    clientID: {
+    consumerKey: {
       type: 'string',
       'default': ''
     },
-    clientSecret: {
+    consumerSecret: {
       type: 'string',
       'default': ''
     },

@@ -81,10 +81,13 @@ function createTableEditor( data, schema ) {
     $prop.addClass( 'form-control input-sm' );
     $prop.val( prop );
 
+    /*
     var $container = $( '<div class="input-group"><span class="input-group-addon" title="Ground truth"><input type="radio" name="gt" value="'+prop+'"></span></div>' );
     $container.append( $prop );
-
     $th.append( $container );
+    */
+
+    $th.append( $prop );
     $th.append( createSelect( type ) );
     $header.append( $th );
   } );

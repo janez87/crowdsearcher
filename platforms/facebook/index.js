@@ -50,8 +50,8 @@ var Platform = {
   },
 
   params: {
-    clientID: 'string',
-    clientSecret: 'string',
+    //clientID: 'string',
+    //clientSecret: 'string',
     token: {
       type: 'string',
       'default': ''

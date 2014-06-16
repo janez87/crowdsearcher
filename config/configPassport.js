@@ -19,6 +19,9 @@ function linkAccountToUser( req, token, tokenSecret, profile, done ) {
   var log = CS.log;
   var User = CS.models.user;
 
+  profile.token = token;
+  profile.tokenSecret = tokenSecret;
+
   log.trace( 'Connecting provider %s (%s)', profile.provider, profile.id );
   log.trace( 'Profile data for (%s): %j', profile.username, profile );
 
