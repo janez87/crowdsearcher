@@ -66,19 +66,19 @@ var Platform = {
   },
   params: {
     consumerKey: {
-      type: 'string',
+      type: 'password',
       'default': ''
     },
     consumerSecret: {
-      type: 'string',
+      type: 'password',
       'default': ''
     },
     token: {
-      type: 'string',
+      type: 'password',
       'default': ''
     },
     tokenSecret: {
-      type: 'string',
+      type: 'password',
       'default': ''
     }
   }
