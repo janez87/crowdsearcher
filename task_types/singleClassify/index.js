@@ -69,6 +69,8 @@ var TaskType = {
     }, {
       name: 'checkGroundTruth',
     }, {
+      name: 'closeMicroTaskOnObjectStatus'
+    }, {
       name: 'closeTaskOnObjectStatus',
     }, {
       name: 'computeAlfa',
