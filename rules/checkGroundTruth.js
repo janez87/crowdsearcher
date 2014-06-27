@@ -21,6 +21,7 @@ var createMart = function( params, task, data, callback ) {
   for ( var i = 0; i < operations.length; i++ ) {
     var op = operations[ i ];
 
+    op = op._id;
     for ( var j = 0; j < objects.length; j++ ) {
       var o = objects[ j ];
 
@@ -56,8 +57,13 @@ var createMart = function( params, task, data, callback ) {
     }
   }
 
-  return ControlMart.create( martToBeCreated, callback );
 
+  return ControlMart.collection.insert( martToBeCreated, function( err ) {
+    if ( err ) return callback( err );
+
+    log.trace( 'Mart created' );
+    return callback();
+  } );
 };
 
 function onOpenTask( params, task, data, callback ) {

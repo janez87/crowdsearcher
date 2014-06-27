@@ -202,6 +202,7 @@ var apiOperations = function( req, res, next ) {
         } );
       } );
       res.json( data );
+
     } else {
       res.json( data.toObject( {
         getters: true

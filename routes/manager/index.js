@@ -239,8 +239,12 @@ exports.wizard = function( req, res, next ) {
   if ( !req.session.wizard )
     req.session.wizard = {};
 
-  if ( req.body.data )
+
+  try {
     req.session.wizard[ req.body.name ] = JSON.parse( req.body.data );
+  } catch ( e ) {
+    req.session.wizard[ req.body.name ] = undefined;
+  }
 
 
   var idx = _.indexOf( pageList, page );
@@ -256,7 +260,7 @@ exports.wizard = function( req, res, next ) {
     if ( err ) return next( err );
 
     var accounts = {};
-    if( req.user ) {
+    if ( req.user ) {
       var userAccounts = req.user.accounts;
       _.each( userAccounts, function( account ) {
         accounts[ account.provider ] = account;

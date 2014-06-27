@@ -32,6 +32,7 @@ var TaskType = {
   defaults: {
     name: '$name$',
     description: '$description$',
+    'private': '$private$',
     operations: [ {
       label: 'mainClassify',
       name: 'classify',
@@ -54,7 +55,6 @@ var TaskType = {
     },
     controlrules: [ {
       name: 'classifyMajority',
-      event: 'END_EXECUTION',
       params: {
         operation: 'mainClassify',
         answers: '$answers$',
@@ -62,20 +62,16 @@ var TaskType = {
       }
     }, {
       name: 'aggregateMajority',
-      event: 'END_EXECUTION',
       params: {
         mode: 'SPECIFIC',
         operations: 'mainClassify'
       }
     }, {
       name: 'checkGroundTruth',
-      event: 'END_EXECUTION'
-    }, {
-      name: 'closeMicroTaskOnObjectStatus',
-      event: 'CLOSE_OBJECT'
     }, {
       name: 'closeTaskOnObjectStatus',
-      event: 'CLOSE_OBJECT'
+    }, {
+      name: 'computeAlfa',
     } ]
   },
   useCases: [ 'Classification', 'Ranking' ],
@@ -86,6 +82,7 @@ var TaskType = {
       type: [ 'string' ],
       'default': 'yes,no'
     },
+    'private': 'boolean',
     objectsNumber: {
       type: 'number',
       'default': 1

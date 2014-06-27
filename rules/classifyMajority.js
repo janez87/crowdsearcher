@@ -61,6 +61,18 @@ function createMart( task, objects, params, callback ) {
     //log.trace( 'Creating the mart for the evalutations' );
     martToBeCreated.push( evaluationtMart );
 
+    /*for ( var i = 0; i < operation.params.categories.length; i++ ) {
+      var category = operation.params.categories[ i ];
+      var categorytMart = {
+        task: task._id,
+        object: objectId,
+        name: category,
+        data: 0,
+        operation: operation._id
+      };
+      martToBeCreated.push( categorytMart );
+    }*/
+
     _.each( operation.params.categories, function( category ) {
       //log.trace( 'Creating the mart for the category %s', category );
       var categorytMart = {
@@ -74,7 +86,7 @@ function createMart( task, objects, params, callback ) {
     } );
 
   }
-  return ControlMart.create( martToBeCreated, callback );
+  return ControlMart.collection.insert( martToBeCreated, callback );
 }
 
 function onOpenTask( params, task, data, callback ) {
@@ -134,7 +146,7 @@ function onEndExecution( params, task, data, callback ) {
         label: operationLabel
       } );
 
-      if( !operation ) {
+      if ( !operation ) {
         log.warn( 'No operation with label %s found', operationLabel );
         return callback();
       }
@@ -280,15 +292,7 @@ var rule = {
   //
   // Description of what the rule does in general.
   hooks: {
-    // Description of what the rule does in this specific event.
     'OPEN_TASK': onOpenTask,
-    // Description of what the rule does in this specific event.
-    'END_TASK': onEndTask,
-    // Description of what the rule does in this specific event.
-    'ADD_MICROTASKS': onAddMicrotasks,
-    // Description of what the rule does in this specific event.
-    'END_MICROTASK': onEndMicrotask,
-    // Description of what the rule does in this specific event.
     'END_EXECUTION': onEndExecution,
     'ON_ADD_OBJECTS': onAddObjects
   },

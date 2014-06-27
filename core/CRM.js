@@ -23,9 +23,11 @@ var ControlRuleManager = {};
 // calling `callback` when the event is completed.
 // **Note**:
 // Only task with status either `OPENED` or `FINALIZED` can trigger events.
+var voloasd = {};
 ControlRuleManager.trigger = function( event, data, callback ) {
-  // The task id must be available in the data object.
+  // The task id must be available in the data object.ß
   var taskId = data.task._id ? data.task._id : data.task;
+  voloasd[ taskId ] = null;
   //debugger;
   log.debug( 'CRM event %s', event );
 
@@ -125,7 +127,13 @@ ControlRuleManager.trigger = function( event, data, callback ) {
     } );
   }
 
+
   function retrieveTask( id, cb ) {
+
+    if ( voloasd[ id ] ) {
+      return cb( null, voloasd[ id ] )
+    }
+
     // Populate the task, this object will be passed to the rule.
     Task
       .findById( id )
@@ -138,6 +146,7 @@ ControlRuleManager.trigger = function( event, data, callback ) {
         if ( !task )
           return cb( new Error( 'No task found for ' + id ) );
 
+        voloasd[ id ] = task;
         return cb( null, task );
       } );
   }
@@ -195,13 +204,17 @@ ControlRuleManager.trigger = function( event, data, callback ) {
       return _.isFunction( controlrule.rule.hooks[ event ] );
     } );
 
+    _.each( rules, function( rule ) {
+      log.trace( rule.name );
+    } );
+
     log.trace( 'Found %s rules to run', rules.length );
 
     // Exit in case of no rules.
     if ( rules.length === 0 )
       return cb();
 
-    async.mapSeries( rules, executeRule, function( err, results ) {
+    async.eachSeries( rules, executeRule, function( err, results ) {
       if ( err ) {
         log.warn( 'Error on control rule hooks', err );
         return cb( null, results );
@@ -251,7 +264,7 @@ ControlRuleManager.trigger = function( event, data, callback ) {
           log.warn( 'Error while execution a rule/hook', err );
         }
         // Exit the domain
-        d.exit();
+        //d.exit();
 
         // return.
         return cb();
@@ -360,9 +373,9 @@ ControlRuleManager.trigger = function( event, data, callback ) {
     checkTask
   ];
 
-  if( semver.gt( CS.mongoVersion, '2.1.0' ) )
-    actions.push( updateCounters ); // Available only for END_EXECUTION on taskTypes
-  
+  //  if ( semver.gt( CS.mongoVersion, '2.1.0' ) )
+  //   actions.push( updateCounters ); // Available only for END_EXECUTION on taskTypes
+
   actions = actions.concat( [
     triggerPlatformRules,
     triggerStrategyRules,

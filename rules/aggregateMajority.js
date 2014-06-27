@@ -105,7 +105,7 @@ function onEndExecution( params, task, data, callback ) {
 
           for ( var i = 0; i < ops.length; i++ ) {
             log.trace( 'ops[%s]: %j', i, ops[ i ] );
-            var opId = _.findWhere( microtask.operations, {
+            var opId = _.findWhere( task.operations, {
               label: ops[ i ]
             } );
             var mart = _.filter( closed, function( mart ) {
@@ -135,7 +135,7 @@ function onEndExecution( params, task, data, callback ) {
 
   Microtask
     .findById( microtask )
-    .populate( 'objects operations' )
+    .populate( 'objects' )
     .exec( function( err, microtask ) {
       if ( err ) return callback( err );
 
@@ -158,14 +158,6 @@ var rule = {
   //
   // Description of what the rule does in general.
   hooks: {
-    // Description of what the rule does in this specific event.
-    'OPEN_TASK': onOpenTask,
-    // Description of what the rule does in this specific event.
-    'END_TASK': onEndTask,
-    // Description of what the rule does in this specific event.
-    'ADD_MICROTASKS': onAddMicrotasks,
-    // Description of what the rule does in this specific event.
-    'END_MICROTASK': onEndMicrotask,
     // Description of what the rule does in this specific event.
     'END_EXECUTION': onEndExecution
   },
