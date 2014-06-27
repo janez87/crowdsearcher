@@ -19,6 +19,11 @@ block append css
     #qrcode > * {
       margin: auto;
     }
+    #qrcode > .url {
+      margin: 5px;
+      font-family: monospace;
+      font-weight: bold;
+    }
 
 
 block header
@@ -38,6 +43,7 @@ block header
           a#qrcode_link(href='#') Show QR code 
             i.fa.fa-chevron-down
           #qrcode
+            p.url #{appBase}api/run?task=#{task._id}
           script.
             new QRCode( 'qrcode', {
               text: baseUrl+'api/run?task=#{task._id}',

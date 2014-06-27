@@ -14,6 +14,7 @@ function invite( params, task, data, callback ) {
   // Task url
   var url = nconf.get( 'webserver:externalAddress' ) + nconf.get( 'api:urlPath' ) + '/landing?task=' + task._id;
 
+  // Make customizable
   var message = 'I just posted a task on CrowdSearcher';
 
   FB.api( 'me/feed', 'post', {
@@ -53,7 +54,7 @@ var Platform = {
     //clientID: 'string',
     //clientSecret: 'string',
     token: {
-      type: 'string',
+      type: 'password',
       'default': ''
     }
   }
