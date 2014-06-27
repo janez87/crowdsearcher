@@ -21,6 +21,8 @@ function createInput( config, name ) {
     multiple = true;
   }
 
+  type = type.toLowerCase();
+
   var originalType = type;
   type = type==='string'? 'text': type;
   type = type==='platform'? 'text': type;
@@ -35,7 +37,8 @@ function createInput( config, name ) {
 
   var $ctrlGroup = $( '<div></div>' );
   var $label = $( '<label></label>' );
-  var $input = $( '<input />' );
+
+  var $input = originalType==='text' ? $( '<textarea></textarea>' ) : $( '<input />' );
 
 
 
@@ -91,11 +94,11 @@ function showParams( params, $paramContainer ) {
 function getParams( $paramContainer ) {
   $paramContainer = $( $paramContainer );
   var data = {};
-  var $dataInputList = $paramContainer.find( 'input:not(input[type="hidden"]), select' );
+  var $dataInputList = $paramContainer.find( 'input:not(input[type="hidden"]), select, textarea' );
 
   $dataInputList.each( function() {
     var $element = $( this );
-    var multiple = $element.data( 'multiple' );
+    var multiple = $element.data( 'multiple' ) || false;
     var originalType = $element.data( 'type' );
     var name = $element.data( 'name' );
     var value = $element.val();

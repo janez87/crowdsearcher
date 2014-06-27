@@ -55,7 +55,11 @@ function dataPreview( data, type ) {
 }
 
 function createTableEditor( data, schema ) {
+  $( '#obj_num' ).text( data.length+' objects loaded.' );
+
   var $header = $( '#header' );
+
+  $header.empty();
 
   function createSelect( selected ) {
     var types = [
@@ -93,6 +97,8 @@ function createTableEditor( data, schema ) {
   } );
 
   var $data = $( '#data' );
+  $data.empty();
+  
   // Print only 5 rows
   for ( var i = 0; i < 5 && i < data.length; i++ ) {
     var $tr = $( '<tr></tr>' );

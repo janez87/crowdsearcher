@@ -33,16 +33,12 @@ block append lateScripts
         $loadingModal.find( '.modal-title' ).text( type );
         $loadingModal.find( '.modal-body p' ).text( message );
         $loadingModal.find( '.modal-footer' ).show();
+        $btn.button( 'reset' );
       } )
-      
       .done( function( task ) {
         location.href = baseUrl+'manage/task/'+task._id
         //$loadingModal.modal( 'hide' );
       } )
-
-      .always( function() {
-        $btn.button( 'reset' );
-      } );
     } );
 
 block content

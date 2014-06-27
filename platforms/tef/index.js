@@ -72,9 +72,13 @@ var Platform = {
 
   params: {
     url: {
-      type: 'url'
+      type: 'url',
+      default: 'http://localhost:8100/'
     },
-    'interface': 'string'
+    'interface': {
+      type: 'string',
+      default: 'actors'
+    }
   }
 };
 

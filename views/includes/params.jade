@@ -22,6 +22,16 @@ mixin printInput( name, type, multiple, id, def )
       data-multiple=''+multiple,
       value=def)
 
+mixin printTextInput( name, id, def )
+  .form-group
+    label(for=id) #{name}:
+    textarea.form-control.input-small(
+      id=id,
+      rows=3,
+      placeholder='Insert '+name,
+      data-type=type,
+      data-name=name)= def
+
 mixin printEnumInput( name, values, id, def )
   .form-group
     label(for=id) #{name}:
@@ -57,5 +67,7 @@ mixin printParamsInput( params, prefix )
         +printBooleanInput( name, id, def )
       else if type=='enum'
         +printEnumInput( name, config.values, id, def )
+      else if type=='text'
+        +printTextInput( name, id, def )
       else
         +printInput( name, type, multiple, id, def )

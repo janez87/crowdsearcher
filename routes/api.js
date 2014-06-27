@@ -168,7 +168,7 @@ var apiOperations = function( req, res, next ) {
   if ( req.bulk )
     query.lean();
   */
-
+  
   query.exec( req.wrap( function( err, data ) {
     if ( err ) return next( err );
 

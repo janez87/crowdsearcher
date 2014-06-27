@@ -76,8 +76,11 @@ var TaskType = {
   },
   useCases: [ 'Classification', 'Ranking' ],
   params: {
-    name: 'string',
-    description: 'string',
+    name: {
+      type: 'string',
+      'default': 'Single Classification name'
+    },
+    description: 'text',
     categories: {
       type: [ 'string' ],
       'default': 'yes,no'
@@ -85,11 +88,17 @@ var TaskType = {
     'private': 'boolean',
     objectsNumber: {
       type: 'number',
-      'default': 1
+      'default': 7
     },
     // possono essere calcolate in base al numero di classi?
-    answers: 'number',
-    agreement: 'number'
+    answers: {
+      type: 'number',
+      default: 1
+    },
+    agreement: {
+      type: 'number',
+      default: 1
+    }
   }
 };
 
