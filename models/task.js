@@ -620,11 +620,12 @@ TaskSchema.methods.addObjects = function( objects, callback ) {
 
       }
 
+      // if map() is used, transformGt will break
       return async.mapSeries( rawTuples, transformGt, function( err, results ) {
         if ( err ) return callback( err );
 
         var ControlMart = _this.model( 'controlmart' );
-        return ControlMart.create( results, function( err ) {
+        return ControlMart.collection.insert( results, function( err ) {
           if ( err ) return callback( err );
 
           // Once all the changes are saved trigger the `ADD_OBJECTS`.

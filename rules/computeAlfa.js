@@ -20,7 +20,7 @@ function onOpenTask( params, task, data, callback ) {
 
 
 function onEndExecution( params, task, data, callback ) {
-  log.trace( 'Performing the rule' );
+  log.trace( 'Performing the rule.. not really, there is a return callback right here...' );
 
   return callback();
   Execution
