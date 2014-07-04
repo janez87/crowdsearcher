@@ -26,6 +26,7 @@ Like.prototype.name = 'Like';
 var TaskType = {
   name: 'Like',
   description: 'Rate an object by giving a Like',
+  image: 'https://cdn3.iconfinder.com/data/icons/linecons-free-vector-icons-pack/32/like-128.png',
   template: fs.readFileSync( __dirname + '/template.hbs', 'utf8' ),
   defaults: {
     name: '$name$',

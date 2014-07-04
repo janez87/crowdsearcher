@@ -29,6 +29,7 @@ var TaskType = {
   name: 'Score',
   description: 'Rate an object by giving a score',
   template: fs.readFileSync( __dirname + '/template.hbs', 'utf8' ),
+  image: 'http://icons.iconarchive.com/icons/oxygen-icons.org/oxygen/256/Actions-rating-icon.png',
   defaults: {
     name: '$name$',
     description: '$description$',

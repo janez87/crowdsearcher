@@ -27,6 +27,7 @@ var TaskType = {
   name: 'Tag',
   description: 'Add a set of tags to the object.',
   template: fs.readFileSync( __dirname + '/template.hbs', 'utf8' ),
+  image: 'http://icons.iconarchive.com/icons/pixelkit/gentle-edges/128/Tag-2-icon.png',
   defaults: {
     name: '$name$',
     description: '$description$',

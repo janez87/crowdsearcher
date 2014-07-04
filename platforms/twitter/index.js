@@ -34,10 +34,10 @@ function invite( params, task, data, callback ) {
       url: url
     }
   }, function( err, res, body ) {
-    if( err ) log.warn( err );
-    
-    url  = body.shorturl || url;
-    
+    if ( err ) log.warn( err );
+
+    url = body.shorturl || url;
+
     // Make configurable
     var message = 'I just posted a task on CrowdSearcher\n' + url;
 
@@ -58,7 +58,7 @@ function invite( params, task, data, callback ) {
 var Platform = {
   name: 'Twitter',
   description: 'Tweet on your timeline.',
-  image: null,
+  image: 'http://www.videocv.org/wp-content/uploads/2012/01/Twitter256x2561-256x256.png',
 
   invite: invite,
   hooks: {

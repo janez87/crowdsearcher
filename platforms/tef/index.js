@@ -64,7 +64,7 @@ function check( config, callback ) {
 var Platform = {
   name: 'TaskExecutionFramework',
   description: 'A *simple* web-server with default interfaces for executing simple Tasks.',
-  image: null,
+  image: 'http://4.bp.blogspot.com/-qefm4LTSo-U/T_0KBLMhrvI/AAAAAAAAASs/HazO-Emz5zI/s1600/Tasks.png',
 
 
   execute: execute,
