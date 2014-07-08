@@ -27,7 +27,7 @@ function onAddMicrotasks( params, task, data, callback ) {
 
     log.trace( 'Creating the mart for the object %s in microtask %s', objectId, microtaskId );
 
-    return ControlMart.insert( tuple, callback );
+    return ControlMart.collection.insert( tuple, callback );
   };
 
   var createMicroTaskMart = function( microtask, callback ) {
