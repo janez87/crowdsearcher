@@ -164,6 +164,7 @@ block content
         - var completedMicrotasks = _.countBy(task.microtasks, 'closed')[ 'true' ] || 0;
         - var totalMicrotasks = task.microtasks.length;
         - var percCompl = (completedMicrotasks/totalMicrotasks)*100;
+        - percCompl = Math.round( percCompl*100 )/100
         .progress
           .progress-bar.progress-bar-success(
             role='progressbar',

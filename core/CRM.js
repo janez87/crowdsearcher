@@ -23,11 +23,9 @@ var ControlRuleManager = {};
 // calling `callback` when the event is completed.
 // **Note**:
 // Only task with status either `OPENED` or `FINALIZED` can trigger events.
-var voloasd = {};
 ControlRuleManager.trigger = function( event, data, callback ) {
   // The task id must be available in the data object.ß
   var taskId = data.task._id ? data.task._id : data.task;
-  voloasd[ taskId ] = null;
   //debugger;
   log.debug( 'CRM event %s', event );
 
@@ -129,11 +127,6 @@ ControlRuleManager.trigger = function( event, data, callback ) {
 
 
   function retrieveTask( id, cb ) {
-
-    if ( voloasd[ id ] ) {
-      return cb( null, voloasd[ id ] )
-    }
-
     // Populate the task, this object will be passed to the rule.
     Task
       .findById( id )
@@ -146,7 +139,6 @@ ControlRuleManager.trigger = function( event, data, callback ) {
         if ( !task )
           return cb( new Error( 'No task found for ' + id ) );
 
-        voloasd[ id ] = task;
         return cb( null, task );
       } );
   }

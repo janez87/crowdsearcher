@@ -6,6 +6,7 @@ mixin printObjects( objects, limit )
     - var completedObjects = _.countBy(objects, 'closed')[ 'true' ] || 0;
     - var totalObjects = objects.length;
     - var percCompl = (completedObjects/totalObjects)*100;
+    - percCompl = Math.round( percCompl*100 )/100
     .progress
       .progress-bar.progress-bar-success(
         role='progressbar',
