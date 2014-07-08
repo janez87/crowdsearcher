@@ -60,3 +60,6 @@ docs
 
 # ignore override config file
 config/override.json
+
+# Debugger configuration
+.node-inspectorrc

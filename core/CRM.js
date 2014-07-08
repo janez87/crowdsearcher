@@ -23,7 +23,11 @@ var ControlRuleManager = {};
 // calling `callback` when the event is completed.
 // **Note**:
 // Only task with status either `OPENED` or `FINALIZED` can trigger events.
+
+//HACK HACK HACK HACK
 var voloasd = {};
+//HACK HACK HACK HACK
+
 ControlRuleManager.trigger = function( event, data, callback ) {
   // The task id must be available in the data object.ß
   var taskId = data.task._id ? data.task._id : data.task;
@@ -245,7 +249,7 @@ ControlRuleManager.trigger = function( event, data, callback ) {
     } );
 
 
-    // Get a fresh Task from the DB
+    // Get a fresh Task from the DB (NOT TRUE WITH THE HACK)
     return retrieveTask( taskId, function( err, task ) {
       if ( err ) {
         log.warn( 'Error while retrieving the Task', err );

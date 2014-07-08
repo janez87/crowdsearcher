@@ -178,103 +178,65 @@ function onEndExecution( params, task, data, callback ) {
 
           var result = _.findWhere( controlmart, {
             name: 'result'
-          } ).data;
+          } );
 
           var evaluations = _.findWhere( controlmart, {
             name: 'evaluations'
-          } ).data;
+          } );
 
-          var categoryCount = {};
+          var categoryCount = [];
           _.each( operation.params.categories, function( category ) {
             var count = _.findWhere( controlmart, {
               name: category
             } );
-            categoryCount[ category ] = count.data;
+            categoryCount.push( count );
           } );
 
           var status = _.findWhere( controlmart, {
             name: 'status'
-          } ).data;
+          } );
 
 
           // Updating the various counters
           log.trace( 'Updating the count' );
-          categoryCount[ category ] = categoryCount[ category ] + 1;
-          evaluations++;
+          //categoryCount[ category ].data = categoryCount[ category ].data + 1;
+          _.findWhere( categoryCount, {
+            name: category
+          } ).data++;
+          evaluations.data++;
 
           // If the number of evaluations is equal to the required ones
           log.trace( 'Checking the majority' );
-          if ( evaluations >= params.answers ) {
+          if ( evaluations.data >= params.answers ) {
 
             // Get the category with the maximum count
-            var maxCount = _.max( _.pairs( categoryCount ), function( p ) {
-              return p[ 1 ];
+            var maxCount = _.max( categoryCount, function( p ) {
+              return p.data;
             } );
 
-            log.trace( 'The most selected category is %s', maxCount );
+            log.trace( 'The most selected category is %s', maxCount.name );
 
             // Verify if the maximum is unique
-            var otherMax = _.where( _.pairs( categoryCount ), function( p ) {
-              return p[ 1 ] === maxCount[ 1 ];
+            var otherMax = _.where( categoryCount, function( p ) {
+              return p.data === maxCount.data;
             } );
 
             // If it's unique it set the result
             if ( otherMax.length > 1 ) {
-              result = undefined;
+              result.data = undefined;
             } else {
-              result = maxCount[ 0 ];
+              result.data = maxCount.name;
             }
 
 
             // If the max is greated or equal the agreement needed it close the object for this operation
             if ( maxCount[ 1 ] >= params.agreement ) {
-              status = 'closed';
+              status.data = 'closed';
             }
 
           }
 
-          var updatedMart = [];
-
-          // Update the control mart
-          var resultMart = {
-            task: task._id,
-            object: objectId,
-            name: 'result',
-            data: result,
-            operation: operation._id
-          };
-          updatedMart.push( resultMart );
-
-          var statustMart = {
-            task: task._id,
-            object: objectId,
-            name: 'status',
-            data: status,
-            operation: operation._id
-          };
-          updatedMart.push( statustMart );
-
-          var evaluationtMart = {
-            task: task._id,
-            object: objectId,
-            name: 'evaluations',
-            data: evaluations,
-            operation: operation._id
-          };
-          updatedMart.push( evaluationtMart );
-
-          _.each( operation.params.categories, function( category ) {
-            log.trace( 'category %s', category );
-            log.trace( 'count %s', categoryCount[ category ] );
-            var categorytMart = {
-              task: task._id,
-              object: objectId,
-              name: category,
-              data: categoryCount[ category ],
-              operation: operation._id
-            };
-            updatedMart.push( categorytMart );
-          } );
+          var updatedMart = [ status, result, evaluations ].concat( categoryCount );
 
           return ControlMart.insert( updatedMart, callback );
         } );
