@@ -1,6 +1,5 @@
 // Load libraries
 var CS = require( '../core' );
-var async = require( 'async' );
 var _ = require( 'underscore' );
 var request = require( 'request' );
 
@@ -12,17 +11,12 @@ var log = CS.log.child( {
 var Execution = CS.models.execution;
 var ControlMart = CS.models.controlmart;
 
-
-
 function onOpenTask( params, task, data, callback ) {
   return callback();
 }
 
-
 function onEndExecution( params, task, data, callback ) {
-  log.trace( 'Performing the rule.. not really, there is a return callback right here...' );
-
-  return callback();
+  log.trace( 'Performing the rule.' );
   Execution
     .find()
     .where( 'task', task._id )
@@ -51,13 +45,12 @@ function onEndExecution( params, task, data, callback ) {
             return {
               object: annotation.object,
               label: annotation.response
-            }
+            };
           } )
-        }
+        };
       } );
 
       // Now I need to create the structure object -> [performer, response]
-
       var objectsAnnotations = {};
       var performers = [];
       _.each( performerAnnotations, function( pA ) {
@@ -70,16 +63,16 @@ function onEndExecution( params, task, data, callback ) {
           objectsAnnotations[ annotation.object ].push( {
             performer: pA.performer,
             label: annotation.label
-          } )
+          } );
 
-        } )
+        } );
       } );
 
       var matrix = [];
       _.each( objectsAnnotations, function( annotations ) {
         var row = [];
         for ( var i = 0; i < performers.length; i++ ) {
-          var p = performers[ i ]
+          var p = performers[ i ];
           var response = _.findWhere( annotations, {
             performer: p
           } );
@@ -109,9 +102,9 @@ function onEndExecution( params, task, data, callback ) {
           task: task._id,
           name: 'kappa_' + Date.now(),
           data: body
-        }
+        };
         return ControlMart.create( tuple, callback );
-      } )
+      } );
     } );
 }
 
