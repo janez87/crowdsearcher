@@ -87,7 +87,7 @@ function invite( task, platform, callback ) {
 var Platform = {
   name: 'E-mail',
   description: 'Invite by sending an e-mail to performers.',
-  image: null,
+  image: 'http://www.goevolve.co.uk/cms/wp-content/uploads/2010/11/gmail.png',
 
   invite: invite,
   params: {

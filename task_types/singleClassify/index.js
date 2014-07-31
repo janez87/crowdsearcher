@@ -29,6 +29,7 @@ var TaskType = {
   name: 'Single classify',
   description: 'Categorize each object with 1 category.',
   template: fs.readFileSync( __dirname + '/template.hbs', 'utf8' ),
+  image: 'https://cdn3.iconfinder.com/data/icons/abstract-1/512/Classification-128.png',
   defaults: {
     name: '$name$',
     description: '$description$',

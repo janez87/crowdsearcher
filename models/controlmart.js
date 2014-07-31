@@ -84,7 +84,6 @@ ControlMartSchema.statics.select = function( filter, names, callback ) {
     .find( filter )
     .where( 'name' ).in( names )
     .sort( '-_id' )
-    .lean()
     .exec( function( err, controlmart ) {
       if ( err ) return callback( err );
 
@@ -101,8 +100,6 @@ ControlMartSchema.statics.get = function( rawTuple, callback ) {
   this
     .find( rawTuple )
     .sort( '-_id' )
-  // Pure javascript object
-  .lean()
     .exec( function( err, controlmart ) {
       if ( err ) return callback( err );
 
@@ -113,7 +110,8 @@ ControlMartSchema.statics.get = function( rawTuple, callback ) {
 
 };
 
-// Insert or update (if exists) controlmart tuples
+// Save tuple
+// Deprecated, kept for compatibility
 ControlMartSchema.statics.insert = function( rawTuples, callback ) {
   log.trace( 'Creating or updating the tuple' );
   var _this = this;
@@ -124,28 +122,7 @@ ControlMartSchema.statics.insert = function( rawTuples, callback ) {
 
   var insertOrUpdate = function( tuple, cb ) {
 
-    var tupleToSearch = _.clone( tuple );
-
-    delete tupleToSearch[ 'data' ];
-
-    // Verify if the tuple already exists
-    _this.findOne( tupleToSearch, function( err, controlmart ) {
-      if ( err ) return cb( err );
-
-      if ( controlmart ) {
-        // Update the data
-        //log.trace( 'The tuple already exists' );
-        controlmart.data = tuple.data;
-      } else {
-        // Create a new tuple
-        //log.trace( 'New tuple' );
-        var ControlMart = _this.model( 'controlmart' );
-        controlmart = new ControlMart( tuple );
-      }
-
-      //log.trace( 'Saving the tuple' );
-      return controlmart.save( cb );
-    } );
+    return tuple.save( cb );
   };
 
   return async.each( rawTuples, insertOrUpdate, callback );

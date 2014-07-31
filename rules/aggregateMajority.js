@@ -16,30 +16,6 @@ var log = CS.log.child( {
 var ControlMart = CS.models.controlmart;
 var Microtask = CS.models.microtask;
 
-function onOpenTask( params, task, data, callback ) {
-  // body...
-
-  return callback();
-}
-
-function onEndTask( params, task, data, callback ) {
-  // body...
-
-  return callback();
-}
-
-function onAddMicrotasks( params, task, data, callback ) {
-  // body...
-
-  return callback();
-}
-
-function onEndMicrotask( params, task, data, callback ) {
-  // body...
-
-  return callback();
-}
-
 function onEndExecution( params, task, data, callback ) {
 
   var microtask = data.microtask;

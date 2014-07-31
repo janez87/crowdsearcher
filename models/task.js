@@ -620,18 +620,27 @@ TaskSchema.methods.addObjects = function( objects, callback ) {
 
       }
 
+      // if map() is used, transformGt will break
       return async.mapSeries( rawTuples, transformGt, function( err, results ) {
         if ( err ) return callback( err );
 
-        var ControlMart = _this.model( 'controlmart' );
-        return ControlMart.create( results, function( err ) {
-          if ( err ) return callback( err );
+        if ( !_.isUndefined( results ) && results.length > 0 ) {
+          log.trace( 'Creating the mart for the ground truth' );
+          var ControlMart = _this.model( 'controlmart' );
+          return ControlMart.collection.insert( results, function( err ) {
+            if ( err ) return callback( err );
 
-          // Once all the changes are saved trigger the `ADD_OBJECTS`.
-          _this.fire( 'ADD_OBJECTS', {
+            // Once all the changes are saved trigger the `ADD_OBJECTS`.
+            _this.fire( 'ADD_OBJECTS', {
+              objects: objectIds
+            }, callback );
+          } );
+
+        } else {
+          return _this.fire( 'ADD_OBJECTS', {
             objects: objectIds
           }, callback );
-        } );
+        }
       } );
     } );
   } );

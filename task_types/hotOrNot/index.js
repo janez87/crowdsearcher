@@ -28,6 +28,7 @@ var TaskType = {
   name: 'Hot or Not',
   description: 'Compare 2 objects at time.',
   template: fs.readFileSync( __dirname + '/template.hbs', 'utf8' ),
+  image: 'http://wscont1.apps.microsoft.com/winstore/1x/8eccf38c-5d84-4213-b9c4-4af47dc8f86b/Icon.80399.png',
   defaults: {
     name: '$name$',
     description: '$description$',

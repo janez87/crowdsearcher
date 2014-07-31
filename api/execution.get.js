@@ -41,6 +41,7 @@ GetExecutionError.USER_BANNED = 'USER_BANNED';
 GetExecutionError.PLATFORM_NOT_FOUND = 'PLATFORM_NOT_FOUND';
 GetExecutionError.PLATFORM_NOT_ENABLED = 'PLATFORM_NOT_ENABLED';
 GetExecutionError.PLATFORM_NOT_EXECUTABLE = 'PLATFORM_NOT_EXECUTABLE';
+GetExecutionError.MISSING_USER_PLATFORM = 'MISSING_USER_PLATFORM';
 
 
 // API object returned by the file
@@ -76,6 +77,7 @@ API.logic = function getExecution( req, res, next ) {
   var taskId = req.query.task;
   var executionId = req.query.execution;
   var performerId = req.query.performer;
+  var username = req.query.username;
 
   var data = {};
 
@@ -153,6 +155,37 @@ API.logic = function getExecution( req, res, next ) {
     if ( req.isAuthenticated() ) {
       execution.performer = req.user._id;
       return callback();
+    }
+
+    // Must create a User based on the username + platform combination
+    if( username ) {
+      // Try to find the user by username
+      return User
+      .findByUsername( username, function( err, user ) {
+        // if not found create one
+        if( err ) {
+          var platform = req.query.platform;
+          if( !platform )
+            return callback( new GetExecutionError( GetExecutionError.MISSING_USER_PLATFORM, 'Cannot create new user without a platform parameter' ) );
+
+          var newUser = new User( {
+            username: username
+          }, platform );
+
+          return req.wrap( 'save', newUser )( function( err, savedUser ) {
+            if( err ) return callback( err );
+
+            execution.performer = savedUser;
+            data.user = savedUser;
+            return callback();
+          } );
+        // otherwise return it
+        } else {
+          execution.performer = user;
+          data.user = user;
+          return callback();
+        }
+      } );
     }
 
     // Must check the passed performer.
