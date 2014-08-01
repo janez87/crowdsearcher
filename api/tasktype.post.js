@@ -182,6 +182,7 @@ API.logic = function postTask( req, res, next ) {
     async.series( actions, function( err ) {
       if ( err ) return next( err );
 
+      req.session.wizard = null;
       res.json( task );
     } );
   } );
