@@ -292,7 +292,7 @@ var rule = {
     }
 
     return done( true );
-  },
+  }
 };
 
 module.exports = exports = rule;

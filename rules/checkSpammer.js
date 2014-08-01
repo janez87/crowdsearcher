@@ -6,6 +6,7 @@
 // Load libraries
 var _ = require( 'underscore' );
 var CS = require( '../core' );
+var async = require( 'async' );
 
 // Create a child logger
 var log = CS.log.child( {
@@ -17,215 +18,154 @@ var ControlMart = CS.models.controlmart;
 var Execution = CS.models.execution;
 
 
-function onOpenTask( params, task, data, callback ) {
-  // In the open task the rule creates the controlmart
-
-  return callback();
-}
-
-function onAddObjects( params, task, data, callback ) {
-
-  return callback();
-}
-
-function onEndTask( params, task, data, callback ) {
-  // body...
-
-  return callback();
-}
-
-function onAddMicrotasks( params, task, data, callback ) {
-  // body...
-
-  return callback();
-}
-
-function onEndMicrotask( params, task, data, callback ) {
-  // body...
-
-  return callback();
-}
-
 function onEndExecution( params, task, data, callback ) {
   log.trace( 'Performing the rule' );
 
-  // Error handler
-  var domain = require( 'domain' ).create();
 
-  domain.on( 'error', callback );
 
-  var execution = data.execution;
-  var operationLabel = params.operation;
+  var firstTime = false;
+  var executionId = data.executionId;
 
+  log.trace( 'Retrieving the execution' );
   Execution
-    .findById( execution )
-    .populate( 'performer annotations.operation annotations.objects', function ( err, execution ) {
+    .findById( executionId )
+    .exec( function( err, execution ) {
+
       if ( err ) return callback( err );
 
-      var performer = execution.performer;
-
-      if ( _.isUndefined( performer ) ) {
-        log.warn( 'The performer is anonymous' );
+      if ( !execution.performer || _.isUndefined( execution.performer ) ) {
+        log.trace( 'No performer for execution %s', executionId );
         return callback();
       }
 
-      var annotations = _.filter( execution.annotations, function ( annotation ) {
-        return annotation.operation.label === operationLabel;
-      } );
-
-
-      if ( annotations.length === 0 ) {
-        log.warn( 'No annotation for the operation %s', operationLabel );
-      }
-
-      var operationId = annotations[ 0 ].operation._id;
-
+      var performer = execution.performer;
+      log.trace( 'Retrieving the mart for the performer %s', performer );
       ControlMart
-        .get( {
+        .find( {
           task: task._id,
-          performer: performer,
-          operation: operationId
-        }, function ( err, controlmart ) {
+          performer: performer
+        } )
+        .exec( function( err, mart ) {
           if ( err ) return callback( err );
 
-          var spammer = _.findWhere( controlmart, {
-            name: 'spammer'
-          } );
-          if ( _.isUndefined( spammer ) ) {
-            spammer = false;
-          }
-
-          if ( spammer ) {
-            log.info( 'The perforemr %s is already a spammer', performer );
-            return callback();
-          }
-
-          var evaluations = _.findWhere( controlmart, {
+          var evaluations = _.findWhere( mart, {
             name: 'evaluations'
           } );
-          if ( _.isUndefined( evaluations ) ) {
-            evaluations = 0;
-          }
 
-          var correct = _.findWhere( controlmart, {
-            name: 'correct'
+          var right = _.findWhere( mart, {
+            name: 'right'
           } );
-          if ( _.isUndefined( correct ) ) {
-            correct = 0;
-          }
 
-          var wrong = _.findWhere( controlmart, {
+          var wrong = _.findWhere( mart, {
             name: 'wrong'
           } );
-          if ( _.isUndefined( wrong ) ) {
-            wrong = 0;
-          }
 
-          var ratio = _.findWhere( controlmart, {
-            name: 'ratio'
+          var spammer = _.findWhere( mart, {
+            name: 'spammer'
           } );
-          if ( _.isUndefined( ratio ) ) {
-            ratio = 0;
+
+          if ( !evaluations ) {
+            firstTime = true;
+            evaluations = {
+              name: 'evaluations',
+              task: task._id,
+              performer: performer,
+              data: 0
+            };
           }
 
-          _.each( annotations, function ( annotation ) {
-            var gt = annotation.object.getMetadata( params.groundtruth );
+          if ( !right ) {
+            right = {
+              name: 'right',
+              task: task._id,
+              performer: performer,
+              data: 0
+            };
+          }
 
-            log.trace( 'Updating the evaluations' );
-            evaluations++;
+          if ( !wrong ) {
+            wrong = {
+              name: 'wrong',
+              task: task._id,
+              performer: performer,
+              data: 0
+            };
+          }
 
-            if ( _.isUndefined( gt ) ) {
-              log.info( 'The object %s does not have a groundtruth', annotation.object._id );
-              return;
-            }
+          if ( !spammer ) {
+            spammer = {
+              name: 'spammer',
+              task: task._id,
+              performer: performer,
+              data: false
+            };
+          }
 
-            var response = annotation.response;
+          log.trace( evaluations, right, wrong, spammer );
 
-            if ( response === gt ) {
-              correct++;
+          var checkAnnotation = function( annotation, cb ) {
+
+            var category = annotation.response;
+
+            ControlMart
+              .find( {
+                task: task._id,
+                name: 'gt_value',
+                object: annotation.object,
+                operation: annotation.operation
+              } )
+              .exec( function( err, mart ) {
+                if ( err ) return cb( err );
+
+                if ( _.isUndefined( mart ) || !mart ) {
+                  log.trace( 'No gt value for object %s', annotation.object );
+                  return cb();
+                }
+
+                evaluations.data++;
+
+                if ( category === mart[ 0 ].data ) {
+                  right.data++;
+                } else {
+                  wrong.data++;
+                }
+
+                if ( wrong.data / evaluations.data < params.threshold && evaluations.data >= params.answers ) {
+                  spammer.data = true;
+                }
+
+                return cb();
+              } );
+          };
+
+
+          var annotations = execution.annotations;
+
+          return async.each( annotations, checkAnnotation, function( err ) {
+            if ( err ) return callback( err );
+
+            if ( firstTime ) {
+              log.trace( 'Creaing the mart' )
+              return ControlMart.create( [ evaluations, right, wrong, spammer ], callback );
             } else {
-              wrong++;
+              log.trace( 'Updating the mart' );
+              return ControlMart.insert( [ evaluations, right, wrong, spammer ], callback );
             }
-
-            ratio = correct / evaluations;
-            if ( evaluations >= params.answers ) {
-              log.trace( 'The performer did %s evaluations', evaluations );
-              if ( ratio <= params.threshold ) {
-                log.trace( 'The ratio of the performer is below the threshold (%s <= %s)', ratio, params.ratio );
-                spammer = true;
-              }
-            }
-
           } );
-
-          log.trace( 'Updating the control mart' );
-          var updatedMart = [];
-          var spammerMart = {
-            performer: performer,
-            name: 'spammer',
-            data: spammer,
-            task: task._id,
-            operation: operationId
-          };
-          updatedMart.push( spammerMart );
-
-          var evaluationsMart = {
-            performer: performer,
-            name: 'evaluations',
-            data: evaluations,
-            task: task._id,
-            operation: operationId
-          };
-          updatedMart.push( evaluationsMart );
-
-          var correctMart = {
-            performer: performer,
-            name: 'correct',
-            data: correct,
-            task: task._id,
-            operation: operationId
-          };
-          updatedMart.push( correctMart );
-
-          var wrongMart = {
-            performer: performer,
-            name: 'wrong',
-            data: wrong,
-            task: task._id,
-            operation: operationId
-          };
-          updatedMart.push( wrongMart );
-
-          var ratioMart = {
-            performer: performer,
-            name: 'ratio',
-            data: ratio,
-            task: task._id,
-            operation: operationId
-          };
-          updatedMart.push( ratioMart );
-
-          return ControlMart.insert( updatedMart, callback );
-
         } );
     } );
+
 }
 
 var rule = {
+
+  hooks: {
+    'END_EXECUTION': onEndExecution
+  },
+
   check: function checkParams( params, done ) {
     log.trace( 'Checking parameters' );
 
-    // Everything went better then expected...
-
-    if ( _.isUndefined( params.operation ) ) {
-      log.error( 'The label of the operation must be specified' );
-      return done( false );
-    }
-
-    if ( _.isUndefined( params.groundtruth ) ) {
-      log.error( 'The groundtruth metadata must be specified' );
-      return done( false );
-    }
 
     if ( _.isUndefined( params.threshold ) || params.threshold <= 0 ) {
       log.error( 'The threshold must be an integer greater than 0' );
@@ -240,27 +180,11 @@ var rule = {
     return done( true );
   },
 
-  hooks: {
-    // Description of what the rule does in this specific event.
-    'OPEN_TASK': onOpenTask,
-    // Description of what the rule does in this specific event.
-    'END_TASK': onEndTask,
-    // Description of what the rule does in this specific event.
-    'ADD_MICROTASKS': onAddMicrotasks,
-    // Description of what the rule does in this specific event.
-    'END_MICROTASK': onEndMicrotask,
-    // Description of what the rule does in this specific event.
-    'END_EXECUTION': onEndExecution,
-    'ON_ADD_OBJECTS': onAddObjects
-  },
-
   params: {
-    operation: 'string',
     answers: 'number',
-    threshold: 'number',
-    groundtruth: 'string'
+    threshold: 'number'
   }
 };
 
 
-module.exports.rule = exports.rule = rule;
+module.exports = exports = rule;
