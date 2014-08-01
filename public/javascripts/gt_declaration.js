@@ -89,35 +89,39 @@ function createTableEditor( data, schema ) {
     $container.append( $prop );
 
     $th.append( $container );
-    $th.append( '<input class="form-control" id="disabledInput" type="text" placeholder="'+type+'" disabled>' );
+    $th.append( createSelect( type ) );
+    // $th.append( '<input class="form-control" id="disabledInput" type="text" placeholder="'+type+'" disabled>' );
     $header.append( $th );
   } );
 
-  // Add the GT at the end
-  // with different color???
-  var objFieldNames = $.map( objSchema, function( v, k ) { return k; } );
-  var gtFieldNames = $.map( data[0], function( v, k ) { return k; } );
-  
-  // GT field
-  var gtField = $.grep( gtFieldNames , function( v ) {
-    return $.inArray( v, objFieldNames )===-1;
-  } )[0];
 
-  var $th = $( '<th></th>' );
-  var $prop = $( '<input type="text"/>' );
-  $prop.addClass( 'form-control input-sm' );
-  $prop.val( gtField );
+  // Append GT field
+  if( !$.isEmptyObject( objSchema ) ) {
+    // Add the GT at the end
+    // with different color???
+    var objFieldNames = $.map( objSchema, function( v, k ) { return k; } );
+    var gtFieldNames = $.map( data[0], function( v, k ) { return k; } );
+    
+    // GT field
+    var gtField = $.grep( gtFieldNames , function( v ) {
+      return $.inArray( v, objFieldNames )===-1;
+    } )[0];
 
-  var $container = $( '<div class="input-group"><span class="input-group-addon" title="Ground truth"><input type="radio" name="gt" value="' + gtField + '" checked></span></div>' );
-  $container.append( $prop );
+    var $th = $( '<th></th>' );
+    var $prop = $( '<input type="text"/>' );
+    $prop.addClass( 'form-control input-sm' );
+    $prop.val( gtField );
 
-  $th.append( $container );
-  $th.append( '<input class="form-control" id="disabledInput" type="text" placeholder="Ground truth" disabled>' );
-  $header.append( $th );
+    var $container = $( '<div class="input-group"><span class="input-group-addon" title="Ground truth"><input type="radio" name="gt" value="' + gtField + '" checked></span></div>' );
+    $container.append( $prop );
 
+    $th.append( $container );
+    $th.append( '<input class="form-control" id="disabledInput" type="text" placeholder="Ground truth" disabled>' );
+    $header.append( $th );
 
+    schema[ gtField ] = 'string';
+  }
 
-  schema[ gtField ] = 'string';
 
 
   var $data = $( '#data' );
@@ -170,9 +174,9 @@ var parse = {
 function loadJSON( data ) {
   var json = JSON.parse( data );
 
-  var schema = objSchema;
+  var schema = {};
 
-  if( $.isEmptyObject( schema ) ) {
+  if( $.isEmptyObject( objSchema ) ) {
     var row = json.data[ 0 ];
 
     $.each( row, function( key, val ) {
@@ -182,6 +186,8 @@ function loadJSON( data ) {
       if ( $.isArray( val ) ) type = 'Array';
       schema[ key ] = type;
     } );
+  } else {
+    schema = objSchema;
   }
 
 
