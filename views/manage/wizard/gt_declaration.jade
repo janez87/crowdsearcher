@@ -4,7 +4,7 @@ block append lateScripts
   script(src='javascripts/dropzone.js')
   script(src='javascripts/gt_declaration.js')
   script.
-    var objDecl = !{JSON.stringify(status.object_declaration)};
+    var objDecl = !{JSON.stringify(status.object_declaration || {})};
     var objSchema = objDecl.schema || {};
 
 block append css
