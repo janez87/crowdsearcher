@@ -55,7 +55,28 @@ function dataPreview( data, type ) {
 }
 
 function createTableEditor( data, schema ) {
+  $( '#obj_num' ).text( data.length+' objects loaded.' );
+
   var $header = $( '#header' );
+
+  $header.empty();
+
+  function createSelect( selected ) {
+    var types = [
+      'Array',
+      'Number',
+      'Date',
+      'Boolean',
+      'Object',
+      'String'
+    ];
+    var select = '<select class="form-control">';
+    $.each( types, function( idx, val ) {
+      select += '<option' + ( val === selected ? ' selected' : '' ) + '>' + val + '</option>';
+    } );
+    select += '</select>';
+    return select;
+  }
 
   $.each( schema, function( prop, type ) {
     var $th = $( '<th></th>' );
@@ -100,6 +121,8 @@ function createTableEditor( data, schema ) {
 
 
   var $data = $( '#data' );
+  $data.empty();
+
   // Print only 5 rows
   for ( var i = 0; i < 5 && i < data.length; i++ ) {
     var $tr = $( '<tr></tr>' );
@@ -147,7 +170,22 @@ var parse = {
 function loadJSON( data ) {
   var json = JSON.parse( data );
 
-  createTableEditor( json.data, objSchema );
+  var schema = objSchema;
+
+  if( $.isEmptyObject( schema ) ) {
+    var row = json.data[ 0 ];
+
+    $.each( row, function( key, val ) {
+      var type = 'string';
+      type = toString.call( val ).split( ' ' ).splice( -1 )[ 0 ].slice( 0, -1 );
+      if ( !isNaN( Date.parse( val ) ) ) type = 'Date';
+      if ( $.isArray( val ) ) type = 'Array';
+      schema[ key ] = type;
+    } );
+  }
+
+
+  createTableEditor( json.data, schema );
 }
 
 $file.on( 'change', function() {
