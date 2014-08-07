@@ -117,7 +117,7 @@ function onEndExecution( params, task, data, callback ) {
               .exec( function( err, mart ) {
                 if ( err ) return cb( err );
 
-                if ( _.isUndefined( mart ) || !mart ) {
+                if ( _.isUndefined( mart[ 0 ] ) || !mart[ 0 ] ) {
                   log.trace( 'No gt value for object %s', annotation.object );
                   return cb();
                 }
