@@ -4,7 +4,7 @@ var path = require( 'path' );
 var async = require( 'async' );
 var fs = require( 'fs' );
 var nconf = require( 'nconf' );
-var AMT = require( '../../../../../../portable/node-amt' );
+var AMT = require( 'node-amt' );
 var moment = require( 'moment' );
 var CS = require( '../../core' );
 
@@ -180,7 +180,7 @@ function onOpenTask( params, task, data, callback ) {
       return cb( null, hitType );
     }
 
-    
+
     hitTypeId = hitType.id;
 
     log.trace( 'Setting notification to hitType %s', hitTypeId );
