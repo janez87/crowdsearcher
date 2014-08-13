@@ -52,13 +52,17 @@ API.logic = function postTask( req, res, next ) {
   var taskTypeImpl = CS.taskTypes[ name ];
   var defaultValues = taskTypeImpl.defaults;
 
+  var objects = [];
   //log.trace( 'Ground truth field: %s', trueColumn );
-  var objects = _.map( data.object_declaration.data, function( val, i ) {
-    return {
-      name: val.id || 'Object ' + i,
-      data: val
-    };
-  } );
+  if ( !_.isUndefined( data.object_declaration ) ) {
+    objects = _.map( data.object_declaration.data, function( val, i ) {
+      return {
+        name: val.id || 'Object ' + i,
+        data: val
+      };
+    } );
+
+  }
 
   log.trace( 'Creating the new field containing the gt' );
   var trueObjects = [];

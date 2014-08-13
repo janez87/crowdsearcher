@@ -55,6 +55,12 @@ var TaskType = {
       name: 'RANDOM',
     },
     controlrules: [ {
+      name: 'checkSpammer',
+      params: {
+        answers: '$nanswers$',
+        threshold: '$threshold$'
+      }
+    }, {
       name: 'classifyMajority',
       params: {
         operation: 'mainClassify',
@@ -101,6 +107,14 @@ var TaskType = {
     agreement: {
       type: 'number',
       default: 1
+    },
+    nanswers: {
+      type: 'number',
+      default: 10
+    },
+    threshold: {
+      type: 'number',
+      default: 0.5
     }
   }
 };

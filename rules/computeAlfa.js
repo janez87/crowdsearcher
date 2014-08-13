@@ -86,6 +86,11 @@ function onEndExecution( params, task, data, callback ) {
         matrix.push( row );
       } );
 
+      if ( matrix[ 0 ].length < 2 ) {
+        log.trace( 'Not enough performers' );
+        return callback();
+      }
+
       matrix = JSON.stringify( matrix );
       log.trace( matrix );
       matrix = matrix.replace( /\"null\"/g, '' );
