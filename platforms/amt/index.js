@@ -1,9 +1,10 @@
 // Load libraries
 var _ = require( 'underscore' );
+var path = require( 'path' );
 var async = require( 'async' );
 var fs = require( 'fs' );
 var nconf = require( 'nconf' );
-var AMT = require( 'amt' );
+var AMT = require( '../../../../../../portable/node-amt' );
 var moment = require( 'moment' );
 var CS = require( '../../core' );
 
@@ -106,7 +107,6 @@ function createExecution( task, microtask, platform, assignment, callback ) {
         continue;
     } else {
       log.warn( 'Operation %s not supported by AMT', operation.name );
-      // Do not add to responses array.
       continue;
     }
 
@@ -175,6 +175,12 @@ function onOpenTask( params, task, data, callback ) {
   }
 
   function addNotification( hitType, cb ) {
+    // If it is an externalQuestion then the notifications are not used
+    if( params.externalQuestion ) {
+      return cb( null, hitType );
+    }
+
+    
     hitTypeId = hitType.id;
 
     log.trace( 'Setting notification to hitType %s', hitTypeId );
@@ -225,25 +231,41 @@ function onAddMicrotasks( params, task, data, callback ) {
   // Add HIT
   function generateQuestionXML( microtask, cb ) {
 
-    // TODO: change to something more async.. and controlled..
-    var question;
-    if ( _.isString( params.questionFile ) && params.questionFile.trim().length > 0 )
-      question = fs.readFileSync( __dirname + '/custom/' + params.questionFile, 'utf8' );
-    else
-      question = fs.readFileSync( __dirname + '/question.xml', 'utf8' );
-
-    // Create a renderer for the file
-    var render = _.template( question );
-
-    // Generate the final XML question file
-    var questionXML = render( {
+    var questionFile;
+    var questionXML;
+    var templateData = {
       microtask: microtask,
       task: task
-    } );
+    };
 
-    //require( 'fs' ).writeFileSync( 'd:\\test.xml', questionXML );
+    if( params.externalQuestion ) {
+      questionFile = path.resolve( __dirname, 'externalQuestion.xml' );
+      log.trace( 'externalQuestionUrl %s', params.externalQuestionUrl );
+      var tempUrl = _.template( params.externalQuestionUrl, templateData );
+      log.trace( 'filled externalQuestionUrl %s', tempUrl );
+      templateData.externalUrl = tempUrl;
+      templateData.height = params.externalQuestionHeight || 550;
+    } else {
+      if ( _.isString( params.questionFile ) && params.questionFile.trim().length > 0 ) {
+        questionFile = path.resolve( __dirname, params.questionFile.trim() );
+      } else {
+        questionFile = path.resolve( __dirname, 'question.xml' );
+      }
+    }
 
-    return cb( null, questionXML );
+
+    // Try to load and template the question file
+    try {
+      log.trace( 'Question file: %s', questionFile );
+      questionXML = fs.readFileSync( questionFile, 'utf8' );
+      log.trace( 'Template Question XML: %s', questionXML );
+      questionXML = _.template( questionXML, templateData );
+      log.trace( 'Question XML: %s', questionXML );
+
+      return cb( null, questionXML );
+    } catch( err ) {
+      return cb( err );
+    }
   }
 
   function createHit( question, cb ) {
@@ -443,12 +465,20 @@ var Platform = {
   notify: handleNotification,
 
   params: {
-    questionFile: {
-      type: 'string'
-    },
     sandbox: {
       type: 'boolean',
       'default': true
+    },
+    externalQuestion: {
+      type: 'boolean',
+      'default': true
+    },
+    externalQuestionUrl: {
+      type: 'string',
+      'default': 'https://'
+    },
+    questionFile: {
+      type: 'string'
     },
     accessKeyId: {
       type: 'pass',

@@ -118,12 +118,6 @@ API.logic = function postTask( req, res, next ) {
   //in order to use the "$  $" simbol as delimiter
   var delimiter = /"\$(\w+)\$"/;
 
-  _.templateSettings = {
-    interpolate: delimiter
-  };
-
-  var template = _.template( defaultValues );
-
   var parsedParams = {};
   _.each( params, function( v, k ) {
     if ( _.isNumber( v ) || _.isBoolean( v ) )
@@ -135,7 +129,9 @@ API.logic = function postTask( req, res, next ) {
   //log.trace( 'Params: %j', params );
   //log.trace( 'ParsedParams: %j', parsedParams );
 
-  var str = template( parsedParams );
+  var str = _.template( defaultValues, parsedParams, {
+    interpolate: delimiter
+  } );
   //log.trace( 'string: ', str );
   var rawTask = JSON.parse( str );
 

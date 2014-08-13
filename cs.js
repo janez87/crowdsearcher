@@ -56,6 +56,7 @@ if ( !fs.existsSync( uploadPath ) )
 // Use JADE as template engine
 app.set( 'views', viewsPath );
 app.set( 'view engine', 'jade' );
+app.enable( 'trust proxy' );
 
 // Export some properities to the views
 app.locals( {
