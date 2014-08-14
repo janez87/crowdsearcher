@@ -4,7 +4,7 @@ var path = require( 'path' );
 var async = require( 'async' );
 var fs = require( 'fs' );
 var nconf = require( 'nconf' );
-var AMT = require( 'node-amt' );
+var AMT = require( 'amt' );
 var moment = require( 'moment' );
 var CS = require( '../../core' );
 
@@ -175,13 +175,13 @@ function onOpenTask( params, task, data, callback ) {
   }
 
   function addNotification( hitType, cb ) {
+    hitTypeId = hitType.id;
+
     // If it is an externalQuestion then the notifications are not used
     if( params.externalQuestion ) {
       return cb( null, hitType );
     }
 
-
-    hitTypeId = hitType.id;
 
     log.trace( 'Setting notification to hitType %s', hitTypeId );
 

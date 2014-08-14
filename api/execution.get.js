@@ -75,6 +75,7 @@ API.logic = function getExecution( req, res, next ) {
   var alias = req.query.alias;
   var jobId = req.query.job;
   var taskId = req.query.task;
+  var microTaskId = req.query.microtask;
   var executionId = req.query.execution;
   var performerId = req.query.performer;
   var username = req.query.username;
@@ -82,7 +83,7 @@ API.logic = function getExecution( req, res, next ) {
   var data = {};
 
   // At least one the parameters must be passed
-  if ( !alias && !jobId && !taskId && !executionId )
+  if ( !alias && !jobId && !taskId && !microTaskId && !executionId )
     return next( new GetExecutionError( GetExecutionError.MISSING_PARAMETERS, 'All the parameter are undefined', APIError.BAD_REQUEST ) );
 
   // # Get Execution
@@ -168,9 +169,9 @@ API.logic = function getExecution( req, res, next ) {
           if( !platform )
             return callback( new GetExecutionError( GetExecutionError.MISSING_USER_PLATFORM, 'Cannot create new user without a platform parameter' ) );
 
-          var newUser = new User( {
+          var newUser = User.createWithAccount( platform, {
             username: username
-          }, platform );
+          } );
 
           return req.wrap( 'save', newUser )( function( err, savedUser ) {
             if( err ) return callback( err );
@@ -235,14 +236,20 @@ API.logic = function getExecution( req, res, next ) {
 
       if ( banned ) return callback( new GetExecutionError( GetExecutionError.USER_BANNED, 'The user is not allowed to perform this task', APIError.FORBIDDEN ) );
 
-      task.assign( {
-        performer: execution.performer
-      }, req.wrap( function( err, id ) {
-        if ( err ) return callback( err );
-
-        execution.microtask = id;
+      // Give the selected microtask or assign a new one
+      if( execution.microtask ) {
         return callback();
-      } ) );
+      } else {
+        task.assign( {
+          performer: execution.performer
+        }, req.wrap( function( err, id ) {
+          if ( err ) return callback( err );
+
+          execution.microtask = id;
+          return callback();
+        } ) );
+      }
+
     } );
   }
 
@@ -309,6 +316,31 @@ API.logic = function getExecution( req, res, next ) {
     checkPlatform,
     saveExecution
   ];
+
+
+
+  // ## From Microtask
+  if( microTaskId ) {
+
+    // Save the microtask ID
+    execution.microtask = microTaskId;
+
+    // Get the task Id from the microtask
+    return Microtask
+    .findById( microTaskId )
+    .populate( 'task' )
+    .exec( req.wrap( function( err, microtask ) {
+      if( err ) return next( err );
+
+      if( !microtask )
+        return next( new GetExecutionError( GetExecutionError.MICROTASK_NOT_FOUND, 'No microtask retrieved' ) );
+
+      taskId = microtask.task._id;//.toJSON(); // Convert to hex string
+
+      // Proceed normally
+      return doActions();
+    } ) );
+  }
 
   function doActions() {
     async.series( actions, function( err ) {
