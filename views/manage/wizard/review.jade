@@ -45,7 +45,7 @@ block content
   .text-center
     button.send.btn.btn-success.btn-lg(type='button')
       i.fa.fa-paper-plane-o
-      |  Create Task! 
+      |  Create Task!
       i.fa.fa-paper-plane-o
 
   #loadingModal.modal.fade(data-keyboard=false,data-backdrop='static')
@@ -60,4 +60,5 @@ block content
 
 
   hr
+  h2 TaskType Data:
   pre!= JSON.stringify( req.session.wizard, null, 2 )

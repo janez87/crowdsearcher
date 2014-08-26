@@ -48,13 +48,18 @@ function checkData( data, operation ) {
 function create( data, operation, callback ) {
   log.debug( 'Creating annotation' );
 
-  var annotation = new Annotation( {
-    object: data.object,
-    operation: operation,
-    creationDate: data.date
-  } );
+  if( data.response ) {
+    var annotation = new Annotation( {
+      object: data.object,
+      operation: operation,
+      creationDate: data.date
+    } );
 
-  return callback( null, [ annotation ] );
+    return callback( null, [ annotation ] );
+  }
+
+  return callback( null, [] );
+
 }
 
 

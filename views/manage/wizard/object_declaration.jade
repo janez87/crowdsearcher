@@ -34,7 +34,7 @@ block content
       3. Configure the task type and click on **confirm**.
 
   hr
-  
+
   h2 Input files
 
   .row
@@ -42,22 +42,19 @@ block content
 
       form.form-horizontal
         .form-group
-          label.col-md-3.control-label(for='file_type') File type: 
+          label.col-md-3.control-label(for='file_type') File type:
           .col-md-9
             select.form-control#file_type
               option(value='.json') JSON
-              option(value='.*') CSV
-              option(value='.*') XML
-              option(value='.*') XLS
         .form-group
-          label.col-md-3.control-label(for='file') File select: 
+          label.col-md-3.control-label(for='file') File select:
           .col-md-9
             input.form-control#file(type='file',title='Select a file')
 
     .col-md-4
-      .dropzone
+      //.dropzone
 
-  h3 Data preview 
+  h3 Data preview
     small#obj_num
   table.table.table-bordered.table-hover.table-condensed
     thead: tr#header

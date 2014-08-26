@@ -77,7 +77,7 @@ var Platform = {
     },
     'interface': {
       type: 'string',
-      default: 'actors'
+      default: ''
     }
   }
 };
