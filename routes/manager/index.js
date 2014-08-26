@@ -219,7 +219,7 @@ var pageMap = {
   'add_operations': 'Add operations',
   'invitation': 'Invitation',
   'execution': 'Execution',
-  'adaptation': 'Adaptation',
+  // 'adaptation': 'Adaptation',
   'review': 'Review'
 };
 var pageList = [
@@ -229,7 +229,7 @@ var pageList = [
   //'add_operations',
   'execution',
   'invitation',
-  'adaptation',
+  // 'adaptation',
   'review'
 ];
 
@@ -252,7 +252,7 @@ exports.wizard = function( req, res, next ) {
   var prevPage = pageList[ idx - 1 ];
   if ( page === 'add_operations' ) {
     prevPage = 'task_type';
-    nextPage = 'execution';
+    nextPage = 'gt_declaration';
   }
 
 

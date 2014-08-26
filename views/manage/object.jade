@@ -17,9 +17,6 @@ block header
         a.btn.btn-sm.btn-info(href='manage/object/'+object._id+'/controlmart')
           i.fa.fa-table
           |  Mart
-        a.btn.btn-sm.btn-default(href='manage/object/'+object._id+'/dashboard')
-          i.fa.fa-dashboard
-          |  Dashboard
   hr
 
 block content
@@ -40,6 +37,6 @@ block content
           data-method='POST') Close
     .col-md-4.text-right
   hr
-    
+
   h3 Data content:
   pre= JSON.stringify( object.data, null, 2)

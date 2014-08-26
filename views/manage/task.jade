@@ -19,12 +19,11 @@ block append css
     #qrcode > * {
       margin: auto;
     }
-    #qrcode > .url {
+    .url {
       margin: 5px;
       font-family: monospace;
       font-weight: bold;
     }
-
 
 block header
   .row
@@ -34,16 +33,15 @@ block header
           i.fa.fa-lock
         else
           i.fa.fa-unlock
-        |  #{task.name} 
+        |  #{task.name}
     .col-md-4.text-center
       h3: +printStatus( task.status )
       code= moment( task[ task.status.toLowerCase()+'Date' ] ).format( 'YYYY-MM-DD HH:mm' )
       if task.opened || task.finalized
         div
-          a#qrcode_link(href='#') Show QR code 
+          a#qrcode_link(href='#') Show QR code
             i.fa.fa-chevron-down
           #qrcode
-            p.url #{appBase}api/run?task=#{task._id}
           script.
             new QRCode( 'qrcode', {
               text: baseUrl+'api/run?task=#{task._id}',
@@ -57,7 +55,7 @@ block header
               $( '#qrcode' ).slideToggle();
               $( 'i', this ).toggleClass( 'fa-chevron-down' );
               $( 'i', this ).toggleClass( 'fa-chevron-up' );
-              
+
               return false;
             } );
 
@@ -72,8 +70,12 @@ block header
           i.fa.fa-dashboard
           |  Dashboard
         if !task.created
-          a.btn.btn-sm.btn-default(href='manage/answers?task='+task._id) Answers 
+          a.btn.btn-sm.btn-default(href='manage/answers?task='+task._id) Answers
             i.fa.fa-list
+  .row
+    .col-md-12.text-center
+      h3 URL to execute the task:
+      p.url #{appBase}api/run?task=#{task._id}
   hr
 
 block content
@@ -122,7 +124,7 @@ block content
           i.fa.fa-trash-o
           |  Remove
         if task.opened || task.finalized
-          a.btn.btn-sm.btn-primary(href='api/run?task='+task._id,target='_blank') Execute 
+          a.btn.btn-sm.btn-primary(href='api/run?task='+task._id,target='_blank') Execute
             i.fa.fa-play
   hr
   .row
@@ -172,7 +174,7 @@ block content
             aria-valuemax=100,
             style="width: #{percCompl}%;"
             aria-valuenow=percCompl) #{percCompl}%
-        
+
         #microtasks.entity-list
           .header
             .row

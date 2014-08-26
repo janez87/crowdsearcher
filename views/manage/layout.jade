@@ -2,10 +2,10 @@
 html(prefix="og: http://ogp.me/ns#")
   head
     base(href=appBase)
-    title CS manager 
+    title CS manager
       if title
         | - #{title}
-    
+
     block meta
       include ../includes/metaOpenGraph
       include ../includes/meta
@@ -26,7 +26,7 @@ html(prefix="og: http://ogp.me/ns#")
       script(src='libs/jquery.noty.default.js')
       script(src='libs/arg.min.js')
       script(src='javascripts/utils.js')
-    
+
     block scripts
 
   body
@@ -41,13 +41,13 @@ html(prefix="og: http://ogp.me/ns#")
 
       .collapse.navbar-collapse.navbar-top-collapse
         ul.nav.navbar-nav
-          li: a(href='manage/wizard') Wizard 
+          li: a(href='manage/wizard') Wizard
             i.fa.fa-magic
-          li: a(href='manage/jobs') Job list 
+          li: a(href='manage/jobs') Job list
             i.fa.fa-list
-          li: a(href='manage/job/new') Job 
+          //li: a(href='manage/job/new') Job
             i.fa.fa-plus-square
-          li: a(href='manage/task/new') Task 
+          //li: a(href='manage/task/new') Task
             i.fa.fa-plus-square
         ul.nav.navbar-nav.navbar-right
           if user
@@ -66,6 +66,6 @@ html(prefix="og: http://ogp.me/ns#")
       footer.row: .col-md-12
         block footer
           include ../includes/footer
-    
+
     block lateScripts
       script(src='javascripts/manager.js')

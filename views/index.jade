@@ -1,4 +1,32 @@
 extends layout
 
 block content
-  p Home
+  p.lead CrowdSearcher is a crowd-management system that implements a paradigm that embodies crowds and social network communities as first-class sources for the information management and extraction on the Web.
+
+  p Retrieval and management of Web data is becoming a more and more complex problem, due to the amount of information to be dealt with, to the diversity of the information sources and of the data formats, and to the evolving expectations of users. More and more users are increasingly relying on social interaction to complete and validate the results of their online activities.
+
+  p For instance, scouting "interesting" results, or suggesting new, unexpected search directions in information seeking processes, occurs in most times aside of the search systems and processes, possibly instrumented and mediated by a social network. Moreover, tasks such as quality assessment, opinion making, and sense extraction cannot be completely delegated to automatic procedures.
+
+  p The Crowdsearcher approach aims at filling the gap between traditional Web systems (CMS, search engines and others), which operate upon world-wide information, with social systems, capable of interacting with real people, in real time, to capture their opinions, suggestions, and emotions by leveraging crowdsourcing practices and making them viable upon a social network. Thanks to the proposed approach, the data management and manipulation experience of users can be enormously enriched.
+
+  hr
+
+  .row
+    .col-md-10
+      p.text-muted CrowdSearcher is part of the Search Computing (Seco) project funded by the European Research Council (ERC) "IDEAS Advanced Grants". Search Computing
+    .col-md-2.text-right
+      a(href="http://www.search-computing.org/")
+        img(height="64",src="http://crowdsearcher.search-computing.org/sites/crowdsearcher.search-computing.com/files/seco_logo.png",alt="SeCo")
+  .row
+    .col-md-10
+      p.text-muted The technology transfer of CrowdSearcher results to the market is sponsored by a grant of EIT ICT Labs in the context of the project "Connecting Digital Cities", Jan.-Dec. 2014. EIT
+    .col-md-2.text-right
+      a(href="http://www.eitictlabs.eu/")
+        img(width="128",src="http://hiis.isti.cnr.it/images/projects/EIT_Kics_logo_EIT_ICT_Labs.jpg",alt="EIT")
+
+  hr
+
+  .text-center
+    a.btn.btn-primary(href="manage",title="Requires login")
+      i.fa.fa-lock
+      |  Go to the Task Manager

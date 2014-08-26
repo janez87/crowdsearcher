@@ -19,7 +19,7 @@ block header
       li(class=idx===index? 'active':'')
         a.text-muted= pageMap[page]
   hr
-  
+
   form#form(method='POST')
     block inputData
       input(type='hidden', name='name', value=pageList[index]||'add_operations')
@@ -28,18 +28,18 @@ block header
   .row
     .col-md-4
       .btn-group
-        if prevPage 
+        if prevPage
           a(href='manage/wizard/'+prevPage).btn.btn-primary Prev
         else
           a(href='#', disabled).btn.btn-default Prev
-          
-        if pageList[index]=='execution'
+
+        if pageList[index]=='gt_declaration'
           a(href='manage/wizard/add_operations').btn.btn-default Add operations
-    
+
     .col-md-4.text-center
       block wizardTitle
         h2= pageMap[ pageList[index] ]
-    
+
     .col-md-4.text-right
       .btn-group
         if pageList[index]=='task_type'

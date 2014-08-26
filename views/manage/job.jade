@@ -7,9 +7,9 @@ include ../includes/status
 block header
   .row
     .col-md-6
-      h1 #{job.name} 
+      h1 #{job.name}
         if job.alias
-          small: a(href='#', title='Run')= job.alias
+          small: a(href='#', title='Run')  #{job.alias}
     .col-md-6.text-right
       code= job._id
       p
@@ -17,7 +17,7 @@ block header
         a.btn.btn-sm.btn-info(href='manage/job/'+job._id+'/controlmart')
           i.fa.fa-table
           |  Mart
-        a.btn.btn-sm.btn-default(href='manage/job/'+job._id+'/flows')
+        //a.btn.btn-sm.btn-default(href='manage/job/'+job._id+'/flows')
           i.fa.fa-random
           |  Flows
         a.btn.btn-sm.btn-danger(
@@ -39,8 +39,8 @@ block content
       mixin printMetadata( job.metadata )
   .row
     .col-md-12
-      .pull-right
-        a.btn.btn-default(href='manage/task/new?job='+job._id) Add Task 
+      //.pull-right
+        a.btn.btn-default(href='manage/task/new?job='+job._id) Add Task
           i.fa.fa-plus-square
       h2 Task list
       if tasks.length==0

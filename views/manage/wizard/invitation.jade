@@ -75,13 +75,14 @@ block content
               else
                 img.media-object(alt=platform.name,
                   src='http://placehold.it/64&text='+platId)
-            
+
             .media-body
               h4.media-heading= platform.name
               if platform.description && platform.description.length>0
                 p!= md(platform.description)
               else
                 p.text-muted No description present.
+      .alert.alert-info To use a different invitation strategy (manual or something else), is sufficient to share the link present in the task page, available after creating the TaskType and opening the Task.
     .col-md-6
       for platform, platId in config.platforms
         if platform.invitation
