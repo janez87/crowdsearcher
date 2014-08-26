@@ -73,7 +73,7 @@ var Platform = {
   params: {
     url: {
       type: 'url',
-      default: 'http://localhost:8100/'
+      default: 'http://demo.search-computing.com/tef-demo/'
     },
     'interface': {
       type: 'string',
