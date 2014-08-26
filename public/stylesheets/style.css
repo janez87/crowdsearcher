@@ -33,7 +33,9 @@ footer {
   cursor: pointer;
 }
 .progress-bar.progress-bar-success {
-  color: #999;
+  color: #333;
+  font-weight: bold;
+  padding: 0px 5px;
 }
 .scrollable {
   max-height: 150px;

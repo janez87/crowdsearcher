@@ -7,7 +7,7 @@ var CS = require( '../../core' );
 
 // Create a custom logger
 var log = CS.log.child( {
-  component: 'Facebook'
+  component: 'Twitter'
 } );
 
 var request = require( 'request' );
