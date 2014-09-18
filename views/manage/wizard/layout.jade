@@ -19,31 +19,33 @@ block header
       li(class=idx===index? 'active':'')
         a.text-muted= pageMap[page]
   hr
-  
+
   form#form(method='POST')
     block inputData
-      input(type='hidden', name='name', value=pageList[index]||'add_operations')
+      input(type='hidden', name='name', value=pageList[index])
       input.wzData(type='hidden', name='data', value='null')
 
   .row
     .col-md-4
       .btn-group
-        if prevPage 
+        if prevPage
           a(href='manage/wizard/'+prevPage).btn.btn-primary Prev
         else
           a(href='#', disabled).btn.btn-default Prev
-          
+
         if pageList[index]=='execution'
           a(href='manage/wizard/add_operations').btn.btn-default Add operations
-    
+
     .col-md-4.text-center
       block wizardTitle
         h2= pageMap[ pageList[index] ]
-    
+
     .col-md-4.text-right
       .btn-group
         if pageList[index]=='task_type'
           a(href='manage/wizard/add_operations').submit.btn.btn-default Add operations
+        if pageList[index]=='object_declaration'
+          a(href='manage/wizard/gt_declaration').submit.btn.btn-default Add Groundtruth
 
         if nextPage
           a(href='manage/wizard/'+nextPage).submit.btn.btn-primary Next

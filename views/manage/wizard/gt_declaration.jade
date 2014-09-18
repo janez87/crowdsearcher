@@ -22,9 +22,16 @@ block append css
       text-overflow: ellipsis;
     }
 
+block wizardTitle
+  h2 Groundtruth
+
+block inputData
+  input(type='hidden', name='name', value='gt_declaration')
+  input.wzData(type='hidden', name='data', value='null')
+
 block content
   hr
-  
+
   h2 Input files
 
   .row
@@ -32,7 +39,7 @@ block content
 
       form.form-horizontal
         .form-group
-          label.col-md-3.control-label(for='file_type') File type: 
+          label.col-md-3.control-label(for='file_type') File type:
           .col-md-9
             select.form-control#file_type
               option(value='.json') JSON
@@ -40,7 +47,7 @@ block content
               option(value='.*') XML
               option(value='.*') XLS
         .form-group
-          label.col-md-3.control-label(for='file') File select: 
+          label.col-md-3.control-label(for='file') File select:
           .col-md-9
             input.form-control#file(type='file',title='Select a file')
 
