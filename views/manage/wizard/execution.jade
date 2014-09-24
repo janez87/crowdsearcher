@@ -88,4 +88,11 @@ block content
             style='display: none;')
             h3 Configure #{platform.name}
             if _.size( platform.params )>0
+              - var account = accounts[ platId ] || {};
+              - var socialConfig = CS.social[ platId ] || {};
+              - socialConfig = socialConfig.strategyConfig || {};
+              if account
+                each def, name in platform.params
+                  if !_.isString( def )
+                    - def.default = account[ name ] || socialConfig[ name ] || def.default;
               +printParamsInput( platform.params )

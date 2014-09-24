@@ -16,7 +16,14 @@ function onAddMicrotasks( params, task, data, callback ) {
 
   var microtasks = data.microtasks;
 
-  var createObjectMart = function( microtaskId, objectId, callback ) {
+
+  var createObjectMart = function( microtask, objectId, callback ) {
+
+    var microtaskId = microtask._id;
+    if ( microtask.populated( 'objects' ) ) {
+      objectId = objectId._id;
+    }
+
     var tuple = {
       task: task._id,
       microtask: microtaskId,
@@ -34,7 +41,7 @@ function onAddMicrotasks( params, task, data, callback ) {
     log.trace( 'Creating the mart of the objects of the microtask %s', microtask.id );
     var objects = microtask.objects;
 
-    return async.each( objects, _.partial( createObjectMart, microtask._id ), callback );
+    return async.each( objects, _.partial( createObjectMart, microtask ), callback );
   };
 
   return async.each( microtasks, createMicroTaskMart, callback );
