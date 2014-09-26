@@ -272,7 +272,9 @@ ControlRuleManager.trigger = function( event, data, callback ) {
     var hooks = platform.implementation.hooks;
 
     // in order to set the this in the function equal to the plaform
-    return executeFunction.call( platform.toObject(), hooks, platform.params, cb );
+    return executeFunction.call( platform.toObject( {
+      virtuals: true
+    } ), hooks, platform.params, cb );
   }
 
   function triggerPlatformRules( task, cb ) {
