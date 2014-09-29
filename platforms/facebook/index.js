@@ -61,7 +61,6 @@ function parseObject( data ) {
   var string = '';
 
   for ( var k in data ) {
-    string += k + ': ';
     string += data[ k ] + '\n';
   }
 
@@ -79,6 +78,94 @@ function retrieveAnswers( microtask, platform ) {
       if ( err ) {
         return log.error( err );
       }
+
+      var createCommentAnnotation = function( object, callback ) {
+        log.trace( 'Retrieving comments' );
+
+        var postId = object.getMetadata( 'postId' );
+
+        FB
+          .api( '/' + postId + '/comments', 'get', function( res ) {
+            if ( res.error ) return callback( res.error );
+
+            log.trace( 'Comments: %s', JSON.stringify( res.data ) );
+
+            if ( _.isUndefined( res.data ) || res.data.length === 0 ) {
+              log.trace( 'No comments' );
+              return callback();
+            }
+
+            var tuple = {
+              object: object._id,
+              microtask: microtask._id,
+              task: microtask.task,
+              platform: platform._id,
+              operation: microtask.operations[ 0 ]._id,
+              name: 'fb_comments',
+            };
+
+            log.trace( '%j', tuple );
+
+            ControlMart
+              .findOne( tuple )
+              .exec( function( err, mart ) {
+                if ( err ) return callback( err );
+
+                var oldComments = mart.data;
+
+                var createExecution = function( comment, othercallback ) {
+
+                  var rawExecution = {
+                    task: microtask.task,
+                    //job: task.job,
+                    microtask: microtask._id,
+                    operations: microtask.operations,
+                    platform: platform._id,
+                    annotations: []
+                  };
+
+                  rawExecution.annotations.push( {
+                    object: object._id,
+                    response: comment.message,
+                    operation: microtask.operations[ 0 ]._id
+                  } );
+
+                  var execution = new Execution( rawExecution );
+
+                  execution.setMetadata( 'commentId', comment.id );
+
+                  return execution.save( function( err, execution ) {
+                    if ( err ) return othercallback( err );
+
+                    log.trace( 'Execution created' );
+                    return execution.close( othercallback );
+                  } );
+                };
+
+                var saveComment = function( comment, cb ) {
+                  log.trace( 'Saving the comment' );
+
+                  if ( oldComments.indexOf( comment.id ) !== -1 ) {
+                    log.trace( 'Coment %s already saved', comment.id );
+                    return cb();
+                  }
+
+                  return createExecution( comment, function( err ) {
+                    if ( err ) return cb( err );
+
+                    log.trace( 'Saving the comment %s in the mart', comment.id );
+                    mart.data.push( comment.id );
+                    mart.markModified( 'data' );
+                    return mart.save( cb );
+                  } );
+
+                };
+
+                return async.eachSeries( res.data, saveComment, callback );
+              } );
+          } );
+      };
+
 
       var createLike = function( object, callback ) {
         log.trace( 'Retrieving likes' );
@@ -178,11 +265,7 @@ function retrieveAnswers( microtask, platform ) {
           } );
       };
 
-      //TODO
-      var createCommentAnnotation = function( object, cb ) {
 
-        return cb();
-      };
       var getAnswers = function( object, cb ) {
 
         if ( microtask.operations[ 0 ].name === 'like' ) {
@@ -230,6 +313,7 @@ function onAddMicroTask( params, task, data, callback ) {
     log.trace( 'Creating the comment for the object %s on the post %s ', object.id, postId );
     FB.api( '/' + postId + '/comments', 'post', {
       message: parseObject( object.data ),
+      can_comment: true,
       access_token: params.token
     }, function( res ) {
       if ( res.error ) return cb( new Error( JSON.stringify( res.error ) ) );
@@ -245,7 +329,7 @@ function onAddMicroTask( params, task, data, callback ) {
     } );
   };
 
-  var createPost = function( microtask, cb ) {
+  var createLikePost = function( microtask, cb ) {
 
     FB.api( 'me/feed', 'post', {
         name: task.name,
@@ -267,6 +351,7 @@ function onAddMicroTask( params, task, data, callback ) {
           return microtask.save( function( err, microtask ) {
             if ( err ) return cb( err );
 
+            log.trace( 'Starting the job for the microtask %s', microtask._id );
             var cronJob = schedule.scheduleJob( _this.implementation.timed.expression, _.partial( _this.implementation.timed.onTick, microtask, _this ) );
 
             return callback();
@@ -275,12 +360,72 @@ function onAddMicroTask( params, task, data, callback ) {
       } );
   };
 
+  var createCommentPost = function( microtask, cb ) {
+
+    var startJob = function( microtask, cb ) {
+
+      log.trace( 'Starting the job for the task %s', microtask._id );
+      var cronJob = schedule.scheduleJob( _this.implementation.timed.expression, _.partial( _this.implementation.timed.onTick, microtask, _this ) );
+      return cb();
+
+
+    };
+
+
+    var createPost = function( object, cb ) {
+
+      var rawPost = {
+        name: task.description,
+        caption: 'CrowdSearcher application',
+        description: parseObject( object.data ),
+        picture: 'http://upload.wikimedia.org/wikipedia/it/b/be/Logo_Politecnico_Milano.png',
+        access_token: params.token
+      };
+
+      FB
+        .api( 'me/feed', 'post', rawPost, function( res ) {
+          if ( res.error ) return cb( new Error( JSON.stringify( res.error ) ) );
+
+          var postId = res.id;
+
+          object.setMetadata( 'postId', postId );
+
+          return object.save( function( err, object ) {
+            if ( err ) return cb( err );
+
+            var tuple = {
+              object: object._id,
+              microtask: microtask._id,
+              task: task._id,
+              platform: _this._id,
+              operation: microtask.operations[ 0 ]._id,
+              name: 'fb_comments',
+              data: []
+            };
+
+            return ControlMart.collection.insert( tuple, cb );
+          } );
+        } );
+    };
+
+
+    return async.eachSeries( microtask.objects, createPost, function( err ) {
+      if ( err ) return cb( err );
+
+      return startJob( microtask, cb );
+    } );
+  };
+
   var performAction = function( microtask, cb ) {
     return microtask
-      .populate( 'objects', function( err, microtask ) {
+      .populate( 'objects operations', function( err, microtask ) {
         if ( err ) return cb( err );
 
-        return createPost( microtask, cb );
+        if ( microtask.operations[ 0 ].name === 'like' ) {
+          return createLikePost( microtask, cb );
+        } else if ( microtask.operations[ 0 ].name === 'comment' ) {
+          return createCommentPost( microtask, cb );
+        }
       } );
 
   };

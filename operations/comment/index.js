@@ -47,7 +47,7 @@ function create( data, operation, callback ) {
 var Comment = {
   name: 'Comment',
   description: 'Write a comment',
-  image: null,
+  image: 'https://lh6.googleusercontent.com/-twnar3yX1zA/AAAAAAAAAAI/AAAAAAAAAA0/8Nsc4Txh4kI/photo.jpg',
 
   checkData: check,
   create: create,
