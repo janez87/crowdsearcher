@@ -50,7 +50,8 @@ Configurator.prototype.load = function() {
     _.bind( this.configOperations, this ),
     _.bind( this.configPlatforms, this ),
     _.bind( this.configTaskTypes, this ),
-    _.bind( this.configStrategies, this )
+    _.bind( this.configStrategies, this ),
+    _.bind( this.configActiveJobs, this )
   ], function( err, results ) {
     if ( err ) {
       _this.emit( 'error', err );
@@ -122,6 +123,7 @@ Configurator.prototype.configOperations = require( './configOperations' );
 Configurator.prototype.configTaskTypes = require( './configTaskTypes' );
 Configurator.prototype.configStrategies = require( './configStrategies' );
 Configurator.prototype.configPlatforms = require( './configPlatforms' );
+Configurator.prototype.configActiveJobs = require( './configActiveJobs' );
 
 
 // Export the webserver configuration

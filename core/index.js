@@ -10,6 +10,22 @@ CS.title = 'CrowdSearcher';
 CS.error = require( './error' );
 CS.activeJobs = {};
 
+CS.createJob = function( platform, microtask, callback ) {
+
+  var cronJob = schedule.scheduleJob( platform.implementation.timed.expression, _.partial( platform.implementation.timed.onTick, microtask, platform ) );
+  CS.activeJobs[ microtask._id ] = cronJob;
+
+  var ActiveJob = CS.models.activeJob;
+
+  var job = {
+    microtask: microtask._id,
+    platform: platform._id
+  };
+
+  return ActiveJob.collection.insert( job, callback );
+
+};
+
 CS.startJob = function( platform, microtask, callback ) {
 
   var cronJob = schedule.scheduleJob( platform.implementation.timed.expression, _.partial( platform.implementation.timed.onTick, microtask, platform ) );
@@ -24,7 +40,17 @@ CS.endJob = function( microtask, callback ) {
   cronJob.cancel();
   delete CS.activeJobs[ microtask._id ];
 
-  return callback();
+  var ActiveJob = CS.models.activeJob;
+
+  ActiveJob
+    .findOne( {
+      microtask: microtask._id
+    } )
+    .exec( function( err, job ) {
+      if ( err ) return callback( err );
+
+      return job.remove( callback );
+    } );
 };
 
 module.exports = exports = CS;

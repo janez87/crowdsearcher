@@ -352,7 +352,7 @@ function onAddMicroTask( params, task, data, callback ) {
             if ( err ) return cb( err );
 
             log.trace( 'Starting the job for the microtask %s', microtask._id );
-            return CS.startJob( _this, microtask, callback );
+            return CS.createJob( _this, microtask, callback );
           } );
         } );
       } );
@@ -363,7 +363,7 @@ function onAddMicroTask( params, task, data, callback ) {
     var startJob = function( microtask, cb ) {
 
       log.trace( 'Starting the job for the task %s', microtask._id );
-      return CS.startJob( _this, microtask, cb );
+      return CS.createJob( _this, microtask, cb );
 
     };
 
