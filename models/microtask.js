@@ -231,6 +231,15 @@ var removeExecutions = function( callback ) {
 var removeActiveJobs = function( callback ) {
 
   function removeActiveJob( activeJob, cb ) {
+
+    log.trace( 'Removing the job for the microtask %s', activeJob.microtask );
+    var j = CS.activeJobs[ activeJob.microtask ];
+    var _ = require( 'underscore' );
+    if ( !_.isUndefined( j ) ) {
+      j.cancel();
+      delete CS.activeJobs[ activeJob.microtask ];
+    }
+
     activeJob.remove( cb );
   }
 
@@ -242,6 +251,7 @@ var removeActiveJobs = function( callback ) {
     .exec( function( err, activeJobs ) {
       if ( err ) return callback( err );
 
+      log.trace( '%s jobs found', activeJobs.length );
       async.each( activeJobs, removeActiveJob, function( err ) {
         if ( err ) return callback( err );
 
@@ -256,7 +266,7 @@ var removeActiveJobs = function( callback ) {
 // Handle job removal, remove all tasks.
 MicrotaskSchema.pre( 'remove', function( next ) {
 
-  var actions = [ removeExecutions, removeActiveJobs ];
+  var actions = [ _.bind( removeExecutions, this ), _.bind( removeActiveJobs, this ) ];
 
   return async.series( actions, next );
 
