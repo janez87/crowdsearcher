@@ -2,12 +2,22 @@ extends ./layout
 
 include ../../includes/params
 
+
+
 block append lateScripts
+  input.session(type='hidden', name='data', value=JSON.stringify(req.session.wizard))
   script.
     var $platformConfigs = $( '.platform-config' );
     var $platforms = $( '.platform' );
     $platforms.on( 'click', function() {
       var $this = $( this );
+      var session = JSON.parse($('.session').val());
+
+      // Facebook should be disabled if the type is not a comment or like
+      if($this.data('platform') === 'facebook' && (session.task_type.name!=='like' && session.task_type.name!=='comment')){
+        return;
+      }
+
       $platforms.removeClass( 'active' );
       $this.addClass( 'active' );
       $this = $( this );
@@ -72,7 +82,6 @@ block content
               else
                 img.media-object(alt=platform.name,
                   src='http://placehold.it/64&text='+platId)
-            
             .media-body
               h4.media-heading= platform.name
               if platform.description && platform.description.length>0
