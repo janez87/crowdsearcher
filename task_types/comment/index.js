@@ -27,7 +27,7 @@ var TaskType = {
   name: 'Comment',
   description: 'Write a comment to the object.',
   template: fs.readFileSync( __dirname + '/template.hbs', 'utf8' ),
-  image: 'http://icons.iconarchive.com/icons/pixelkit/gentle-edges/128/Comment-2-icon.png',
+  image: 'https://lh6.googleusercontent.com/-twnar3yX1zA/AAAAAAAAAAI/AAAAAAAAAA0/8Nsc4Txh4kI/photo.jpg',
   defaults: {
     name: '$name$',
     description: '$description$',
@@ -49,17 +49,14 @@ var TaskType = {
       name: 'RANDOM'
     },
     controlrules: [ {
-      name: 'limitObjectEvaluations',
+      name: 'limitMicrotaskExecution',
       event: 'END_EXECUTION',
       params: {
-        maxExecutions: '$maxExecutions$'
+        maxExecution: '$maxExecutions$'
       }
     }, {
-      name: 'closeMicroTaskOnObjectStatus',
-      event: 'CLOSE_OBJECT'
-    }, {
-      name: 'closeTaskOnObjectStatus',
-      event: 'CLOSE_OBJECT'
+      name: 'closeTaskOnMicrotaskStatus',
+      event: 'END_MICROTASK'
     } ]
   },
   useCases: [ 'Comment' ],

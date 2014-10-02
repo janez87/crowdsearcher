@@ -51,14 +51,12 @@ var TaskType = {
     controlrules: [ {
       name: 'countLikes',
     }, {
-      name: 'limitObjectEvaluations',
+      name: 'limitMicrotaskExecution',
       params: {
-        maxExecutions: '$maxExecutions$'
+        maxExecution: '$maxExecutions$'
       }
     }, {
-      name: 'closeMicroTaskOnObjectStatus'
-    }, {
-      name: 'closeTaskOnObjectStatus'
+      name: 'closeTaskOnMicrotaskStatus'
     } ]
   },
   useCases: [ 'Ranking' ],

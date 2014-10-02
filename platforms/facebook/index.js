@@ -352,9 +352,7 @@ function onAddMicroTask( params, task, data, callback ) {
             if ( err ) return cb( err );
 
             log.trace( 'Starting the job for the microtask %s', microtask._id );
-            var cronJob = schedule.scheduleJob( _this.implementation.timed.expression, _.partial( _this.implementation.timed.onTick, microtask, _this ) );
-
-            return callback();
+            return CS.startJob( _this, microtask, callback );
           } );
         } );
       } );
@@ -365,9 +363,7 @@ function onAddMicroTask( params, task, data, callback ) {
     var startJob = function( microtask, cb ) {
 
       log.trace( 'Starting the job for the task %s', microtask._id );
-      var cronJob = schedule.scheduleJob( _this.implementation.timed.expression, _.partial( _this.implementation.timed.onTick, microtask, _this ) );
-      return cb();
-
+      return CS.startJob( _this, microtask, cb );
 
     };
 
@@ -434,6 +430,12 @@ function onAddMicroTask( params, task, data, callback ) {
   return async.each( microtasks, performAction, callback );
 }
 
+var onCloseMicrotask = function( params, task, data, callback ) {
+
+  log.trace( 'Stopping the job for the microtask %s', data.microtask._id );
+
+  return CS.endJob( data.microtask, callback );
+};
 
 var Platform = {
   name: 'facebook',
@@ -443,7 +445,8 @@ var Platform = {
   execute: execute,
   hooks: {
     'OPEN_TASK': invite,
-    'ADD_MICROTASKS': onAddMicroTask
+    'ADD_MICROTASKS': onAddMicroTask,
+    'END_MICROTASK': onCloseMicrotask
   },
   timed: {
     expression: '* * * * *',

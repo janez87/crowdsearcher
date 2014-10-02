@@ -1,7 +1,7 @@
 // Load libraries
 var _ = require( 'underscore' );
 var util = require( 'util' );
-var schedule = require( 'node-schedule' );
+var async = require( 'async' );
 var CS = require( '../core' );
 
 // Use a child logger
@@ -68,27 +68,18 @@ API.logic = function StartFB( req, res, next ) {
         return next( new StartFBError( StartFBError.FB_NOT_CONFIGURED, 'The task selected does not have the FB platform configured', APIError.BAD_REQUEST ) );
       }
 
-      var platformImplementation = CS.platforms[ facebook.name ];
-
       var microtasks = task.microtasks;
 
-      _.each( microtasks, function( microtask ) {
-        log.trace( 'Scheduling the job for the microtask %s', microtask._id );
-        var cronJob;
 
-        var tickFunction = function() {
+      async.each( microtasks, function( m, cb ) {
+        return CS.startJob( facebook, m, cb );
+      }, function( err ) {
+        if ( err ) return res.json( err );
 
-          platformImplementation.timed.onTick( microtask, facebook );
-
-        };
-
-        // Schedule the job and start it!
-        var cronExpression = platformImplementation.timed.expression;
-        cronJob = schedule.scheduleJob( cronExpression, tickFunction );
+        log.trace( 'Jobs scheduled' );
+        return res.json( {} );
       } );
 
-      log.trace( 'Jobs scheduled' );
-      res.json( {} );
     } ) );
 };
 
