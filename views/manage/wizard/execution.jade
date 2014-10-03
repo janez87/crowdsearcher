@@ -9,9 +9,16 @@ block append lateScripts
   script.
     var $platformConfigs = $( '.platform-config' );
     var $platforms = $( '.platform' );
+    var session = JSON.parse($('.session').val());
+
+    var $facebook = $('.platform[data-platform="facebook"]');
+
+    if(session.task_type.name!=='like' && session.task_type.name!=='comment'){
+      $facebook.addClass('disabled');
+    }
+
     $platforms.on( 'click', function() {
       var $this = $( this );
-      var session = JSON.parse($('.session').val());
 
       // Facebook should be disabled if the type is not a comment or like
       if($this.data('platform') === 'facebook' && (session.task_type.name!=='like' && session.task_type.name!=='comment')){
@@ -63,6 +70,9 @@ block append css
     }
     .platform.active:hover {
       background-color: #ddd;
+    }
+    .platform.disabled{
+      background-color:#ff7f7f
     }
     img.media-object {
       width: 64px;
