@@ -155,6 +155,7 @@ function drawActiveVsClosed( activeExecutions, closedObjects ) {
     series: [ {
       name: 'Active executions',
       data: activeExecutions,
+      turboThreshold: 0,
       type: 'area',
       fillColor: {
         linearGradient: {

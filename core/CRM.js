@@ -221,11 +221,13 @@ ControlRuleManager.trigger = function( event, data, callback ) {
   // Function that wraps each function into a 'secure' domain
   // and provides a fresh version of the Task from the DB.
   function executeFunction( hooks, params, cb ) {
+    var _this = this;
+
     if ( !hooks || !_.isFunction( hooks[ event ] ) ) {
       return cb();
     }
 
-    var fn = hooks[ event ];
+    var fn = _.bind( hooks[ event ], _this );
     // Create a domain to wrap the function calls
     var d = domain.create();
     // Catch any strange error, log it and exit.
@@ -238,7 +240,7 @@ ControlRuleManager.trigger = function( event, data, callback ) {
     } );
 
 
-    // Get a fresh Task from the DB (NOT TRUE WITH THE HACK)
+    // Get a fresh Task from the DB 
     return retrieveTask( taskId, function( err, task ) {
       if ( err ) {
         log.warn( 'Error while retrieving the Task', err );
@@ -268,7 +270,11 @@ ControlRuleManager.trigger = function( event, data, callback ) {
 
   function executeHook( platform, cb ) {
     var hooks = platform.implementation.hooks;
-    return executeFunction( hooks, platform.params, cb );
+
+    // in order to set the this in the function equal to the plaform
+    return executeFunction.call( platform.toObject( {
+      virtuals: true
+    } ), hooks, platform.params, cb );
   }
 
   function triggerPlatformRules( task, cb ) {

@@ -207,7 +207,7 @@ function onEndExecution( params, task, data, callback ) {
 
           // If the number of evaluations is equal to the required ones
           log.trace( 'Checking the majority' );
-          if ( evaluations.data === params.answers ) {
+          if ( evaluations.data >= params.answers ) {
 
             // Get the category with the maximum count
             var maxCount = _.max( categoryCount, function( p ) {

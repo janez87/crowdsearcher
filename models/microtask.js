@@ -204,12 +204,7 @@ MicrotaskSchema.methods.close = function( callback ) {
 
 
 
-
-
-// ## Middlewares
-//
-// Handle job removal, remove all tasks.
-MicrotaskSchema.pre( 'remove', function( next ) {
+var removeExecutions = function( callback ) {
 
   function removeExecution( execution, cb ) {
     execution.remove( cb );
@@ -222,15 +217,59 @@ MicrotaskSchema.pre( 'remove', function( next ) {
     .where( 'task', this.task )
     .where( 'microtask', this._id )
     .exec( function( err, executions ) {
-      if ( err ) return next( err );
+      if ( err ) return callback( err );
 
       async.each( executions, removeExecution, function( err ) {
-        if ( err ) return next( err );
+        if ( err ) return callback( err );
 
         log.debug( 'Removed all executions' );
-        return next();
+        return callback();
       } );
     } );
+};
+
+var removeActiveJobs = function( callback ) {
+
+  function removeActiveJob( activeJob, cb ) {
+
+    log.trace( 'Removing the job for the microtask %s', activeJob.microtask );
+    var j = CS.activeJobs[ activeJob.microtask ];
+    var _ = require( 'underscore' );
+    if ( !_.isUndefined( j ) ) {
+      j.cancel();
+      delete CS.activeJobs[ activeJob.microtask ];
+    }
+
+    activeJob.remove( cb );
+  }
+
+  var ActiveJob = CS.models.activeJob;
+
+  ActiveJob
+    .find()
+    .where( 'microtask', this._id )
+    .exec( function( err, activeJobs ) {
+      if ( err ) return callback( err );
+
+      log.trace( '%s jobs found', activeJobs.length );
+      async.each( activeJobs, removeActiveJob, function( err ) {
+        if ( err ) return callback( err );
+
+        log.debug( 'Removed all activeJobs' );
+        return callback();
+      } );
+    } );
+};
+
+// ## Middlewares
+//
+// Handle job removal, remove all tasks.
+MicrotaskSchema.pre( 'remove', function( next ) {
+
+  var actions = [ _.bind( removeExecutions, this ), _.bind( removeActiveJobs, this ) ];
+
+  return async.series( actions, next );
+
 } );
 
 exports = module.exports = MicrotaskSchema;

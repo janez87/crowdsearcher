@@ -178,7 +178,7 @@ function onOpenTask( params, task, data, callback ) {
     hitTypeId = hitType.id;
 
     // If it is an externalQuestion then the notifications are not used
-    if( params.externalQuestion ) {
+    if ( params.externalQuestion ) {
       return cb( null, hitType );
     }
 
@@ -238,7 +238,7 @@ function onAddMicrotasks( params, task, data, callback ) {
       task: task
     };
 
-    if( params.externalQuestion ) {
+    if ( params.externalQuestion ) {
       questionFile = path.resolve( __dirname, 'externalQuestion.xml' );
       log.trace( 'externalQuestionUrl %s', params.externalQuestionUrl );
       var tempUrl = _.template( params.externalQuestionUrl, templateData );
@@ -263,7 +263,7 @@ function onAddMicrotasks( params, task, data, callback ) {
       log.trace( 'Question XML: %s', questionXML );
 
       return cb( null, questionXML );
-    } catch( err ) {
+    } catch ( err ) {
       return cb( err );
     }
   }
@@ -303,7 +303,7 @@ function onAddMicrotasks( params, task, data, callback ) {
   }
 
   var microtasks = data.microtasks;
-  return async.each( microtasks, performActions, callback );
+  return async.eachSeries( microtasks, performActions, callback );
 }
 
 function onEndMicrotask( params, task, data, callback ) {

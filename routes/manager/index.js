@@ -213,9 +213,9 @@ exports.flows = function( req, res, next ) {
 // # Wizard
 //
 var pageMap = {
-  'object_declaration': 'Object declaration',
-  'task_type': 'Task Type',
-  'gt_declaration': 'GT Declaration',
+  'object_declaration': 'Objects',
+  'task_type': 'Task',
+  'gt_declaration': 'Ground Truth',
   'add_operations': 'Add operations',
   'invitation': 'Invitation',
   'execution': 'Execution',
@@ -223,9 +223,9 @@ var pageMap = {
   'review': 'Review'
 };
 var pageList = [
-  'object_declaration',
   'task_type',
-  'gt_declaration',
+  'object_declaration',
+  //'gt_declaration',
   //'add_operations',
   'execution',
   'invitation',
@@ -250,9 +250,15 @@ exports.wizard = function( req, res, next ) {
   var idx = _.indexOf( pageList, page );
   var nextPage = pageList[ idx + 1 ];
   var prevPage = pageList[ idx - 1 ];
+
   if ( page === 'add_operations' ) {
     prevPage = 'task_type';
     nextPage = 'gt_declaration';
+  }
+
+  if ( page === 'gt_declaration' ) {
+    prevPage = 'object_declaration';
+    nextPage = 'invitation';
   }
 
 

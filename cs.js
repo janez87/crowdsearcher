@@ -1,3 +1,6 @@
+var agent = require( 'webkit-devtools-agent' );
+agent.start();
+
 process.title = 'CrowdSearcher';
 
 Error.stackTraceLimit = process.env.PRODUCTION ? 15 : Infinity;
@@ -268,7 +271,7 @@ config.once( 'ready', function configReady() {
 
   // Task Types wizard
   app.get( '/manage/wizard', function( req, res ) {
-    res.redirect( nconf.get( 'webserver:externalAddress' )+'manage/wizard/object_declaration' );
+    res.redirect( nconf.get( 'webserver:externalAddress' ) + 'manage/wizard/task_type' );
   } );
   app.all( '/manage/wizard/:page', manager.wizard );
 
@@ -350,7 +353,7 @@ config.once( 'ready', function configReady() {
   log.debug( 'Starting %s server on port %s', protocol, config.getPort() );
 
 
-  if( protocol==='https' ) {
+  if ( protocol === 'https' ) {
     var options = {
       cert: fs.readFileSync( './certificate.pem' ).toString(),
       key: fs.readFileSync( './privatekey.pem' ).toString()

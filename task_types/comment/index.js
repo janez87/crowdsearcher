@@ -5,7 +5,7 @@ var CS = require( '../../core' );
 
 // Import a child logger
 var log = CS.log.child( {
-  component: 'Like TT'
+  component: 'Comment TT'
 } );
 
 
@@ -18,22 +18,22 @@ var Like = function( id, message ) {
 };
 // Make it subclass Error
 util.inherits( Like, CSError );
-Like.prototype.name = 'Like';
+Like.prototype.name = 'Comment';
 // Custom errors
 
 
 // Define the Operation Object
 var TaskType = {
-  name: 'Like',
-  description: 'Rate an object by giving a Like',
-  image: 'https://cdn3.iconfinder.com/data/icons/linecons-free-vector-icons-pack/32/like-128.png',
+  name: 'Comment',
+  description: 'Write a comment to the object.',
   template: fs.readFileSync( __dirname + '/template.hbs', 'utf8' ),
+  image: 'https://lh6.googleusercontent.com/-twnar3yX1zA/AAAAAAAAAAI/AAAAAAAAAA0/8Nsc4Txh4kI/photo.jpg',
   defaults: {
     name: '$name$',
     description: '$description$',
     operations: [ {
-      label: 'Like',
-      name: 'like'
+      label: 'Comment',
+      name: 'comment'
     } ],
     splittingStrategy: {
       name: 'EQUI_SPLIT',
@@ -49,17 +49,17 @@ var TaskType = {
       name: 'RANDOM'
     },
     controlrules: [ {
-      name: 'countLikes',
-    }, {
       name: 'limitMicrotaskExecution',
+      event: 'END_EXECUTION',
       params: {
         maxExecution: '$maxExecutions$'
       }
     }, {
-      name: 'closeTaskOnMicrotaskStatus'
+      name: 'closeTaskOnMicrotaskStatus',
+      event: 'END_MICROTASK'
     } ]
   },
-  useCases: [ 'Ranking' ],
+  useCases: [ 'Comment' ],
   params: {
     name: 'string',
     description: 'string',
