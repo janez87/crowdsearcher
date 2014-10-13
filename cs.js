@@ -1,6 +1,3 @@
-var agent = require( 'webkit-devtools-agent' );
-agent.start();
-
 process.title = 'CrowdSearcher';
 
 Error.stackTraceLimit = process.env.PRODUCTION ? 15 : Infinity;

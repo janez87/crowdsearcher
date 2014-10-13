@@ -1,7 +1,10 @@
 extends ../layout
 
+block append libCSS
+  link(rel='stylesheet', href='stylesheets/introjs.min.css')
 
 block append lateScripts
+  script(src='libs/intro.min.js')
   script.
     var $btnSend = $( '.submit' );
     var $form = $( '#form' );

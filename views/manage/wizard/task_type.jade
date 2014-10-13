@@ -4,6 +4,49 @@ include ../../includes/params
 
 block append lateScripts
   script.
+    function wizardTutorial( done ) {
+      var wizardTutorial = true;
+      try {
+        wizardTutorial = localStorage[ 'wizardTutorial' ]!=='true';
+      } catch( e ) {}
+
+      var wizardTutorial = true;
+      if( wizardTutorial ) {
+        introJs( 'header' )
+        .start()
+        .oncomplete( function() {
+          //window.location.href = baseUrl+'second.html?multipage=true';
+          localStorage[ 'wizardTutorial' ] = 'true';
+          return done();
+        } );
+      } else {
+        return done();
+      }
+    }
+
+    function pageTutorial() {
+      var tutorial = true;
+      try {
+        tutorial = localStorage[ 'tutorial' ]!=='true';
+      } catch( e ) {}
+
+      var tutorial = true;
+      if( tutorial ) {
+        introJs( 'header' )
+        .start()
+        .oncomplete( function() {
+          //window.location.href = baseUrl+'second.html?multipage=true';
+          console.log( 'Done' );
+        } );
+      }
+    }
+
+    $( window ).on( 'load', function() {
+      wizardTutorial( pageTutorial );
+    } );
+
+
+
 
     $btnSend.click( function( evt ) {
       var $container = $( '.task-type-config:visible' );
@@ -40,14 +83,14 @@ block append lateScripts
 
     $useCaseList.on( 'mouseenter', handleEnter );
     $useCases.on( 'mouseleave', handleExit );
-    
+
     $useCaseList.on( 'click', function() {
       var $this = $( this );
       var wasActive = $this.hasClass( 'active' );
 
       $useCaseList.off( 'mouseenter' );
       $useCases.off( 'mouseleave' );
-      
+
       $useCaseList.removeClass( 'active' );
       $taskTypes.removeClass( 'active' );
       $taskTypeConfigs.hide();
@@ -118,29 +161,30 @@ block content
 
   .row.selection
     .col-md-4
-      h2 Select the use-case
-      ul.list-group.use-cases
+      h2(data-intro="irst", data-step="1") Select the use-case
+      ul.list-group.use-cases(data-intro="Test intro", data-step="2")
         for task_types, name in config.useCases
           li.list-group-item.use-case(data-use-case=name, data-task-types=task_types)= name
     .col-md-8
-      h2 Task types
+      h2(data-intro="Select task type", data-step="3") Task types
 
-      for taskType in config.taskTypes
-        .media.task-type(id='tt_'+taskType.id,
-          data-task-type=taskType.id,
-          style='display: none;')
-          if taskType.image && taskType.image.length>0
-            img.media-object.pull-left(alt=taskType.name,
-              src=taskType.image)
-          else
-            img.media-object.pull-left(alt=taskType.name,
-              src='http://placehold.it/64&text='+taskType.name.replace( / /g, '+' ) )
-          .media-body
-            h4.media-headding= taskType.name
-            if taskType.description && taskType.description.length>0
-              p!= md( taskType.description )
+      div(data-intro="Test intro", data-step="4")
+        for taskType in config.taskTypes
+          .media.task-type(id='tt_'+taskType.id,
+            data-task-type=taskType.id,
+            style='display: none;')
+            if taskType.image && taskType.image.length>0
+              img.media-object.pull-left(alt=taskType.name,
+                src=taskType.image)
             else
-              p.text-muted No description available
+              img.media-object.pull-left(alt=taskType.name,
+                src='http://placehold.it/64&text='+taskType.name.replace( / /g, '+' ) )
+            .media-body
+              h4.media-headding= taskType.name
+              if taskType.description && taskType.description.length>0
+                p!= md( taskType.description )
+              else
+                p.text-muted No description available
 
   hr
   for taskType in config.taskTypes

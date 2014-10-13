@@ -1,17 +1,32 @@
 extends layout
 
 block header
-  h1 CS manager
+  h1 CrowSearcher Manager
+
+block append css
+  style.
+    .btn-xl {
+      padding: 0.5em 2em;
+      font-size: 1.5em;
+      line-height: 2em;
+      border-radius: 16px;
+    }
 
 block content
-  p: strong Hello #{user.username}!
-  p With the CS manager UI you can see and change the status of your Tasks, see statistics on the active Tasks and many more cool things!!!
-  ul
-    h3 Tasks
-    li: a(href="manage/wizard") Create Task based on a TaskType.
-    //li: a(href="manage/task/new") Create a new Task
-      span.label.label-warning ADVANCED
-      | .
-    h3 Jobs
-    li: a(href="manage/jobs") See list of jobs.
-    //li: a(href="manage/job/new") Create a new Job.
+  p.lead Hello #{user.name} #{user.surname}!
+
+  p This is the entry point for managing the Tasks and the related entities.
+
+
+
+  .row
+    .col-md-6.text-center
+      p.lead Create a Job based on a TaskType.
+      a.btn.btn-xl.btn-success(href="manage/wizard") Wizard <i class="fa fa-magic"></i>
+      hr
+      p.text-muted The wizard allow the creation of ...
+    .col-md-6.text-center
+      p.lead See the list of currently available Jobs.
+      a.btn.btn-xl.btn-success(href="manage/jobs") Job list <i class="fa fa-list"></i>
+      hr
+      p.text-muted.text-justify Lorem ipsum Fugiat pariatur laboris commodo Excepteur ut sit ex non et velit et officia mollit magna anim Duis sint reprehenderit eu occaecat occaecat sunt Duis pariatur incididunt in ad incididunt aute minim nostrud in id ea eu in dolore cillum ea.
