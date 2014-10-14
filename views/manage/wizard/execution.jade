@@ -7,6 +7,60 @@ include ../../includes/params
 block append lateScripts
   input.session(type='hidden', name='data', value=JSON.stringify(req.session.wizard))
   script.
+
+   var wizardTutorial = function(){
+
+      var introConfiguration = {
+        steps:[],
+        showStepNumbers:false,
+        scrollToElement:false,
+        exitOnOverlayClick:false,
+        showBullets:false
+      };
+
+      var executionTutorial = true;
+
+      try{
+        executionTutorial = localStorage[ 'executionTutorial' ]!=='true';
+      }catch(e){}
+
+
+
+      if(executionTutorial){
+
+        introConfiguration.steps = [
+              {
+                intro:'In this page you where to execute the task'
+              },
+              {
+                element: document.querySelector('#tutorial_execution_platform'),
+                intro: "Here you see the list of possible execution platform"
+              },{
+                element: document.querySelector('#tutorial_execution_platform'),
+                intro: "Red platform are disable due compatibility issue with the task type selected"
+              },{
+                element:document.querySelector('#tutorial_configuration'),
+                intro:'Here you configure the platform'
+              },{
+                element:document.querySelector('#tutorial_next'),
+                intro:'Press Next to go to the next step'
+              }
+            ];
+
+          localStorage[ 'executionTutorial' ] = 'true';
+      }
+
+      if(introConfiguration.steps.length > 0){
+        introJs()
+        .setOptions(introConfiguration)
+        .start()
+      }
+    };
+
+    $( window ).on( 'load', function() {
+      wizardTutorial();
+    } );
+
     var $platformConfigs = $( '.platform-config' );
     var $platforms = $( '.platform' );
     var session = JSON.parse($('.session').val());
@@ -81,7 +135,7 @@ block append css
 
 block content
   .row
-    .col-md-6
+    .col-md-6#tutorial_execution_platform
       h2 Select execution platform
       for platform, platId in config.platforms
         if platform.execution
@@ -98,7 +152,7 @@ block content
                 p!= md(platform.description)
               else
                 p.text-muted No description present.
-    .col-md-6
+    .col-md-6#tutorial_configuration
       for platform, platId in config.platforms
         if platform.execution
           .platform-config(

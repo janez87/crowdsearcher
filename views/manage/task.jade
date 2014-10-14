@@ -10,6 +10,98 @@ include ../includes/params
 block append scripts
   script(src='libs/qrcode.min.js')
 
+block append lateScripts
+  script
+    var wizardTutorial = function(){
+
+        var introConfiguration = {
+          steps:[],
+          showStepNumbers:false,
+          scrollToElement:false,
+          exitOnOverlayClick:false,
+          showBullets:false
+        };
+
+        var taskDetailsTutorial = true;
+
+        try{
+          taskDetailsTutorial = localStorage[ 'taskDetailsTutorial' ]!=='true';
+        }catch(e){}
+
+        var currentStep = localStorage['currentStep'];
+        if(!currentStep){
+
+          // First time
+          currentStep = 1;
+        }else{
+
+          // After the open task
+          // + 1 -> click on the open button
+          // + 2 -> the task is opened
+          currentStep = parseInt(currentStep)+2
+        }
+
+        if(taskDetailsTutorial){
+
+          introConfiguration.steps = [
+                {
+                  intro:'In this page you cam see the details of the task you just created'
+                },
+                {
+                  element: document.querySelector('#tutorial_status'),
+                  intro: "Notice that the task is CREATED but not OPENED"
+                },{
+                  element:document.querySelector('#tutorial_status'),
+                  intro:'Thus the task can not be executed yet'
+                },{
+                  element:document.querySelector('#tutorial_open'),
+                  intro:'Click here to open the task'
+                },{
+                  intro:'Now the task is opened and can be exectued by the performers'
+                },{
+                  intro:'Here you find the qr code',
+                  element:document.querySelector('#qrcode_link')
+                },{
+                  intro:'..or the link for executing the task',
+                  element:document.querySelector('#tutorial_url')
+                },{
+                  intro:'Here you can find the answers and statistics about the execution',
+                  element:document.querySelector('#tutorial_stats')
+                },{
+                  inth:'Here you can manually change the status of the task (dangerous)',
+                  element:document.querySelector('#tutorial_change_status')
+                }
+              ];
+
+            localStorage[ 'taskDetailsTutorial' ] = 'true';
+        }
+
+        if(introConfiguration.steps.length > 0){
+          introJs()
+          .setOptions(introConfiguration)
+          .goToStep(currentStep)
+          .start()
+          .onbeforechange(function(elem){
+             var currentStep = localStorage[ 'currentStep' ];
+
+             if(!currentStep){
+              currentStep = 1;
+             }else{
+              currentStep = 1+ parseInt(currentStep);
+             }
+
+             localStorage['currentStep'] = currentStep;
+          })
+         .onexit(function(){
+             localStorage['currentStep'] = undefined
+          })
+        }
+      };
+
+      $( window ).on( 'load', function() {
+        wizardTutorial();
+      } );
+
 block append css
   style(type='text/css').
     #qrcode {
@@ -35,7 +127,7 @@ block header
           i.fa.fa-unlock
         |  #{task.name}
     .col-md-4.text-center
-      h3: +printStatus( task.status )
+      h3#tutorial_status: +printStatus( task.status )
       code= moment( task[ task.status.toLowerCase()+'Date' ] ).format( 'YYYY-MM-DD HH:mm' )
       if task.opened || task.finalized
         div
@@ -62,7 +154,7 @@ block header
     .col-md-4.text-right
       code= task._id
       p
-      .btn-group
+      .btn-group#tutorial_stats
         a.btn.btn-sm.btn-info(href='manage/task/'+task._id+'/controlmart')
           i.fa.fa-table
           |  Mart
@@ -73,7 +165,7 @@ block header
           a.btn.btn-sm.btn-default(href='manage/answers?task='+task._id) Answers
             i.fa.fa-list
   .row
-    .col-md-12.text-center
+    .col-md-12.text-center#tutorial_url
       h3 URL to execute the task:
       p.url #{appBase}api/run?task=#{task._id}
   hr
@@ -88,9 +180,9 @@ block content
           |  Job
     .col-md-4.text-center
       if !task.closed
-        .btn-group
+        .btn-group#tutorial_change_status
           if task.status=='CREATED'
-            a.btn.btn-sm.btn-info(
+            a#tutorial_open.btn.btn-sm.btn-info(
               href='#',
               data-destination,
               data-action='open',

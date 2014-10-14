@@ -1,10 +1,6 @@
 extends ../layout
 
-block append libCSS
-  link(rel='stylesheet', href='stylesheets/introjs.min.css')
-
 block append lateScripts
-  script(src='libs/intro.min.js')
   script.
     var $btnSend = $( '.submit' );
     var $form = $( '#form' );
@@ -18,9 +14,19 @@ block append lateScripts
 
 block header
   ul.nav.nav-tabs.nav-justified
-    for page, idx in pageList
-      li(class=idx===index? 'active':'')
-        a.text-muted= pageMap[page]
+    //for page, idx in pageList
+    // li(class=idx===index? 'active':'')
+    //    a.text-muted= pageMap[page]
+    li#tutorial_task(class=0===index? 'active':'' data-intro="Here you define the type of task to be performed..", data-step="1")
+      a.text-muted Task
+    li#tutorial_object(class=1===index? 'active':'' data-intro="..then you define the objects of the task", data-step="2")
+      a.text-muted Object
+    li#tutorial_execution(class=2===index? 'active':'' data-intro="Here you specify where you want to execute your task", data-step="3")
+      a.text-muted Execution
+    li#tutorial_invitation(class=3===index? 'active':'' data-intro="..and how to invite the perfomer", data-step="4")
+      a.text-muted Invitation
+    li#tutorial_review(class=4===index? 'active':'')
+      a.text-muted Review
   hr
 
   form#form(method='POST')
@@ -49,6 +55,6 @@ block header
           a(href='manage/wizard/add_operations').submit.btn.btn-default Add operations
 
         if nextPage
-          a(href='manage/wizard/'+nextPage).submit.btn.btn-primary Next
+          a#tutorial_next(href='manage/wizard/'+nextPage).submit.btn.btn-primary Next
         else
           a(href='#', disabled).btn.btn-default Next

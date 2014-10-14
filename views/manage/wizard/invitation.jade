@@ -4,6 +4,56 @@ include ../../includes/params
 
 block append lateScripts
   script.
+
+   var wizardTutorial = function(){
+
+      var introConfiguration = {
+        steps:[],
+        showStepNumbers:false,
+        scrollToElement:false,
+        exitOnOverlayClick:false,
+        showBullets:false
+      };
+
+      var invitationTutorial = true;
+
+      try{
+        invitationTutorial = localStorage[ 'invitationTutorial' ]!=='true';
+      }catch(e){}
+
+
+      if(invitationTutorial){
+
+        introConfiguration.steps = [
+              {
+                intro:'In this page you where to execute the task'
+              },
+              {
+                element: document.querySelector('#tutorial_invitation_platform'),
+                intro: "Here you see the list of possible invitation platform"
+              },{
+                element:document.querySelector('#tutorial_configuration'),
+                intro:'Here you configure the platform'
+              },{
+                element:document.querySelector('#tutorial_next'),
+                intro:'Press Next to go to the next step'
+              }
+            ];
+
+          localStorage[ 'invitationTutorial' ] = 'true';
+      }
+
+      if(introConfiguration.steps.length > 0){
+        introJs()
+        .setOptions(introConfiguration)
+        .start()
+      }
+    };
+
+    $( window ).on( 'load', function() {
+      wizardTutorial();
+    } );
+
     var $platformConfigs = $( '.platform-config' );
     var $platforms = $( '.platform' );
     $platforms.on( 'click', function() {
@@ -64,7 +114,7 @@ block append css
 
 block content
   .row
-    .col-md-6
+    .col-md-6#tutorial_invitation_platform
       h2 Select invitation platform
       for platform, platId in config.platforms
         if platform.invitation
@@ -83,7 +133,7 @@ block content
               else
                 p.text-muted No description present.
       .alert.alert-info To use a different invitation strategy (manual or something else), is sufficient to share the link present in the task page, available after creating the TaskType and opening the Task.
-    .col-md-6
+    .col-md-6#tutorial_configuration
       for platform, platId in config.platforms
         if platform.invitation
           .platform-config(

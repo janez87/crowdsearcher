@@ -3,7 +3,7 @@ html(prefix='og: http://ogp.me/ns#')
   head
     base(href=appBase)
     title= title
-    
+
     block meta
       include includes/metaOpenGraph
       include includes/meta
@@ -16,7 +16,7 @@ html(prefix='og: http://ogp.me/ns#')
 
     block libScripts
       include includes/libJS
-      
+
     block scripts
       script(src='javascripts/script.js')
   body
@@ -49,3 +49,5 @@ html(prefix='og: http://ogp.me/ns#')
         block content
       footer
         include includes/footer
+
+      block lateScripts

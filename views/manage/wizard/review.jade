@@ -7,6 +7,54 @@ block inputData
 
 block append lateScripts
   script.
+
+    var wizardTutorial = function(){
+
+      var introConfiguration = {
+        steps:[],
+        showStepNumbers:false,
+        scrollToElement:false,
+        exitOnOverlayClick:false,
+        showBullets:false
+      };
+
+      var reviewTutorial = true;
+
+      try{
+        reviewTutorial = localStorage[ 'reviewTutorial' ]!=='true';
+      }catch(e){}
+
+
+      if(reviewTutorial){
+
+        introConfiguration.steps = [
+              {
+                intro:'In this page you can review the task you configured'
+              },
+              {
+                element: document.querySelector('#tutorial_summary'),
+                intro: "Here you see the data that will be sent to the CrowdSearcher"
+              },{
+                element:document.querySelector('#tutorial_post'),
+                intro:'Click here to finally post the task',
+                position:'top'
+              }
+            ];
+
+          localStorage[ 'reviewTutorial' ] = 'true';
+      }
+
+      if(introConfiguration.steps.length > 0){
+        introJs()
+        .setOptions(introConfiguration)
+        .start()
+      }
+    };
+
+    $( window ).on( 'load', function() {
+      wizardTutorial();
+    } );
+
     $( '.send' ).click( function( evt ) {
       var $btn = $( this );
       $loadingModal = $( '#loadingModal' );
@@ -43,7 +91,7 @@ block append lateScripts
 
 block content
   .text-center
-    button.send.btn.btn-success.btn-lg(type='button')
+    button.send.btn.btn-success.btn-lg(type='button')#tutorial_post
       i.fa.fa-paper-plane-o
       |  Create Task!
       i.fa.fa-paper-plane-o
@@ -60,5 +108,6 @@ block content
 
 
   hr
-  h2 TaskType Data:
-  pre!= JSON.stringify( req.session.wizard, null, 2 )
+  #tutorial_summary
+    h2 TaskType Data:
+    pre!= JSON.stringify( req.session.wizard, null, 2 )

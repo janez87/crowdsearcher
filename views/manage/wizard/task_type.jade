@@ -3,47 +3,92 @@ extends ./layout
 include ../../includes/params
 
 block append lateScripts
-  script.
-    function wizardTutorial( done ) {
+  script
+
+    var wizardTutorial = function(){
+
+      var introConfiguration = {
+        steps:[],
+        showStepNumbers:false,
+        scrollToElement:false,
+        exitOnOverlayClick:false,
+        showBullets:false
+      };
+
       var wizardTutorial = true;
-      try {
+      var taskTypeTutorial = true;
+
+      try{
         wizardTutorial = localStorage[ 'wizardTutorial' ]!=='true';
-      } catch( e ) {}
+        taskTypeTutorial = localStorage[ 'taskTypeTutorial' ]!=='true';
+      }catch(e){}
 
-      var wizardTutorial = true;
-      if( wizardTutorial ) {
-        introJs( 'header' )
-        .start()
-        .oncomplete( function() {
-          //window.location.href = baseUrl+'second.html?multipage=true';
-          localStorage[ 'wizardTutorial' ] = 'true';
-          return done();
-        } );
-      } else {
-        return done();
+
+      if(wizardTutorial){
+
+        introConfiguration.steps= [
+                {
+                  intro: "Welcome to the CrowdSearcher tutorial!"
+                },
+                {
+                  element: document.querySelector('#tutorial_task'),
+                  intro: "Here you define the type of task to be performed.."
+                },{
+                  element: document.querySelector('#tutorial_object'),
+                  intro: "..then you define the objects of the task"
+                },{
+                  element: document.querySelector('#tutorial_execution'),
+                  intro: "Here you specify where you want to execute your task"
+                },{
+                  element: document.querySelector('#tutorial_invitation'),
+                  intro: "..and how to invite the perfomer"
+                },{
+                  element: document.querySelector('#tutorial_review'),
+                  intro: "This is a tooltip."
+                }]
+
+            localStorage[ 'wizardTutorial' ] = 'true';
+
       }
-    }
 
-    function pageTutorial() {
-      var tutorial = true;
-      try {
-        tutorial = localStorage[ 'tutorial' ]!=='true';
-      } catch( e ) {}
+      if(taskTypeTutorial){
 
-      var tutorial = true;
-      if( tutorial ) {
-        introJs( 'header' )
-        .start()
-        .oncomplete( function() {
-          //window.location.href = baseUrl+'second.html?multipage=true';
-          console.log( 'Done' );
-        } );
+        introConfiguration.steps = introConfiguration.steps.concat(
+              [{
+                intro:'In this page you specify the type task you want to perform'
+              },
+              {
+                element: document.querySelector('#tutorial_use_case_list'),
+                intro: "First you choose the use case you want to solve"
+              },{
+                element: document.querySelector('#tutorial_task_type'),
+                intro: "Then the type of task"
+              },{
+                element: document.querySelector('#tutorial_configuration'),
+                intro: "and configure it",
+                position:'top'
+              },{
+                element:document.querySelector('#tutorial_next'),
+                intro:'Press Next to go to the next step'
+              }
+              ]
+          );
+          localStorage[ 'taskTypeTutorial' ] = 'true';
       }
-    }
+
+
+      if(introConfiguration.steps.length > 0){
+        introJs()
+        .setOptions(introConfiguration)
+        .start()
+      }
+    };
 
     $( window ).on( 'load', function() {
-      wizardTutorial( pageTutorial );
+      wizardTutorial();
     } );
+
+
 
 
 
@@ -161,14 +206,14 @@ block content
 
   .row.selection
     .col-md-4
-      h2(data-intro="irst", data-step="1") Select the use-case
-      ul.list-group.use-cases(data-intro="Test intro", data-step="2")
+      h2#use_case Select the use-case
+      ul#tutorial_use_case_list.list-group.use-cases
         for task_types, name in config.useCases
           li.list-group-item.use-case(data-use-case=name, data-task-types=task_types)= name
     .col-md-8
-      h2(data-intro="Select task type", data-step="3") Task types
+      h2#tutorial_task_types Task types
 
-      div(data-intro="Test intro", data-step="4")
+      div#tutorial_task_type
         for taskType in config.taskTypes
           .media.task-type(id='tt_'+taskType.id,
             data-task-type=taskType.id,
@@ -187,22 +232,23 @@ block content
                 p.text-muted No description available
 
   hr
-  for taskType in config.taskTypes
-    .row.task-type-config(
-      id='tt_'+taskType.id+'_config',
-      data-name=taskType.id,
-      style='display: none;')
-      .col-md-12
-        h2 #{taskType.name} configuration
-      .col-md-6
-        h3 Parameters
-        if _.size( taskType.params )>0
-          +printParamsInput( taskType.params, 'tt_'+taskType.id )
-        else
-          p.text-muted No parameters to set.
-      .col-md-6
-        h3 Default values
-        if _.size( taskType.defaults )>0
-          +printParams( taskType.defaults )
-        else
-          p.text-muted No default values.
+  #tutorial_configuration
+    for taskType in config.taskTypes
+      .row.task-type-config(
+        id='tt_'+taskType.id+'_config',
+        data-name=taskType.id,
+        style='display: none;')
+        .col-md-12
+          h2 #{taskType.name} configuration
+        .col-md-6
+          h3 Parameters
+          if _.size( taskType.params )>0
+            +printParamsInput( taskType.params, 'tt_'+taskType.id )
+          else
+            p.text-muted No parameters to set.
+        .col-md-6
+          h3 Default values
+          if _.size( taskType.defaults )>0
+            +printParams( taskType.defaults )
+          else
+            p.text-muted No default values.

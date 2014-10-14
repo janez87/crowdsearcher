@@ -3,6 +3,60 @@ extends ./layout
 block append lateScripts
   script(src='javascripts/dropzone.js')
   script(src='javascripts/object_declaration.js')
+  script.
+
+    var wizardTutorial = function(){
+
+      var introConfiguration = {
+        steps:[],
+        showStepNumbers:false,
+        scrollToElement:false,
+        exitOnOverlayClick:false,
+        showBullets:false
+      };
+
+      var objectDeclarationTutorial = true;
+
+      try{
+        objectDeclarationTutorial = localStorage[ 'objectDeclarationTutorial' ]!=='true';
+      }catch(e){}
+
+
+      if(objectDeclarationTutorial){
+
+        introConfiguration.steps = [
+              {
+                intro:'In this page you upload the objects'
+              },
+              {
+                element: document.querySelector('#tutorial_form'),
+                intro: "Upload the objects"
+              },{
+                element: document.querySelector('#tutorial_table'),
+                intro: "Here you can see a small preview of the objects uploaded"
+              },{
+                element:document.querySelector('#tutorial_next'),
+                intro:'Press Next to go to the next step'
+              }
+            ];
+
+          localStorage[ 'objectDeclarationTutorial' ] = 'true';
+      }
+
+      if(introConfiguration.steps.length > 0){
+        introJs()
+        .setOptions(introConfiguration)
+        .start()
+        .oncomplete( function() {
+          //window.location.href = baseUrl+'manage/wizard/object_declaration?multipage=true';
+          return done();
+        } )
+      }
+    };
+
+    $( window ).on( 'load', function() {
+      wizardTutorial();
+    } );
 
 block append css
   style(type='text/css').
@@ -40,7 +94,7 @@ block content
   .row
     .col-md-8
 
-      form.form-horizontal
+      form#tutorial_form.form-horizontal
         .form-group
           label.col-md-3.control-label(for='file_type') File type:
           .col-md-9
@@ -56,6 +110,6 @@ block content
 
   h3 Data preview
     small#obj_num
-  table.table.table-bordered.table-hover.table-condensed
+  table.table.table-bordered.table-hover.table-condensed#tutorial_table
     thead: tr#header
     tbody#data
