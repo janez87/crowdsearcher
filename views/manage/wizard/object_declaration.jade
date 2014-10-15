@@ -34,6 +34,7 @@ block append lateScripts
               },{
                 element: document.querySelector('#tutorial_table'),
                 intro: "Here you can see a small preview of the objects uploaded"
+                position:'top'
               },{
                 element:document.querySelector('#tutorial_next'),
                 intro:'Press Next to go to the next step'
@@ -47,10 +48,6 @@ block append lateScripts
         introJs()
         .setOptions(introConfiguration)
         .start()
-        .oncomplete( function() {
-          //window.location.href = baseUrl+'manage/wizard/object_declaration?multipage=true';
-          return done();
-        } )
       }
     };
 
