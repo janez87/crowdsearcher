@@ -29,15 +29,16 @@ block append lateScripts
 
         introConfiguration.steps = [
               {
-                intro:'In this page you can review the task you configured'
+                intro:'In this page you can see a JSON representation of the just confgured task.'
               },
               {
                 element: document.querySelector('#tutorial_summary'),
-                intro: "Here you see the data that will be sent to the CrowdSearcher"
+                intro: "Here you see the data that will be sent to the CrowdSearcher",
+                position:'top'
               },{
                 element:document.querySelector('#tutorial_post'),
                 intro:'Click here to finally post the task',
-                position:'top'
+                position:'left'
               }
             ];
 

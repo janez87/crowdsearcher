@@ -15,6 +15,52 @@ block header
             |  Task
 
 block content
+  .panel.panel-info
+    .panel-heading
+      strong <i class="fa fa-info-circle"></i> Info
+      button.close(type="button", data-toggle="collapse", data-target="#info")
+        span(aria-hidden="true") &times;
+        span.sr-only Close
+    #info.panel-collapse.collapse.in
+      .panel-body
+        p Sample answer element:
+
+        .panel.panel-success
+          .panel-heading
+            .row
+              .col-md-6
+                a.accordion-toggle(href="#sample_answer",data-toggle="collapse") Execution
+                |  by <em>User name|Guest</em> on
+                span.label.label-info  <em>Execution platform</em>
+
+              .col-md-6.text-right
+                span.label.label-success <em>STATUS</em>
+                | @
+                code  #{f( Date.now() )}
+          #sample_answer.panel-collapse.collapse.in
+            .panel-body
+              .row
+                .col-md-8
+                  p: a(href="") Task link
+                  p: a(href="") Microtask link
+                .col-md-4.text-right
+                  p Created: <code>#{f( Date.now() )}</code>
+                  p Closed: <code>#{f( Date.now() )}</code>
+              h4 Annotation list
+              ul
+                li
+                  code <em>Annotation value</em>
+                  |  for
+                  tt  <em>Operation name</em> (<em>Operation type</em>) on
+                  a(href="#")  <em>object id link</em>
+                li
+                  code <em>Annotation value</em>
+                  |  for
+                  tt  <em>Operation name</em> (<em>Operation type</em>) on
+                  a(href="#")  <em>object id link</em>
+
+  hr
+
   - function f( date ) { return moment( date ).format( 'YYYY-MM-DD HH:mm:ss' ); };
   if answers.length===0
     blockquote
@@ -31,16 +77,16 @@ block content
                   href='#'+execution._id,
                   data-toggle='collapse',
                   data-parent='accordion') Execution
-                |  by 
+                |  by
                 if execution.performer
                   = execution.performer.name
                 else
-                  | Guest
-                |  on 
+                  |  Guest
+                |  on
                 span.label.label-info= execution.platform.name
               .col-md-6.text-right
                 +printStatus( execution.status, classMap )
-                |  @ 
+                |  @
                 code= f( execution[ execution.status.toLowerCase()+'Date' ] )
           div(id=execution._id).panel-collapse.collapse
             .panel-body
@@ -70,8 +116,8 @@ block content
                     li
                       if annotation.response
                         code= annotation.response
-                        |  for 
-                      tt= annotation.operation.label
-                      |  (#{annotation.operation.name}) on 
+                        |  for
+                      tt #{annotation.operation.label}
+                      |  (#{annotation.operation.name}) on
                       a(href='manage/object/'+annotation.object)= annotation.object
               //pre= JSON.stringify( execution, null, 2 )

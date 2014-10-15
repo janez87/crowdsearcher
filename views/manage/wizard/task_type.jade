@@ -5,7 +5,8 @@ include ../../includes/params
 block append lateScripts
   script
 
-    var wizardTutorial = function(){
+    var wizardTutorial = function( force ){
+      force = force || false;
 
       var introConfiguration = {
         steps:[],
@@ -24,7 +25,7 @@ block append lateScripts
       }catch(e){}
 
 
-      if(wizardTutorial){
+      if(wizardTutorial || force ){
 
         introConfiguration.steps= [
                 {
@@ -32,26 +33,26 @@ block append lateScripts
                 },
                 {
                   element: document.querySelector('#tutorial_task'),
-                  intro: "Here you define the type of task to be performed.."
+                  intro: "Here you define the type of task to be performed"
                 },{
                   element: document.querySelector('#tutorial_object'),
-                  intro: "..then you define the objects of the task"
+                  intro: "... then you define the objects of the task"
                 },{
                   element: document.querySelector('#tutorial_execution'),
-                  intro: "Here you specify where you want to execute your task"
+                  intro: "... then where you want to execute your task"
                 },{
                   element: document.querySelector('#tutorial_invitation'),
-                  intro: "..and how to invite the perfomer"
+                  intro: "... and how to invite the perfomer"
                 },{
                   element: document.querySelector('#tutorial_review'),
-                  intro: "This is a tooltip."
+                  intro: "... and finally you can review your task."
                 }]
 
             localStorage[ 'wizardTutorial' ] = 'true';
 
       }
 
-      if(taskTypeTutorial){
+      if(taskTypeTutorial || force){
 
         introConfiguration.steps = introConfiguration.steps.concat(
               [{
@@ -59,27 +60,44 @@ block append lateScripts
               },
               {
                 element: document.querySelector('#tutorial_use_case_list'),
-                intro: "First you choose the use case you want to solve"
+                intro: "First you choose the use case you want to solve:"
               },{
                 element: document.querySelector('#tutorial_task_type'),
-                intro: "Then the type of task"
+                intro: "Then the type of task:"
               },{
                 element: document.querySelector('#tutorial_configuration'),
-                intro: "and configure it",
+                intro: "Now you can configure the selected task type:",
                 position:'top'
               },{
                 element:document.querySelector('#tutorial_next'),
-                intro:'Press Next to go to the next step'
+                intro:'Once done you can go to the next step.',
+                position:'left'
               }
               ]
           );
           localStorage[ 'taskTypeTutorial' ] = 'true';
       }
 
-
       if(introConfiguration.steps.length > 0){
         introJs()
         .setOptions(introConfiguration)
+        .onbeforechange( function( el ) {
+          if( el.id==='tutorial_next')
+            el.focus();
+        } )
+        .onafterchange( function( el ) {
+          if( el.id==='tutorial_next') {
+            var $field = $( '.task-type-config:visible input[data-name="name"]' );
+            var str = $field.val() || '';
+            str = str.trim();
+
+            if( str.length===0 ) {
+              this.previousStep();
+              $field.focus();
+              alert( 'You must insert the name for the task' );
+            }
+          }
+        } )
         .start()
       }
     };

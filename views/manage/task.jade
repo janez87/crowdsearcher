@@ -11,7 +11,7 @@ block append scripts
   script(src='libs/qrcode.min.js')
 
 block append lateScripts
-  script
+  script.
     var wizardTutorial = function(){
 
         var introConfiguration = {
@@ -41,11 +41,15 @@ block append lateScripts
           currentStep = parseInt(currentStep)+2
         }
 
+        var state = '!{task.status}';
+        if( state==='OPENED' )
+          currentStep = 5;
+
         if(taskDetailsTutorial){
 
           introConfiguration.steps = [
                 {
-                  intro:'In this page you can see the details of the task you just created'
+                  intro:'In this page you can see the details of the task.'
                 },
                 {
                   element: document.querySelector('#tutorial_status'),
@@ -57,18 +61,19 @@ block append lateScripts
                   element:document.querySelector('#tutorial_open'),
                   intro:'Click here to open the task'
                 },{
-                  intro:'Now the task is opened and can be exectued by the performers'
+                  element: document.querySelector('#tutorial_status'),
+                  intro:'The task is opened and can be exectued by the performers'
                 },{
-                  intro:'Here you find the qr code',
+                  intro:'Click here to find the QRCode',
                   element:document.querySelector('#qrcode_link')
                 },{
                   intro:'..or the link for executing the task',
                   element:document.querySelector('#tutorial_url')
                 },{
-                  intro:'Here you can find the answers and statistics about the execution',
+                  intro:'Here you can navigate to the pages showing details on the answers and statistics about the execution.',
                   element:document.querySelector('#tutorial_stats')
                 },{
-                  inth:'Here you can manually change the status of the task (dangerous)',
+                  intro:'Here you can manually change the status of the task (dangerous)',
                   element:document.querySelector('#tutorial_change_status')
                 }
               ];
@@ -162,8 +167,7 @@ block header
           i.fa.fa-dashboard
           |  Dashboard
         if !task.created
-          a.btn.btn-sm.btn-default(href='manage/answers?task='+task._id) Answers
-            i.fa.fa-list
+          a.btn.btn-sm.btn-default(href='manage/answers?task='+task._id) Answers <i class="fa fa-list"></i>
   .row
     .col-md-12.text-center#tutorial_url
       h3 URL to execute the task:
@@ -196,7 +200,7 @@ block content
               data-action='finalize',
               data-id=task._id,
               data-entity='task',
-              data-method='POST') finalize
+              data-method='POST') Finalize
           if task.finalized || task.opened
             a.btn.btn-sm.btn-danger#close(
               href='#',
@@ -216,8 +220,7 @@ block content
           i.fa.fa-trash-o
           |  Remove
         if task.opened || task.finalized
-          a.btn.btn-sm.btn-primary(href='api/run?task='+task._id,target='_blank') Execute
-            i.fa.fa-play
+          a.btn.btn-sm.btn-primary(href='api/run?task='+task._id,target='_blank') Execute <i class="fa fa-play"></i>
   hr
   .row
     .col-md-6

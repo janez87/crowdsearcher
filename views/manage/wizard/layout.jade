@@ -1,5 +1,11 @@
 extends ../layout
 
+block append css
+  style.
+    i.info {
+     cursor: help;
+    }
+
 block append lateScripts
   script.
     var $btnSend = $( '.submit' );
@@ -11,6 +17,10 @@ block append lateScripts
       $form.submit();
       return false;
     }
+
+    $( 'i.info' ).click( function() {
+      wizardTutorial( true );
+    } );
 
 block header
   ul.nav.nav-tabs.nav-justified
@@ -47,7 +57,7 @@ block header
 
     .col-md-4.text-center
       block wizardTitle
-        h2= pageMap[ pageList[index] ]
+        h2 #{pageMap[ pageList[index] ]} <i class="fa fa-info-circle info" title="Start tutorial"></i>
 
     .col-md-4.text-right
       .btn-group

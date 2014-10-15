@@ -37,7 +37,8 @@ block append lateScripts
                 position:'top'
               },{
                 element:document.querySelector('#tutorial_next'),
-                intro:'Press Next to go to the next step'
+                intro:'Press Next to go to the next step',
+                position:'left'
               }
             ];
 
@@ -103,6 +104,13 @@ block content
             input.form-control#file(type='file',title='Select a file')
 
     .col-md-4
+      .alert.alert-info
+        strong <i class="fa fa-info-circle"></i> Info
+        p Sample JSON files to use can be downloaded here:
+          a(href="https://gist.github.com/janez87/c2077395f546790dc4a6", target="_blank")  sample json.
+        ul
+          li <code>object.json</code> is the JSON file for data.
+          li <code>gt.json</code> is the JSON file for the Ground truth.
       //.dropzone
 
   h3 Data preview

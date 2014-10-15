@@ -30,20 +30,21 @@ block append lateScripts
 
         introConfiguration.steps = [
               {
-                intro:'In this page you where to execute the task'
+                intro:'In this page you can select where to execute your task'
               },
               {
                 element: document.querySelector('#tutorial_execution_platform'),
                 intro: "Here you see the list of possible execution platform"
               },{
                 element: document.querySelector('#tutorial_execution_platform'),
-                intro: "Red platform are disable due compatibility issue with the task type selected"
+                intro: "Red platform (if any) are disable due compatibility issue with the selected task type"
               },{
                 element:document.querySelector('#tutorial_configuration'),
-                intro:'Here you configure the platform'
+                intro:'Here you can configure the platform parameters'
               },{
                 element:document.querySelector('#tutorial_next'),
-                intro:'Press Next to go to the next step'
+                intro:'Press Next to go to the next step',
+                position:'left'
               }
             ];
 

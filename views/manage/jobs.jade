@@ -4,7 +4,45 @@ block header
   h1 Job list
 
 block content
-  //pre= JSON.stringify( jobs, null, 2 )
+
+  .panel.panel-info
+    .panel-heading
+      strong <i class="fa fa-info-circle"></i> Info
+      button.close(type="button", data-toggle="collapse", data-target="#info")
+        span(aria-hidden="true") &times;
+        span.sr-only Close
+    #info.panel-collapse.collapse.in
+      .panel-body
+        p Here you can see the list of jobs present in the platform.
+
+        p If you click on the Job name you can see some details on the job.
+
+        p To see details about the Job click on the <button class="btn btn-sm btn-default"><i class="fa fa-folder-open"></i> Details</button> button to go to the Job details page.
+
+        p Sample job row:
+
+        .panel.panel-default
+          .panel-heading
+            a.accordion-toggle(
+              href='#sample',
+              data-toggle='collapse') Job name
+            code job-alias
+            .btn-group.pull-right
+              button.btn.btn-sm.btn-danger
+                i.fa.fa-trash-o
+                |  Remove
+              button.btn.btn-sm.btn-default
+                i.fa.fa-folder-open
+                |  Details
+            .clearfix
+          #sample.panel-collapse.collapse.in
+            .panel-body
+              .pull-right
+                p Created:
+                  code= moment( Date.now() ).format( 'YYYY-MM-DD HH:mm' )
+              .md Job description
+  hr
+
   if jobs.length===0
     blockquote
       p No Jobs found in the database.

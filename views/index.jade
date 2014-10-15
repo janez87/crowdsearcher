@@ -1,14 +1,18 @@
 extends layout
 
 block content
-  p.lead This is the CrowdSearcher demo application.
+  p.lead Welcome to the CrowdSearcher sandbox demo.
 
-  p See <a href="http://crowdsearcher.search-computing.org/">CrowdSearcher home</a> for more details
 
-  p With this app you can:
+  p With this demo you can test the core features of the system:
     ul
-      li Create Task
-      li Manage them
+      li Create crowdsourced task based on a predefined <em>task type</em>.
+      li See the progress of the task using the integrated dashboard.
+      li See the list of answers for a task.
+      li Manage the task.
+      li: em etc...
+
+  p.text-muted We strongly suggest to visit the official <a href="http://crowdsearcher.search-computing.org/" target="_blank">CrowdSearcher home</a> for an overview on how the platform works.
 
   .alert.alert-warning
     strong
@@ -16,9 +20,13 @@ block content
       |  This is a demo application
     p Do not use it for production or data sensitive tasks because the data will be accessible to all the users that have access to the application.
 
+
   hr
 
+
   .text-center
-    a.btn.btn-primary(href="manage",title="Requires login")
+    p When you are ready you can click the button below and start testing the platform.
+
+    a.btn.btn-lg.btn-primary(href="manage",title="Requires login")
       i.fa.fa-lock
       |  Go to the Task Manager

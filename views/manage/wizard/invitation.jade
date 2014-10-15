@@ -26,7 +26,7 @@ block append lateScripts
 
         introConfiguration.steps = [
               {
-                intro:'In this page you where to execute the task'
+                intro:'In this page you can select which platform to use to invite people.'
               },
               {
                 element: document.querySelector('#tutorial_invitation_platform'),
@@ -36,7 +36,8 @@ block append lateScripts
                 intro:'Here you configure the platform'
               },{
                 element:document.querySelector('#tutorial_next'),
-                intro:'Press Next to go to the next step'
+                intro:'Press Next to go to the next step',
+                position:'left'
               }
             ];
 
@@ -132,7 +133,9 @@ block content
                 p!= md(platform.description)
               else
                 p.text-muted No description present.
-      .alert.alert-info To use a different invitation strategy (manual or something else), is sufficient to share the link present in the task page, available after creating the TaskType and opening the Task.
+      .alert.alert-info
+        strong <i class="fa fa-info-circle"></i> Manual invitation
+        p To use a different invitation strategy (manual or something else) just skip this phase and share the link present in the task detail page, available after creating and opening the Task.
     .col-md-6#tutorial_configuration
       for platform, platId in config.platforms
         if platform.invitation

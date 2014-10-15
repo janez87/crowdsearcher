@@ -17,9 +17,6 @@ block header
         a.btn.btn-sm.btn-info(href='manage/job/'+job._id+'/controlmart')
           i.fa.fa-table
           |  Mart
-        //a.btn.btn-sm.btn-default(href='manage/job/'+job._id+'/flows')
-          i.fa.fa-random
-          |  Flows
         a.btn.btn-sm.btn-danger(
           href='#',
           data-id=job._id,
@@ -39,9 +36,6 @@ block content
       mixin printMetadata( job.metadata )
   .row
     .col-md-12
-      //.pull-right
-        a.btn.btn-default(href='manage/task/new?job='+job._id) Add Task
-          i.fa.fa-plus-square
       h2 Task list
       if tasks.length==0
         .alert.alert-info No tasks for this job.
