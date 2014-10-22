@@ -92,6 +92,7 @@ footer {
 }
 .try-links .info-box {
   text-align: right;
+  min-height: 11em;
 }
 .try-links .info-box + .info-box {
   text-align: left;

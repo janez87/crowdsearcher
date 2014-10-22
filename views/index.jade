@@ -89,7 +89,7 @@ html(prefix='og: http://ogp.me/ns#')
             .col-xs-6.info-box
               i.fa.fa-2x.fa-users
               h4 Social networks
-              p.text-muted .
+              p.text-muted Deploy your task using crowdsourcing platforms, social networks or our platform.
             .col-xs-6.info-box
               i.fa.fa-2x.fa-pencil-square-o
               h4 Task templates
@@ -101,7 +101,7 @@ html(prefix='og: http://ogp.me/ns#')
             .col-xs-6.info-box
               i.fa.fa-2x.fa-dashboard
               h4 Clear dashboard interface
-              p.text-muted Lorem ipsum In cillum cupidatat Ut et tempor.
+              p.text-muted Get a quick, at-a-glance overview of key metrics of the task.
 
         .col-md-6
           img.img-responsive(src="http://placehold.it/1024x1024",alt="Features")
@@ -135,22 +135,25 @@ html(prefix='og: http://ogp.me/ns#')
 
 
       hr#try
+
       .intro-section.row: .col-md-12
         h1 Try it
 
         p.text-muted Lorem ipsum Ex ex veniam quis consequat ullamco non elit nostrud magna occaecat in non aliqua non voluptate ut Duis.
 
-      .row.info-box-container.try-links
-        .col-xs-6.info-box
-          a(href=appBase+"manage/wizard")
-            i.fa.fa-3x.fa-magic
-            h4 Run the wizard
-            p.text-muted A step to step guide to create a Task.
-        .col-xs-6.info-box
-          a(href=appBase+"manage/jobs")
-            i.fa.fa-3x.fa-list
-            h4 Job list
-            p.text-muted See the list of the created jobs.
+
+        a.btn.btn-home(href=appBase+"manage") Try it now <i class="fa fa-play"></i>
+        //.row.info-box-container.try-links
+          .col-xs-6.info-box
+            a(href=appBase+"manage/wizard")
+              i.fa.fa-3x.fa-magic
+              h4 Run the wizard
+              p.text-muted A step to step guide to create a Task.
+          .col-xs-6.info-box
+            a(href=appBase+"manage/jobs")
+              i.fa.fa-3x.fa-list
+              h4 Job list
+              p.text-muted See the list of the created jobs.
 
 
       hr#about
