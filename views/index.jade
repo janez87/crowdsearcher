@@ -36,8 +36,8 @@ html(prefix='og: http://ogp.me/ns#')
           li: a(href='#what') what is
           li: a(href='#feat') features
           li: a(href='#how') how it works
+          li: a(href='#try') try
           li: a(href='#about') about
-          li: a(href='#contacts') contacts
 
         ul.nav.navbar-nav.navbar-right
           if user
@@ -59,7 +59,7 @@ html(prefix='og: http://ogp.me/ns#')
         .col-md-12.text-center.sub-title Web data retrival and information management from the crowd and social networks.
 
       .row: .col-md-12.text-center
-          a.btn.btn-home(href="#more") Know more
+          a.btn.btn-home(href="#what") Know more
       .row: .col-md-12.text-center
           a.btn.btn-home.inverse(href=appBase+'download') Download demo
 
@@ -67,7 +67,7 @@ html(prefix='og: http://ogp.me/ns#')
 
       hr#what
 
-      .intro-section
+      .intro-section.row: .col-md-12
         h1 What is crowdsearcher
         p.lead CrowdSearcher is a crowd-management system that implements a paradigm that embodies crowds and social network communities as first-class sources for the information management and extraction on the Web.
 
@@ -77,52 +77,42 @@ html(prefix='og: http://ogp.me/ns#')
 
         p.text-muted The Crowdsearcher approach aims at filling the gap between traditional Web systems (CMS, search engines and others), which operate upon world-wide information, with social systems, capable of interacting with real people, in real time, to capture their opinions, suggestions, and emotions by leveraging crowdsourcing practices and making them viable upon a social network. Thanks to the proposed approach, the data management and manipulation experience of users can be enormously enriched.
 
-        .row.info-box-container
-          .col-xs-3.col-xs-offset-3.info-box
-            i.fa.fa-3x.fa-magic
-            h4 Run the wizard
-            p.text-muted A step to step guide to create a Task.
-          .col-xs-3.info-box
-            i.fa.fa-3x.fa-list
-            h4 Job list
-            p.text-muted See the list of the created jobs.
-
-
       hr#feat
 
-      .intro-section.row
-        .col-xs-6
+      .intro-section.row: .col-md-12
+        .col-md-6
           h1 Features <i class="fa fa-laptop"></i>
 
           p.lead .
 
           .row.info-box-container
-            .col-md-6.info-box
+            .col-xs-6.info-box
               i.fa.fa-2x.fa-users
               h4 Social networks
               p.text-muted .
-            .col-md-6.info-box
+            .col-xs-6.info-box
               i.fa.fa-2x.fa-pencil-square-o
               h4 Task templates
-              p.text-muted Lorem ipsum In cillum cupidatat Ut et tempor.
-            .col-md-6.info-box
+              p.text-muted Easy task configuration with our template.
+            .col-xs-6.info-box
               i.fa.fa-cogs.fa-2x
-              h4 Real time adjusting
-              p.text-muted Lorem ipsum In cillum cupidatat Ut et tempor.
-            .col-md-6.info-box
+              h4 Real time
+              p.text-muted Adapt your task as it run using our reactive enviroment.
+            .col-xs-6.info-box
               i.fa.fa-2x.fa-dashboard
               h4 Clear dashboard interface
               p.text-muted Lorem ipsum In cillum cupidatat Ut et tempor.
 
-        .col-xs-6
-          img.img-responsive(src=appBase+"img/features.png",alt="Features")
+        .col-md-6
+          img.img-responsive(src="http://placehold.it/1024x1024",alt="Features")
+          //img.img-responsive(src=appBase+"img/features.png",alt="Features")
 
 
       hr#how
 
-      .intro-section.row
+      .intro-section.row: .col-md-12
         h1 How it works
-        p.text-muted Follow these steps and create your task.
+        p.text-muted Create you task following these simple steps.
 
         img.img-responsive(src=appBase+"img/steps.png",alt="Steps")
 
@@ -143,13 +133,29 @@ html(prefix='og: http://ogp.me/ns#')
             h4.media-heading Review
             p.text-muted Review and create the Task.
 
-        .row: .col-md-12.text-center
-          a.btn.btn-home.inverse(href=appBase+'download') Download demo
+
+      hr#try
+      .intro-section.row: .col-md-12
+        h1 Try it
+
+        p.text-muted Lorem ipsum Ex ex veniam quis consequat ullamco non elit nostrud magna occaecat in non aliqua non voluptate ut Duis.
+
+      .row.info-box-container.try-links
+        .col-xs-6.info-box
+          a(href=appBase+"manage/wizard")
+            i.fa.fa-3x.fa-magic
+            h4 Run the wizard
+            p.text-muted A step to step guide to create a Task.
+        .col-xs-6.info-box
+          a(href=appBase+"manage/jobs")
+            i.fa.fa-3x.fa-list
+            h4 Job list
+            p.text-muted See the list of the created jobs.
 
 
       hr#about
 
-      .intro-section.row
+      .intro-section.row: .col-md-12
         h1 About
         p.lead.text-muted CrowdSearcher is part of the Search Computing (Seco) project funded by the European Research Council (ERC) "IDEAS Advanced Grants". The technology transfer of CrowdSearcher results to the market is sponsored by a grant of EIT ICT Labs in the context of the project "Connecting Digital Cities", Jan.-Dec. 2014. Crowdsearcher has been used within the 7FP EU project Cubrik.
 
@@ -162,24 +168,24 @@ html(prefix='og: http://ogp.me/ns#')
         hr
 
         .row
-          .col-md-3.about-person
+          .col-xs-6.col-md-3.about-person
             img.img-circle(src=appBase+"img/ceri.jpg",alt="Stefano Ceri")
             .about-name Stefano Ceri
             .about-role
               abbr(title="Benevolent Dictator For Life") BDFL
 
-          .col-md-3.about-person
+          .col-xs-6.col-md-3.about-person
             img.img-circle(src=appBase+"img/brambilla.png",alt="Marco Brambilla")
             .about-name Marco Brambilla
             .about-role
               abbr(title="Benevolent Dictator For Life") BDFL
 
-          .col-md-3.about-person
+          .col-xs-6.col-md-3.about-person
             img.img-circle(src=appBase+"img/mauri.jpg",alt="Andrea Ciambawamba Mauri")
             .about-name Andrea Ciambawamba Mauri
             .about-role PhD student
 
-          .col-md-3.about-person
+          .col-xs-6.col-md-3.about-person
             img.img-circle(src=appBase+"img/volonterio.jpg",alt="Riccardo Volonterio")
             .about-name Riccardo Volonterio
             .about-role Peon

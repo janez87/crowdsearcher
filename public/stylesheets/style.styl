@@ -75,24 +75,39 @@ footer
     text-align justify
     line-height 2em
 
-  .info-box-container
-    margin-top 5em
-    margin-bottom 5em
+.info-box-container
+  margin-top 5em
+  margin-bottom 5em
+
+  .info-box
+    text-align center
+    i
+      color #D82B3F
+    h4
+      font-weight: bold;
+      margin: 1em 0;
+    h4 + p
+      text-align center
+      font-size 1em
+      line-height 1em
 
 
+.try-links
 
-.info-box
-  text-align center
-  i
-    color #D82B3F
-  h4
-    font-weight: bold;
-    margin: 1em 0;
-  p
-    //text-align justify
-    font-size 1em
-    line-height 1em
+  .info-box
+    text-align right
+  .info-box + .info-box
+    text-align left
 
+  a
+    display inline-block
+    width 30%
+    text-align center
+    padding 1em
+    border-radius 5px
+    &:hover
+      text-decoration none
+      background-color #eee
 
 .list-steps
 

@@ -71,23 +71,45 @@ footer {
   text-align: justify;
   line-height: 2em;
 }
-.intro-section .info-box-container {
+.info-box-container {
   margin-top: 5em;
   margin-bottom: 5em;
 }
-.info-box {
+.info-box-container .info-box {
   text-align: center;
 }
-.info-box i {
+.info-box-container .info-box i {
   color: #d82b3f;
 }
-.info-box h4 {
+.info-box-container .info-box h4 {
   font-weight: bold;
   margin: 1em 0;
 }
-.info-box p {
+.info-box-container .info-box h4 + p {
+  text-align: center;
   font-size: 1em;
   line-height: 1em;
+}
+.try-links .info-box {
+  text-align: right;
+}
+.try-links .info-box + .info-box {
+  text-align: left;
+}
+.try-links a {
+  display: inline-block;
+  width: 30%;
+  text-align: center;
+  padding: 1em;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  -ms-border-radius: 5px;
+  -o-border-radius: 5px;
+  border-radius: 5px;
+}
+.try-links a:hover {
+  text-decoration: none;
+  background-color: #eee;
 }
 .list-steps {
   text-align: left;
