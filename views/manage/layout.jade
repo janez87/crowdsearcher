@@ -37,7 +37,8 @@ html(prefix="og: http://ogp.me/ns#")
           span.icon-bar
           span.icon-bar
           span.icon-bar
-        a.navbar-brand(href=appBase+'manage') CS Manager
+        block homeLink
+          a.navbar-brand(href=appBase+"manage") CS Manager
 
       .collapse.navbar-collapse.navbar-top-collapse
         ul.nav.navbar-nav

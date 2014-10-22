@@ -12,6 +12,11 @@ block append css
       border-radius: 16px;
     }
 
+block homeLink
+  a.navbar-brand(href=appBase)
+    img.top-logo(src=appBase+'img/logo.png',alt="CrowdSearcher logo")
+    span.top-logo-text= title
+
 block content
   p.lead Hello #{user.name} #{user.surname}!
 

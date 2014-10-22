@@ -7,6 +7,154 @@ body
 footer
   margin-top 2em
 
+.top-logo
+  height: 32px;
+  float: left;
+  margin-right: 5px;
+
+.top-logo-text
+  text-transform uppercase
+  font-weight bold
+
+.top-bar.top-bar
+  &>li>a
+    color #fff
+    text-transform uppercase
+
+
+.title
+  margin-top: 4em;
+  font-size: 3em;
+  text-transform: uppercase;
+  font-weight: bold;
+
+  .logo
+    height 100px
+    margin-right: 0.5em;
+
+.sub-title
+  font-size: 2em;
+  line-height 1.5em
+  text-transform: uppercase;
+  margin: 2em 0;
+
+
+.btn-home
+  text-transform: uppercase;
+  border: 2px solid;
+  background-color: #D82B3F;
+  border: 2px solid #D82B3F;
+  color: #FFF;
+  padding: 1em 2.5em;
+  font-weight: bold;
+  width: 15em;
+  margin-bottom: 0.5em;
+  font-size: 1.15em;
+
+  &.inverse
+    background-color: #fff;
+    border: 2px solid #D82B3F;
+    color: #D82B3F;
+
+
+.intro-section
+  text-align center
+  h1
+    font-size 2.5em
+    text-transform uppercase
+    color #D82B3F
+    font-weight bold
+    margin-top 2em
+    margin-bottom 2em
+
+  h1 + p
+    text-align center
+    font-weight bold
+  p
+    font-size 1.5em
+    text-align justify
+    line-height 2em
+
+  .info-box-container
+    margin-top 5em
+    margin-bottom 5em
+
+
+
+.info-box
+  text-align center
+  i
+    color #D82B3F
+  h4
+    font-weight: bold;
+    margin: 1em 0;
+  p
+    //text-align justify
+    font-size 1em
+    line-height 1em
+
+
+.list-steps
+
+  text-align left
+  counter-reset steps
+  margin 3em 0
+
+  .media
+
+    &:before
+      content: counter(steps);
+      counter-increment: steps;
+      float: left;
+      height: 48px;
+      background: #D82B3F;
+      width: 48px;
+      color: #FFF;
+      font-size: 1.25em;
+      text-align: center;
+      line-height: 48px;
+      border-radius: 48px;
+      margin-right 1.5em
+
+    .media-heading
+      font-weight bold
+
+    p
+      font-size 1em
+      line-height: 1em;
+
+
+
+.img-steps
+  width 100%
+  margin-bottom 3em
+
+.about-logos
+  margin 5em 0
+  img
+    width 50%
+
+.about-person
+  fa 1
+  img
+    width 120px
+  .about-name
+    font-weight: bold;
+    margin-top: 1em;
+  .about-role
+    color #333
+
+
+
+
+
+
+
+
+
+
+
+
 .vertical-center
   display inline-block
   vertical-align middle
