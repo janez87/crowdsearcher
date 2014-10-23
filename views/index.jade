@@ -13,6 +13,13 @@ html(prefix='og: http://ogp.me/ns#')
 
     block css
       link(rel='stylesheet', href='stylesheets/style.css')
+      style.
+        .navbar {
+          margin-bottom: 0px;
+        }
+        body {
+          padding-top: 50px;
+        }
 
     block libScripts
       include includes/libJS
@@ -47,156 +54,163 @@ html(prefix='og: http://ogp.me/ns#')
             li: a(href='register') Register
             li: a(href='login') Login
 
-    .container
+    .container-fluid
 
-      .row
-        .col-md-12.text-center
-          .title
-            img.logo(src=appBase+"img/logo.png",alt="CrowdSearcher logo")
-            span crowdsearcher
+      .intro-section: .intro-section-content
+        .row
+          .col-md-12.text-center
+            .title
+              img.logo(src=appBase+"img/logo.png",alt="CrowdSearcher logo")
+              span crowdsearcher
 
-      .row
-        .col-md-12.text-center.sub-title Tool for configuring crowd-based applications over social networks and crowdsourcing engines.
+        .row
+          .col-md-12.text-center.sub-title Tool for configuring crowd-based applications over social networks and crowdsourcing engines.
 
-      .row: .col-md-12.text-center
-          a.btn.btn-home(href="#what") Know more
-      .row: .col-md-12.text-center
-          a.btn.btn-home.inverse(href="mailto:marco.brambilla@polimi.it?cc=andrea.mauri@polimi.it,riccardo.volonterio@polimi.it&subject=CrowdSearcher%20information") Contact us
+        .row: .col-md-12.text-center
+            a.btn.btn-home(href="#what") Know more
+        .row: .col-md-12.text-center
+            a.btn.btn-home.inverse(href="mailto:marco.brambilla@polimi.it?cc=andrea.mauri@polimi.it,riccardo.volonterio@polimi.it&subject=CrowdSearcher%20information") Contact us
 
 
       hr#what
 
-      .intro-section.row: .col-md-12
-        h1 About crowdsearcher
-        p.lead CrowdSearcher builds human-powered applications, crowds are invited and engaged through a variety of mechamisms, including crowdsourcing engines and social networks.
-        //p.lead CrowdSearcher is a crowd-management system that implements a paradigm that embodies crowds and social network communities as first-class sources for the information management and extraction on the Web.
+      .intro-section: .intro-section-content
+        .row: .col-md-12
+          h1 About crowdsearcher
+          p.lead CrowdSearcher builds human-powered applications, crowds are invited and engaged through a variety of mechamisms, including crowdsourcing engines and social networks
+          //p.lead CrowdSearcher is a crowd-management system that implements a paradigm that embodies crowds and social network communities as first-class sources for the information management and extraction on the Web.
 
-        p.text-muted Retrieval and management of Web data is becoming a more and more complex problem, due to the amount of information to be dealt with, to the diversity of the information sources and to the evolving expectations of users. More and more users are increasingly relying on social interaction to complete and validate the results of their online activities.
+          p.text-muted Retrieval and management of Web data is becoming a more and more complex problem, due to the amount of information to be dealt with, to the diversity of the information sources and to the evolving expectations of users. More and more users are increasingly relying on social interaction to complete and validate the results of their online activities.
 
-        p.text-muted For instance, scouting "interesting" results, or suggesting new, unexpected search directions in information seeking processes, occurs in most times aside of the search systems and processes, possibly instrumented and mediated by a social network. Moreover, tasks such as quality assessment, opinion making, and sense extraction cannot be completely delegated to automatic procedures.
+          p.text-muted For instance, scouting "interesting" results, or suggesting new, unexpected search directions in information seeking processes, occurs in most times aside of the search systems and processes, possibly instrumented and mediated by a social network. Moreover, tasks such as quality assessment, opinion making, and sense extraction cannot be completely delegated to automatic procedures.
 
-        p.text-muted The Crowdsearcher approach aims at filling the gap between traditional Web systems (CMS, search engines and others), which operate upon world-wide information, with social systems, capable of interacting with real people, in real time, to capture their opinions, suggestions, and emotions by leveraging crowdsourcing practices and making them viable upon a social network. Thanks to the proposed approach, the data management and manipulation experience of users can be enormously enriched.
+          p.text-muted The Crowdsearcher approach aims at filling the gap between traditional Web systems (CMS, search engines and others), which operate upon world-wide information, with social systems, capable of interacting with real people, in real time, to capture their opinions, suggestions, and emotions by leveraging crowdsourcing practices and making them viable upon a social network. Thanks to the proposed approach, the data management and manipulation experience of users can be enormously enriched.
 
       hr#feat
 
-      .intro-section.row: .col-md-12
-        .col-md-6
-          h1 Features <i class="fa fa-laptop"></i>
+      .intro-section: .intro-section-content
+        .row
+          .col-md-6
+            h1 Features <i class="fa fa-laptop"></i>
 
-          p.lead .
+            p.lead .
 
-          .row.info-box-container
-            .col-xs-6.info-box
-              i.fa.fa-2x.fa-users
-              h4 Social networks
-              p.text-muted Deploy your task using crowdsourcing platforms, social networks or custom interfaces.
-            .col-xs-6.info-box
-              i.fa.fa-2x.fa-pencil-square-o
-              h4 Task templates
-              p.text-muted Configure your tasks with template-driven approach.
-            .col-xs-6.info-box
-              i.fa.fa-cogs.fa-2x
-              h4 Real time
-              p.text-muted Adapt your task as it runs using a reactive enviroment.
-            .col-xs-6.info-box
-              i.fa.fa-2x.fa-dashboard
-              h4 Clear dashboard interface
-              p.text-muted Get a quick, at-a-glance overview of key metrics of the task.
+            .row.info-box-container
+              .col-xs-6.info-box
+                i.fa.fa-2x.fa-users
+                h4 Social networks
+                p.text-muted Deploy your task using crowdsourcing platforms, social networks or custom interfaces.
+              .col-xs-6.info-box
+                i.fa.fa-2x.fa-pencil-square-o
+                h4 Task templates
+                p.text-muted Configure your tasks with template-driven approach.
+              .col-xs-6.info-box
+                i.fa.fa-cogs.fa-2x
+                h4 Real time
+                p.text-muted Adapt your task as it runs using a reactive enviroment.
+              .col-xs-6.info-box
+                i.fa.fa-2x.fa-dashboard
+                h4 Clear dashboard interface
+                p.text-muted Get a quick, at-a-glance overview of key metrics of the task.
 
-        .col-md-6
-          img.img-responsive(src="http://placehold.it/1024x1024",alt="Features")
-          //img.img-responsive(src=appBase+"img/features.png",alt="Features")
+          .col-md-6
+            img.img-responsive(src="http://placehold.it/1024x1024",alt="Features")
+            //img.img-responsive(src=appBase+"img/features.png",alt="Features")
 
 
       hr#how
 
-      .intro-section.row: .col-md-12
-        h1 How it works
-        p.text-muted Create a task following these simple steps.
+      .intro-section: .intro-section-content
+        .row: .col-md-12
+          h1 How it works
+          p.text-muted Create a task following these simple steps.
 
-        img.img-responsive(src=appBase+"img/steps.png",alt="Steps")
+          img.img-responsive(src=appBase+"img/steps.png",alt="Steps")
 
-        ul.media-list.list-steps
-          li.media: .media-body
-            h4.media-heading Task
-            p.text-muted Select the task type that suites your needs.
-          li.media: .media-body
-            h4.media-heading Object
-            p.text-muted Import the objects that will be enriched and/or evaulated.
-          li.media: .media-body
-            h4.media-heading Execution
-            p.text-muted Select the platform where you want to execute your task.
-          li.media: .media-body
-            h4.media-heading Invitation
-            p.text-muted Select the platform for inviting the performers.
-          li.media: .media-body
-            h4.media-heading Review
-            p.text-muted Review and create the task.
+          .row: .col-md-6.col-md-offset-3
+            ul.media-list.list-steps
+              li.media: .media-body
+                h4.media-heading Task
+                p.text-muted Select the task type that suites your needs.
+              li.media: .media-body
+                h4.media-heading Object
+                p.text-muted Import the objects that will be enriched and/or evaulated.
+              li.media: .media-body
+                h4.media-heading Execution
+                p.text-muted Select the platform where you want to execute your task.
+              li.media: .media-body
+                h4.media-heading Invitation
+                p.text-muted Select the platform for inviting the performers.
+              li.media: .media-body
+                h4.media-heading Review
+                p.text-muted Review and create the task.
 
 
       hr#try
 
-      .intro-section.row: .col-md-12
-        h1 Try it
+      .intro-section: .intro-section-content
+        .row: .col-md-12
+          h1 Try it
 
-        p.text-muted Try our online tool for building crowd-based applications.
+          p.text-muted Try our online tool for building crowd-based applications.
 
 
-        a.btn.btn-home(href=appBase+"manage") Try it now <i class="fa fa-play"></i>
-        //.row.info-box-container.try-links
-          .col-xs-6.info-box
-            a(href=appBase+"manage/wizard")
-              i.fa.fa-3x.fa-magic
-              h4 Run the wizard
-              p.text-muted A step to step guide to create a Task.
-          .col-xs-6.info-box
-            a(href=appBase+"manage/jobs")
-              i.fa.fa-3x.fa-list
-              h4 Job list
-              p.text-muted See the list of the created jobs.
+          a.btn.btn-home(href=appBase+"manage") Try it now <i class="fa fa-play"></i>
+          //.row.info-box-container.try-links
+            .col-xs-6.info-box
+              a(href=appBase+"manage/wizard")
+                i.fa.fa-3x.fa-magic
+                h4 Run the wizard
+                p.text-muted A step to step guide to create a Task.
+            .col-xs-6.info-box
+              a(href=appBase+"manage/jobs")
+                i.fa.fa-3x.fa-list
+                h4 Job list
+                p.text-muted See the list of the created jobs.
 
 
       hr#about
 
-      .intro-section.row: .col-md-12
-        h1 About
-        p.lead.text-muted CrowdSearcher is part of the Search Computing (Seco) project funded by the European Research Council (ERC) "IDEAS Advanced Grants". The exploitation of CrowdSearcher is sponsored by a grant of EIT ICT Labs in the context of the project "Connecting Digital Cities". Crowdsearcher has been used within the 7FP EU project Cubrik.
+      .intro-section: .intro-section-content
+        .row: .col-md-12
+          h1 About
+          p.lead.text-muted CrowdSearcher is part of the Search Computing (Seco) project funded by the European Research Council (ERC) "IDEAS Advanced Grants". The exploitation of CrowdSearcher is sponsored by a grant of EIT ICT Labs in the context of the project "Connecting Digital Cities". Crowdsearcher has been used within the 7FP EU project Cubrik.
 
-        .row.about-logos
-          .col-xs-4.text-center
-            img(src=appBase+"img/logo-polimi.png",alt="Politecnico di milano logo")
-          .col-xs-4.text-center
-            img(src=appBase+"img/seco-logo.png",alt="SearchComputing logo")
-          .col-xs-4.text-center
-            img(src=appBase+"img/eit-logo.jpg",alt="EIT logo")
+          .row.about-logos
+            .col-xs-4.text-center
+              img(src=appBase+"img/logo-polimi.png",alt="Politecnico di milano logo")
+            .col-xs-4.text-center
+              img(src=appBase+"img/seco-logo.png",alt="SearchComputing logo")
+            .col-xs-4.text-center
+              img(src=appBase+"img/eit-logo.jpg",alt="EIT logo")
 
-        hr
+          hr
 
-        .row
-          .col-xs-6.col-md-6.about-person
-            img.img-circle(src=appBase+"img/ceri.jpg",alt="Stefano Ceri")
-            .about-name Stefano Ceri
-            .about-role Professor of Database Systems at Politecnico di Milano.
+          .row
+            .col-xs-6.col-md-6.about-person
+              img.img-circle(src=appBase+"img/ceri.jpg",alt="Stefano Ceri")
+              .about-name Stefano Ceri
+              .about-role Professor of Database Systems at Politecnico di Milano.
 
-          .col-xs-6.col-md-6.about-person
-            img.img-circle(src=appBase+"img/brambilla.png",alt="Marco Brambilla")
-            .about-name Marco Brambilla
-            .about-role Assistant Professor of Software Engineering.
-        .row
-          .col-xs-6.col-md-4.about-person
-            img.img-circle(src=appBase+"img/mauri.jpg",alt="Andrea Ciambawamba Mauri")
-            .about-name Andrea Mauri
-            .about-role PhD student.
+            .col-xs-6.col-md-6.about-person
+              img.img-circle(src=appBase+"img/brambilla.png",alt="Marco Brambilla")
+              .about-name Marco Brambilla
+              .about-role Assistant Professor of Software Engineering.
+          .row
+            .col-xs-6.col-md-4.about-person
+              img.img-circle(src=appBase+"img/mauri.jpg",alt="Andrea Ciambawamba Mauri")
+              .about-name Andrea Mauri
+              .about-role PhD student.
 
-          .col-xs-6.col-md-4.about-person
-            img.img-circle(src=appBase+"img/leonardi.jpg",alt="Chiara Leonardi")
-            .about-name Chiara Leonardi
-            .about-role Service Designer.
+            .col-xs-6.col-md-4.about-person
+              img.img-circle(src=appBase+"img/leonardi.jpg",alt="Chiara Leonardi")
+              .about-name Chiara Leonardi
+              .about-role Service Designer.
 
-          .col-xs-6.col-md-4.about-person
-            img.img-circle(src=appBase+"img/volonterio.jpg",alt="Riccardo Volonterio")
-            .about-name Riccardo Volonterio
-            .about-role Engineer.
+            .col-xs-6.col-md-4.about-person
+              img.img-circle(src=appBase+"img/volonterio.jpg",alt="Riccardo Volonterio")
+              .about-name Riccardo Volonterio
+              .about-role Engineer.
 
 
       footer
