@@ -101,7 +101,7 @@ function createTableEditor( data, schema ) {
     // with different color???
     var objFieldNames = $.map( objSchema, function( v, k ) { return k; } );
     var gtFieldNames = $.map( data[0], function( v, k ) { return k; } );
-    
+
     // GT field
     var gtField = $.grep( gtFieldNames , function( v ) {
       return $.inArray( v, objFieldNames )===-1;
