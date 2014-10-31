@@ -82,7 +82,10 @@ var TaskType = {
     }, {
       name: 'computeAlfa',
     }, {
-      name: 'pushObject'
+      name: 'pushObject',
+      params: {
+        task: '$task$'
+      }
     } ]
   },
   useCases: [ 'Classification', 'Ranking' ],
@@ -117,6 +120,9 @@ var TaskType = {
     threshold: {
       type: 'number',
       default: 0.5
+    },
+    task: {
+      type: 'string'
     }
   }
 };
