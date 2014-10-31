@@ -29,7 +29,32 @@ EquiSplitError.ZERO_OBJECTS = 'ZERO_OBJECTS';
 EquiSplitError.CONFIGURATION_MISMATCH = 'CONFIGURATION_MISMATCH';
 EquiSplitError.MISSING_PARAMETERS = 'MISSING_PARAMETERS';
 
+function onAddObjects( params, task, data, callback ) {
 
+  var objects = data.objectIds;
+
+  var i, j, subArray;
+  var microtaskToCreate = [];
+
+  for ( i = 0, j = objects.length; i < j; i += params.objectsNumber ) {
+    var start = i;
+    var end = start + params.objectsNumber;
+    subArray = objects.slice( start, end );
+    //log.trace( 'Slice from %s to %s: %j', start, end, subArray );
+    var rawMicrotask = {
+      platforms: task.platforms,
+      operations: task.operations,
+      objects: subArray
+    };
+    //log.trace( 'Associating %s objects to a microtask: %j', subArray.length, subArray );
+
+    microtaskToCreate.push( rawMicrotask );
+  }
+  log.debug( 'Creating %s microtasks', microtaskToCreate.length );
+
+  return task.addMicrotasks( microtaskToCreate, callback );
+
+}
 
 function onOpenTask( params, task, data, callback ) {
   // Find all non `closed` object for the current Task.
@@ -100,7 +125,8 @@ var strategy = {
   //
   // Description of what the strategy does in general.
   hooks: {
-    'OPEN_TASK': onOpenTask
+    'OPEN_TASK': onOpenTask,
+    'ADD_OBJECTS': onAddObjects
   },
 
   // ## Check rule

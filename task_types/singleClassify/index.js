@@ -81,6 +81,8 @@ var TaskType = {
       name: 'closeTaskOnObjectStatus',
     }, {
       name: 'computeAlfa',
+    }, {
+      name: 'pushObject'
     } ]
   },
   useCases: [ 'Classification', 'Ranking' ],
