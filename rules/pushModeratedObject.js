@@ -1,12 +1,10 @@
 // Load libraries
 var _ = require( 'underscore' );
-var async = require( 'async' );
 var CS = require( '../core' );
-var domain = require( 'domain' );
-
+var request = require( 'request' );
 // Create a child logger
 var log = CS.log.child( {
-  component: 'Close Microtask'
+  component: 'push moderated object'
 } );
 
 // Models
@@ -14,12 +12,29 @@ var Task = CS.models.task;
 var ObjectModel = CS.models.object;
 var ControlMart = CS.models.controlmart;
 
+function notifyEndpoint( id, answer, endpoint, callback ) {
+
+  var object = {
+    id: id,
+    moderated: answer
+  };
+
+  var options = {
+    json: true,
+    body: JSON.stringify( object )
+  };
+
+  return request.post( options, callback );
+}
+
 function onCloseObject( params, task, data, callback ) {
+  log.trace( 'Performing the rule' );
   var objectId = data.objectId;
 
   var nextTaskId = params.task;
 
   if ( !nextTaskId ) {
+    log.error( 'No next task configured' );
     return callback();
   }
 
@@ -44,7 +59,7 @@ function onCloseObject( params, task, data, callback ) {
 
           var result = mart.data;
 
-          if ( result === 'yes' ) {
+          if ( result === 'si' ) {
             log.trace( 'Object %s tagged as positive', objectId );
             ObjectModel
               .findById( objectId )
@@ -56,12 +71,21 @@ function onCloseObject( params, task, data, callback ) {
                   data: object.data
                 };
 
-                return nextTask.addObjects( newObject, callback );
+
+                return nextTask.addObjects( newObject, function() {
+                  return notifyEndpoint( object.data.id, result, params.endpointè + '/accepted', callback );
+                } );
               } );
 
           } else {
-            log.trace( 'Object %s tagged as negative' );
-            return callback();
+            log.trace( 'Object %s tagged as negative', objectId );
+            ObjectModel
+              .findById( objectId )
+              .exec( function( err, object ) {
+                if ( err ) return callback( err );
+
+                return notifyEndpoint( object.data.id, result, params.endpoint + '/rejected', callback );
+              } );
           }
         } );
 
@@ -81,7 +105,8 @@ var rule = {
     'CLOSE_OBJECT': onCloseObject
   },
   params: {
-    task: 'string'
+    task: 'string',
+    endpoint: 'string'
   }
 };
 
