@@ -16,15 +16,18 @@ function notifyEndpoint( id, answer, endpoint, callback ) {
 
   var object = {
     id: id,
-    moderated: answer
+    moderated: answer,
+    data: 'asdasdasdasd'
   };
 
   var options = {
     json: true,
-    body: JSON.stringify( object )
+    body: object
   };
 
-  return request.post( options, callback );
+  log.trace( options );
+
+  return request.post( endpoint, options, callback );
 }
 
 function onCloseObject( params, task, data, callback ) {
@@ -73,7 +76,7 @@ function onCloseObject( params, task, data, callback ) {
 
 
                 return nextTask.addObjects( newObject, function() {
-                  return notifyEndpoint( object.data.id, result, params.endpointè + '/accepted', callback );
+                  return notifyEndpoint( object.data.id, result, params.endpoint + '/approve', callback );
                 } );
               } );
 
@@ -84,7 +87,7 @@ function onCloseObject( params, task, data, callback ) {
               .exec( function( err, object ) {
                 if ( err ) return callback( err );
 
-                return notifyEndpoint( object.data.id, result, params.endpoint + '/rejected', callback );
+                return notifyEndpoint( object.data.id, result, params.endpoint + '/reject', callback );
               } );
           }
         } );

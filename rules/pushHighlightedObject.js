@@ -22,7 +22,7 @@ function notifyEndpoint( id, answer, endpoint, callback ) {
     body: JSON.stringify( object )
   };
 
-  return request.post( options, callback );
+  return request.post( endpoint, options, callback );
 }
 
 function onCloseObject( params, task, data, callback ) {
@@ -53,12 +53,12 @@ function onCloseObject( params, task, data, callback ) {
           .exec( function( err, object ) {
             if ( err ) return callback( err );
 
-            return notifyEndpoint( object.data.id, result, params.endpoint + '/hihglited', callback );
+            return notifyEndpoint( object.data.id, result, params.endpoint + '/highlight', callback );
           } );
 
       } else {
         log.trace( 'Object %s tagged as negative', objectId );
-
+        log.trace( ' No need to notify the endpoint' );
         return callback();
       }
     } );
