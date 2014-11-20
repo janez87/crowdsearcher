@@ -68,7 +68,7 @@ var TaskType = {
         operations: 'mainClassify'
       }
     }, {
-      name: 'pushModeratedObject',
+      name: 'pushObject',
       params: {
         task: '$task$',
         endpoint: '$endpoint$'
@@ -91,7 +91,7 @@ var TaskType = {
     'private': 'boolean',
     objectsNumber: {
       type: 'number',
-      'default': 7
+      'default': 10
     },
     answers: {
       type: 'number',
