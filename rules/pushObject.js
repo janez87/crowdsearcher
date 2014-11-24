@@ -12,8 +12,9 @@ var log = CS.log.child( {
 var Execution = CS.models.execution;
 var ObjectModel = CS.models.object;
 
-function notifyEndpoint( id, answer, endpoint, callback ) {
+function notifyEndpoint( id, endpoint, callback ) {
 
+  log.trace( endpoint );
   var object = {
     id: id
   };
