@@ -24,6 +24,15 @@ Can be overridden by creating a `config/override.json` file to store needed conf
     cd *path/to/CrowdSearcher*
     npm start
 
+## License Information
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+Commercial licenses are realeased upon request.
+Free for Academic use.
+
 ## Problems
 Contatc us!
 
