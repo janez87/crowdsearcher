@@ -6,27 +6,27 @@ var CS = require( '../../core' );
 
 // Import a child logger
 var log = CS.log.child( {
-  component: 'SingleClassify TT'
+  component: 'Highlight TT'
 } );
 
 
-// Create the SingleClassify class
+// Create the Highlight class
 var CSError = CS.error;
-// Create the SingleClassify class
-var SingleClassify = function( id, message ) {
+// Create the Highlight class
+var Highlight = function( id, message ) {
   /* jshint camelcase: false */
-  SingleClassify.super_.call( this, id, message );
+  Highlight.super_.call( this, id, message );
 };
 // Make it subclass Error
-util.inherits( SingleClassify, CSError );
-SingleClassify.prototype.name = 'SingleClassify';
+util.inherits( Highlight, CSError );
+Highlight.prototype.name = 'Highlight';
 // Custom errors
-//SingleClassify.CLASSIFY_BAD_CATEGORIES = 'CLASSIFY_BAD_CATEGORIES';
+//Highlight.CLASSIFY_BAD_CATEGORIES = 'CLASSIFY_BAD_CATEGORIES';
 
 
 // Define the Operation Object
 var TaskType = {
-  name: 'Single classify',
+  name: 'Highlight',
   description: 'Categorize each object with 1 category.',
   template: fs.readFileSync( __dirname + '/template.hbs', 'utf8' ),
   image: 'https://cdn3.iconfinder.com/data/icons/abstract-1/512/Classification-128.png',
@@ -55,12 +55,6 @@ var TaskType = {
       name: 'RANDOM',
     },
     controlrules: [ {
-      name: 'checkSpammer',
-      params: {
-        answers: '$nanswers$',
-        threshold: '$threshold$'
-      }
-    }, {
       name: 'classifyMajority',
       params: {
         operation: 'mainClassify',
@@ -74,18 +68,12 @@ var TaskType = {
         operations: 'mainClassify'
       }
     }, {
-      name: 'checkGroundTruth',
-    }, {
-      name: 'pushObject',
+      name: 'pushHighlightedObject',
       params: {
-        task: '$task$'
+        endpoint: '$endpoint$'
       }
     }, {
       name: 'closeMicroTaskOnObjectStatus'
-    }, {
-      name: 'closeTaskOnObjectStatus',
-    }, {
-      name: 'computeAlfa',
     } ]
   },
   useCases: [ 'Classification', 'Ranking' ],
@@ -104,7 +92,6 @@ var TaskType = {
       type: 'number',
       'default': 7
     },
-    // possono essere calcolate in base al numero di classi?
     answers: {
       type: 'number',
       default: 1
@@ -113,15 +100,7 @@ var TaskType = {
       type: 'number',
       default: 1
     },
-    nanswers: {
-      type: 'number',
-      default: 10
-    },
-    threshold: {
-      type: 'number',
-      default: 0.5
-    },
-    task: {
+    endpoint: {
       type: 'string'
     }
   }

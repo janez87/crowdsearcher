@@ -256,7 +256,7 @@ var rule = {
   hooks: {
     'OPEN_TASK': onOpenTask,
     'END_EXECUTION': onEndExecution,
-    'ON_ADD_OBJECTS': onAddObjects
+    'ADD_OBJECTS': onAddObjects
   },
 
 
