@@ -131,7 +131,7 @@ function onEndExecution( params, task, data, callback ) {
     if( err ) {
       return callback( err );
     }
-    
+
     // Pre apply the task info and the task itself
     var fn = _.partial( parseRule, task, info );
 
@@ -139,11 +139,11 @@ function onEndExecution( params, task, data, callback ) {
       if( err ) {
         return callback( err );
       }
-      
+
       log.debug( 'Adaptation completed' );
       return callback();
     } );
-    
+
   } );
 
 }

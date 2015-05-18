@@ -21,25 +21,23 @@ block content
           .col-md-9.col-md-offset-3
             p: .btn-group
               button.btn.btn-primary(type='submit') LogIn
-              //a.btn.btn-default(href='register') Register
+              a.btn.btn-default(href='register') Register
 
             hr
 
-            //
-              if _.size( socialMap )>0
-                p Or login with one of those social networks:
-                .btn-group
-                  each social, name in socialMap
-                   - var icon = social.icon || 'fa-'+name+'-square'
-                    a.btn.btn-default(href='connect/'+name, title='Login with '+name)
-                      i.fa(class=icon)
-    //
-      .col-md-6
-        .alert.alert-info
-          strong
-            i.fa.fa-info-circle
-            |  Access
-          p.
-            You can use the following credentials: <br>
-            <strong>user:</strong> demo<br>
-            <strong>password:</strong> demo<br>
+            if _.size( socialMap )>0
+              p Or login with one of those social networks:
+              .btn-group
+                each social, name in socialMap
+                 - var icon = social.icon || 'fa-'+name+'-square'
+                  a.btn.btn-default(href='connect/'+name, title='Login with '+name)
+                    i.fa(class=icon)
+    .col-md-6
+      .alert.alert-info
+        strong
+          i.fa.fa-info-circle
+          |  Access
+        p.
+          You can use the following credentials: <br>
+          <strong>user:</strong> demo<br>
+          <strong>password:</strong> demo<br>

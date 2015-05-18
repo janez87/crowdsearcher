@@ -170,8 +170,9 @@ block header
           a.btn.btn-sm.btn-default(href='manage/answers?task='+task._id) Answers <i class="fa fa-list"></i>
   .row
     .col-md-12.text-center#tutorial_url
-      h3 URL to execute the task:
-      p.url #{appBase}api/run?task=#{task._id}
+      if task.finalized || task.opened
+        h3 URL to execute the task:
+        p.url #{appBase}api/run?task=#{task._id}
   hr
 
 block content

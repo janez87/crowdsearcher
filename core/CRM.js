@@ -240,7 +240,7 @@ ControlRuleManager.trigger = function( event, data, callback ) {
     } );
 
 
-    // Get a fresh Task from the DB 
+    // Get a fresh Task from the DB
     return retrieveTask( taskId, function( err, task ) {
       if ( err ) {
         log.warn( 'Error while retrieving the Task', err );
@@ -353,10 +353,8 @@ ControlRuleManager.trigger = function( event, data, callback ) {
 
   function updateCounters( task, cb ) {
     // Update counters only on tasks with a defined taskType execution closed events
-    /*
     if( task.get( 'taskType' )===null && event!=='END_EXECUTION' )
       return cb( null, task );
-    */
 
     return task.updateInfo( function( err ) {
       if ( err ) {
@@ -372,8 +370,8 @@ ControlRuleManager.trigger = function( event, data, callback ) {
     checkTask
   ];
 
-  //  if ( semver.gt( CS.mongoVersion, '2.1.0' ) )
-  //   actions.push( updateCounters ); // Available only for END_EXECUTION on taskTypes
+  if ( semver.gt( CS.mongoVersion, '2.1.0' ) )
+    actions.push( updateCounters ); // Available only for END_EXECUTION on taskTypes
 
   actions = actions.concat( [
     triggerPlatformRules,

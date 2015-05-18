@@ -76,11 +76,6 @@ var TaskType = {
     }, {
       name: 'checkGroundTruth',
     }, {
-      name: 'pushObject',
-      params: {
-        task: '$task$'
-      }
-    }, {
       name: 'closeMicroTaskOnObjectStatus'
     }, {
       name: 'closeTaskOnObjectStatus',
@@ -120,9 +115,6 @@ var TaskType = {
     threshold: {
       type: 'number',
       default: 0.5
-    },
-    task: {
-      type: 'string'
     }
   }
 };
