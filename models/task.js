@@ -1238,6 +1238,9 @@ TaskSchema.methods.updateInfo = function( name, callback ) {
         name: k,
         data: v
       };
+
+      tuple = new ControlMart( tuple );
+
       tuples.push( tuple );
     } );
 
