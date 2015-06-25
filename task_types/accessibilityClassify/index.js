@@ -75,8 +75,8 @@ var TaskType = {
     }, {
       name: 'pushImages',
       params: {
-        taskA: '$taskA$',
-        taskB: '$taskB$'
+        taskB: '$taskB$',
+        taskC: '$taskC$'
       }
     } ]
   },
@@ -104,10 +104,10 @@ var TaskType = {
       type: 'number',
       default: 1
     },
-    taskA: {
+    taskB: {
       type: 'string'
     },
-    taskB: {
+    taskC: {
       type: 'string'
     }
   }

@@ -67,10 +67,10 @@ function onCloseObject( params, task, data, callback ) {
   log.trace( 'Performing the rule' );
   var objectId = data.objectId;
 
-  var taskA = params.taskA;
   var taskB = params.taskB;
+  var taskC = params.taskC;
 
-  if ( !taskA ) {
+  if ( !taskC ) {
     log.error( 'No next task configured' );
     return callback();
   }
@@ -79,7 +79,7 @@ function onCloseObject( params, task, data, callback ) {
     return callback();
   }
 
-  return async.each( [ taskA, taskB ], _.partial( pushObject, task, objectId ), callback );
+  return async.each( [ taskC, taskB ], _.partial( pushObject, task, objectId ), callback );
 
 
 }
@@ -96,8 +96,8 @@ var rule = {
     'CLOSE_OBJECT': onCloseObject
   },
   params: {
-    taskA: 'string',
-    taskB: 'string'
+    taskB: 'string',
+    taskC: 'string'
   }
 };
 
