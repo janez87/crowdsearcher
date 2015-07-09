@@ -22,7 +22,7 @@ var pushObject = function( previousTask, object, taskId, callback ) {
       if ( !nextTask )
         return callback( new Error( 'Invalid task' ) );
 
-
+      // Commento di test
       ControlMart
         .findOne( {
           object: object,
