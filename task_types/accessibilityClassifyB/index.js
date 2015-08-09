@@ -25,7 +25,7 @@ SingleClassify.prototype.name = 'SingleClassify';
 
 // Define the Operation Object
 var TaskType = {
-  name: 'Accessibility classify Step A',
+  name: 'Accessibility classify Step B',
   description: 'Categorize each object with 1 category.',
   template: fs.readFileSync( __dirname + '/template.hbs', 'utf8' ),
   image: 'https://cdn3.iconfinder.com/data/icons/abstract-1/512/Classification-128.png',
@@ -34,16 +34,40 @@ var TaskType = {
     description: '$description$',
     'private': '$private$',
     operations: [ {
-      label: 'mainClassify',
+      label: 'What elements can be encountered?',
       name: 'classify',
       params: {
-        categories: [ 'yes', 'no', 'can be improved' ],
+        categories: [ 'One zebra and possibly sidewalks', 'Two zebras and possibly sidewalks', 'No zebra' ],
       }
     }, {
-      label: 'improve',
+      label: 'Does the street have potholes?',
       name: 'classify',
       params: {
-        categories: [ 'zoom in', 'zoom out', 'rotate right', 'rotate left', 'higher pitch', 'lower pitch' ]
+        categories: [ 'yes', 'no' ]
+      }
+    }, {
+      label: 'Does the street have tramlines?',
+      name: 'classify',
+      params: {
+        categories: [ 'yes', 'no' ],
+      }
+    }, {
+      label: 'Does the street have bumps?',
+      name: 'classify',
+      params: {
+        categories: [ 'yes', 'no' ],
+      }
+    }, {
+      label: 'Are there any traffic lights?',
+      name: 'classify',
+      params: {
+        categories: [ 'yes', 'no' ],
+      }
+    }, {
+      label: 'Is there an intersection?',
+      name: 'classify',
+      params: {
+        categories: [ 'yes', 'no' ],
       }
     } ],
     splittingStrategy: {
@@ -62,15 +86,49 @@ var TaskType = {
     controlrules: [ {
       name: 'classifyMajority',
       params: {
-        operation: 'mainClassify',
+        operation: 'What elements can be encountered?',
+        answers: '$answers$',
+        agreement: '$agreement$'
+      }
+    }, {
+      name: 'classifyMajority',
+      params: {
+        operation: 'Does the street have potholes?',
+        answers: '$answers$',
+        agreement: '$agreement$'
+      }
+    }, {
+      name: 'classifyMajority',
+      params: {
+        operation: 'Does the street have tramlines?',
+        answers: '$answers$',
+        agreement: '$agreement$'
+      }
+    }, {
+      name: 'classifyMajority',
+      params: {
+        operation: 'Does the street have bumps?',
+        answers: '$answers$',
+        agreement: '$agreement$'
+      }
+    }, {
+      name: 'classifyMajority',
+      params: {
+        operation: 'Are there any traffic lights?',
+        answers: '$answers$',
+        agreement: '$agreement$'
+      }
+    }, {
+      name: 'classifyMajority',
+      params: {
+        operation: 'Is there an intersection?',
         answers: '$answers$',
         agreement: '$agreement$'
       }
     }, {
       name: 'aggregateMajority',
       params: {
-        mode: 'SPECIFIC',
-        operations: 'mainClassify'
+        mode: 'ALL'
       }
     }, {
       name: 'checkGroundTruth',
@@ -78,12 +136,6 @@ var TaskType = {
       name: 'closeMicroTaskOnObjectStatus'
     }, {
       name: 'closeTaskOnObjectStatus',
-    }, {
-      name: 'pushImages',
-      params: {
-        taskB: '$taskB$',
-        taskC: '$taskC$'
-      }
     } ]
   },
   useCases: [ 'Classification', 'Ranking' ],
@@ -96,7 +148,7 @@ var TaskType = {
     'private': 'boolean',
     objectsNumber: {
       type: 'number',
-      'default': 4
+      'default': 1
     },
     answers: {
       type: 'number',
@@ -105,12 +157,6 @@ var TaskType = {
     agreement: {
       type: 'number',
       default: 1
-    },
-    taskB: {
-      type: 'string'
-    },
-    taskC: {
-      type: 'string'
     }
   }
 };
