@@ -24,12 +24,6 @@ Can be overridden by creating a `config/override.json` file to store needed conf
     cd *path/to/CrowdSearcher*
     npm start
 
-## Problems
-Contatc us!
-
-- [Riccardo Volonterio][volox]
-- [Andrea Mauri][janez]
-
 
 [cs]: http://crowdsearcher.search-computing.org/ "CrowdSearcher"
 [cs-doc]: http://crowdsearcher.search-computing.org/software "CrowdSearcher documentation"
