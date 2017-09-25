@@ -1,0 +1,276 @@
+extends ./layout
+
+block append css
+  style(type='text/css').
+    .condition:first-child .logic-operator {
+      display: none;
+    }
+    
+    .condition .btn-add {
+      display: none;
+    }
+    .condition:last-child .btn-add {
+      display: inline-block;
+    }
+
+    .condition .btn-remove {
+    }
+    .condition:last-child .btn-remove {
+      display: none;
+    }
+
+block append lateScripts
+  script.
+    function saveData( data ) {
+      if ( data )
+        $( '.wzData' ).val( JSON.stringify( data ) );
+    }
+
+    $btnSend.click( function( evt ) {
+      var rules = $( '#condition_list .rule' ).map( function() {
+        return $( this ).data( 'rule' )
+      } ).get();
+
+      saveData( rules );
+
+      return sendData.call( this, evt );
+    } );
+
+    var $conditions = $( '#conditions' );
+    var $conditionList = $( '#condition_list' );
+    var $template = $( '#template' );
+    var $actions = $( '#actions' );
+    var $scope = $( '#scope' );
+
+    $template.on( 'click', '.btn-add', function( evt ) {
+      var $clonedTemplate = $template.clone();
+      
+      $clonedTemplate.attr( 'id', null );
+      $clonedTemplate.find( 'select' ).attr( 'selectedIndex', null );
+      $clonedTemplate.find( '.value' ).val( null );
+
+      $conditions.prepend( $clonedTemplate );
+    } );
+    
+    $conditions.on( 'click', '.btn-remove', function( evt ) {
+      $( this ).closest( '.condition' ).remove();
+    } );
+
+    $( '#add_rule' ).click( function() {
+      var rule = {
+        'scope': '',
+        'type': '',
+        'when': [],
+        'do': {
+          action: '',
+          params: {}
+        }
+      };
+
+      // Conditions
+      $conditions.find( '.condition' ).each( function( idx) {
+        var condition = {};
+        condition.condition = $( '.event', this ).val();
+        condition.operator = $( '.operator', this ).val();
+        // Possible unsafe
+        condition.value = parseFloat( $( '.value', this ).val() );
+        if( idx!=0 )
+          condition.logicOperator = $( '.logic-operator', this ).val();
+
+        rule.when.push( condition );
+      } );
+
+      // Action
+      rule[ 'do' ].action = $actions.val();
+      rule.scope = $scope.val();
+      rule.type = $( 'input[name=adaptationType]:checked' ).val();
+
+      // Create list item
+      var $li = $( '<li></li>' );
+      $li.addClass( 'list-group-item' );
+      $li.addClass( 'rule' );
+      $li.attr( 'data-rule', JSON.stringify( rule, null, 2 ) );
+      $li.append( '<pre>'+JSON.stringify( rule, null, 2 )+'</pre>' )
+      $conditionList.append( $li );
+    } );
+
+    $actions.change( function() {
+      var val = this.value;
+      $( '.action-config' ).hide();
+      $( '#action_'+val+'_config' ).show();
+    } );
+
+
+    var $actionOptions = $actions.find( 'option' ).detach();
+    var actions = {
+      'task': $actionOptions.filter( '.task' ).get(),
+      'object': $actionOptions.filter( '.object' ).get(),
+      'performer': $actionOptions.filter( '.performer' ).get()
+    };
+
+    
+    var $options = $conditions.find( '.event option' ).detach();
+    var options = {
+      'task': $options.filter( '.task' ).get(),
+      'object': $options.filter( '.object' ).get(),
+      'performer': $options.filter( '.performer' ).get()
+    };
+
+    $scope.change( function() {
+      var scope = this.value;
+      
+      $conditions.find( '.event' ).empty();
+      $conditions.find( '.event' ).append( '<option>None</option>' );
+      $.each(options[ scope ] || [], function() {
+        $conditions.find( '.event' ).append( this );
+      } );
+      $conditions.find( '.event' ).val( 'None' );
+
+
+
+      $actions.empty();
+      $actions.append( '<option>None</option>' );
+      $.each(actions[ scope ] || [], function() {
+        $actions.append( this );
+      } );
+      $actions.val( 'None' );
+      
+      /*
+      $conditions.find( '.event :not(.'+scope+')' ).wrap( '<span class="hidden"></span>' );
+      $conditions.find( '.event .'+scope ).unwrap();
+
+      $actions.val( 'None' );
+      $actions.find( ':not(.'+scope+')' ).wrap( '<span class="hidden"></span>' );
+      $actions.find( '.'+scope ).unwrap();
+      */
+    } );
+
+    $scope.change();
+    $actions.change();
+
+
+
+
+
+block content
+
+  .row
+    .col-md-6
+      h2 Adaptation rule:
+      
+      h3 SCOPE:
+      select#scope.form-control(title='Selected the scope for the condition')
+        option None
+        option(value='task') Task
+        option(value='object') Object
+        option(value='performer') Performer
+      
+      h3 WHEN:
+      #conditions
+        #template.row.condition
+          .col-md-2
+            select.logic-operator.form-control(title='Logic operator')
+              option(value='AND') &amp;&amp;
+              option(value='OR') ||
+          .col-md-3
+            select.event.form-control(title='Selected the condition')
+              option.task.object.performer(value='quality') Quality
+
+              option.task.object.performer(value='executions.total') Total executions
+              option.task.object.performer(value='executions.closed') Closed executions
+              option.task.object.performer(value='executions.invalid') Invalid executions
+              
+              option.object(value='answers') Total answers
+              
+              option.task(value='lifecycle.active') Time active
+              option.task(value='lifecycle.idle') Time idle
+              
+              option.task(value='objects') Total objects
+              option.task(value='objects.closed') Closed objects
+              option.task(value='objects.invalid') Invalid objects
+              
+              option.disabled.task(value='',disabled) -- CURRENT PLATFORM --
+              option.task(value='current.quality') Quality
+              
+              option.task(value='current.executions') Total executions
+              option.task(value='current.executions.closed') Closed executions
+              option.task(value='current.executions.invalid') Invalid executions
+              
+              option.task(value='current.time.active') Time active
+              option.task(value='current.time.idle') Time idle
+              
+              option.task(value='current.objects') Total objects
+              option.task(value='current.objects.closed') Closed objects
+              option.task(value='current.objects.invalid') Invalid objects
+
+          .col-md-2
+            select.operator.form-control(title='Select the operator for the condition')
+              option(value='>') &gt;
+              option(value='<') &lt;
+              option(value='<=') &lt;=
+              option(value='>=') &gt;=
+              option(value='==') ==
+              option(value='!=') !=
+          .col-md-3
+            input.value.form-control(type='number',title='Insert the value')
+          .col-md-2.text-right
+            button(type='button',title='Add one more condition').btn.btn-success.btn-sm.btn-add
+              i.fa.fa-plus
+            button(type='button',title='Remove current condition').btn.btn-danger.btn-sm.btn-remove
+              i.fa.fa-minus
+      
+
+      h3 DO
+      select#actions.form-control(title='Actions')
+        option.task(value='invite') Re-invite
+        option.task(value='replan') Re-plan
+        option.task(value='migrate') Migrate
+        option.task(value='close') Close
+        
+        option.object(value='redo') Redo
+        option.object(value='cancel') Cancel
+        
+        option.performer(value='ban') Ban
+      
+      
+
+      h3 RULE TYPE:
+      .row
+        .col-md-6
+          .radio
+            label
+              input(name='adaptationType',
+                checked,
+                value='one-shot',
+                type='radio')
+              |  ONE SHOT
+          .alert.alert-info
+            strong Info:
+            p.
+              The one shot rules are <u>executed only the first time</u>, per scope, the condition is met.
+        .col-md-6
+          .radio
+            label
+              input(name='adaptationType',
+                value='repeat',
+                type='radio')
+              |  REPEATING
+          .alert.alert-warning
+            strong Warning:
+            p.
+              The repeating rules are <u>executed every time</u> the conditions are met.
+
+      #configurations
+        .action-config#action_replan_config(style='display: none;')
+          h3 Re-plan parameters
+        .action-config#action_migrate_config(style='display: none;')
+          h3 Migrate parameters
+      hr
+
+
+      .text-right
+        button#add_rule(type='button').btn.btn-success Add rule 
+          i.fa.fa-plus
+    .col-md-6
+      h2 Adaptation rules in use:
+      ul#condition_list.list-group

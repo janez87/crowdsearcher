@@ -1,119 +1,285 @@
-// Load libraries
-var mongo = require('mongoose');
+'use strict';
+let _ = require( 'lodash' );
+let Promise = require( 'bluebird' );
+var async = require( 'async' );
+var mongo = require( 'mongoose' );
+var CS = require( '../core' );
 
-// Create child Logger
-var log = common.log.child( { component: 'MicroTask model' } );
+// Create a child logger
+var log = CS.log.child( {
+  component: 'Microtask model'
+} );
 
-
-var CRM = require( '../scripts/controlRuleManager' );
-var MicroTaskStatuses = require( '../config/constants' ).MicroTaskStatuses;
-
-// Import Mongo Classes and Objects
+// Import Mongoose Classes and Objects
+var MongoError = mongo.Error;
 var Schema = mongo.Schema;
 var ObjectId = Schema.ObjectId;
-var Mixed = Schema.Types.Mixed;
 
-// Import the plugins
-var metadataPlugin = require( './plugins/metadata' );
+// Import the CRM for handling microtask events.
+var CRM = require( '../core/CRM' );
 
-// Import the CRM
-var CRM = require( '../scripts/controlRuleManager' );
+// # Microtask definition
+// The microtask is an instance of the Task.
 
-// Plugins
+// ## Schema
+//
+// Mongoose schema for the Microtask entity.
+var MicrotaskSchema = new Schema( {
+    // ### Status
+    //
+    // Current status of the Microtask.
+    // The status changes how the Microtask behave to some events/requests.
+    status: {
+      type: String,
+      required: true,
+      index: true,
+      uppercase: true,
+      'enum': [
+        // The Microtask has been created.
+        'CREATED',
 
-// MicroTaskSchema
-// ------
-// The Microtask schema represents
-var MicroTaskSchema = new Schema( {
-  // Task that owns this `Microtask`
-  task: {
-    required: true,
-    type: ObjectId,
-    ref: 'task'
-  },
+        // The Microtask has been closed, it will not accept any `Object` and `Execution`s.
+        // Setting the state to `CLOSED` will trigger the `END_MICROTASK` event and set the `closedDate`
+        // field to the current date.
+        'CLOSED'
+      ],
+      'default': 'CREATED'
+    },
 
-  // List of objects belonging to the `Microtask`
-  objects: [ {
-    type: ObjectId,
-    ref: 'object',
-    unique: true
-  } ],
-
-  // Array that contains the `Operation`s
-  operations: {
-    type: [ {
+    // ### References
+    //
+    // Tha parent Task of this Microtask.
+    task: {
+      required: true,
       type: ObjectId,
-      ref: 'operation'
-    } ],
-    required: true
+      ref: 'task'
+    },
+
+    // Unique list of `Object`s of the Microtask.
+    objects: {
+      type: [ {
+        type: ObjectId,
+        ref: 'object'
+      } ],
+      'default': []
+    },
+
+
+    // ### Time data
+    //
+    // Creation date of the entity. By default it will be the first save of the object.
+    createdDate: {
+      required: true,
+      type: Date,
+      'default': Date.now
+    },
+
+    // Closed date of the entity. Will be available only after **closing** the microtask.
+    closedDate: {
+      type: Date,
+      'default': null
+    }
+
   },
 
-  platforms: {
-    type: [{
-      type: ObjectId,
-      ref: 'platform'
-    }],
-    required: true
-  },
+  /// ## Schema options
+  //
+  {
+    // Do not allow to add random properties to the model.
+    strict: true,
+    // Disable index check in production.
+    autoIndex: process.env.PRODUCTION ? false : true
+  } );
 
 
-  // Useful timed data
-  creationDate: {
-    type: Date,
-    'default': Date.now
-  },
 
-  closedDate: {
-    type: Date,
-    'default': null
-  },
 
-  lastResponse: {
-    type: Date
-  },
 
-  status: {
-    type: Number,
-    index: true,
-    'default': MicroTaskStatuses.OPENED
-  }
 
-}, {
-  strict: false
+
+
+
+// ## Plugins to add to the Microtask model.
+//
+// Add the `metadata` fileld to the entity.
+MicrotaskSchema.plugin( require( './plugins/metadataPlugin' ) );
+// Add the `accessKey` plugin.
+MicrotaskSchema.plugin( require( './plugins/accessKeyPlugin' ) );
+// Add the `operations` plugin.
+MicrotaskSchema.plugin( require( './plugins/operationsPlugin' ) );
+// Add the `platforms` plugin.
+MicrotaskSchema.plugin( require( './plugins/platformsPlugin' ) );
+
+
+
+
+
+
+
+
+// # Microtask calculated fields
+//
+// Boolean indicating if the microtask is created.
+MicrotaskSchema.virtual( 'created' ).get( function() {
+  return this.status === 'CREATED';
+} );
+// Boolean indicating if the microtask is closed.
+MicrotaskSchema.virtual( 'closed' ).get( function() {
+  return this.status === 'CLOSED';
+} );
+// Boolean indicating if the microtask is editable.
+MicrotaskSchema.virtual( 'editable' ).get( function() {
+  return this.created;
 } );
 
 
-MicroTaskSchema.plugin( metadataPlugin );
 
 
-// Methods
-// ---
-MicroTaskSchema.methods.closeMicroTask = function( callback ) {
-  var thisMicroTask = this;
+// # Retro compatibility
+//
+// add getters to changed attributes to normalize behaviour
+MicrotaskSchema.path( 'createdDate' ).get( function( date ) {
+  if ( this.toObject().creationDate )
+    return this.toObject().creationDate;
+  else
+    return date;
+} );
+MicrotaskSchema.path( 'status' ).get( function( status ) {
+  if ( status === '0' )
+    return 'CREATED';
+  else if ( status === '10' )
+    return 'OPENED';
+  else if ( status === '20' )
+    return 'FINALIZED';
+  else if ( status === '30' )
+    return 'WAIT';
+  else if ( status === '40' )
+    return 'SUSPENDED';
+  else if ( status === '50' )
+    return 'CLOSED';
+  else
+    return status;
+} );
 
-  log.trace( 'Closing microtask', this.id );
 
-  this.set( 'status', MicroTaskStatuses.CLOSED );
-  this.set('closedDate', Date.now());
 
-  this.save( function( err ) {
-    if( err ) return callback( err );
+// # Microtask instance methods
+//
 
-    // Trigger the `END_MICROTASK` event
-    // The signature of the event requires a `task`, so we grab it from the db
-    var Task = thisMicroTask.model( 'task' );
+// ## Events
+//
+// Shortcut for triggering events using the given data as payload.
+// The payload **always** have a `task` key containing the id of the current task
+// and a `microtask` key containing the current microtask id.
+MicrotaskSchema.methods.fire = function( event, data, callback ) {
+  if ( !_.isFunction( callback ) ) {
+    callback = data;
+    data = {};
+  }
 
-    Task
-    .findById( thisMicroTask.task )
-    .exec( function( err, task ) {
-      CRM.execute( 'END_MICROTASK', {
-        task: task,
-        microtask: thisMicroTask
-      }, callback );
-    } );
-  } );
+  return CRM
+  .trigger( event, _.defaults( {
+    task: this.task._id ? this.task._id : this.task,
+    microtask: this._id
+  }, data ) )
+  .asCallback( callback );
+};
+
+// Closes the current microtask. The `END_MICROTASK` event will be triggered **after** setting the
+// status field to `CLOSED`.
+MicrotaskSchema.methods.close = function( callback ) {
+  let promise = Promise.resolve();
+
+  // Skip if already closed.
+  if( this.closed ) {
+    // Skip if already closed.
+    let error = new MongoError( 'Already closed' );
+    promise = Promise.reject( error );
+  }
+
+  return promise
+  .then( () => {
+    log.debug( 'Closing microtask', this._id );
+
+    this.set( 'status', 'CLOSED' );
+    this.set( 'closedDate', Date.now() );
+
+    return this.save();
+  } )
+  .then( () => {
+    return this.fire( 'END_MICROTASK', callback );
+  } )
+  .asCallback( callback );
 };
 
 
 
-exports = module.exports = MicroTaskSchema;
+
+var removeExecutions = function( callback ) {
+
+  function removeExecution( execution, cb ) {
+    execution.remove( cb );
+  }
+
+  var Execution = CS.models.execution;
+
+  Execution
+    .find()
+    .where( 'task', this.task )
+    .where( 'microtask', this._id )
+    .exec( function( err, executions ) {
+      if ( err ) return callback( err );
+
+      async.each( executions, removeExecution, function( err ) {
+        if ( err ) return callback( err );
+
+        log.debug( 'Removed all executions' );
+        return callback();
+      } );
+    } );
+};
+
+var removeActiveJobs = function( callback ) {
+
+  function removeActiveJob( activeJob, cb ) {
+
+    log.trace( 'Removing the job for the microtask %s', activeJob.microtask );
+    var j = CS.activeJobs[ activeJob.microtask ];
+    if ( !_.isUndefined( j ) ) {
+      j.cancel();
+      delete CS.activeJobs[ activeJob.microtask ];
+    }
+
+    activeJob.remove( cb );
+  }
+
+  var ActiveJob = CS.models.activeJob;
+
+  ActiveJob
+    .find()
+    .where( 'microtask', this._id )
+    .exec( function( err, activeJobs ) {
+      if ( err ) return callback( err );
+
+      log.trace( '%s jobs found', activeJobs.length );
+      async.each( activeJobs, removeActiveJob, function( err ) {
+        if ( err ) return callback( err );
+
+        log.debug( 'Removed all activeJobs' );
+        return callback();
+      } );
+    } );
+};
+
+// ## Middlewares
+//
+// Handle job removal, remove all tasks.
+MicrotaskSchema.pre( 'remove', function( next ) {
+
+  var actions = [ _.bind( removeExecutions, this ), _.bind( removeActiveJobs, this ) ];
+
+  return async.series( actions, next );
+
+} );
+
+exports = module.exports = MicrotaskSchema;

@@ -1,0 +1,36 @@
+include ../../includes/params
+
+.row
+  .col-md-6
+    h3 Available performer control strategies
+    .form-group
+      label(for="performer_control_name") Control strategy:
+      .input-group
+        select#performer_control_name.form-control.input-small(
+          data-toggle='collapse',
+          data-parent='#performer_controls-params')
+          option(value='',selected) None
+          each performer_control in config.performerControlStrategies
+            - var id = _.kebabCase( 'performer_control-'+performer_control.name );
+            option(
+              data-target='#'+id,
+              data-actions=JSON.stringify( performer_control.actions ),
+              value=performer_control.name)= performer_control.name
+        span.input-group-btn
+          button.btn.btn-small.btn-success.add_control(
+            data-source='#performer_control_name',
+            data-target='#performer_control_list') Add 
+            i.fa.fa-plus
+    hr
+    #performer_controls-params
+      each performer_control in config.performerControlStrategies
+        - var id = _.kebabCase( 'performer_control-'+performer_control.name );
+        div.collapse(id=id)
+          h4 Performer control parameters
+          if !_.isEmpty( performer_control.params ) 
+            +printParamsInput( performer_control.params, id )
+          else
+            blockquote No parameters needed
+  .col-md-6
+    h3 Selected performer control strategies
+    ul#performer_control_list.list-group

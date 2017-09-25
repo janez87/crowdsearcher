@@ -1,0 +1,78 @@
+extends layout
+
+include ../includes/markdown
+include ../includes/metadata
+include ../includes/status
+
+block header
+  .row
+    .col-md-6
+      h1 #{job.name}
+        if job.alias
+          small: a(href='#', title='Run')  #{job.alias}
+    .col-md-6.text-right
+      code= job._id
+      p
+      .btn-group
+        a.btn.btn-sm.btn-info(href='manage/job/'+job._id+'/controlmart')
+          i.fa.fa-table
+          |  Mart
+        a.btn.btn-sm.btn-danger(
+          href='#',
+          data-id=job._id,
+          data-destination='manage/jobs',
+          data-entity='job',
+          data-method='DELETE')
+          i.fa.fa-trash-o
+          |  Remove
+
+block content
+  .row
+    .col-md-6
+      h3 Description
+      mixin printMarkdown( job.description )
+    .col-md-6
+      h3 Metadata
+      mixin printMetadata( job.metadata )
+  .row
+    .col-md-12
+      h2 Task list
+      if tasks.length==0
+        .alert.alert-info No tasks for this job.
+      else
+        #tasks.entity-list
+          .header
+            .row
+              .col-xs-1.cell ID
+              .col-xs-7.cell Name
+              .col-xs-2.cell Status
+              .col-xs-2.cell Actions
+          .scrollable(style="max-height: 500px;"): .content
+            for task in tasks
+              .row(class=task.status.toLowerCase())
+                .col-xs-1.cell.text-center(title=task._id)
+                  if task.private
+                    i.fa.fa-lock
+                  else
+                    i.fa.fa-unlock
+                .col-xs-7.cell= task.name
+                .col-xs-2.cell.text-center
+                   +printStatus( task.status )
+                .col-xs-2.cell.text-right
+                  .btn-group
+                    a.btn.btn-xs.btn-default(href='manage/task/'+task._id)
+                      .visible-lg
+                        i.fa.fa-folder-open
+                        |  Details
+                      .hidden-lg
+                        i.fa.fa-folder-open
+                    a.btn.btn-xs.btn-danger(
+                      href='#',
+                      data-id=task._id,
+                      data-entity='task',
+                      data-method='DELETE')
+                      .visible-lg
+                        i.fa.fa-trash-o
+                        |  Remove
+                      .hidden-lg
+                        i.fa.fa-trash-o

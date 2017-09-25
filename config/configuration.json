@@ -1,18 +1,9 @@
 {
   "webserver": {
+    "protocol": "http",
     "hostname": "localhost",
-    "port": 8100
-  },
-
-  "useCache": false,
-
-  "scripts": {
-    "path": "scripts",
-    "default": "default"
-  },
-
-  "operations": {
-    "path": "operations"
+    "port": 2100,
+    "externalAddress": "/istat/cs/"
   },
 
   "api": {
@@ -21,26 +12,41 @@
   },
 
   "mongo": {
-      "url": "mongodb://localhost/CrowdSearcher",
-      "path": "data",
-      "modelsPath": "models"
+    "url": "mongodb://localhost/CrowdSearcher",
+    "modelsPath": "models"
   },
 
+  "redis": {
+    "keyPrefix": "CS:",
+    "host": "localhost"
+  },
 
+  "rules": {
+    "path": "rules"
+  },
+
+  "taskTypes": {
+    "path": "task_types"
+  },
+
+  "strategies": {
+    "path": "strategies",
+    "splitting": "splitting",
+    "taskAssignment": "task_assignment",
+    "assignment": "assignment",
+    "implementation": "implementation",
+    "invitation": "invitation"
+  },
+
+  "operations": {
+    "path": "operations"
+  },
   "platforms": {
     "path": "platforms"
   },
 
-  "social": {
-    "facebook": {
-      "clientID": "",
-      "clientSecret": ""
-    },
-    "twitter": {
-      "consumerKey": "",
-      "consumerSecret": ""
-    }
-  },
+  "social": {},
+
   "logger": {
     "path": "logs",
     "streams": {
@@ -48,7 +54,7 @@
         "level": "trace"
       },
       "file": {
-        "level": "error",
+        "level": "trace",
         "filename": "cs_volog.jlog"
       }
     }

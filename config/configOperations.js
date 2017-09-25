@@ -1,21 +1,29 @@
-// Load libraries
-var _  = require('underscore');
-var nconf = require( 'nconf' );
-var glob = require( 'glob' );
+'use strict';
+// Load system modules
 
+// Load modules
+let _ = require( 'lodash' );
+let glob = require( 'glob' );
+let Promise = require( 'bluebird' );
 
-// Configure Operations
-// ---
-function configOperations( callback ) {
+// Load my modules
+let CS = require( '../core' );
+
+// Constant declaration
+
+// Module variables declaration
+
+// Module functions declaration
+function configOperations() {
   // Import the log, cannot be imported before because is not available
-  var log = common.log;
+  var log = CS.log;
 
   // Wrap into a `try catch` to handle all errors
   try {
     log.trace( 'Configuring operation list' );
 
     // Get the configuration object
-    var operationConfiguration = nconf.get( 'operations' );
+    var operationConfiguration = this.get( 'operations' );
 
     // Compose the operation base directory
     var opBaseDir = operationConfiguration.path;
@@ -27,10 +35,9 @@ function configOperations( callback ) {
     };
 
     // Read all the files inside the `opBaseDir` asynchronusly
-    glob( '*', options, function( err, files ) {
-      if( err ) return callback( err );
-
-      if( !files ) return callback();
+    return glob( '*', options )
+    .then( function( files ) {
+      if( !files ) return;
 
       var operations = {};
 
@@ -38,25 +45,30 @@ function configOperations( callback ) {
         //var platform = file.slice( 0, -3 );
         var operation = file;
 
-        file = '../'+opBaseDir + '/' + file;
+        file = '../' + opBaseDir + '/' + file;
         log.trace( 'Loading %s operation', operation );
 
 
         operations[ operation ] = require( file );
+        if ( !operations[ operation ].name ) {
+          operations[ operation ].name = operation;
+        }
+
       } );
 
-      GLOBAL.common.operations = operations;
-      return callback();
-    });
+      CS.operations = operations;
+    } );
 
-  } catch( err ) {
+  } catch ( err ) {
     console.error( 'Operations configuration error', err );
-    return callback( err );
+    return Promise.reject( err );
   }
-
 }
 
+// Module class declaration
 
+// Module initialization (at first load)
+glob = Promise.promisify( glob );
 
-// Export configuration function
+// Module exports
 exports = module.exports = configOperations;

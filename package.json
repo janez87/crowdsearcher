@@ -1,51 +1,62 @@
 {
   "name": "CrowdSearcher",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "scripts": {
     "start": "node cs.js | bunyan -o short",
-    "test": "mocha -c -R spec"
+    "debug": "node --debug cs.js | bunyan -o short",
+    "debug-brk": "node --debug-brk cs.js | bunyan -o short",
+    "dev": "nodemon --debug cs.js | bunyan -o short"
   },
   "dependencies": {
-    "express": "3.x",
-
-    "coffee-script": "*",
-    "stylus": "*",
-    "jade": "*",
-    "showdown": "*",
-    "express-coffee": "*",
-
-    "nconf": "*",
-    "bunyan": "*",
-    "underscore": "*",
-    "underscore.string": "*",
-
-    "request": "*",
-    "async": "*",
-    "mongoose": "3.6.x",
-    "q": "*",
-
-    "passport": "*",
-    "passport-local": "*",
-    "passport-oauth": "*",
-    "passport-facebook": "*",
-    "passport-twitter": "*",
-    "connect-flash": "*",
-
-    "glob": "*",
-
-    "fb": "*",
-    "amt": "*",
-    "twit":"*",
-
-    "node-schedule": "*",
-
-    "nodemailer":"*"
+    "amt": "0.1.x",
+    "async": "0.2.x",
+    "bluebird": "3.x",
+    "body-parser": "1.x",
+    "bunyan": "1.x",
+    "coffee-script": "1.6.x",
+    "connect-flash": "0.1.x",
+    "connect-redis": "3.x",
+    "cookie-parser": "1.x",
+    "cookie-session": "1.x",
+    "cors": "2.x",
+    "express": "4.x",
+    "express-session": "1.x",
+    "fb": "0.6.x",
+    "glob": "3.2.x",
+    "ioredis": "1.x",
+    "jade": "0.x",
+    "lodash": "4.x",
+    "markdown": "0.5.x",
+    "method-override": "2.x",
+    "mkdirp": "0.x",
+    "moment": "2.x",
+    "mongoose": "4.x",
+    "nconf": "0.6.x",
+    "node-schedule": "0.1.x",
+    "nodemailer": "0.5.x",
+    "passport": "0.1.x",
+    "passport-facebook": "1.0.x",
+    "passport-github": "0.1.x",
+    "passport-google-oauth": "0.1.x",
+    "passport-local": "0.1.x",
+    "passport-twitter": "1.0.x",
+    "request": "2.x",
+    "semver": "5.x",
+    "serve-static": "1.x",
+    "showdown": "0.3.x",
+    "stylus": "0.x",
+    "twit": "2.x"
   },
   "devDependencies": {
-    "supertest": "*",
-    "should": "*",
+    "co": "*",
+    "debug": "*",
+    "eslint-config-volox": "*",
+    "groc": "*",
     "mocha": "*",
-    "groc": "*"
+    "nodemon": "1.x",
+    "request": "2.x",
+    "should": "*",
+    "supertest": "*"
   }
 }

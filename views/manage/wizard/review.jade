@@ -1,0 +1,114 @@
+extends ./layout
+
+
+block inputData
+  input(type='hidden', name='name', value=pageList[index] || 'add_operations')
+  input.wzData(type='hidden', name='data', value=JSON.stringify( req.session.wizard))
+
+block append lateScripts
+  script.
+
+    var wizardTutorial = function(){
+
+      var introConfiguration = {
+        steps:[],
+        showStepNumbers:false,
+        scrollToElement:false,
+        exitOnOverlayClick:false,
+        showBullets:false
+      };
+
+      var reviewTutorial = true;
+
+      try{
+        reviewTutorial = localStorage[ 'reviewTutorial' ]!=='true';
+      }catch(e){}
+
+
+      if(reviewTutorial){
+
+        introConfiguration.steps = [
+              {
+                intro:'In this page you can see a JSON representation of the just confgured task.'
+              },
+              {
+                element: document.querySelector('#tutorial_summary'),
+                intro: "Here you see the data that will be sent to the CrowdSearcher",
+                position:'top'
+              },{
+                element:document.querySelector('#tutorial_post'),
+                intro:'Click here to finally post the task',
+                position:'left'
+              }
+            ];
+
+          localStorage[ 'reviewTutorial' ] = 'true';
+      }
+
+      if(introConfiguration.steps.length > 0){
+        introJs()
+        .setOptions(introConfiguration)
+        .start()
+      }
+    };
+
+    $( window ).on( 'load', function() {
+      wizardTutorial();
+    } );
+
+    $( '.send' ).click( function( evt ) {
+      var $btn = $( this );
+      $loadingModal = $( '#loadingModal' );
+      $btn.button( 'loading' );
+
+      $loadingModal.find( '.modal-title' ).text( 'Info' );
+      $loadingModal.find( '.modal-body p' ).text( 'Wait please, creating task...' );
+      $loadingModal.find( '.modal-footer' ).hide();
+      $loadingModal.modal( 'show' );
+
+      var url = baseUrl+'api/tasktype';
+      var data = $( '.wzData' ).val();
+      $.ajax( {
+        url: url,
+        data: data,
+        type: 'POST',
+        dataType: 'json',
+        contentType: "application/json",
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+      .fail( function( xhr, type, message ) {
+        $loadingModal.find( '.modal-title' ).text( type );
+        $loadingModal.find( '.modal-body p' ).text( message );
+        $loadingModal.find( '.modal-footer' ).show();
+        $btn.button( 'reset' );
+      } )
+      .done( function( task ) {
+        location.href = baseUrl+'manage/task/'+task._id
+        //$loadingModal.modal( 'hide' );
+      } )
+    } );
+
+block content
+  .text-center
+    button.send.btn.btn-success.btn-lg(type='button')#tutorial_post
+      i.fa.fa-paper-plane-o
+      |  Create Task!
+      i.fa.fa-paper-plane-o
+
+  #loadingModal.modal.fade(data-keyboard=false,data-backdrop='static')
+    .modal-dialog.modal-sm
+      .modal-content
+        .modal-header
+          h4.modal-title
+        .modal-body: p
+        .modal-footer
+          button.btn.btn-danger(type='button',
+            data-dismiss='modal') Close
+
+
+  hr
+  #tutorial_summary
+    h2 TaskType Data:
+    pre!= JSON.stringify( req.session.wizard, null, 2 )

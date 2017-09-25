@@ -1,0 +1,73 @@
+extends layout
+
+include ../includes/metadata
+include ../includes/status
+include ../includes/params
+
+block header
+  h1 Create Job
+  
+block content
+  .row
+    .col-md-6
+      .form-group
+        label(for='name') Insert job name:
+        input#name.form-control(type='text', placeholder='Job name')
+      .form-group
+        label(for='alias') Insert job alias:
+        input#alias.form-control(type='text', placeholder='Job alias')
+        p.help-block The alias will be slugified.
+    .col-md-6
+      .form-group
+        label(for='description') Insert description:
+        textarea#description.form-control(rows='5')
+        p.help-block Insert 
+          a(href='http://daringfireball.net/projects/markdown/syntax', target='_blank') markdown 
+          | here
+      //div
+        .form-group
+          label(for="assignment_name") Task assignment strategy:
+          select#assignment_name.form-control.input-small(
+            data-toggle='collapse',
+            data-parent='#assignment-params')
+            option(value='',selected) None
+            each assignment in assignments
+              option(
+                data-target='#assign-'+assignment.name,
+                value=assignment.name)= assignment.name
+        hr
+        #assignment-params
+          each assignment in assignments
+            div.collapse(id='assign-'+assignment.name)
+              if !_.isEmpty( assignment.params ) 
+                +printParamsInput( assignment.params, 'assign-'+assignment.name )
+              else
+                blockquote No parameters needed
+  .row
+    .col-md-6
+      .form-group
+        label(for='landing') Insert landing page:
+        textarea#landing.form-control(rows='7')
+        p.help-block Insert 
+          a(href='http://daringfireball.net/projects/markdown/syntax', target='_blank') markdown 
+          | here
+    .col-md-6
+      .form-group
+        label(for='ending') Insert ending page:
+        textarea#ending.form-control(rows='7')
+        p.help-block Insert 
+          a(href='http://daringfireball.net/projects/markdown/syntax', target='_blank') markdown 
+          | here
+  .row
+    .col-md-12.text-right
+      .btn-group
+        button.btn.btn-warning(type='reset')
+          i.fa.fa-undo
+          |  Reset
+        button#send.btn.btn-success(type='button')
+          i.fa.fa-envelope-o
+          |  Send
+
+  // Load scripts
+  script(src='javascripts/new_job.js')
+  //pre= JSON.stringify( taskAssignmentStrategies, null, 2)

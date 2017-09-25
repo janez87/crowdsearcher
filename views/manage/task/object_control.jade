@@ -1,0 +1,36 @@
+include ../../includes/params
+
+.row
+  .col-md-6
+    h3 Available object control strategies
+    .form-group
+      label(for="object_control_name") Control strategy:
+      .input-group
+        select#object_control_name.form-control.input-small(
+          data-toggle='collapse',
+          data-parent='#object_controls-params')
+          option(value='',selected) None
+          each object_control in config.objectControlStrategies
+            - var id = _.kebabCase( 'object_control-'+object_control.name );
+            option(
+              data-target='#'+id,
+              data-actions=JSON.stringify( object_control.actions ),
+              value=object_control.name)= object_control.name
+        span.input-group-btn
+          button.btn.btn-small.btn-success.add_control(
+            data-source='#object_control_name',
+            data-target='#object_control_list') Add 
+            i.fa.fa-plus
+    hr
+    #object_controls-params
+      each object_control in config.objectControlStrategies
+        - var id = _.kebabCase( 'object_control-'+object_control.name );
+        div.collapse(id=id)
+          h4 Object control parameters
+          if !_.isEmpty( object_control.params ) 
+            +printParamsInput( object_control.params, id )
+          else
+            blockquote No parameters needed
+  .col-md-6
+    h3 Selected object control strategies
+    ul#object_control_list.list-group

@@ -1,0 +1,1862 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"o",
+				"objectId"
+			],
+			[
+				"ann",
+				"annotation"
+			],
+			[
+				"find",
+				"findById"
+			],
+			[
+				"re",
+				"response"
+			],
+			[
+				"a",
+				"annotations"
+			],
+			[
+				"ex",
+				"executionId"
+			],
+			[
+				"requ",
+				"request"
+			],
+			[
+				"ob",
+				"objectId"
+			],
+			[
+				"on",
+				"onAddObjects"
+			],
+			[
+				"mi",
+				"microtaskToCreate"
+			],
+			[
+				"ne",
+				"nextTaskId"
+			],
+			[
+				"lo",
+				"localStorage"
+			],
+			[
+				"intr",
+				"introConfiguration"
+			],
+			[
+				"tutorial_",
+				"tutorial_change_status"
+			],
+			[
+				"q",
+				"querySelector"
+			],
+			[
+				"tutoria",
+				"tutorial_review"
+			],
+			[
+				"tu",
+				"tutorial_configuration"
+			],
+			[
+				"wi",
+				"wizardTutorial"
+			],
+			[
+				"task",
+				"task_type"
+			],
+			[
+				"use",
+				"use_case_list"
+			],
+			[
+				"tas",
+				"task_types"
+			],
+			[
+				"in",
+				"introConfiguration"
+			],
+			[
+				"page",
+				"pageList"
+			],
+			[
+				"pl",
+				"platforms"
+			],
+			[
+				"ac",
+				"activeJob"
+			],
+			[
+				"acti",
+				"activeJob"
+			],
+			[
+				"ca",
+				"callback"
+			],
+			[
+				"as",
+				"async"
+			],
+			[
+				"remove",
+				"removeActiveJobs"
+			],
+			[
+				"remo",
+				"removeExecution"
+			],
+			[
+				"Obje",
+				"ObjectId"
+			],
+			[
+				"j",
+				"j"
+			],
+			[
+				"cron",
+				"cronJob"
+			],
+			[
+				"act",
+				"activeJobs"
+			],
+			[
+				"cre",
+				"createExecution"
+			],
+			[
+				"com",
+				"comment"
+			],
+			[
+				"ol",
+				"oldComments"
+			],
+			[
+				"save",
+				"saveComment"
+			],
+			[
+				"ope",
+				"operation"
+			],
+			[
+				"st",
+				"startJob"
+			],
+			[
+				"comment",
+				"commentId"
+			],
+			[
+				"obj",
+				"object"
+			],
+			[
+				"rre",
+				"retrieveAnswers"
+			],
+			[
+				"exec",
+				"execution"
+			],
+			[
+				"Exec",
+				"Execution"
+			],
+			[
+				"create",
+				"createExecution"
+			],
+			[
+				"new",
+				"newLike"
+			],
+			[
+				"get",
+				"getMetadata"
+			],
+			[
+				"objec",
+				"objects"
+			],
+			[
+				"crea",
+				"createLike"
+			],
+			[
+				"lik",
+				"likeCount"
+			],
+			[
+				"commen",
+				"commentId"
+			],
+			[
+				"post",
+				"postId"
+			],
+			[
+				"c",
+				"cb"
+			],
+			[
+				"id",
+				"_id"
+			],
+			[
+				"r",
+				"return"
+			],
+			[
+				"po",
+				"postId"
+			],
+			[
+				"me",
+				"message"
+			],
+			[
+				"e",
+				"error"
+			],
+			[
+				"mo",
+				"microtasks"
+			],
+			[
+				"obje",
+				"object"
+			],
+			[
+				"p",
+				"performer"
+			],
+			[
+				"exe",
+				"execution"
+			],
+			[
+				"contr",
+				"controlrule"
+			],
+			[
+				"tr",
+				"threshold"
+			],
+			[
+				"fi",
+				"firstTime"
+			],
+			[
+				"ch",
+				"checkAnnotation"
+			],
+			[
+				"an",
+				"answers"
+			],
+			[
+				"t",
+				"threshold"
+			],
+			[
+				"max",
+				"maxCount"
+			],
+			[
+				"cate",
+				"category"
+			],
+			[
+				"op",
+				"operations"
+			],
+			[
+				"req",
+				"request"
+			],
+			[
+				"l",
+				"label"
+			],
+			[
+				"pe",
+				"performers"
+			],
+			[
+				"per",
+				"performer"
+			],
+			[
+				"oj",
+				"objectsAnnotations"
+			],
+			[
+				"for",
+				"for	for (…) {…}"
+			],
+			[
+				"comp",
+				"computeAlfa"
+			],
+			[
+				"gro",
+				"groupedExecutions"
+			],
+			[
+				"str",
+				"stringify"
+			],
+			[
+				"gt",
+				"gt_declaration"
+			],
+			[
+				"true",
+				"trueObjects"
+			],
+			[
+				"ControlMartS",
+				"ControlMartSchema"
+			],
+			[
+				"Contr",
+				"ControlMart"
+			],
+			[
+				"mart",
+				"martToBeCreated"
+			],
+			[
+				"object",
+				"objectId"
+			],
+			[
+				"opera",
+				"operations"
+			],
+			[
+				"operat",
+				"operation"
+			],
+			[
+				"COn",
+				"ControlMart"
+			],
+			[
+				"tra",
+				"transformGt"
+			],
+			[
+				"raw",
+				"rawTuples"
+			],
+			[
+				"ra",
+				"rawGt"
+			],
+			[
+				"ture",
+				"trueColumn"
+			],
+			[
+				"tru",
+				"trueColumn"
+			],
+			[
+				"type",
+				"type"
+			],
+			[
+				"upda",
+				"updateEvaluations"
+			],
+			[
+				"plat",
+				"platform"
+			],
+			[
+				"pla",
+				"platformNames"
+			],
+			[
+				"invi",
+				"invitation"
+			],
+			[
+				"pal",
+				"platformNames"
+			],
+			[
+				"platform",
+				"platformNames"
+			],
+			[
+				"Obj",
+				"ObjectModel"
+			],
+			[
+				"CLO",
+				"CLOSED"
+			],
+			[
+				"C",
+				"CLOSED"
+			],
+			[
+				"CLOSED",
+				"CLOSED_GOOD"
+			],
+			[
+				"BA",
+				"USER_BANNED"
+			],
+			[
+				"GE",
+				"GetExecutionError"
+			],
+			[
+				"if",
+				"if	if"
+			],
+			[
+				"performer",
+				"performerId"
+			],
+			[
+				"Con",
+				"ControlMart"
+			],
+			[
+				"ts",
+				"taskId"
+			],
+			[
+				"A",
+				"APIError"
+			],
+			[
+				"Ban",
+				"BanPerformerError"
+			],
+			[
+				"Ba",
+				"BanPerformerError"
+			],
+			[
+				"us",
+				"userId"
+			],
+			[
+				"execu",
+				"executions"
+			],
+			[
+				"cer",
+				"createObjectMart"
+			],
+			[
+				"clo",
+				"closeObject"
+			],
+			[
+				"Ob",
+				"ObjectModel"
+			],
+			[
+				"ma",
+				"maxExecutions"
+			],
+			[
+				"check",
+				"checkObject"
+			],
+			[
+				"Oj",
+				"ObjectModel"
+			],
+			[
+				"dele",
+				"delimiter"
+			],
+			[
+				"de",
+				"defaultValues"
+			],
+			[
+				"ta",
+				"taskTypeImpl"
+			],
+			[
+				"date",
+				"dateString"
+			],
+			[
+				"va",
+				"varExecutions"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "models/task.js",
+			"settings":
+			{
+				"buffer_size": 32485,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "views/login.jade",
+			"settings":
+			{
+				"buffer_size": 1525,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "views/register.jade",
+			"settings":
+			{
+				"buffer_size": 1259,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "rules/pushModeratedObject.js",
+			"settings":
+			{
+				"buffer_size": 2698,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"contents": "consumerKey: AjVnDCa6fdmbUdnuShQNFQ\nconsumerSecret: ik9WfR9kMws7ZMtycFf1k4uO23ZZHPBWXQFzBjeV8cM\ntoken: 1583197976-aSkpGOKQ9PZLYWFHhbOHemlWSlirwVOlc0nw70B\ntokenSecret: z7WuCj4KqfOoZC8jzoIARSGaqRYrmjjPUbCMt2da0iXVF",
+			"settings":
+			{
+				"buffer_size": 212,
+				"line_ending": "Unix",
+				"name": "consumerKey: AjVnDCa6fdmbUdnuShQNFQ"
+			}
+		},
+		{
+			"file": "rules/pushObject.js",
+			"settings":
+			{
+				"buffer_size": 1966,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "config/override.json",
+			"settings":
+			{
+				"buffer_size": 902,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "config/configuration.json",
+			"settings":
+			{
+				"buffer_size": 870,
+				"line_ending": "Unix"
+			}
+		}
+	],
+	"build_system": "",
+	"command_palette":
+	{
+		"height": 162.0,
+		"selected_items":
+		[
+			[
+				"git push",
+				"Git: Push"
+			],
+			[
+				"git stat",
+				"Git: Status"
+			],
+			[
+				"git status",
+				"Git: Status"
+			],
+			[
+				"git sta",
+				"Git: Stash"
+			],
+			[
+				"git p",
+				"Git: Push"
+			],
+			[
+				"git stash",
+				"Git: Stash"
+			],
+			[
+				"git stas",
+				"Git: Stash"
+			],
+			[
+				"git stt",
+				"Git: Status"
+			],
+			[
+				"gti sta",
+				"Git: Stash"
+			],
+			[
+				"git stats",
+				"Git: Status"
+			],
+			[
+				"git pull",
+				"Git: Pull"
+			],
+			[
+				"ins",
+				"Package Control: Install Package"
+			],
+			[
+				"insta",
+				"Package Control: Install Package"
+			],
+			[
+				"remove",
+				"Package Control: Remove Package"
+			],
+			[
+				"JS",
+				"Format: Javascript"
+			],
+			[
+				"package list",
+				"Package Control: List Packages"
+			],
+			[
+				"git pu",
+				"Git: Push"
+			],
+			[
+				"INSTA",
+				"Package Control: Install Package"
+			],
+			[
+				"git diff",
+				"Git: Diff"
+			],
+			[
+				"git  status",
+				"Git: Status"
+			],
+			[
+				"GIT Statu",
+				"Git: Status"
+			],
+			[
+				"git add ",
+				"Git: Quick Add"
+			],
+			[
+				"status",
+				"Git: Status"
+			],
+			[
+				"list",
+				"Package Control: List Packages"
+			],
+			[
+				"lint",
+				"SublimeLinter: Lint This View"
+			],
+			[
+				"sublime deb",
+				"SublimeLinter: Enable Debug Mode"
+			],
+			[
+				"install",
+				"Package Control: Install Package"
+			],
+			[
+				"git statu",
+				"Git: Status"
+			],
+			[
+				"git add",
+				"Git: Quick Add"
+			],
+			[
+				"instal",
+				"Package Control: Install Package"
+			],
+			[
+				"git di",
+				"Git: Diff Current File"
+			],
+			[
+				"git st",
+				"Git: Status"
+			]
+		],
+		"width": 444.0
+	},
+	"console":
+	{
+		"height": 126.0,
+		"history":
+		[
+			"import urllib.request,os; pf = 'Package Control.sublime-package'; ipp = sublime.installed_packages_path(); urllib.request.install_opener( urllib.request.build_opener( urllib.request.ProxyHandler()) ); open(os.path.join(ipp, pf), 'wb').write(urllib.request.urlopen( 'http://sublime.wbond.net/' + pf.replace(' ','%20')).read())"
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"expanded_folders":
+	[
+		"/Users/amauri/Documents/Develop/cs",
+		"/Users/amauri/Documents/Develop/cs/config",
+		"/Users/amauri/Documents/Develop/cs/views"
+	],
+	"file_history":
+	[
+		"/Users/amauri/Documents/Develop/cs/views/login.jade",
+		"/Users/amauri/Documents/Develop/cs/views/index.jade",
+		"/Users/amauri/Documents/Develop/cs/views/layout.jade",
+		"/Users/amauri/Documents/Develop/cs/api/checks/checkTaskId.js",
+		"/Users/amauri/Documents/Develop/cs/views/register.jade",
+		"/Users/amauri/Documents/Develop/cs/models/object.js",
+		"/Users/amauri/Documents/Develop/cs/views/manage/wizard/object_declaration.jade",
+		"/Users/amauri/Documents/Develop/cs/rules/aggregateMajority.js",
+		"/Users/amauri/Documents/Develop/cs/views/manage/wizard/add_operations.jade",
+		"/Users/amauri/Documents/Develop/cs/core/CRM.js",
+		"/Users/amauri/Documents/Develop/cs/models/platform.js",
+		"/Users/amauri/Documents/Develop/cs/api/objects.post.js",
+		"/Users/amauri/Documents/Develop/cs/task_types/moderate/index.js",
+		"/Users/amauri/Documents/Develop/cs/rules/pushObject.js",
+		"/Users/amauri/Documents/Develop/cs/node_modules/glob/node_modules/inherits/README.md",
+		"/Users/amauri/Documents/Develop/cs/node_modules/showdown/compressed/extensions/github.js",
+		"/Users/amauri/Documents/Develop/cs/views/manage/wizard/gt_declaration.jade",
+		"/Users/amauri/Documents/Develop/cs/core/index.js",
+		"/Users/amauri/Documents/Develop/cs/node_modules/nconf/test/provider-save-test.js",
+		"/Users/amauri/Documents/Develop/cs/api/checks/checkTaskData.js",
+		"/Users/amauri/Documents/Develop/cs/rules/checkSpammer.js",
+		"/Users/amauri/Documents/Develop/cs/api/checks/checkJobId.js",
+		"/Users/amauri/Documents/Develop/cs/node_modules/passport-github/node_modules/pkginfo/examples/object-argument.js",
+		"/Users/amauri/Documents/Develop/cs/node_modules/amt/node_modules/xml2js/node_modules/xmlbuilder/node_modules/lodash-node/compat/utilities/parseInt.js",
+		"/Users/amauri/Documents/Develop/cs/node_modules/request/node_modules/tough-cookie/generate-pubsuffix.js",
+		"/Users/amauri/Documents/Develop/cs/task_types/moderate/template.hbs",
+		"/Users/amauri/Documents/Develop/cs/rules/pushModeratedObject.js",
+		"/Users/amauri/Documents/Develop/cs/test/model.js",
+		"/Users/amauri/Documents/Develop/cs/views/includes/metaOpenGraph.jade",
+		"/Users/amauri/Documents/Develop/cs/models/microtask.js",
+		"/Users/amauri/Documents/Develop/cs/node_modules/.bin/md2html",
+		"/Users/amauri/Documents/Develop/cs/node_modules/express/node_modules/connect/lib/middleware/methodOverride.js",
+		"/Users/amauri/Documents/Develop/cs/strategies/splitting/EQUI_SPLIT.js",
+		"/Users/amauri/Documents/Develop/cs/views/manage/wizard/execution.jade",
+		"/Users/amauri/Documents/Develop/cs/node_modules/.bin/express",
+		"/Users/amauri/Documents/Develop/cs/node_modules/mocha/lib/interfaces/exports.js",
+		"/Users/amauri/Documents/Develop/cs/node_modules/mongoose/examples/population/population-options.js",
+		"/Users/amauri/Documents/Develop/cs/node_modules/mongoose/examples/population/population-of-multiple-existing-docs.js",
+		"/Users/amauri/Documents/Develop/cs/node_modules/mongoose/examples/express/connection-sharing/modelA.js",
+		"/Users/amauri/Documents/Develop/cs/node_modules/express/node_modules/connect/node_modules/express-session/node_modules/debug/Readme.md",
+		"/Users/amauri/Documents/Develop/cs/node_modules/express-coffee/node_modules/uglify-js/README.html",
+		"/Users/amauri/Documents/Develop/cs/node_modules/express/node_modules/connect/node_modules/method-override/README.md",
+		"/Users/amauri/Documents/Develop/cs/models/annotation.js",
+		"/Users/amauri/Documents/Develop/cs/api/answer.post.js",
+		"/Users/amauri/Documents/Develop/cs/models/execution.js",
+		"/Users/amauri/Documents/Develop/cs/operations/like/index.js",
+		"/Users/amauri/Documents/Develop/cs/task_types/like/index.js",
+		"/Users/amauri/Documents/Develop/cs/rules/countLikes.js",
+		"/Users/amauri/Documents/Develop/cs/node_modules/amt/node_modules/xml2js/node_modules/xmlbuilder/node_modules/lodash-node/compat/arrays/lastIndexOf.js",
+		"/Users/amauri/Documents/Develop/cs/rules/limitTaskExecution.js",
+		"/Users/amauri/Documents/Develop/cs/api/execution.start.js",
+		"/Users/amauri/Documents/Develop/cs/node_modules/moment/lang/en-ca.js",
+		"/Users/amauri/Documents/Develop/cs/node_modules/glob/node_modules/minimatch/test/extglob-ending-with-state-char.js",
+		"/Users/amauri/Documents/Develop/cs/node_modules/stylus/node_modules/sax/LICENSE-W3C.html",
+		"/Users/amauri/Documents/Develop/cs/node_modules/mongoose/node_modules/mongodb/node_modules/bson/ext/win32/x64/bson.node",
+		"/Users/amauri/Documents/Develop/cs/rules/old/positionToOrderStream.js",
+		"/Users/amauri/Documents/Develop/cs/node_modules/supertest/node_modules/superagent/node_modules/formidable/example/post.js",
+		"/Users/amauri/Documents/Develop/cs/node_modules/moment/test/moment/preparse_postformat.js",
+		"/Users/amauri/Documents/Develop/cs/node_modules/jade/node_modules/monocle/node_modules/readdirp/examples/node_modules/tap-stream/examples/tap-nested-objects.js",
+		"/Users/amauri/Documents/Develop/cs/node_modules/express/node_modules/connect/node_modules/multiparty/node_modules/readable-stream/lib/_stream_transform.js",
+		"/Users/amauri/Documents/Develop/cs/rules/classifyMajority.js",
+		"/Users/amauri/Documents/Develop/cs/platforms/tef/index.js",
+		"/Users/amauri/Documents/Develop/cs/rules/pushHighlightedObject.js",
+		"/Users/amauri/Documents/Develop/cs/node_modules/supertest/node_modules/superagent/node_modules/formidable/test/integration/test-fixtures.js",
+		"/Users/amauri/Documents/Develop/cs/node_modules/fb/node_modules/request/tests/test-errors.js",
+		"/Users/amauri/Documents/Develop/cs/models/task.js",
+		"/Users/amauri/Documents/Develop/cs/rules/test.js",
+		"/Users/amauri/Documents/Develop/cs/task_types/highlight/index.js",
+		"/Users/amauri/Documents/Develop/cs/config/configPassport.js",
+		"/Users/amauri/Documents/Develop/cs/task_types/highlight/template.hbs",
+		"/Users/amauri/Documents/Develop/cs/node_modules/request/node_modules/tough-cookie/public-suffix.txt",
+		"/Users/amauri/Documents/Develop/cs/node_modules/groc/node_modules/uglify-js/node_modules/source-map/build/prefix-utils.jsm",
+		"/Users/amauri/Documents/Develop/cs/task_types/singleClassify/template.hbs",
+		"/Users/amauri/Documents/Develop/cs/task_types/expoClassify/template.hbs",
+		"/Users/amauri/Library/Application Support/Sublime Text 3/Packages/User/Preferences.sublime-settings",
+		"/Users/amauri/Documents/Develop/cs/rules/old/validateToActor.js",
+		"/Users/amauri/Documents/Develop/cs/task_types/singleClassify/index.js",
+		"/Users/amauri/Documents/Develop/cs/node_modules/showdown/test/cases/github-style-at-start.html",
+		"/Users/amauri/Documents/Develop/cs/node_modules/showdown/test/cases/github-style-codeblock.html",
+		"/Users/amauri/Documents/Develop/cs/node_modules/should/lib/eql.js",
+		"/Users/amauri/Documents/Develop/cs/platforms/amt/externalQuestion.xml",
+		"/Users/amauri/Documents/Develop/cs/core/error.js",
+		"/Users/amauri/Documents/Develop/cs/rules/pushObjects.js",
+		"/Users/amauri/Documents/Develop/cs/cs.js",
+		"/Users/amauri/Documents/Develop/cs/platforms/amt/custom/validateActors.xml",
+		"/Users/amauri/Documents/Develop/cs/node_modules/mongoose/lib/error/validation.js",
+		"/Users/amauri/Documents/Develop/cs/test/volo.js",
+		"/Users/amauri/Documents/Develop/cs/views/manage/index.jade",
+		"/Users/amauri/Documents/Develop/cs/models/plugins/operationsPlugin.js",
+		"/Users/amauri/Documents/Develop/cs/models/user.js",
+		"/Users/amauri/Documents/Develop/cs/public/javascripts/object_declaration.js",
+		"/Users/amauri/Dropbox/expo2015data/expo_loghi.json",
+		"/Users/amauri/Documents/Develop/cs/node_modules/twit/tests/user-stream.js",
+		"/Users/amauri/Documents/Develop/cs/operations/comment/index.js",
+		"/Users/amauri/Documents/Develop/cs/models/operation.js",
+		"/Users/amauri/Documents/Develop/cs/node_modules/glob/test/new-glob-optional-options.js",
+		"/Users/amauri/Documents/Develop/cs/test/voloOpen.js",
+		"/Users/amauri/Documents/Develop/cs/public/stylesheets/style.css",
+		"/Users/amauri/Documents/Develop/cs/node_modules/.bin/stylus",
+		"/Users/amauri/Documents/Develop/cs/node_modules/groc/node_modules/spate/test/spate_test.coffee",
+		"/Users/amauri/Documents/Develop/cs/public/javascripts/strategy.js",
+		"/Users/amauri/Documents/Develop/cs/node_modules/.bin/semver",
+		"/Users/amauri/Documents/Develop/cs/node_modules/should/.idea/codeStyleSettings.xml",
+		"/Users/amauri/Documents/Develop/cs/views/manage/task.jade",
+		"/Users/amauri/Documents/Develop/cs/views/manage/task/object_control.jade",
+		"/Users/amauri/Documents/Develop/cs/node_modules/mongoose/lib/schema/objectid.js",
+		"/Users/amauri/Documents/Develop/cs/node_modules/stylus/lib/nodes/object.js",
+		"/Users/amauri/Documents/Develop/cs/views/includes/libJS.jade",
+		"/Users/amauri/Documents/Develop/cs/views/manage/wizard/layout.jade",
+		"/Users/amauri/Documents/Develop/cs/views/includes/libCSS.jade",
+		"/Users/amauri/Documents/Develop/cs/views/manage/layout.jade",
+		"/Users/amauri/Documents/Develop/cs/views/manage/wizard/review.jade",
+		"/Users/amauri/Documents/Develop/cs/views/manage/wizard/invitation.jade",
+		"/Users/amauri/Documents/Develop/cs/views/manage/wizard/task_type.jade",
+		"/Users/amauri/Documents/Develop/cs/views/manage/task/task_control.jade",
+		"/Users/amauri/Documents/Develop/cs/routes/manager/index.js",
+		"/Users/amauri/Documents/Develop/cs/README.md",
+		"/Users/amauri/Documents/Develop/cs/views/manage/task/invitation.jade",
+		"/Users/amauri/Documents/Develop/cs/node_modules/amt/node_modules/xml2js/node_modules/xmlbuilder/node_modules/lodash-node/compat/internals/isNative.js",
+		"/Users/amauri/Documents/Develop/cs/rules/old/init_platforms.js",
+		"/Users/amauri/Documents/Develop/cs/api/execution.get.js",
+		"/Users/amauri/Documents/Develop/cs/public/javascripts/manager.js",
+		"/Users/amauri/Documents/Develop/cs/node_modules/showdown/test/cases/automatic-anchors.html",
+		"/Users/amauri/Documents/Develop/cs/node_modules/v8-profiler/wscript",
+		"/Users/amauri/Documents/Develop/cs/views/manage/wizard/adaptation.jade",
+		"/Users/amauri/Documents/Develop/cs/node_modules/showdown/test/cases/list-with-blockquote.html",
+		"/Users/amauri/Desktop/flickrsample.json",
+		"/Users/amauri/Documents/Develop/cs/rules/closeTaskOnMicrotaskStatus.js"
+	],
+	"find":
+	{
+		"height": 33.0
+	},
+	"find_in_files":
+	{
+		"height": 0.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"onCloseObject",
+			"Moderate",
+			"SingleClassify",
+			"invitationTutorial",
+			"tutorial_review",
+			"invitationTutorial",
+			"#tutorial_execution_platform",
+			"executionTutorial",
+			"objectDeclarationTutorial",
+			"taskTypeTutorial",
+			"tutorial_task",
+			"tutoria_use_case_list",
+			"use_case_list",
+			"review",
+			"invitation",
+			"execution",
+			"#object",
+			"#task",
+			"pageTutorial",
+			"CS.startJob",
+			"configTaskTypes",
+			"Account",
+			"AccountSchema",
+			"AMT",
+			"StartAMTJob",
+			"createPost",
+			"toObj",
+			"Tag",
+			"Classify",
+			"operat",
+			"closed",
+			"will tr",
+			"completed",
+			"addOpera",
+			"onCloseObject",
+			"infos",
+			"OpenTask",
+			"RedoObject",
+			"hook",
+			"objects",
+			"onCloseObject",
+			"ObjectModel",
+			"HOtOrNotError",
+			"EquiSplit",
+			"Croed",
+			"Open",
+			"Task",
+			"cancel",
+			"todo",
+			"domain",
+			"OpenTaskError",
+			"add",
+			"addP",
+			"add",
+			"Score",
+			"SingleClassify",
+			"answer",
+			"Limit Task Execution",
+			"Event",
+			"SingleClassify",
+			"template",
+			"onOpenTask",
+			"toUTC",
+			"perforemr",
+			"color",
+			"_",
+			"\"",
+			"global",
+			"\"",
+			":2",
+			"clone",
+			"config",
+			"console",
+			"updateMart",
+			"ClassifyMajority",
+			"keys",
+			"ClassifyMajorityError",
+			"ClassifyMajority",
+			"log.trace"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"folders":
+	[
+		{
+			"follow_symlinks": true,
+			"path": "/Users/amauri/Documents/Develop/cs/core"
+		},
+		{
+			"follow_symlinks": true,
+			"path": "/Users/amauri/Documents/Develop/cs"
+		}
+	],
+	"groups":
+	[
+		{
+			"selected": 2,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "models/task.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 32485,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								12930,
+								12930
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 6617.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 4,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "views/login.jade",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1525,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								798,
+								798
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Jade/Syntaxes/Jade.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "views/register.jade",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1259,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								71,
+								71
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Jade/Syntaxes/Jade.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "rules/pushModeratedObject.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2698,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2208,
+								2295
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 488.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 5,
+					"type": "text"
+				}
+			]
+		},
+		{
+			"selected": 3,
+			"sheets":
+			[
+				{
+					"buffer": 4,
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 212,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								212,
+								212
+							]
+						],
+						"settings":
+						{
+							"auto_name": "consumerKey: AjVnDCa6fdmbUdnuShQNFQ",
+							"syntax": "Packages/Text/Plain text.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 6,
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "rules/pushObject.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1966,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								286,
+								286
+							]
+						],
+						"settings":
+						{
+							"history_list_is_closing": true,
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 98.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 7,
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"file": "config/override.json",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 902,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JSON.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 7,
+					"file": "config/configuration.json",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 870,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								169,
+								169
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JSON.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 21.0
+	},
+	"input":
+	{
+		"height": 30.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			],
+			[
+				1,
+				0,
+				2,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			0.506941012434,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"output.git-commit":
+	{
+		"height": 96.0
+	},
+	"output.git-pull":
+	{
+		"height": 102.0
+	},
+	"output.git-push":
+	{
+		"height": 102.0
+	},
+	"project": "",
+	"replace":
+	{
+		"height": 40.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+			[
+				"",
+				"cs/api/performer.post.js"
+			],
+			[
+				"overr",
+				"cs/config/override.json"
+			],
+			[
+				"push",
+				"cs/rules/pushObject.js"
+			],
+			[
+				"checktas",
+				"cs/api/checks/checkTaskId.js"
+			],
+			[
+				"task",
+				"cs/models/task.js"
+			],
+			[
+				"pushmode",
+				"cs/rules/pushModeratedObject.js"
+			],
+			[
+				"moderate",
+				"cs/task_types/moderate/index.js"
+			],
+			[
+				"likein",
+				"cs/operations/like/index.js"
+			],
+			[
+				"exec",
+				"cs/models/execution.js"
+			],
+			[
+				"answer",
+				"cs/api/answer.post.js"
+			],
+			[
+				"anno",
+				"cs/models/annotation.js"
+			],
+			[
+				"tefin",
+				"cs/platforms/tef/index.js"
+			],
+			[
+				"equi",
+				"cs/strategies/splitting/EQUI_SPLIT.js"
+			],
+			[
+				"cla",
+				"cs/rules/classifyMajority.js"
+			],
+			[
+				"eq",
+				"cs/strategies/splitting/EQUI_SPLIT.js"
+			],
+			[
+				"cr",
+				"core/CRM.js"
+			],
+			[
+				"validate",
+				"cs/rules/old/validateToActor.js"
+			],
+			[
+				"object",
+				"cs/views/manage/wizard/object_declaration.jade"
+			],
+			[
+				"object_de",
+				"cs/public/javascripts/object_declaration.js"
+			],
+			[
+				"user",
+				"cs/models/user.js"
+			],
+			[
+				"operapl",
+				"cs/models/plugins/operationsPlugin.js"
+			],
+			[
+				"sty.",
+				"cs/public/stylesheets/style.css"
+			],
+			[
+				"task_t",
+				"cs/views/manage/wizard/task_type.jade"
+			],
+			[
+				"revie",
+				"cs/views/manage/wizard/review.jade"
+			],
+			[
+				"invi",
+				"cs/views/manage/wizard/invitation.jade"
+			],
+			[
+				"exe",
+				"cs/views/manage/wizard/execution.jade"
+			],
+			[
+				"objectde",
+				"cs/views/manage/wizard/object_declaration.jade"
+			],
+			[
+				"managerin",
+				"cs/routes/manager/index.js"
+			],
+			[
+				"mana",
+				"cs/public/javascripts/manager.js"
+			],
+			[
+				"wizlau",
+				"cs/views/manage/wizard/layout.jade"
+			],
+			[
+				"wiztask",
+				"cs/views/manage/wizard/task_type.jade"
+			],
+			[
+				"execu",
+				"cs/views/manage/wizard/execution.jade"
+			],
+			[
+				"revi",
+				"cs/views/manage/wizard/review.jade"
+			],
+			[
+				"wizard",
+				"cs/views/manage/wizard/execution.jade"
+			],
+			[
+				"micro",
+				"cs/models/microtask.js"
+			],
+			[
+				"conf",
+				"cs/config/Configurator.js"
+			],
+			[
+				"facebookinde",
+				"cs/platforms/facebook/index.js"
+			],
+			[
+				"singleclass",
+				"cs/task_types/singleClassify/index.js"
+			],
+			[
+				"tasktyp",
+				"cs/task_types/comment/index.js"
+			],
+			[
+				"comment",
+				"cs/operations/comment/index.js"
+			],
+			[
+				"mi",
+				"cs/models/microtask.js"
+			],
+			[
+				"face",
+				"cs/api/facebook.start.js"
+			],
+			[
+				"close",
+				"cs/rules/closeTaskOnMicrotaskStatus.js"
+			],
+			[
+				"faceboo",
+				"cs/api/facebook.start.js"
+			],
+			[
+				"platformface",
+				"cs/platforms/facebook/index.js"
+			],
+			[
+				"tasktypelike",
+				"cs/task_types/like/index.js"
+			],
+			[
+				"closetas",
+				"cs/rules/closeTaskOnMicrotaskStatus.js"
+			],
+			[
+				"limit",
+				"cs/rules/limitMicrotaskExecution.js"
+			],
+			[
+				"tasktypecom",
+				"cs/task_types/comment/index.js"
+			],
+			[
+				"control",
+				"cs/models/controlmart.js"
+			],
+			[
+				"operationcomm",
+				"cs/operations/comment/index.js"
+			],
+			[
+				"objec",
+				"cs/models/object.js"
+			],
+			[
+				"contro",
+				"cs/models/controlmart.js"
+			],
+			[
+				"obj",
+				"cs/models/object.js"
+			],
+			[
+				"metada",
+				"cs/test/plugins/metadata.js"
+			],
+			[
+				"pla",
+				"cs/models/platform.js"
+			],
+			[
+				"con",
+				"cs/models/controlmart.js"
+			],
+			[
+				"execution.jade",
+				"cs/views/manage/wizard/execution.jade"
+			],
+			[
+				"limito",
+				"cs/rules/limitObjectEvaluations.js"
+			],
+			[
+				"coun",
+				"cs/rules/countLikes.js"
+			],
+			[
+				"crm",
+				"core/CRM.js"
+			],
+			[
+				"gt_",
+				"cs/views/manage/wizard/gt_declaration.jade"
+			],
+			[
+				"add",
+				"cs/views/manage/wizard/add_operations.jade"
+			],
+			[
+				"cs",
+				"cs/cs.js"
+			],
+			[
+				"manager",
+				"cs/routes/manager/index.js"
+			],
+			[
+				"inspe",
+				"cs/.node-inspectorrc"
+			],
+			[
+				"cs.j",
+				"cs/cs.js"
+			],
+			[
+				"das",
+				"cs/public/javascripts/dashboard.js"
+			],
+			[
+				"tefind",
+				"cs/platforms/tef/index.js"
+			],
+			[
+				"faceb",
+				"cs/platforms/facebook/index.js"
+			],
+			[
+				"manage",
+				"cs/views/manage/index.jade"
+			],
+			[
+				"amtindex",
+				"cs/platforms/amt/index.js"
+			],
+			[
+				"amtin",
+				"cs/node_modules/amt/node_modules/xml2js/node_modules/sax/test/index.js"
+			],
+			[
+				"maj",
+				"cs/rules/classifyMajority.js"
+			],
+			[
+				"countli",
+				"cs/rules/countLikes.js"
+			],
+			[
+				"comput",
+				"cs/rules/computeAlfa.js"
+			],
+			[
+				"singlecl",
+				"cs/task_types/singleClassify/index.js"
+			],
+			[
+				"taskty",
+				"cs/api/tasktype.post.js"
+			],
+			[
+				"chec",
+				"cs/rules/checkSpammer.js"
+			],
+			[
+				"agg",
+				"cs/rules/aggregateMajority.js"
+			],
+			[
+				"loo",
+				"cs/rules/old/loopMajority.js"
+			],
+			[
+				"majo",
+				"cs/rules/classifyMajority.js"
+			],
+			[
+				"contrl",
+				"cs/models/controlmart.js"
+			],
+			[
+				"tas",
+				"cs/models/task.js"
+			],
+			[
+				"mailindex",
+				"cs/platforms/email/index.js"
+			],
+			[
+				"twitterin",
+				"cs/platforms/twitter/index.js"
+			],
+			[
+				"twi",
+				"cs/node_modules/twit/lib/twitter.js"
+			],
+			[
+				"lay",
+				"cs/views/layout.jade"
+			],
+			[
+				"wiz",
+				"cs/views/manage/wizard/adaptation.jade"
+			],
+			[
+				"class",
+				"cs/rules/classifyMajority.js"
+			],
+			[
+				"agger",
+				"cs/rules/aggregateMajority.js"
+			],
+			[
+				"com",
+				"cs/rules/computeAlfa.js"
+			],
+			[
+				"ta",
+				"cs/models/task.js"
+			],
+			[
+				"clas",
+				"cs/rules/classifyMajority.js"
+			],
+			[
+				"wizardre",
+				"cs/views/manage/wizard/review.jade"
+			],
+			[
+				"tefinde",
+				"cs/platforms/tef/index.js"
+			],
+			[
+				"scorein",
+				"cs/task_types/score/index.js"
+			],
+			[
+				"tagin",
+				"cs/task_types/tag/index.js"
+			],
+			[
+				"hotinde",
+				"cs/task_types/hotOrNot/index.js"
+			],
+			[
+				"singleind",
+				"cs/task_types/singleClassify/index.js"
+			],
+			[
+				"likeinde",
+				"cs/task_types/like/index.js"
+			],
+			[
+				"emailinde",
+				"cs/platforms/email/index.js"
+			],
+			[
+				"facebookindex",
+				"cs/platforms/facebook/index.js"
+			],
+			[
+				"tefindex",
+				"cs/platforms/tef/index.js"
+			],
+			[
+				"tag",
+				"cs/node_modules/jade/lib/nodes/tag.js"
+			],
+			[
+				"wizardin",
+				"cs/views/manage/wizard/invitation.jade"
+			],
+			[
+				"dash",
+				"cs/views/manage/dashboard.jade"
+			],
+			[
+				"compute",
+				"cs/rules/computeAlfa.js"
+			],
+			[
+				"ov",
+				"config/override.json"
+			],
+			[
+				"routesapi",
+				"routes/api.js"
+			],
+			[
+				"task.ge",
+				"api/.task.get.js"
+			],
+			[
+				"aggre",
+				"rules/aggregateMajority.js"
+			],
+			[
+				"comp",
+				"rules/computeAlfa.js"
+			],
+			[
+				"singcla",
+				"task_types/singleClassify/index.js"
+			],
+			[
+				"task.po",
+				"api/task.post.js"
+			],
+			[
+				"routesma",
+				"routes/manager/index.js"
+			],
+			[
+				"che",
+				"rules/checkGroundTruth.js"
+			],
+			[
+				"singlecla",
+				"task_types/singleClassify/index.js"
+			],
+			[
+				"closemi",
+				"rules/closeMicroTaskOnObjectStatus.js"
+			],
+			[
+				"controlm",
+				"models/controlmart.js"
+			],
+			[
+				"ann",
+				"models/annotation.js"
+			],
+			[
+				"managein",
+				"routes/manager/index.js"
+			],
+			[
+				"manag",
+				"public/javascripts/manager.js"
+			],
+			[
+				"review",
+				"views/manage/wizard/review.jade"
+			],
+			[
+				"stat",
+				"api/stats.get.js"
+			],
+			[
+				"ob",
+				"models/object.js"
+			],
+			[
+				"sta",
+				"api/stats.get.js"
+			],
+			[
+				"modelobje",
+				"models/object.js"
+			]
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 500.0,
+		"selected_items":
+		[
+		],
+		"width": 380.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"selected_group": 1,
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 239.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}

@@ -1,0 +1,64 @@
+include ../../includes/params
+
+.row
+  .col-md-6
+    h3 Available operations
+    .form-group
+      label(for="operation_name") Operation:
+      .input-group
+        select#operation_name.form-control.input-small(
+          data-toggle='collapse',
+          data-parent='#operations-params')
+          option(value='',selected) None
+          each operation,id in config.operations
+            option(
+              data-target='#op-'+id,
+              value=id)= operation.name
+        span.input-group-btn
+          button.btn.btn-small.btn-success.add(
+            data-type='operation',
+            data-source='#operation_name',
+            data-target='#operation_list') Add 
+            i.fa.fa-plus
+    .form-group
+      label(for="operation_label") Label:
+      input#operation_label.form-control.input-small(
+        type="text",
+        data-name='label',
+        placeholder="Insert operation label",
+        required)
+    hr
+    #operations-params
+      each operation,id in config.operations
+        div.collapse(id='op-'+id)
+          h4 Operation parameters
+          if !_.isEmpty( operation.params ) 
+            +printParamsInput( operation.params, 'op-'+id )
+          else
+            blockquote No parameters needed
+  .col-md-6
+    h3 Selected operations
+    ul#operation_list.list-group
+
+script.
+  $( '#operations .add' ).on( 'click', function ( evt ) {
+    if( $( '#operation_name' ).val()!=='' ) {
+      var $operations = $( '#operation_list .operation' );
+
+      var labels = $operations.map( function() {
+        var $op = $( this );
+        return $op.data( 'value' ).label;
+      } ).get();
+
+      var $label = $( '#operation_label' );
+      var label = $label.val().trim();
+
+      if( label==='' || $.inArray( label, labels )!==-1 ) {
+        evt.stopImmediatePropagation();
+        evt.stopPropagation();
+        warnNoty( 'You must insert a <b>valid</b> and <b>unique</b> label' );
+        $label.select();
+        return false;
+      }
+    }
+  } );

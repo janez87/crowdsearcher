@@ -1,0 +1,19 @@
+.row
+  .col-md-6
+    .form-group
+      label.required(for='name') Name
+      input#name.form-control.input-small(type='text', placeholder='Task name', required)
+    .input-group
+      span.input-group-addon.input-small
+        input#private(type='checkbox')
+      label(for="private") Private?
+    .form-group(style='display: #{jobData}')
+      label(for='job') Job id
+      input#job.form-control.input-small(type='text', placeholder='Insert Job ID')
+  .col-md-6
+    .form-group
+      label(for='description_md') Description
+      textarea#description_md.form-control(rows=5)
+      p.help-block Insert 
+        a(href='http://daringfireball.net/projects/markdown/syntax', target='_blank') markdown
+        |  here

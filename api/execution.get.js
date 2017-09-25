@@ -1,362 +1,415 @@
+'use strict';
+// Load system modules
 
-// Load libraries
-var _ = require( 'underscore' );
-var util = require( 'util' );
-var async = require( 'async' );
-var nconf = require( 'nconf' );
+// Load modules
+let _ = require( 'lodash' );
+let Promise = require( 'bluebird' );
+let mongoose = require( 'mongoose' );
 
-// Use a child logger
-var log = common.log.child( { component: 'Get Execution' } );
+// Load my modules
+let CS = require( '../core' );
+let APIError = require( './error' );
 
-// Import models
-var Job = common.models.job;
-var Task = common.models.task;
-var Microtask = common.models.microtask;
-var Execution = common.models.execution;
-var Performer = common.models.user;
+// Constant declaration
 
-// Generate custom error `GetExecutionError` that inherits
-// from `APIError`
-var APIError = require( './error' );
-var GetExecutionError = function( id, message, status ) {
-  /* jshint camelcase: false */
-  GetExecutionError.super_.call( this, id, message, status );
-};
-util.inherits( GetExecutionError, APIError );
+// Module variables declaration
+let User = CS.models.user;
+let Task = CS.models.task;
+let Job = CS.models.job;
+let Microtask = CS.models.microtask;
+let Platform = CS.models.platform;
+let Execution = CS.models.execution;
+let ObjectId = mongoose.Types.ObjectId;
+let log = CS.log.child( {
+  component: 'Get Execution',
+} );
 
-GetExecutionError.prototype.name = 'GetExecutionError';
-// Custom error IDs
+// Custom errors
+class RequireAuthError extends APIError {}
+class GetExecutionError extends APIError {}
 GetExecutionError.MISSING_PARAMETERS = 'MISSING_PARAMETERS';
-GetExecutionError.CLOSED_MICROTASK = 'CLOSED_MICROTASK';
 GetExecutionError.CLOSED_TASK = 'CLOSED_TASK';
-GetExecutionError.CLOSED_JOB = 'CLOSED_JOB';
+GetExecutionError.TASK_NOT_OPENED = 'TASK_NOT_OPENED';
+GetExecutionError.JOB_NOT_FOUND = 'JOB_NOT_FOUND';
+GetExecutionError.TASK_NOT_FOUND = 'TASK_NOT_FOUND';
+GetExecutionError.MICROTASK_NOT_FOUND = 'MICROTASK_NOT_FOUND';
+GetExecutionError.CLOSED_MICROTASK = 'CLOSED_MICROTASK';
+GetExecutionError.USER_NOT_FOUND = 'USER_NOT_FOUND';
+GetExecutionError.USER_BANNED = 'USER_BANNED';
+GetExecutionError.PLATFORM_NOT_FOUND = 'PLATFORM_NOT_FOUND';
+GetExecutionError.PLATFORM_NOT_ENABLED = 'PLATFORM_NOT_ENABLED';
+GetExecutionError.PLATFORM_NOT_EXECUTABLE = 'PLATFORM_NOT_EXECUTABLE';
+GetExecutionError.MISSING_USER_PLATFORM = 'MISSING_USER_PLATFORM';
+
+// Module functions declaration
+function checkJob( jobId ) {
+  log.trace( 'Check if job %s is good', jobId );
+
+  return Job
+    .findById( jobId )
+    .select( '-task -objects' )
+    .exec()
+    .then( job => {
+      // Check if task is available
+      if ( !job ) {
+        let error = new GetExecutionError( GetExecutionError.TASK_NOT_FOUND, 'No job retrieved' );
+        return Promise.reject( error );
+      }
+
+      return job;
+    } );
+}
+
+function assignTask( data ) {
+  let job = data.job;
+  let performerId = data.performer;
+
+  log.trace( 'Assign task to performer %s from job %s', performerId, job._id );
+  let assign = Promise.promisify( job.assign, {
+    multiArgs: true,
+    context: job,
+  } );
+
+  return assign( {
+    performer: performerId,
+  } );
+}
+
+function checkTask( taskId ) {
+  log.trace( 'Check if task %s is good', taskId );
+
+  return Task
+    .findById( taskId )
+    .select( '-microtasks -objects' )
+    .exec()
+    .then( task => {
+      // Check if task is available
+      if ( !task ) {
+        let error = new GetExecutionError( GetExecutionError.TASK_NOT_FOUND, 'No task retrieved' );
+        return Promise.reject( error );
+      }
+
+      // Check if task is closed
+      if ( task.closed ) {
+        let error = new GetExecutionError( GetExecutionError.CLOSED_TASK, 'Task closed, cannot get an execution' );
+        return Promise.reject( error );
+      }
+
+      // Check if task is created
+      if ( task.created ) {
+        let error = new GetExecutionError( GetExecutionError.TASK_NOT_OPENED, 'Task not yet opened, cannot get an execution' );
+        return Promise.reject( error );
+      }
+
+      return task;
+    } )
+}
+
+function checkPerformer( performerId, task ) {
+  if ( !task.private ) {
+    return null;
+  }
+
+  // Check passed performerId
+  if ( performerId instanceof ObjectId || ObjectId.isValid( performerId ) ) {
+    return User
+      .findById( performerId )
+      .select( '_id' )
+      .lean()
+      .exec()
+      .then( performer => {
+        if ( !performer ) {
+          let error = new GetExecutionError( GetExecutionError.USER_NOT_FOUND, 'No user retrieved' )
+          return Promise.reject( error );
+        }
+
+        log.trace( 'Got performer %s', performer._id );
+        return performer._id;
+      } );
+  }
+
+  // Use performerId as generic string username
+  // Check passed username
+  let username = performerId;
+  if ( username ) {
+    // TODO
+  }
 
 
-// API object returned by the file
-// -----
-var API = {
-  // List of API parameters. In the format
-  //      name: required
-  // ... the required parameters will be verified automatically.
+  return Promise.reject( new RequireAuthError() );
+}
+
+function assignMicrotask( data ) {
+  let task = data.task;
+  let performerId = data.performer;
+
+  log.trace( 'Assign microtask to performer %s from task %s', performerId, task._id );
+
+  return task
+    .isBanned( performerId )
+    .then( isBanned => {
+      if ( isBanned ) {
+        let error = new GetExecutionError( GetExecutionError.USER_BANNED, 'The user is not allowed to perform this task', APIError.FORBIDDEN );
+        return Promise.reject( error );
+      }
+
+      let assign = Promise.promisify( task.assign, {
+        multiArgs: true,
+        context: task,
+      } )
+
+      // Assign microtask
+      return assign( {
+        performer: performerId,
+      } );
+    } );
+}
+
+function checkMicrotask( microtaskId ) {
+  log.trace( 'Check if microtask %s is good', microtaskId );
+
+  return Microtask
+    .findById( microtaskId )
+    .select( '-objects' )
+    .exec()
+    .then( microtask => {
+      // Check if microtask is available
+      if ( !microtask ) {
+        let error = new GetExecutionError( GetExecutionError.MICROTASK_NOT_FOUND, 'No microtask retrieved' );
+        return Promise.reject( error );
+      }
+
+      // Check if microtask is closed
+      if ( microtask.closed ) {
+        let error = new GetExecutionError( GetExecutionError.CLOSED_MICROTASK, 'Microtask closed, cannot get an execution' );
+        return Promise.reject( error );
+      }
+
+      return microtaskId;
+    } )
+}
+
+function assignPlatform( data ) {
+  let task = data.task;
+  let performerId = data.performer;
+  let microtaskId = data.microtask;
+
+  let assign = Promise.promisify( task.implementation, {
+    multiArgs: true,
+    context: task,
+  } )
+
+  // Assign microtask
+  return assign( {
+    performer: performerId,
+    microtask: microtaskId,
+  } );
+}
+
+function checkPlatform( platformId ) {
+  log.trace( 'Check if platform %s is good', platformId );
+
+  return Platform
+    .findById( platformId )
+    .exec()
+    .then( platform => {
+      if ( !platform ) {
+        let error = new GetExecutionError( GetExecutionError.PLATFORM_NOT_FOUND, 'No platform retrieved' );
+        return Promise.reject( error );
+      }
+
+      if ( !platform.enabled ) {
+        let error = new GetExecutionError( GetExecutionError.PLATFORM_NOT_ENABLED, 'Platform not enabled' );
+        return Promise.reject( error );
+      }
+
+      if ( !platform.execution ) {
+        let error = new GetExecutionError( GetExecutionError.PLATFORM_NOT_EXECUTABLE, 'Platform not enabled for execution' );
+        return Promise.reject( error );
+      }
+
+      return platformId;
+    } );
+}
+
+function saveExecution( data ) {
+  let execution = new Execution( data );
+
+  return execution.save();
+}
+
+function getExecutionById( executionId ) {
+  log.trace( 'Get by id: %s', executionId );
+
+  let query = Execution.findById( executionId );
+  return Promise.resolve( {
+    queryObject: query
+  } );
+}
+
+function getExecutionPromise( data ) {
+  let promise = Promise.resolve();
+
+  let taskId = data.task;
+  let jobId = data.job;
+  let microtaskId = data.microtask;
+  let executionId = data.execution;
+  let performerId = data.performer;
+
+  debugger;
+  // Check query parameters
+  if ( !taskId && !microtaskId && !executionId && !jobId ) {
+    let error = new GetExecutionError( GetExecutionError.MISSING_PARAMETERS, 'All the parameter are undefined', APIError.BAD_REQUEST );
+    promise = Promise.reject( error );
+  }
+
+  let rawExecution = {};
+  if ( jobId ) {
+    promise =
+      checkJob( jobId )
+      .tap( job => rawExecution.job = job )
+      .then( job => [ performerId, job ] )
+      .spread( checkPerformer )
+      .tap( myPerformerId => rawExecution.performer = myPerformerId )
+      .return( rawExecution )
+      .then( assignTask )
+      .spread( checkTask )
+      .tap( task => rawExecution.task = task ) // Associate task to execution
+      // performer
+      .then( task => [ performerId, task ] )
+      .spread( checkPerformer )
+      .tap( myPerformerId => rawExecution.performer = myPerformerId ) // Associate performer to execution
+      // Microtask
+      .return( rawExecution )
+      .then( assignMicrotask )
+      .then( checkMicrotask )
+      .tap( myMicrotaskId => rawExecution.microtask = myMicrotaskId ) // Associate microtask to execution
+      // Platform
+      .return( rawExecution )
+      .then( assignPlatform )
+      .then( checkPlatform )
+      .tap( platformId => rawExecution.platform = platformId ) // Associate platform to execution
+      // Execution
+      .return( rawExecution )
+      .then( saveExecution );
+
+
+  }
+  // Create execution based on task
+  else if ( taskId ) {
+    promise = checkTask( taskId )
+      .tap( task => rawExecution.task = task ) // Associate task to execution
+      // Performer
+      .then( task => [ performerId, task ] )
+      .spread( checkPerformer )
+      .tap( myPerformerId => rawExecution.performer = myPerformerId ) // Associate performer to execution
+      // Microtask
+      .return( rawExecution )
+      .then( assignMicrotask )
+      .then( checkMicrotask )
+      .tap( myMicrotaskId => rawExecution.microtask = myMicrotaskId ) // Associate microtask to execution
+      // Platform
+      .return( rawExecution )
+      .then( assignPlatform )
+      .then( checkPlatform )
+      .tap( platformId => rawExecution.platform = platformId ) // Associate platform to execution
+      // Execution
+      .return( rawExecution )
+      .then( saveExecution );
+
+
+  } else if ( microtaskId ) {
+    promise = checkMicrotask( microtaskId )
+      .tap( myMicrotaskId => rawExecution.microtask = myMicrotaskId ) // Associate microtask to execution
+      .tap( myMicrotaskId => {
+        // Get task from microtask
+        return Microtask
+          .findById( myMicrotaskId )
+          .select( 'task' )
+          .populate( 'task', '-objects -microtasks' )
+          .get( 'task' )
+          .then( task => rawExecution.task = task )
+      } )
+      // Platform
+      .return( rawExecution )
+      .then( assignPlatform )
+      .then( checkPlatform )
+      .tap( platformId => rawExecution.platform = platformId ) // Associate platform to execution
+      // Execution
+      .return( rawExecution )
+      .then( saveExecution );
+
+
+  } else if ( executionId ) {
+    promise = getExecutionById( executionId )
+      .then( obj => [ obj, true ] );
+  }
+
+  return promise;
+}
+
+function getExecution( req, res, next ) {
+  log.trace( 'Getting execution' );
+
+  let config = _.assign( {}, req.query );
+
+  if ( req.isAuthenticated() ) {
+    // If user is authenticated then use its id
+    let performerId = req.user._id;
+    config.performer = performerId;
+  }
+
+
+  return getExecutionPromise( config )
+    .spread( ( data, isQuery ) => {
+      if ( isQuery ) {
+        log.debug( 'Got execution from', req.query.execution );
+        req.queryObject = data.queryObject;
+        return next();
+      } else {
+        log.debug( 'Got execution %s', data._id );
+        let executionObj = data.toObject( {
+          getters: true,
+        } );
+
+        return res.json( executionObj );
+      }
+    } )
+    .catch( RequireAuthError, err => {
+      log.debug( 'This task requires authentication', err );
+
+      // Ok, require auth
+      req.session.destination = req.originalUrl.slice( 1 );
+      // Save in session the provenance of the user
+      req.session.from = req.query.from;
+
+      return res.format( {
+        html: () => res.redirect( CS.config.externalAddress + 'login' ),
+        json: () => res.json( APIError.UNAUTHORIZED, {
+          id: 'UNAUTHORIZED',
+          message: 'A user must be provided for this Task',
+          requestedUrl: req.session.destination
+        } ),
+      } );
+    } )
+    .catch( next );
+}
+// Module class declaration
+
+// Module initialization (at first load)
+
+// Module exports
+module.exports = {
   params: {
     job: false,
     alias: false,
     task: false,
-    microtask: false,
     execution: false,
     performer: false
   },
-
-  // The API endpoint. The final endpoint will be:
-  //    /api/**endpointUrl**
   url: 'execution',
-
-  // The API method to implement.
-  method: 'GET'
+  method: 'GET',
+  promiseLogic: getExecutionPromise,
+  logic: getExecution,
+  authError: RequireAuthError,
 };
-
-
-// API core function logic. If this function is executed then each check is passed.
-API.logic = function getExecution( req, res, next ) {
-  log.trace( 'Execution get' );
-
-  // Get the passed ids
-  var alias = req.query.alias;
-  var jobId = req.query.job;
-  var taskId = req.query.task;
-  var microtaskId = req.query.microtask;
-  var executionId = req.query.execution;
-  var performer = req.query.performer;
-
-  // At least one the parameters must be passed
-  if( !alias && !jobId && !taskId && !microtaskId && !executionId )
-    return next ( new GetExecutionError( GetExecutionError.MISSING_PARAMETERS,'All the parameter are undefined',APIError.BAD_REQUEST ) );
-
-  // ## Functions
-
-  // ### Execution
-  // Create and save an `Execution` object.
-  var createExecution = function( data, callback ) {
-    log.trace( 'Create execution' );
-
-    // Create execution
-    var rawExecution = {
-      job: data.task.job,
-      task: data.task,
-      microtask: data.microtask,
-      platform: data.platform,
-      performer: data.performer,
-      operations: data.microtask.operations
-    };
-
-    // Create and save execution
-    Execution.create( rawExecution, req.wrap( callback ) );
-  };
-
-  // ### Microtask
-  // Used to retrieve the microtask given the ID.
-  var retrieveMicroTask = function( id, callback ) {
-    Microtask
-    .findOne()
-    .where( '_id', id )
-    .where( 'status' ).ne( 50 ) //TODO: use constant
-    .populate( 'task operations platforms' )
-    .exec( req.wrap( function( err, microtask ) {
-      if( err ) return callback( err );
-
-      if( !microtask )
-        return callback( new GetExecutionError( GetExecutionError.CLOSED_MICROTASK, 'Closed or unavailable microtask' ) );
-
-      if( microtask.task.status===50 )
-        return callback( new GetExecutionError( GetExecutionError.CLOSED_TASK, 'Task is closed' ) );
-
-      var data = {
-        microtask: microtask,
-        task: microtask.task
-      };
-      return callback( null, data );
-    } ) );
-  };
-  // Used to assign a `microtask` from a `task` by invoking the Microtask Assignment strategy.
-  var assignMicroTask = function( data, callback ) {
-    var task = data.task;
-    var performer = data.performer;
-
-    task
-    .performMicroTaskAssigmentStrategy( {
-      task: task,
-      performer: performer
-    }, req.wrap( function( err, microtask ) {
-      // Add the microtask to the data object.
-      data.microtask = microtask;
-      return callback( err, data );
-    } ) );
-  };
-
-  // ### Task
-  // Used to retrieve the task given the ID.
-  var retrieveTask = function( id, callback ) {
-
-    Task
-    .findOne()
-    .where( '_id', id )
-    .where( 'status' ).ne( 50 ) //TODO: use constant
-    .exec( req.wrap( function( err, task ) {
-      if( err ) return callback( err );
-
-      if( !task )
-        return callback( new GetExecutionError( GetExecutionError.CLOSED_TASK, 'Closed or unavailable task' ) );
-
-      var data = {
-        task: task
-      };
-      return callback( null, data );
-    } ) );
-  };
-  // Used to assign a `task` from a `job` by invoking the Task Assignment strategy.
-  var assignTask = function( data, callback ) {
-    var job = data.job;
-
-    job
-    .performTaskAssigmentStrategy( {
-      job: job,
-      performer: performer
-      //TODO: Put something here???
-    }, req.wrap( function( err, task ) {
-      // Add the task to the data object.
-      data.task = task;
-      return callback( err, data );
-    } ) );
-  };
-
-
-  // ### Job
-  var retrieveJob = function( id, callback ) {
-    Job
-    .findById( id )
-    .where( 'status' ).ne( 50 ) // TODO: use constant
-    .exec( req.wrap( function( err, job ) {
-      if( err ) return callback( err );
-
-      if( !job )
-        return callback( new GetExecutionError( GetExecutionError.CLOSED_JOB, 'Closed or unavailable job' ) );
-
-      var data = {
-        job: job
-      };
-      return callback( null, data );
-    } ) );
-  };
-  // Used to retrieve the job with an alias
-  var retrieveAlias = function( alias, callback ) {
-    log.trace( 'Searching job for alias %s', alias );
-
-    Job
-    .findByAlias( alias )
-    .where( 'status' ).ne( 50 ) // TODO: use constant
-    .exec( req.wrap( function( err, job ) {
-      if( err ) return callback( err );
-
-      if( !job )
-        return callback( new GetExecutionError( GetExecutionError.CLOSED_JOB, 'Closed or unavailable job' ) );
-
-      log.trace( 'Got job %s (%s)', job.name, job._id );
-
-      var data = {
-        job: job
-      };
-
-      return callback( null, data );
-    } ) );
-  };
-
-  // ### Platform
-  var assignPlatform = function( data, callback ) {
-    var task = data.task;
-    var microtask = data.microtask;
-    var performer = data.performer;
-
-    task
-    .performImplementationStrategy( {
-      task: task,
-      microtask: microtask,
-      performer: performer
-    }, req.wrap( function( err, platform ) {
-      // Pass to the following function in the chain
-      // the `task`, `microtask` and the `platform`.
-
-      // Add the task to the data object.
-      data.platform = platform;
-      return callback( err, data );
-    } ) );
-  };
-
-  // ### Performer
-  var getPerformer = function( data, callback ) {
-    var task = data.task;
-
-    // If task is public then skip `performer` check.
-    if( !task.isPrivate() )
-      return callback( null, data );
-
-    // User already logged, pass the id..
-    if( req.isAuthenticated() ) {
-      data.performer = req.user;
-      return callback( null, data );
-    }
-
-
-    // Performer passed as a parameter
-    if( performer ) {
-
-      // Get the performer from the DB
-      return Performer
-      .findById( performer )
-      .exec( req.wrap( function( err, performer ) {
-        if( err ) return callback( err );
-
-        if( !performer ) return callback( new GetExecutionError( GetExecutionError.BAD_PERFORMER, 'Unable to find the specified performer' ) );
-
-        data.performer = performer;
-
-        delete req.query.performer;
-        return callback( null, data );
-      } ) );
-    }
-
-    // User not logged, save the url and redirect to login page. Remove the initial `/`.
-    req.session.destination = req.originalUrl.slice(1);
-
-    // Save in session the provenance of the user
-    req.session.from = req.query.from;
-    // Paramter used, remove it
-    delete req.query.from;
-
-    log.trace( 'User unauthorized, sending redirect' );
-    res.format( {
-      html: function() {
-
-        // Break out of the async cycle and request a user login
-        var baseURL = nconf.get( 'webserver:externalAddress' );
-        return res.redirect( baseURL+'login' );
-      },
-      json: function() {
-        return res.json( APIError.UNAUTHORIZED, {
-          id: 'UNAUTHORIZED',
-          message: 'A user must be provided while using a JSON request for a private Task',
-          requestedUrl: req.session.destination
-        } );
-      }
-    } );
-  };
-
-
-  // ## Main API logic
-  // Empty placeholder for functions to execute.
-  var actions = [
-    assignPlatform,
-    createExecution
-  ];
-
-  if( executionId ) {
-    // We got an execution Id, so we just need to retrieve it from Mongo.
-    req.queryObject = Execution.findById( executionId );
-
-    delete req.query.execution;
-    // Pass to the next middleware to hadle filters, population etc...
-    return next();
-  } else if( microtaskId ) {
-    // In this case we need to get the task from the microtask first and then
-    // create an execution.
-    // *Note*: can casue some erroneous behavuoir in case of complex
-    // Microtask Assignment strategies
-    actions.unshift(
-      _.partial( retrieveMicroTask, microtaskId ),
-      getPerformer
-    );
-    delete req.query.microtask;
-  } else if( taskId ) {
-    // If the Task id was passed then we need to get a microtask using the
-    // assigment strategy and create the execution.
-    actions.unshift(
-      _.partial( retrieveTask, taskId ),
-      getPerformer,
-      assignMicroTask
-    );
-    delete req.query.task;
-  } else if( alias ) {
-    // If the *alias* was passed then we need to get first the Task, then a
-    // microtask using the assigment strategy and create the execution.
-    actions.unshift(
-      _.partial( retrieveAlias, alias ),
-      assignTask,
-      getPerformer,
-      assignMicroTask
-    );
-    delete req.query.alias;
-  } else if( jobId ) {
-    // If the Job id was passed then we need to get a task using the
-    // assigment strategy, and proceed like we have the task Id.
-    actions.unshift(
-      _.partial( retrieveJob, jobId ),
-      assignTask,
-      getPerformer,
-      assignMicroTask
-    );
-    delete req.query.job;
-  }
-
-  async.waterfall( actions, function( err, execution ) {
-    if( err ) return next( err );
-
-    log.trace( 'Completed assignment chain, got execution %s', execution.id );
-
-    req.queryObject = Execution.findById( execution.id );
-
-    return next();
-  } );
-};
-
-
-// Export the API object
-exports = module.exports = API;

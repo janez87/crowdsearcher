@@ -1,0 +1,23 @@
+mixin printPlatforms( platforms )
+  if platforms.length==0
+    .alert.alert-info Sorry, no platforms specified.
+  else
+    .list-group.scrollable
+      for platform in platforms
+        - var platformId = 'plat_'+platform._id;
+        .list-group-item
+          .list-group-item-heading
+            .row
+              .col-md-6
+                a(data-toggle='collapse',href='#'+platformId)= platform.name
+              .col-md-6.text-right
+                if platform.enabled
+                  i.fa.fa-power-off.fa-border(title='Platform enabled')
+
+                if platform.execution
+                  i.fa.fa-play.fa-border(title='Platform enabled for execution')
+
+                if platform.invitation
+                  i.fa.fa-envelope-o.fa-border(title='Platform enabled for invitation')
+          .list-group-item-text.collapse(id=platformId)
+            +printParams( platform.params )

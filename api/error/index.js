@@ -1,8 +1,8 @@
 
-// Load libraries
+'use strict';
 var util = require( 'util' );
 
-var CSError = require('../../error');
+var CSError = require('../../core/error');
 // Create the APIError class
 var APIError = function( id, message, status ) {
   APIError.super_.call( this, id, message);

@@ -1,162 +1,106 @@
-// Load libraries
-var _  = require('underscore');
-var path = require( 'path' );
-var nconf = require( 'nconf' );
-var async = require( 'async' );
-var glob = require('glob');
+'use strict';
+// Load system modules
+let path = require( 'path' );
 
+// Load modules
+let _ = require( 'lodash' );
+let glob = require( 'glob' );
+let Promise = require( 'bluebird' );
 
-// Configure Operations
-// ---
-function configOperations( callback ) {
-  // Import the log, cannot be imported before because is not available
-  var log = common.log;
+// Load my modules
+let CS = require( '../core' );
 
-  // Wrap into a `try catch` to handle all errors
-  try {
-    log.trace( 'Configuring Strategy list' );
+// Constant declaration
 
-    // Get the configuration object
-    var scriptConfiguration = nconf.get( 'scripts' );
+// Module variables declaration
 
+// Module functions declaration
+function loadFromFolder( folder ) {
+  let log = CS.log;
+  let options = {
+    cwd: folder
+  };
 
-    function findStrategies( callback ) {
-      // Compose the strategies base directory
-      var scriptBaseDir = path.join( scriptConfiguration.path, 'strategies' );
+  return glob( '*.js', options )
+  .then( function( files ) {
+    if ( !files ) return null;
 
+    var requireFolder = path.join( '..', folder );
 
-      var options = {
-        cwd: scriptBaseDir
-      };
-      glob( '*/*.js', options, function( err, files ) {
-        if( err ) return callback( err );
-
-        if( !files ) return callback();
-
-        var strategies = {};
-
-        _.each( files, function( file ) {
-          var match = file.match( /(.*)\/(.*)\.js/i );
-
-          // something went wrong with the match
-          if( !match ) return;
-
-          // First match will contain the *underscored* folder name.
-          var strategyContainer = match[1];
-          // Convert `this_string` into `ThisString`
-          strategyContainer = _.classify( strategyContainer );
-          // lowercase the first letter
-          strategyContainer = strategyContainer[ 0 ].toLowerCase()+strategyContainer.slice(1);
-
-          // Second match will contain the strategy name.
-          var strategyName = match[2];
-
-          log.trace( 'Loading %s into %s', strategyName, strategyContainer );
-          file = '../'+scriptBaseDir + '/' + file;
-
-          var container = strategies[ strategyContainer ] || {};
-          container[ strategyName ] = require( file );
-
-          strategies[ strategyContainer ] = container;
-        } );
-
-        // Create the global container for the strategies
-        GLOBAL.common.strategies = strategies;
-
-        // return
-        return callback();
-      } );
-    }
-
-    function findCustomRules( callback ) {
-      // Compose the custom rules base directory
-      var customRuleBaseDir = path.join( scriptConfiguration.path, 'default' );
-
-
-      var options = {
-        cwd: customRuleBaseDir
-      };
-      glob( '*.js', options, function( err, files ) {
-        if( err ) return callback( err );
-
-        if( !files ) return callback();
-
-        var customRules = {};
-
-        _.each( files, function( file ) {
-          var match = file.match( /(.*)\.js/i );
-
-          // something went wrong with the match
-          if( !match ) return;
-
-          var customRuleName = match[1];
-
-          log.trace( 'Loading custom rule "%s"', customRuleName );
-          file = '../'+customRuleBaseDir + '/' + file;
-
-          customRules[ customRuleName ] = require( file );
-        } );
-
-        // Create the global container for the strategies
-        GLOBAL.common.customRules = customRules;
-
-        // return
-        return callback();
-      } );
-    }
-
-
-    async.parallel( [
-      findStrategies,
-      findCustomRules
-    ], callback );
-
-    /*
-    // Mapping from the prpperty name to the folder containing
-    // the corresponding strategy
-    var mapping = {
-      executionAssignment: 'execution_assignment',
-      taskAssignment: 'task_assignment',
-      microtaskAssignment: 'microtask_assignment',
-      splitting: 'splitting',
-      implementation: 'implementation',
-      invitation: 'invitation'
-    };
-
-    // For each strategy folder load the files and add the logic
-    // into the global strategies object (in the right place).
-    _.each( mapping, function( folderName, propertyName ) {
-
-      // Add the property to the strategy list
-      strategies[ propertyName ] = {};
-
-      // Load each file in the folder
-      var strategyList = fs.readdirSync( path.join( scriptBaseDir, folderName ) );
-
-      var strategyMatch = /^([a-z]\w*)\.js$/i;
-      _.each( strategyList, function( strategyFile ) {
-
-        if( !strategyFile.match( strategyMatch ) ) {
-          log.trace( 'Skip strategy from file: %s', strategyFile );
-        } else {
-          log.trace( 'Loading %s strategy from file: %s', propertyName, strategyFile );
-
-          var strategyFullPath = path.join( '..', scriptBaseDir, folderName, strategyFile );
-
-          var match = strategyFile.match( strategyMatch );
-
-          strategies[ propertyName ][ match[1] ] = require( strategyFullPath );
-        }
-      } );
+    var mapping = {};
+    // Require each retrieved file.
+    _.each( files, function( file ) {
+      // Use the file name without extesion as the key.
+      var key = file.slice( 0, -3 );
+      // ... and load the file as the value.
+      log.trace( 'Loading strategy %s', file );
+      mapping[ key ] = require( path.join( requireFolder, file ) );
     } );
-    */
-  } catch( err ) {
-    console.error( 'Strategies configuration error', err );
-    callback( err );
-  }
+
+    return mapping;
+  } );
+}
+function loadStrategies() {
+  var log = CS.log;
+  // Clone so the original wont be modified.
+  var config = _.clone( this.get( 'strategies' ) );
+
+  // retrieve the base path and remove it fom the object so we ca cycle over
+  // the keys and load the strategies.
+  var basePath = config.path;
+  delete config.path;
+
+
+  log.debug( 'Config: %j', config );
+  log.debug( 'Config pairs: %j', _.toPairs( config ) );
+  let pairs = _.toPairs( config );
+
+  return Promise
+  .map( pairs, ( data )=>{
+    var container = data[ 0 ];
+    var folder = path.join( basePath, data[ 1 ] );
+
+    return loadFromFolder( folder )
+    .then( ( strategies )=> {
+      log.trace( '%s have %s strategies in %s: %j', container, _.size( strategies ), folder, strategies );
+      // Add to the corresponding container in the `CS` global variable.
+      CS[ container ] = strategies;
+    })
+  } )
+}
+function loadCustomRules() {
+  var log = CS.log;
+  var rulesPath = this.get( 'rules.path' );
+
+  return Promise
+  .bind( this )
+  .return( rulesPath )
+  .then( loadFromFolder )
+  .then( function( mapping ) {
+    // Make the rules public, under the `rules` key.
+    CS.rules = mapping;
+    log.trace( 'Rules: %j', mapping );
+  } );
+}
+function configStrategies() {
+  // Import the log, cannot be imported before because is not available.
+  var log = CS.log;
+
+  log.debug( 'Loading strategies and custom rules' );
+  return Promise
+  .all( [
+    loadStrategies.call( this ),
+    loadCustomRules.call( this ),
+  ] )
+  .then( ()=>{
+    log.debug( 'Strategy and custom rules loading complete' );
+  } )
 }
 
+// Module class declaration
 
+// Module initialization (at first load)
+glob = Promise.promisify( glob );
 
-// Export configuration function
-exports = module.exports = configOperations;
+// Module exports
+exports = module.exports = configStrategies;

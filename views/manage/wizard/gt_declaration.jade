@@ -1,0 +1,57 @@
+extends ./layout
+
+block append lateScripts
+  script(src='javascripts/dropzone.js')
+  script(src='javascripts/gt_declaration.js')
+  script.
+    var objDecl = !{JSON.stringify(status.object_declaration || {})};
+    var objSchema = objDecl.schema || {};
+
+block append css
+  style(type='text/css').
+    .table {
+      table-layout: fixed;
+    }
+    .table>tbody>tr {
+      height: 3em;
+      max-height: 3em;
+      white-space: nowrap;
+    }
+    .table>tbody>tr>td {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+block wizardTitle
+  h2 Groundtruth
+
+block inputData
+  input(type='hidden', name='name', value='gt_declaration')
+  input.wzData(type='hidden', name='data', value='null')
+
+block content
+  hr
+
+  h2 Input files
+
+  .row
+    .col-md-8
+
+      form.form-horizontal
+        .form-group
+          label.col-md-3.control-label(for='file_type') File type:
+          .col-md-9
+            select.form-control#file_type
+              option(value='.json') JSON
+        .form-group
+          label.col-md-3.control-label(for='file') File select:
+          .col-md-9
+            input.form-control#file(type='file',title='Select a file')
+
+    .col-md-4
+      //.dropzone
+
+  h3 Data preview
+  table.table.table-bordered.table-hover.table-condensed
+    thead: tr#header
+    tbody#data

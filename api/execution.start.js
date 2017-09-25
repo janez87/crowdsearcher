@@ -1,119 +1,128 @@
+'use strict';
+// Load system modules
+let url = require( 'url' );
 
-// Load libraries
-var _ = require( 'underscore' );
-var url = require( 'url' );
-var util = require( 'util' );
-var async = require( 'async' );
+// Load modules
+let _ = require( 'lodash' );
+let Promise = require( 'bluebird' );
 
-// Use a child logger
-var log = common.log.child( { component: 'Start Execution' } );
+// Load my modules
+let CS = require( '../core' );
+let APIError = require( './error' );
+let getExecutionAPI = require( './execution.get' );
 
-// Import other APIs
-var getExecutionAPI = require( './execution.get' );
+// Constant declaration
 
-// Generate custom error `StartExecutionError` that inherits
-// from `APIError`
-var APIError = require( './error' );
-var StartExecutionError = function( id, message, status ) {
-  /* jshint camelcase: false */
-  StartExecutionError.super_.call( this, id, message, status );
-};
-util.inherits( StartExecutionError, APIError );
+// Module variables declaration
+let RequireAuthError = getExecutionAPI.authError;
+let Execution = CS.models.execution;
+let log = CS.log.child( {
+  component: 'Start Execution'
+} );
 
-StartExecutionError.prototype.name = 'StartExecutionError';
-// Custom error IDs
+// Custom Errors
+class StartExecutionError extends APIError {}
 StartExecutionError.NO_EXECUTION = 'NO_EXECUTION';
 StartExecutionError.INVALID_URL = 'INVALID_URL';
 
+// Module functions declaration
+function getExecution( config ) {
+  log.trace( 'Fake GET execution call' );
 
-// API object returned by the file
-// -----
-var API = {
-  // The API endpoint. The final endpoint will be:
-  //    /api/**endpointUrl**
-  url: 'run',
+  // Make the fake call
+  return getExecutionAPI
+  .promiseLogic( config )
+  .get( '_id' );
+}
+function populateExecution( executionId ) {
+  log.trace( 'Populating execution %s', executionId );
 
-  // The API method to implement.
-  method: 'GET'
-};
-
-
-// API core function logic. If this function is executed then each check is passed.
-API.logic = function startExecution( req, res, next ) {
-  // Fake API call to `GET /api/execution`
-  var getExecution = function( callback ) {
-    // Make the fake call
-    getExecutionAPI.logic( req, res, callback );
-  };
-
-  // From the id retrieve the Execution Object
-  var populateExecution = function( callback ) {
-    var query = req.queryObject;
-
-    query
-    .populate( 'task microtask operations platform' )
-    .exec( req.wrap( callback ) );
-  };
-
-  var startImplementation = function( execution, callback ) {
-    if( !execution )
-      return callback( new StartExecutionError( StartExecutionError.NO_EXECUTION, 'Missing execution' ) );
-
-    var platform = execution.platform;
-    // Import the platform implementation
-    var platformImplementation = common.platforms[ platform.name ];
-
-    try {
-      platformImplementation.execute(
-        execution.task,
-        execution.microtask,
-        execution,
-        platform,
-        req.wrap( callback )
-      );
-    } catch( err ) {
-      log.error( 'Execution error' );
-      return callback( err );
+  return Execution
+  .findById( executionId )
+  .populate( 'platform' )
+  .populate( 'microtask', '-objects' )
+  .populate( 'task', '-objects -microtasks' )
+  .exec()
+  .then( execution => {
+    if( !execution ) {
+      let error = new StartExecutionError( StartExecutionError.NO_EXECUTION, 'Missing execution' );
+      return Promise.reject( error );
     }
-  };
 
-  var actions = [
-    getExecution,
-    populateExecution,
-    startImplementation
-  ];
-
-  async.waterfall( actions, function( err, executionUrl ) {
-    if( err ) return next( err );
-
-    if( !executionUrl )
-      return next( new StartExecutionError( StartExecutionError.INVALID_URL, 'The platform did not provide a valid url' ) );
-
-    log.debug( 'Run execution complete' );
-    var urlObj = url.parse( executionUrl, true );
-    urlObj.search = null;
-    var qs = _.extend( urlObj.query, req.query );
-
-    log.trace( 'Params: %j', req.query );
-    log.trace( 'qs: %j', qs );
-
-    //urlObj.query = {};
-    executionUrl = url.format( urlObj );
-    log.trace( 'Redirect url is %s', executionUrl );
-
-    res.format( {
-      html: function() {
-        res.redirect( executionUrl );
-      },
-      json: function() {
-        res.json( {
-          url: executionUrl
-        } );
-      }
-    } );
+    return execution;
   } );
-};
+}
+function startImplementation( execution ) {
+  log.trace( 'Starting implementation for execution %s', execution._id );
+  // Data
+  let microtask = execution.microtask;
+  let task = execution.task;
 
+  // Import the platform implementation
+  let platform = execution.platform;
+  let platformImplementation = platform.implementation;
 
-// Export the API object
-exports = module.exports = API;
+  let executePromise = Promise.promisify( platformImplementation.execute, {
+    multiArgs: true,
+    context: platformImplementation,
+  } );
+
+  return executePromise( task, microtask, execution, platform );
+}
+function startExecution( req, res, next ) {
+  log.trace( 'Starting execution' );
+
+  // Create config object
+  let config = _.assign( {}, req.query );
+  if( req.isAuthenticated() ) {
+    // If user is authenticated then use its id
+    let performerId = req.user._id;
+    config.performer = performerId;
+  }
+
+  return getExecution( config )
+  .then( populateExecution )
+  .then( startImplementation )
+  .spread( executionUrl => {
+    if( !executionUrl ) {
+      let error = new StartExecutionError( StartExecutionError.INVALID_URL, 'The platform did not provide a valid url' );
+      return Promise.reject( error );
+    }
+
+    let urlObj = url.parse( executionUrl, true );
+    urlObj.search = null;
+    executionUrl = url.format( urlObj );
+
+    return res.format( {
+      // Send an HTML redirect
+      html: () => res.redirect( executionUrl ),
+      // Send a JSON with the url to contact
+      json: () => res.json( { url: executionUrl } ),
+    } );
+  } )
+  .catch( RequireAuthError, err => {
+    log.debug( 'This task requires authentication', err );
+
+    // Ok, require auth
+    req.session.destination = req.originalUrl.slice( 1 );
+    // Save in session the provenance of the user
+    req.session.from = req.query.from;
+
+    return res.format( {
+      html: () => res.redirect( CS.config.externalAddress+'login' ),
+      json: () => res.json( APIError.UNAUTHORIZED, { id: 'UNAUTHORIZED', message: 'A user must be provided for this Task', requestedUrl: req.session.destination } ),
+    } );
+  } )
+  .catch( next );
+}
+
+// Module class declaration
+
+// Module initialization (at first load)
+
+// Module exports
+module.exports = {
+  url: 'run',
+  method: 'GET',
+  logic: startExecution,
+}

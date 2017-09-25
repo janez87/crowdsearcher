@@ -1,0 +1,78 @@
+extends layout
+
+block header
+  h1 Job list
+
+block content
+
+  .panel.panel-info
+    .panel-heading
+      strong <i class="fa fa-info-circle"></i> Info
+      button.close(type="button", data-toggle="collapse", data-target="#info")
+        span(aria-hidden="true") &times;
+        span.sr-only Close
+    #info.panel-collapse.collapse.in
+      .panel-body
+        p Here you can see the list of jobs present in the platform.
+
+        p If you click on the Job name you can see some details on the job.
+
+        p To see details about the Job click on the <button class="btn btn-sm btn-default"><i class="fa fa-folder-open"></i> Details</button> button to go to the Job details page.
+
+        p Sample job row:
+
+        .panel.panel-default
+          .panel-heading
+            a.accordion-toggle(
+              href='#sample',
+              data-toggle='collapse') Job name
+            code job-alias
+            .btn-group.pull-right
+              button.btn.btn-sm.btn-danger
+                i.fa.fa-trash-o
+                |  Remove
+              button.btn.btn-sm.btn-default
+                i.fa.fa-folder-open
+                |  Details
+            .clearfix
+          #sample.panel-collapse.collapse.in
+            .panel-body
+              .pull-right
+                p Created:
+                  code= moment( Date.now() ).format( 'YYYY-MM-DD HH:mm' )
+              .md Job description
+  hr
+
+  if jobs.length===0
+    blockquote
+      p No Jobs found in the database.
+  else
+    #accordion.panel-group
+      for job in jobs
+        .panel.panel-default
+          .panel-heading
+            a.accordion-toggle(
+              href='#'+job._id,
+              data-toggle='collapse',
+              data-parent='accordion')= job.name
+            if job.alias
+              code= job.alias
+            .btn-group.pull-right
+              a.btn.btn-sm.btn-danger#delete(
+                href='#',
+                data-destination,
+                data-id=job._id,
+                data-entity='job',
+                data-method='DELETE')
+                i.fa.fa-trash-o
+                |  Remove
+              a.btn.btn-sm.btn-default(href='manage/job/'+job._id)
+                i.fa.fa-folder-open
+                |  Details
+            .clearfix
+          div(id=job._id).panel-collapse.collapse
+            .panel-body
+              .pull-right
+                p Created:
+                  code= moment( job.creationDate ).format( 'YYYY-MM-DD HH:mm' )
+              .md= job.description

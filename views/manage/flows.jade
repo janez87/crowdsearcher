@@ -1,0 +1,14 @@
+extends layout
+
+block header
+  h1 Task flows for job #{jobId}
+
+block append scripts
+  script(src='libs/d3.v3.min.js')
+  script.
+    var jobId = '#{jobId}';
+
+block content
+  h2 Flow
+  #container
+  script(src='javascripts/flow.js')

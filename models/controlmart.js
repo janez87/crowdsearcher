@@ -1,103 +1,137 @@
+'use strict';
+var mongo = require( 'mongoose' );
+let _ = require( 'lodash' );
+var async = require( 'async' );
+var CS = require( '../core' );
 
-
-// Load libraries
-var mongo = require('mongoose');
-var log = common.log.child( { component: 'ControlMart model' } );
-var _ = require('underscore');
+// Create a child logger
+var log = CS.log.child( {
+  component: 'ControlMart model'
+} );
 
 // Import Mongo Classes and Objects
 var Schema = mongo.Schema;
 var ObjectId = Schema.ObjectId;
 
-// User schema
+// Control Mart
+// ---
+// It contains all the control parameters needed by the control rules
+
+// ControlMart schema
 var ControlMartSchema = new Schema( {
-  
-  
-  name:{
-    type:String,
-    required:true
+  name: {
+    type: String,
+    required: true,
+    index: true,
   },
 
-  job:{
-    type:ObjectId,
-    ref:'job'
+  job: {
+    index: true,
+    type: ObjectId,
+    ref: 'job'
   },
 
-  task:{
-    type:ObjectId,
-    ref:'task'
+  task: {
+    index: true,
+    type: ObjectId,
+    ref: 'task'
   },
 
-  microtask:{
-    type:ObjectId,
-    ref:'microtask'
+  microtask: {
+    index: true,
+    type: ObjectId,
+    ref: 'microtask'
   },
 
-  operation:{
-    type:ObjectId,
-    ref:'operation'
+  operation: {
+    index: true,
+    type: ObjectId,
+    ref: 'operation'
   },
 
-  platform:{
-    type:ObjectId,
-    ref:'platform'
+  platform: {
+    index: true,
+    type: ObjectId,
+    ref: 'platform'
   },
 
-  object:{
-    type:ObjectId,
-    ref:'object'
+  performer: {
+    index: true,
+    type: ObjectId,
+    ref: 'performer'
+  },
+
+  object: {
+    index: true,
+    type: ObjectId,
+    ref: 'object'
   },
 
   data: Schema.Types.Mixed
 } );
 
-//Return the data value of the ControlMart tuple that exactly match the input rawTuple
-ControlMartSchema.statics.select = function(rawTuple,callback){
+// ## Static methods for the `ControlMart` class
+// ---
 
-  log.trace('Retrieving the controlmart tuple of %j', rawTuple);
 
-  this.find(rawTuple,function(err,controlMartTuples){
-    if(err) return callback(err);
-    
-    log.trace('%s retrieved',controlMartTuples);
+ControlMartSchema.statics.select = function( filter, names, callback ) {
+  if ( !_.isArray( names ) )
+    names = [ names ];
 
-    return callback(null,controlMartTuples);
-  });
+  // Just in case
+  delete filter[ 'data' ];
+  delete filter[ 'name' ];
+
+  // If no names specified just call the get.
+  if ( names.length === 0 )
+    return this.get( filter, callback );
+
+  this
+    .find( filter )
+    .where( 'name' ).in( names )
+    .sort( '-_id' )
+    .exec( function( err, controlmart ) {
+      if ( err ) return callback( err );
+
+      log.trace( '%s tuples selected', controlmart.length );
+
+      return callback( null, controlmart );
+    } );
+};
+
+// Return the tuple matching the condition in its original format
+ControlMartSchema.statics.get = function( rawTuple, callback ) {
+  log.trace( 'Retrieving the controlmart tuple of %j', rawTuple );
+
+  this
+    .find( rawTuple )
+    .sort( '-_id' )
+    .exec( function( err, controlmart ) {
+      if ( err ) return callback( err );
+
+      log.trace( '%s tuples retrieved', controlmart.length );
+
+      return callback( null, controlmart );
+    } );
 
 };
 
-//Returns all the tuples matching the condition
-ControlMartSchema.statics.get = function(rawTuple,callback){
+// Save tuple
+// Deprecated, kept for compatibility
+ControlMartSchema.statics.insert = function( rawTuples, callback ) {
+  log.trace( 'Creating or updating the tuple' );
+  var _this = this;
 
-  if(_.isUndefined(rawTuple.name)){
-    return callback(new Error('The name is required'));
+  if ( !_.isArray( rawTuples ) ) {
+    rawTuples = [ rawTuples ];
   }
 
-  //Need to force the undefined values
-  var tupleToSearch = {
-    job: rawTuple.job,
-    task: rawTuple.task,
-    operation: rawTuple.operation,
-    microtask: rawTuple.microtask,
-    object: rawTuple.object,
-    name:rawTuple.name,
-    platform: rawTuple.platform
+  var insertOrUpdate = function( tuple, cb ) {
+
+    return tuple.save( cb );
   };
 
-  log.trace('Retrieving the controlmart tuple of %j', tupleToSearch);
-
-  this.findOne(tupleToSearch,function(err,controlMartTuple){
-    if(err) return callback(err);
-    
-    log.trace('%s retrieved',controlMartTuple);
-
-    if(controlMartTuple && !_.isUndefined(controlMartTuple)){
-      return callback(null,controlMartTuple.data);
-    }
-
-    return callback();
-  });
- 
+  return async.each( rawTuples, insertOrUpdate, callback );
 };
 
 

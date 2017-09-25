@@ -1,9 +1,9 @@
 !!! 5
-html(prefix="og: http://ogp.me/ns#")
+html(prefix='og: http://ogp.me/ns#')
   head
     base(href=appBase)
     title= title
-    
+
     block meta
       include includes/metaOpenGraph
       include includes/meta
@@ -16,7 +16,7 @@ html(prefix="og: http://ogp.me/ns#")
 
     block libScripts
       include includes/libJS
-      
+
     block scripts
       script(src='javascripts/script.js')
   body
@@ -27,7 +27,10 @@ html(prefix="og: http://ogp.me/ns#")
           span.icon-bar
           span.icon-bar
           span.icon-bar
-        a.navbar-brand(href=appBase)= title
+        block homeLink
+          a.navbar-brand(href=appBase)
+            img.top-logo(src=appBase+'img/logo.png',alt="CrowdSearcher logo")
+            span.top-logo-text= title
 
       .collapse.navbar-collapse.navbar-top-collapse
         ul.nav.navbar-nav.navbar-right
@@ -35,7 +38,7 @@ html(prefix="og: http://ogp.me/ns#")
             li: a(href='account')= user.username || user.displayName
             li: a(href='logout') Logout
           else
-            li: a(href='register') Register
+            //li: a(href='register') Register
             li: a(href='login') Login
 
     .container
@@ -47,3 +50,5 @@ html(prefix="og: http://ogp.me/ns#")
         block content
       footer
         include includes/footer
+
+      block lateScripts

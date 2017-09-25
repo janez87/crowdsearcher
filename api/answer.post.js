@@ -1,198 +1,110 @@
+'use strict';
+// Load system modules
 
+// Load modules
+let _ = require( 'lodash' );
+let Promise = require( 'bluebird' );
 
-// Load libraries
-var _ = require( 'underscore' );
-var util = require( 'util' );
-var async = require( 'async' );
+// Load my modules
+let CS = require( '../core' );
+let APIError = require( './error' );
 
-// Use a child logger
-var log = common.log.child( { component: 'Post Answer' } );
+// Constant declaration
 
-// Generate custom error `PostAnswerError` that inherits
-// from `APIError`
-var APIError = require( './error' );
-var PostAnswerError = function( id, message, status ) {
-  /* jshint camelcase: false */
-  PostAnswerError.super_.call( this, id, message, status );
-};
-util.inherits( PostAnswerError, APIError );
+// Module variables declaration
+// let Task = CS.models.task;
+let Microtask = CS.models.microtask;
+let Execution = CS.models.execution;
+let log = CS.log.child( {
+  component: 'Post Answer'
+} );
 
-PostAnswerError.prototype.name = 'PostAnswerError';
-// Custom error IDs
+// Custom errors
+class PostAnswerError extends APIError {}
 PostAnswerError.ANSWER_NUMBER_MISMATCH = 'ANSWER_NUMBER_MISMATCH';
 PostAnswerError.OPERATION_TYPE_INVALID = 'OPERATION_TYPE_INVALID';
-PostAnswerError.EXECUTION_CLOSED = 'EXECUTION_CLOSED';
 PostAnswerError.BAD_FORMAT = 'BAD_FORMAT';
+PostAnswerError.NOT_FOUND = 'NOT_FOUND';
+PostAnswerError.EXECUTION_CLOSED = 'EXECUTION_CLOSED';
 
-// API object returned by the file
-// -----
-var API = {
-  // List of checks to perform. Each file is execute
-  // *in order* as an express middleware.
-  checks: [
-    'checkExecutionId'
-  ],
+// Module functions declaration
+function checkExecution( executionId ) {
+  return Execution
+  .findById( executionId )
+  .then( execution => {
+    // Check if execution is present
+    if( !execution ) {
+      let error = new PostAnswerError( PostAnswerError.NOT_FOUND, 'No execution retrieved' );
+      return Promise.reject( error );
+    }
 
+    // Check if execution is not closed
+    if( execution.closed ) {
+      let error = new PostAnswerError( PostAnswerError.EXECUTION_CLOSED, 'Execution already closed' );
+      return Promise.reject( error );
+    }
 
-  // List of API parameters. In the format
-  //      name: required
-  // ... the required parameters will be verified automatically.
-  params: {
-    execution: true
-  },
+    return execution;
+  } )
+}
+function addAnnotations( answers, execution ) {
+  return execution
+  .createAnnotations( answers )
+  .return( execution );
+}
+function saveExecution( execution ) {
+  // let taskId = execution.task;
+  let microtaskId = execution.microtask;
 
-  // The API endpoint. The final endpoint will be:
-  //    /api/**endpointUrl**
-  url: 'answer',
+  // TODO must add also the task check like task.closed || microtask.closed
 
-  // The API method to implement.
-  method: 'POST'
-};
+  return Microtask
+  .findById( microtaskId )
+  .select( 'status' )
+  .lean()
+  .exec()
+  .then( microtask => {
+    if( microtask.status==='CLOSED' ) { // Andrea Mauri PhD
+      return execution.makeInvalid();
+    } else {
+      return execution.close();
+    }
+  } )
+  .return( execution );
+}
+function postAnswer( req, res, next ) {
+  let executionId = req.params.id;
+  log.trace( 'Posting answer for %s', executionId );
 
-
-// API core function logic. If this function is executed then each check is passed.
-API.logic = function postAnswer( req, res, next ) {
-  log.trace( 'Posting answer' );
-
-  var answerData = req.body.data;
-  var query = req.queryObject;
-  log.trace( 'Answer posted: %j', answerData );
-
-  if( _.isUndefined( answerData ) )
-    return next( new PostAnswerError( PostAnswerError.BAD_FORMAT, 'The response must be a json containing a "data" field', APIError.BAD_REQUEST ) );
-
-
-
-  /*
-  function checkObjectIds() {
-    // Get the array of `objectIds`.
-    var objectIds = _.pluck( data, 'objectId' );
-
-
-    // Create a domain to handle Mongoose errors
-    var d = domain.create();
-    d.on( 'error', callback );
-
-    MicroTask
-    .findById( execution.microtask )
-    .select( 'objects' )
-    .lean()
-    .exec( d.bind( function( err, microtask ) {
-      if( err ) return callback( err );
-
-
-      var microtaskObjectIds = _.invoke( microtask.objects, 'toString' );
-
-      log.trace( 'Passed ids', objectIds );
-      log.trace( 'Microtask ids', microtaskObjectIds );
-
-      var wrongIds = _.difference( objectIds, microtaskObjectIds );
-      log.trace( 'Found %s wrong ids: %j', wrongIds.length, wrongIds );
-
-      if( wrongIds.length>0 )
-        return callback( new LikeError( LikeError.LIKE_BAD_OBJECTIDS, 'The following ids does not belong to the current microtask\n'+wrongIds.join() ) );
-
-      return callback();
-    } ) );
-  };
-  */
-
-  // Perform the stored query to retrieve the execution object.
-  var retrieveExecution = function( callback ) {
-    query
-    .populate( 'operations' )
-    .exec( req.wrap( function( err, executionObj ) {
-      // Error if the execution is closed
-      if( executionObj.closed )
-        return next( new PostAnswerError( PostAnswerError.EXECUTION_CLOSED, 'The execution is already closed', APIError.FORBIDDEN ) );
-
-      var data = {
-        execution: executionObj
-      };
-      callback( null, data );
-    } ) );
-  };
-
-  // Now check if the answer is posted correctly and create the annotations.
-  function createAnnotations( data, callback ) {
-    var operation = data.operation;
-    var answer = data.answer;
-
-    log.trace( 'Creating Answer for %s with data %j', operation.label, answer );
-
-    // Import `Operation` implementation
-    var opImplementation = common.operations[ operation.name ];
-
-    // Check if there is an error in the data sent.
-    var error = opImplementation.checkData( answer, operation );
-    if( error ) return callback( error );
-
-    // Delegate the creation of the `Annotation`s to the operations `create` method.
-    opImplementation.create( answer, operation, callback );
+  // Check data field
+  let answers = req.body.data;
+  if( _.isUndefined( answers ) ) {
+    let error = new PostAnswerError( PostAnswerError.BAD_FORMAT, 'The response must be a json containing a "data" field', APIError.BAD_REQUEST );
+    return next( error );
   }
 
-  var closeExecution = function( data, callback ) {
-    var annotations = data.annotations;
-    var execution = data.execution;
+  let runAddAnnotations = _.curry( addAnnotations );
 
-    log.trace( 'Post answer success, created %s annotations', annotations.length );
-
-    // Add each `Annotation` to the `Execution`
-    _.each( annotations, function( annotation ) {
-      execution.annotations.push( annotation );
+  return checkExecution( executionId )
+  .then( runAddAnnotations( answers ) )
+  .then( saveExecution )
+  .then( execution => {
+    let objExecution = execution.toObject( {
+      getters: true,
     } );
+    // Return the updated executoin
+    return res.json( objExecution );
+  } )
+  .catch( next ); // Handle errors
+}
 
-    // Close the execution
-    execution.close( req.wrap( function( err, results ) {
-      if( err ) return callback( err );
+// Module class declaration
 
-      // ... and return the `Annotation`s.
-      return callback( null, annotations, results );
-    } ) );
-  };
+// Module initialization (at first load)
 
-  var initAnswers = function( data, callback ) {
-    var execution = data.execution;
-
-    // Associate each operation with a the response posted.
-    var answerListObj = [];
-    _.each( execution.operations, function( operation, index ) {
-      answerListObj.push( {
-        operation: operation,
-        answer: answerData[ index ] || null
-      } );
-    } );
-
-    // For each response create and an array of Annotations.
-    async.map( answerListObj, createAnnotations, function( err, arrayOfAnnotations ) {
-      if( err ) return next( err );
-
-      // Transform an array of array into a simple array (Eg: `[[a,b],[c]] -> [a,b,c]`)
-      var annotations = _.flatten( arrayOfAnnotations );
-      data.annotations = annotations;
-      return callback( null, data );
-    } );
-  };
-
-
-  var actions = [
-    retrieveExecution,
-    //checkObjectIds,
-    initAnswers,
-    closeExecution
-  ];
-
-  // Execute each action
-  async.waterfall( actions, function( err, annotations, results ) {
-    if( err ) return next( err );
-
-    // ... and return the `Annotation`s.
-    return res.json( {
-      annotations: annotations,
-      data: results
-    } );
-  } );
+// Module exports
+module.exports = {
+  url: 'answer/:id',
+  method: 'POST',
+  logic: postAnswer,
 };
-
-// Export the API object
-exports = module.exports = API;

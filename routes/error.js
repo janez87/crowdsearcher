@@ -1,13 +1,21 @@
-
-
-// Load libraries
+'use strict';
+var CS = require( '../core' );
 
 // Create a child logger
-var log = common.log.child( { component: 'Error Routes' } );
+var log = CS.log.child( {
+  component: 'Error Routes'
+} );
 
 
-exports.error = function( err, req, res, next ){
+exports.error = function( err, req, res, next ) {
   log.error( err );
+
+  if ( err.fake ) {
+    log.trace( 'fake!' )
+    return res.render( 'welldone', {
+      message: 'Well Done!'
+    } );
+  }
 
   res.status( 500 );
   var errorData = {

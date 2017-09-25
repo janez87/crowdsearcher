@@ -1,0 +1,290 @@
+extends layout
+
+include ../includes/metadata
+include ../includes/status
+include ../includes/objects
+include ../includes/operations
+include ../includes/platforms
+include ../includes/params
+
+block append scripts
+  script(src='libs/qrcode.min.js')
+
+block append lateScripts
+  script.
+    var wizardTutorial = function(){
+
+        var introConfiguration = {
+          steps:[],
+          showStepNumbers:false,
+          scrollToElement:false,
+          exitOnOverlayClick:false,
+          showBullets:false
+        };
+
+        var taskDetailsTutorial = true;
+
+        try{
+          taskDetailsTutorial = localStorage[ 'taskDetailsTutorial' ]!=='true';
+        }catch(e){}
+
+        var currentStep = localStorage['currentStep'];
+        if(!currentStep){
+
+          // First time
+          currentStep = 1;
+        }else{
+
+          // After the open task
+          // + 1 -> click on the open button
+          // + 2 -> the task is opened
+          currentStep = parseInt(currentStep)+2
+        }
+
+        var state = '!{task.status}';
+        if( state==='OPENED' )
+          currentStep = 5;
+
+        if(taskDetailsTutorial){
+
+          introConfiguration.steps = [
+                {
+                  intro:'In this page you can see the details of the task.'
+                },
+                {
+                  element: document.querySelector('#tutorial_status'),
+                  intro: "Notice that the task is CREATED but not OPENED"
+                },{
+                  element:document.querySelector('#tutorial_status'),
+                  intro:'Thus the task can not be executed yet'
+                },{
+                  element:document.querySelector('#tutorial_open'),
+                  intro:'Click here to open the task'
+                },{
+                  element: document.querySelector('#tutorial_status'),
+                  intro:'The task is opened and can be exectued by the performers'
+                },{
+                  intro:'Click here to find the QRCode',
+                  element:document.querySelector('#qrcode_link')
+                },{
+                  intro:'..or the link for executing the task',
+                  element:document.querySelector('#tutorial_url')
+                },{
+                  intro:'Here you can navigate to the pages showing details on the answers and statistics about the execution.',
+                  element:document.querySelector('#tutorial_stats')
+                },{
+                  intro:'Here you can manually change the status of the task (dangerous)',
+                  element:document.querySelector('#tutorial_change_status')
+                }
+              ];
+
+            localStorage[ 'taskDetailsTutorial' ] = 'true';
+        }
+
+        if(introConfiguration.steps.length > 0){
+          introJs()
+          .setOptions(introConfiguration)
+          .goToStep(currentStep)
+          .start()
+          .onbeforechange(function(elem){
+             var currentStep = localStorage[ 'currentStep' ];
+
+             if(!currentStep){
+              currentStep = 1;
+             }else{
+              currentStep = 1+ parseInt(currentStep);
+             }
+
+             localStorage['currentStep'] = currentStep;
+          })
+         .onexit(function(){
+             localStorage['currentStep'] = undefined
+          })
+        }
+      };
+
+      $( window ).on( 'load', function() {
+        wizardTutorial();
+      } );
+
+block append css
+  style(type='text/css').
+    #qrcode {
+      text-align: center;
+      display: none;
+    }
+    #qrcode > * {
+      margin: auto;
+    }
+    .url {
+      margin: 5px;
+      font-family: monospace;
+      font-weight: bold;
+    }
+
+block header
+  .row
+    .col-md-4
+      h1
+        if task.private
+          i.fa.fa-lock
+        else
+          i.fa.fa-unlock
+        |  #{task.name}
+    .col-md-4.text-center
+      h3#tutorial_status: +printStatus( task.status )
+      code= moment( task[ task.status.toLowerCase()+'Date' ] ).format( 'YYYY-MM-DD HH:mm' )
+      if task.opened || task.finalized
+        div
+          a#qrcode_link(href='#') Show QR code
+            i.fa.fa-chevron-down
+          #qrcode
+          script.
+            new QRCode( 'qrcode', {
+              text: baseUrl+'api/run?task=#{task._id}',
+              width: 256,
+              height: 256,
+              correctLevel: QRCode.CorrectLevel.H
+            } );
+            $( '#qrcode_link' ).click( function( evt ) {
+              evt.preventDefault();
+
+              $( '#qrcode' ).slideToggle();
+              $( 'i', this ).toggleClass( 'fa-chevron-down' );
+              $( 'i', this ).toggleClass( 'fa-chevron-up' );
+
+              return false;
+            } );
+
+    .col-md-4.text-right
+      code= task._id
+      p
+      .btn-group#tutorial_stats
+        a.btn.btn-sm.btn-info(href='manage/task/'+task._id+'/controlmart')
+          i.fa.fa-table
+          |  Mart
+        a.btn.btn-sm.btn-default(href='manage/task/'+task._id+'/dashboard')
+          i.fa.fa-dashboard
+          |  Dashboard
+        if !task.created
+          a.btn.btn-sm.btn-default(href='manage/answers?task='+task._id) Answers <i class="fa fa-list"></i>
+  .row
+    .col-md-12.text-center#tutorial_url
+      if task.finalized || task.opened
+        h3 URL to execute the task:
+        p.url #{appBase}api/run?task=#{task._id}
+  hr
+
+block content
+  //pre= JSON.stringify( task, null, 2 )
+  .row
+    .col-md-4
+      .btn-group
+        a.btn.btn-sm.btn-default(href='manage/job/'+task.job)
+          i.fa.fa-folder-open
+          |  Job
+    .col-md-4.text-center
+      if !task.closed
+        .btn-group#tutorial_change_status
+          if task.status=='CREATED'
+            a#tutorial_open.btn.btn-sm.btn-info(
+              href='#',
+              data-destination,
+              data-action='open',
+              data-id=task._id,
+              data-entity='task',
+              data-method='POST') Open
+          if task.opened
+            a.btn.btn-sm.btn-warning(
+              href='#',
+              data-destination,
+              data-action='finalize',
+              data-id=task._id,
+              data-entity='task',
+              data-method='POST') Finalize
+          if task.finalized || task.opened
+            a.btn.btn-sm.btn-danger#close(
+              href='#',
+              data-destination,
+              data-action='close',
+              data-id=task._id,
+              data-entity='task',
+              data-method='POST') Close
+    .col-md-4.text-right
+      .btn-group
+        a.btn.btn-sm.btn-danger(
+          href='#',
+          data-id=task._id,
+          data-destination='manage/job/'+task.job,
+          data-entity='task',
+          data-method='DELETE')
+          i.fa.fa-trash-o
+          |  Remove
+        if task.opened || task.finalized
+          a.btn.btn-sm.btn-primary(href='api/run?task='+task._id,target='_blank') Execute <i class="fa fa-play"></i>
+  hr
+  .row
+    .col-md-6
+      h3 Control rules
+      if task.controlrules.length==0
+        blockquote Sorry, no control rules found.
+      else
+        .list-group.scrollable
+          for controlrule in task.controlrules
+            - var ruleId = 'rule_'+controlrule._id;
+            .list-group-item
+              .list-group-item-heading
+                if controlrule.event
+                  a(data-toggle='collapse',href='#'+ruleId)= controlrule.action || controlrule.type
+                    span.pull-right.label.label-default= controlrule.event
+                else
+                  a(data-toggle='collapse',href='#'+ruleId)= controlrule.name
+              .list-group-item-text.collapse(id=ruleId)
+                +printParams( controlrule.params )
+
+    .col-md-6
+      h3 Metadata
+      +printMetadata( task.metadata )
+  .row
+    .col-md-6
+      h3 Operations
+      +printOperations( task.operations )
+    .col-md-6
+      h3 Platforms
+      +printPlatforms( task.platforms )
+  .row
+    .col-md-6
+      h3 Microtask list (#{microtasksStats.total})
+      if microtasks.length==0
+        blockquote No microtasks available.
+      else
+        - var percCompl = (microtasksStats.closed/microtasksStats.total)*100;
+        - percCompl = Math.round( percCompl*100 )/100
+        .progress
+          .progress-bar.progress-bar-success(
+            role='progressbar',
+            aria-valuemin=0,
+            aria-valuemax=100,
+            style="width: #{percCompl}%;"
+            aria-valuenow=percCompl) #{percCompl}%
+        #microtasks.entity-list
+          .header
+            .row
+              .col-xs-3.cell Status
+              .col-xs-7.cell Creation/Closed date
+              .col-xs-2.cell Actions
+          .scrollable(style="max-height: 250px;"): .content
+            for microtask, i in microtasks
+              .row(class=microtask.status.toLowerCase())
+                .col-xs-3.cell(title=microtask._id): +printStatus( microtask.status )
+                .col-xs-7.cell= moment( microtask.closedDate || microtask.createdDate ).format( 'YYYY-MM-DD HH:mm' )
+                .col-xs-2.cell.text-right
+                  a.btn.btn-xs.btn-default(href='manage/microtask/'+microtask._id)
+                    .visible-lg
+                      i.fa.fa-folder-open
+                      |  Details
+                    .hidden-lg
+                      i.fa.fa-folder-open
+    .col-md-6
+      h3 Objects (#{objectsStats.total})
+      +printObjects( objects, 200, objectsStats )

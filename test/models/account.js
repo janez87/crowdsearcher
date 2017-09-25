@@ -1,6 +1,6 @@
 
 
-// Load libraries
+'use strict';
 var mongo = require('mongoose');
 //var log = common.log.child( { component: 'Account model' } );
 

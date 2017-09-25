@@ -1,10 +1,11 @@
 
 
-// Load libraries
+'use strict';
 var util = require( 'util' );
+var CS = require( '../core' );
 
 // Use a child logger
-var log = common.log.child( { component: 'Delete Job' } );
+var log = CS.log.child( { component: 'Delete Job' } );
 
 
 // Mongo models
@@ -13,6 +14,7 @@ var log = common.log.child( { component: 'Delete Job' } );
 // from `APIError`
 var APIError = require( './error' );
 var DeleteJobError = function( id, message, status ) {
+  /* jshint camelcase: false */
   DeleteJobError.super_.call( this, id, message, status );
 };
 util.inherits( DeleteJobError, APIError );
@@ -24,14 +26,6 @@ DeleteJobError.prototype.name = 'DeleteJobError';
 // API object returned by the file
 // -----
 var API = {
-
-
-  checks: [
-    'checkJobId'
-  ],
-  // List of API parameters. In the format
-  //      name: required
-  // ... the required parameters will be verified automatically.
   params: {
     job: true
   },
@@ -48,17 +42,22 @@ var API = {
 
 // API core function logic. If this function is executed then each check is passed.
 API.logic = function deleteJob( req, res, next ) {
-  log.trace( 'Removing Job %s', req.query.job );
+  var id = req.query.job;
+  log.trace( 'Removing Job %s', id );
 
-  var query = req.queryObject;
-
-  query
-  .remove()
+  var Job = CS.models.job;
+  Job
+  .findById( id )
   .exec( req.wrap( function( err, job ) {
     if( err ) return next( err );
 
-    log.trace( 'Job %s (%s) removed', job._id, job.name );
-    res.json( job );
+    job.remove( function( err ) {
+      if( err ) return next( err );
+
+      res.json( {
+        message: 'Good by job... we will miss you...'
+      } );
+    } );
   } ) );
 };
 

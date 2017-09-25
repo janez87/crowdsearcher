@@ -7,25 +7,320 @@ body
 footer
   margin-top 2em
 
+.navbar-nav.navbar-right:last-child
+  margin-right 0
+
+.top-logo
+  height: 32px;
+  float: left;
+  margin-right: 5px;
+
+.top-logo-text
+  text-transform uppercase
+  font-weight bold
+
+.top-bar.top-bar
+  &>li>a
+    color #fff
+    text-transform uppercase
+
+
+.title
+  margin-top: 4em;
+  font-size: 3em;
+  text-transform: uppercase;
+  font-weight: bold;
+
+  .logo
+    height 100px
+    margin-right: 0.5em;
+
+.sub-title
+  font-size: 2em;
+  line-height 1.5em
+  text-transform: uppercase;
+  margin: 2em 0;
+
+
+.btn-home
+  text-transform: uppercase;
+  border: 2px solid;
+  background-color: #D82B3F;
+  border: 2px solid #D82B3F;
+  color: #FFF;
+  padding: 1em 2.5em;
+  font-weight: bold;
+  width: 15em;
+  margin-bottom: 0.5em;
+  font-size: 1.15em;
+
+  &.inverse
+    background-color: #fff;
+    border: 2px solid #D82B3F;
+    color: #D82B3F;
+
+
+.intro-section
+  text-align center
+  margin-right -15px
+  margin-left -15px
+
+  .intro-section-content
+    max-width 970px
+    margin-right auto
+    margin-left auto
+    padding-bottom: 5em;
+
+
+
+  &:nth-of-type(2n+1)
+    background-color #e0d8d8
+
+  h1
+    font-size 2.5em
+    text-transform uppercase
+    color #D82B3F
+    font-weight bold
+    margin-top 2em
+    margin-bottom 2em
+
+  p
+    font-size 1.20em
+    text-align justify
+    line-height 2em
+
+  h1 + p
+    text-align center
+    font-weight bold
+
+.info-box-container
+  margin-top 5em
+  margin-bottom 5em
+
+  .info-box
+    text-align center
+    min-height 11em
+    i
+      color #D82B3F
+    h4
+      font-weight: bold;
+      margin: 1em 0;
+    h4 + p
+      text-align center
+      font-size 1em
+      line-height 1em
+
+
+.try-links
+
+  .info-box
+    text-align right
+
+  .info-box + .info-box
+    text-align left
+
+  a
+    display inline-block
+    width 30%
+    text-align center
+    padding 1em
+    border-radius 5px
+
+    &:hover
+      text-decoration none
+      background-color #eee
+
+.list-steps
+
+  text-align left
+  counter-reset steps
+  margin 3em 0
+
+  .media
+
+    &:before
+      content: counter(steps);
+      counter-increment: steps;
+      float: left;
+      height: 48px;
+      background: #D82B3F;
+      width: 48px;
+      color: #FFF;
+      font-size: 1.25em;
+      text-align: center;
+      line-height: 48px;
+      border-radius: 48px;
+      margin-right 1.5em
+
+    .media-heading
+      font-weight bold
+
+    p
+      font-size 1em
+      line-height: 1em;
+
+
+
+.img-steps
+  width 100%
+  margin-bottom 3em
+
+.about-logos
+  margin 5em 0
+  img
+    height: 9em;
+
+.about-person
+  margin: 2em 0;
+  img
+    width 120px
+  .about-name
+    font-weight: bold;
+    margin-top: 1em;
+  .about-role
+    color #333
+
+
+
+
+
+
+
+
+
+
+
+
+.vertical-center
+  display inline-block
+  vertical-align middle
+  height 100%
+
+.input-group
+  margin-bottom: 5px
+
+.input-group span.input-group-addon.input-small > input[type="checkbox"]
+  position: relative;
+  top: 2px;
+.input-group span.input-group-addon.input-small+label
+  border: 1px solid #ccc;
+  border-top-right-radius: 3px;
+  border-bottom-right-radius: 3px;
+  height: 30px;
+  padding: 5px 10px;
+  font-size: 12px;
+  line-height: 1.428571429;
+  display: table-cell;
+  width: 100%;
+  margin-bottom: 0;
+
+.panel .list-group .list-group-item-heading
+  cursor: pointer
+
+.progress-bar.progress-bar-success
+  color #333
+  font-weight bold
+  padding 0px 5px
+
+.scrollable
+  max-height: 150px;
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  &.list-group
+    border 1px solid #ddd
+    border-radius 4px
+    .list-group-item
+      border none
+      border-top 1px solid #ddd
+      &:first-child
+        border-top none
+
+.params
+  dd
+    overflow-x hidden
+    text-overflow ellipsis
+    word-break break-all
+    white-space nowrap
+
+.status
+
+
+
+.entity-list
+  border 1px solid #ddd
+  .scrollable
+    overflow-y: scroll;
+
+  .row
+    margin-left 0
+    margin-right 0
+
+    &.created
+    &.opened
+      background-color #DFF0D8
+      &:hover
+        background-color #D0E9C6
+    &.finalized
+    &.closed
+      background-color #F2DEDE
+      &:hover
+        background-color #EBCCCC
+    &.closed_bad
+      background-color #F2DEDE
+      &:hover
+        background-color #EBCCCC
+    &.closed_good
+      background-color #F2DEDE
+      &:hover
+        background-color #EBCCCC
+
+  .cell
+    overflow-x hidden
+    text-overflow ellipsis
+    word-break break-all
+    white-space nowrap
+
+
+    padding 5px
+    border-bottom 1px solid #ddd
+    border-right 1px solid #ddd
+    &:last-child
+      border-right none
+
+  .header
+    .row
+      margin-right 15px
+    .cell
+      font-weight bold
+      text-align center
+
+  .content
+    .row:last-child
+      .cell
+        border-bottom none
+
+    .cell
+      min-height 2.5em;
+
+
 .dropzone
   cursor pointer
 
-  border-width 0.5em
+  border-width 0.3em
   border-style dashed
 
   text-align center
   padding 2em 1em
 
-  border-color RoyalBlue
-  background-color LightCyan
+  border-color gray
+  background-color lightgray
 
   &.error
     border-color red
-    background-color MistyRose
 
   &.active
     border-color green
-    background-color PaleGreen
 
   input[type='file']
     width 0

@@ -1,0 +1,43 @@
+include ../../includes/params
+
+.row
+  .col-md-6
+    h3 Available invitation strategies
+    .form-group
+      label(for="invitation_name") Strategy:
+      .input-group
+        select#invitation_name.form-control.input-small(
+          data-toggle='collapse',
+          data-parent='#invitation-params')
+          option(value='',selected) None
+          each invitation in config.invitation
+            option(
+              data-target='#invite-'+invitation.name,
+              value=invitation.name)= invitation.name
+        span.input-group-btn
+          button.btn.btn-small.btn-success.add(
+            data-type='strategy',
+            data-source='#invitation_name',
+            data-target='#invitation_list') Set
+    hr
+    #invitation-params
+      each invitation in config.invitation
+        div.collapse(id='invite-'+invitation.name)
+          h4 Invitation strategy parameters
+          if !_.isEmpty( invitation.params ) 
+            +printParamsInput( invitation.params, 'invite-'+invitation.name )
+          else
+            blockquote No parameters needed
+  .col-md-6
+    h3 Selected invitation
+    ul#invitation_list.list-group
+
+script.
+  $( '#invitation .add' ).on( 'click', function ( evt ) {
+    var numChild = $( '#invitation_list' ).children().length;
+    if( numChild>0 ) {
+      evt.stopImmediatePropagation();
+      evt.stopPropagation();
+      return false;
+    }
+  } );

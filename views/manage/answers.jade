@@ -1,0 +1,123 @@
+extends layout
+
+include ../includes/status
+include ../includes/metadata
+
+block header
+  .row
+    .col-md-6
+      h1 Answer list
+    .col-md-6.text-right
+      if answers.length>0
+        .btn-group
+          a.btn.btn-default(href='manage/task/'+answers[0].task)
+            i.fa.fa-folder-open
+            |  Task
+
+block content
+  .panel.panel-info
+    .panel-heading
+      strong <i class="fa fa-info-circle"></i> Info
+      button.close(type="button", data-toggle="collapse", data-target="#info")
+        span(aria-hidden="true") &times;
+        span.sr-only Close
+    #info.panel-collapse.collapse.in
+      .panel-body
+        p Sample answer element:
+
+        .panel.panel-success
+          .panel-heading
+            .row
+              .col-md-6
+                a.accordion-toggle(href="#sample_answer",data-toggle="collapse") Execution
+                |  by <em>User name|Guest</em> on
+                span.label.label-info  <em>Execution platform</em>
+
+              .col-md-6.text-right
+                span.label.label-success <em>STATUS</em>
+                | @
+                code  #{f( Date.now() )}
+          #sample_answer.panel-collapse.collapse.in
+            .panel-body
+              .row
+                .col-md-8
+                  p: a(href="") Task link
+                  p: a(href="") Microtask link
+                .col-md-4.text-right
+                  p Created: <code>#{f( Date.now() )}</code>
+                  p Closed: <code>#{f( Date.now() )}</code>
+              h4 Annotation list
+              ul
+                li
+                  code <em>Annotation value</em>
+                  |  for
+                  tt  <em>Operation name</em> (<em>Operation type</em>) on
+                  a(href="#")  <em>object id link</em>
+                li
+                  code <em>Annotation value</em>
+                  |  for
+                  tt  <em>Operation name</em> (<em>Operation type</em>) on
+                  a(href="#")  <em>object id link</em>
+
+  hr
+
+  - function f( date ) { return moment( date ).format( 'YYYY-MM-DD HH:mm:ss' ); };
+  if answers.length===0
+    blockquote
+      p No answers found in the database.
+  else
+    #accordion.panel-group
+      - var classMap = { 'CREATED': 'default', 'CLOSED': 'success', 'INVALID': 'danger' };
+      for execution in answers
+        .panel(class='panel-'+classMap[ execution.status ] )
+          .panel-heading
+            .row
+              .col-md-6
+                a.accordion-toggle(
+                  href='#'+execution._id,
+                  data-toggle='collapse',
+                  data-parent='accordion') Execution
+                |  by
+                if execution.performer
+                  = execution.performer.name
+                else
+                  |  Guest
+                |  on
+                span.label.label-info= execution.platform.name
+              .col-md-6.text-right
+                +printStatus( execution.status, classMap )
+                |  @
+                code= f( execution[ execution.status.toLowerCase()+'Date' ] )
+          div(id=execution._id).panel-collapse.collapse
+            .panel-body
+              .row
+                .col-md-8
+                  if execution.metadata.length>0
+                    h4 Metadata
+                    +printMetadata( execution.metadata )
+                  p: a(href='manage/task/'+execution.task) Task
+                  p: a(href='manage/microtask/'+execution.microtask) Microtask
+                .col-md-4.text-right
+                  p Created:
+                    code= f( execution.createdDate )
+                  if execution.status==='CLOSED'
+                    p Closed:
+                      code= f( execution.createdDate )
+                  if execution.status==='INVALID'
+                    p Closed:
+                      code= f( execution.invalidDate )
+              h4 Annotations
+              if execution.annotations.length===0
+                blockquote
+                  p No annotations present.
+              else
+                ul
+                  each annotation in execution.annotations
+                    li
+                      if annotation.response
+                        code= annotation.response
+                        |  for
+                      tt #{annotation.operation.label}
+                      |  (#{annotation.operation.name}) on
+                      a(href='manage/object/'+annotation.object)= annotation.object
+              //pre= JSON.stringify( execution, null, 2 )

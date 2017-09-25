@@ -1,10 +1,11 @@
 
-// Load libraries
-var _ = require( 'underscore' );
+'use strict';
+let _ = require( 'lodash' );
 var util = require( 'util' );
+var CS = require( '../core' );
 
 // Use a child logger
-var log = common.log.child( { component: 'Get API' } );
+var log = CS.log.child( { component: 'Get API' } );
 
 // Generate custom error `GetError` that inherits
 // from `APIError`
@@ -36,15 +37,15 @@ var API = {
 
 
 // API core function logic. If this function is executed then each check is passed.
-API.logic = function setApi( req, res, next ) {
+API.logic = function getApi( req, res, next ) {
   var entity = req.params.entity;
   entity = entity==='performer'? 'user' : entity;
   var property = req.params.property;
 
-  log.trace( 'Getting %s for %s ', property, entity );
+  log.trace( 'Getting %s for %s ', property || 'all properties', entity );
 
   // Get the model based on the `entity` parameter.
-  var model = common.models[ entity ];
+  var model = CS.models[ entity ];
 
   if( _.isUndefined( model ) )
     return next( new GetError( GetError.BAD_ENTITY_NAME, 'Unable to retrieve the entity "'+entity+'"', APIError.BAD_REQUEST ) );
@@ -52,7 +53,6 @@ API.logic = function setApi( req, res, next ) {
   if( !_.isUndefined( property ) ) {
     var pathInfo = model.schema.path( property );
     var pathType = model.schema.pathType( property );
-    log.trace( 'Path info (%s): %j', pathType, pathInfo );
     if( _.isUndefined( pathInfo ) && pathType!=='nested' )
       return next( new GetError( GetError.BAD_ENTITY_PROPERTY, 'The entity "'+entity+'" has no "'+property+'" property', APIError.BAD_REQUEST ) );
   }

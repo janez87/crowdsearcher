@@ -37,14 +37,14 @@ block content
             .col-md-9
               - var birthday = user.birthday.getFullYear()+'-'+( user.birthday.getMonth()+1)+'-'+user.birthday.getDate();
                 input#birthday.form-control(type='date', value=birthday, disabled)
-      h4 Add accounts
-      p: .btn-group
-        a.btn.btn-facebook(href='connect/facebook')
-          i.icon-facebook-sign
-          |  | Add facebook
-        a.btn.btn-twitter(href='connect/twitter')
-          i.icon-twitter
-          |  | Add twitter
+      if _.size( socialMap )>0
+        h4 Add accounts
+        .btn-group
+          each social, name in socialMap
+           - var icon = social.icon || 'fa-'+name+'-square'
+            a.btn.btn-default(href='connect/'+name, title='Login with '+name)
+              i.fa(class=icon)
+              |  #{name}
     .col-md-6
       h3 Metadata
       if user.metadata.length>0
@@ -53,9 +53,10 @@ block content
             li= metadata
       else
         .alert.alert-info
-          strong Info: 
+          strong Info:
           | no metadata present...
 
+  hr
   .row
     .col-md-12
       .panel.panel-default
@@ -71,14 +72,11 @@ block content
                     img.img-responsive(src=imgUrl, title="#{account.displayName} image")
                   .col-md-11
                     h4.list-group-item-heading
-                      i(class='icon-#{account.provider}-sign')
-                      |  | #{account.provider}
-                      
-
+                      i.fa(class='fa-#{account.provider}-square')
+                      |  #{account.provider}
                     p #{account.displayName} (
                       if account.profileUrl
-                        a(
-                          href=account.profileUrl,
+                        a(href=account.profileUrl,
                           title='#{account.provider} profile',
                           target='_blank')= account.uid
                       else
@@ -90,4 +88,4 @@ block content
               h4 Info:
               | no accounts connected...
 
-  //pre= JSON.stringify( user, null, 2 )
+  //pre!= JSON.stringify( user, null, 2 )

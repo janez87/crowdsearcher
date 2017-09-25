@@ -1,21 +1,11 @@
 
 
-// Load libraries
-var _ = require( 'underscore' );
+'use strict';
 var util = require( 'util' );
-var async = require( 'async' );
-
-// Import the CRM
-var CRM = require( '../scripts/controlRuleManager' );
-
-// Import the required Models
-var Task = common.models.task;
-var Job = common.models.job;
-var Operation = common.models.operation;
-var Platform = common.models.platform;
+var CS = require( '../core' );
 
 // Use a child logger
-var log = common.log.child( { component: 'Finalize Task' } );
+var log = CS.log.child( { component: 'Finalize task' } );
 
 // Generate custom error `FinalizeTaskError` that inherits
 // from `APIError`
@@ -27,25 +17,14 @@ util.inherits( FinalizeTaskError, APIError );
 
 FinalizeTaskError.prototype.name = 'FinalizeTaskError';
 // Custom error IDs
-FinalizeTaskError.WRONG_JOB_ID = 'WRONG_JOB_ID';
-
+FinalizeTaskError.NOT_FOUND = 'NOT_FOUND';
 
 // API object returned by the file
 // -----
 var API = {
-  // List of checks to perform. Each file is execute
-  // *in order* as an express middleware.
-  checks: [
-    'checkTaskId'
-  ],
-
-  params: {
-    task: true
-  },
-
   // The API endpoint. The final endpoint will be:
   //    /api/**endpointUrl**
-  url: 'finalize',
+  url: 'task/:id/finalize',
 
   // The API method to implement.
   method: 'POST'
@@ -54,22 +33,25 @@ var API = {
 
 // API core function logic. If this function is executed then each check is passed.
 API.logic = function finalizeTask( req, res, next ) {
-  log.trace( 'Task poster' );
+  var id = req.params.id;
+  log.trace( 'Finalizing task %s', id );
 
-  var Task = req.queryObject;
-
+  var Task = CS.models.task;
   Task
-  .exec(req.wrap(function(err,task){
-    if (err) return next(err);
+  .findById( id )
+  .exec( req.wrap( function( err, task ) {
+    if( err ) return next( err );
 
-    log.trace('Task %s retrieved',task.id);
-    task.finalizeTask(function(err){
-      if(err) return next(err);
+    if( !task )
+      return next( new FinalizeTaskError( FinalizeTaskError.NOT_FOUND, 'Task not found' ) );
 
-      res.status(200);
-      res.json({});
-    });
-  }));
+    task.finalize( req.wrap( function( err ) {
+      if( err ) return next( err );
+
+      log.debug( 'Task %s finalized', id );
+      res.json( task );
+    } ) );
+  } ) );
 };
 
 

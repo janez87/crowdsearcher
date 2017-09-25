@@ -1,116 +1,97 @@
-//module.change_code = true;
-
-// Load libraries
-var _ = require('underscore');
-var domain = require( 'domain' );
-var nconf = require('nconf');
-var nodemailer = require('nodemailer');
-var async = require('async');
+'use strict';
+var nconf = require( 'nconf' );
+var nodemailer = require( 'nodemailer' );
+var async = require( 'async' );
+var CS = require( '../../core' );
 
 // Create a custom logger
-var log = common.log.child( { component: 'Email' } );
+var log = CS.log.child( {
+  component: 'Email'
+} );
 
-function invite(data, config, callback){
 
-  var d = domain.createDomain();
 
-  d.on('error',callback);
 
-  var task = data.task;
+function invite( task, platform, callback ) {
+  var params = platform.params;
 
-  var service = config.service;
-  var host = config.host;
-  var port = config.port;
-  var user = config.user;
-  var password = config.password;
-  var secure = config.secure;
-  var from = config.from;
+  // Parameters
+  var service = params.service;
+  var host = params.host;
+  var port = params.port;
+  var user = params.user;
+  var password = params.password;
+  var secure = params.secure;
+  var from = params.from;
+  var emails = params.emails;
 
+  // init SMTP
   var smtp;
+  if ( service && service.trim() !== '' ) {
+    log.trace( 'Creating the smtp connection to the service %s', service );
 
-  if(!_.isUndefined(service) && service!==''){
-    log.trace('Creating the smtp connection to the service %s', service);
-    smtp = nodemailer.createTransport(service,{
-      auth:{
-        user:user,
-        pass:password
+    smtp = nodemailer.createTransport( service, {
+      auth: {
+        user: user,
+        pass: password
       }
-    });
+    } );
 
-  }else{
-    log.trace('Creating the smtp connection to the host %s', host);
-    smtp = nodemailer.createTransport('SMTP',{
-      hostname:host,
-      secureConnection:secure,
-      port:port,
-      auth:{
-        user:user,
-        pass:password
+  } else {
+    log.trace( 'Creating the smtp connection to the host %s', host );
+
+    smtp = nodemailer.createTransport( 'SMTP', {
+      hostname: host,
+      secureConnection: secure,
+      port: port,
+      auth: {
+        user: user,
+        pass: password
       }
-    });
-
+    } );
   }
 
-  var strategyName = config.strategyName;
-  var performers = data.performers;
-
+  // Generate URL
   var url = nconf.get( 'webserver:externalAddress' );
-  url += 'api/landing?task='+task.id;
+  url += 'api/landing?task=' + task.id;
 
-  if(strategyName === 'ANNOUNCEMENT'){
-    log.warn('The email does not support the ANNOUNCEMENT strategy');
-    return callback();
-  }
+  // The actual Sandmail
+  function send( email, cb ) {
 
-
-  var sendMail = function(performer,callback){
-    log.trace('Composing the mail for the user %j',performer);
-
-    if(_.isUndefined(performer.email)){
-      log.trace('Performer %s does not have an email',performer.id);
-      return callback();
-    }
-
+    // Create mail object
     var mail = {
-      from:from,
-      to:performer.email,
-      html:'<p>I posted a task on the CrowdSearcher</p></br><p>Click <a href="'+url+'"  >here</a> to execute it</p>',
-      subject:'crowdSearcher'
+      from: from,
+      to: email,
+      html: '<p>I posted a task on the CrowdSearcher</p></br><p>Click <a href="' + url + '"  >here</a> to execute it</p>',
+      subject: 'CrowdSearcher task'
     };
 
-    smtp.sendMail(mail,function(err,status){
-      if (err){
-        log.error(err.message);
-
-        // I ignore the error and continue to send mails
-        return callback();
+    smtp.sendMail( mail, function( err, status ) {
+      if ( err ) {
+        log.error( err );
+        return cb();
       }
 
-      log.trace(status.message);
-      return callback();
-    });
+      log.trace( 'Mail to %s sent: %s', email, status.message );
+      return cb();
+    } );
+  }
 
-  };
-
-  async.each(performers,sendMail,function(err){
-    if (err) return callback(err);
-
+  async.each( emails, send, function( err ) {
+    if ( err ) return callback( err );
     smtp.close();
     return callback();
-  });
-
-}
-
-function create(task, microtask, config, callback){
-  log.trace('Nothing to do here');
-  return callback();
+  } );
 }
 
 var Platform = {
-  init: create,
+  name: 'E-mail',
+  description: 'Invite by sending an e-mail to performers.',
+  image: 'http://www.goevolve.co.uk/cms/wp-content/uploads/2010/11/gmail.png',
+
   invite: invite,
-  enabled: true,
   params: {
+    emails: [ 'string' ],
     service: {
       type: 'string',
       'default': 'gmail'
@@ -119,8 +100,8 @@ var Platform = {
     port: 'number',
     user: 'string',
     password: 'password',
-    secure:'boolean',
-    from:'string'
+    secure: 'boolean',
+    from: 'string'
   }
 };
 module.exports = exports = Platform;

@@ -1,16 +1,17 @@
-
-
-// Load libraries
-var _  = require('underscore');
-var fs  = require('fs');
-var util  = require('util');
+'use strict';
+let _ = require( 'lodash' );
+var fs = require( 'fs' );
+var util = require( 'util' );
 var path = require( 'path' );
 var MongoError = require( 'mongoose' ).Error;
 var nconf = require( 'nconf' );
 var glob = require( 'glob' );
+var CS = require( '../core' );
 
 // Create a child logger
-var log = common.log.child( { component: 'API Routes' } );
+var log = CS.log.child( {
+  component: 'API Routes'
+} );
 
 // Import the `APIError` Class to generate errors
 var APIError = require( '../api/error' );
@@ -22,7 +23,7 @@ var apiMapping = {};
 
 // Function used to generate APIid
 var getAPIid = function( method, endpoint ) {
-  return method.toLowerCase()+'-'+endpoint;
+  return method.toLowerCase() + '-' + endpoint;
 };
 
 
@@ -75,15 +76,16 @@ ObjectNotFoundError.OBJECT_NOT_FOUND = 'OBJECT_NOT_FOUND';
 var errorHandler = function( err, req, res, next ) {
   // If the error is not coming from the API subpath,
   // then forward it to the next error handler
-  if( !/^\/api.*/i.test( req.path ) ) return next( err );
+  if ( !/^\/api.*/i.test( req.path ) ) return next( err );
 
   // Handle API error
-  if( err instanceof APIError ) {
+  if ( err instanceof APIError ) {
+    log.error( 'Api Error', err );
     log.error( err, err.toString() );
     res.status( err.status || APIError.SERVER_ERROR );
     res.json( err );
-  // Handle Mongoose errors
-  } else if( err instanceof MongoError ) {
+    // Handle Mongoose errors
+  } else if ( err instanceof MongoError ) {
     log.error( 'Mongo Error', err );
     log.error( err.stack );
     res.status( APIError.SERVER_ERROR );
@@ -92,12 +94,20 @@ var errorHandler = function( err, req, res, next ) {
       id: err.name,
       stack: err.stack
     } );
-  // Handle general Errors
+    // Handle general Errors
   } else {
+
+    if ( err.fake ) {
+      log.trace( 'fake!' )
+      return res.render( 'welldone', {
+        message: 'Well Done!'
+      } );
+    }
+
     log.error( 'General Error', err );
     log.error( err.stack );
     res.status( APIError.SERVER_ERROR );
-    var message = err.name.length? err.name+': ': '';
+    var message = err.name.length ? err.name + ': ' : '';
     message += err.message;
     res.json( {
       message: message,
@@ -113,13 +123,13 @@ var checkParams = function( req, res, next ) {
   var apiID = getAPIid( req.method, req.path );
   var params = apiMapping[ apiID ];
 
-  if( !_.isUndefined( params ) ) {
-    for( var param in params ) {
+  if ( !_.isUndefined( params ) ) {
+    for ( var param in params ) {
       var required = params[ param ];
       log.trace( 'Parameter %s is required? %s', param, required );
 
-      if( required && _.isUndefined( req.query[ param ] ) ) {
-        var msg = 'Missing required parameter "'+param+'"';
+      if ( required && _.isUndefined( req.query[ param ] ) ) {
+        var msg = 'Missing required parameter "' + param + '"';
         return next( new MissingParameterError( MissingParameterError.PARAMETER_MISSING, msg, APIError.BAD_REQUEST ) );
       }
     }
@@ -133,68 +143,83 @@ var checkParams = function( req, res, next ) {
 var apiOperations = function( req, res, next ) {
   var query = req.queryObject;
 
-  query.setOptions( {
-    // Since we are going to return it as a plain object we dont need any mongoose function
-    lean: true
-  } );
-
   // Must populate something?
-  if( req.query.populate ) {
+  if ( req.query.populate ) {
     log.trace( 'Adding field population' );
     var populateFields = req.query.populate;
 
-    if( !_.isArray( populateFields ) )
+    if ( !_.isArray( populateFields ) )
       populateFields = [ populateFields ];
 
 
     // Join the array of fields to populate with a `space`.
     query
-    .populate( populateFields.join( ' ' ) );
+      .populate( populateFields.join( ' ' ) );
   }
 
 
   // Must select a subset of fields?
-  if( req.query.select ) {
+  if ( req.query.select ) {
     log.trace( 'Adding field selection' );
     var selectedFields = req.query.select;
 
-    if( !_.isArray( selectedFields ) )
+    if ( !_.isArray( selectedFields ) )
       selectedFields = [ selectedFields ];
 
-
+    log.trace( 'Selected fields: %j', selectedFields );
     // Join the array of fields to populate with a `space`.
     query
-    .select( '+'+selectedFields.join( ' +' ) );
+      .select( selectedFields.join( ' ' ) );
   }
 
-  query.exec( req.wrap( function( err, data ) {
-    if( err ) return next( err );
+  /*
+  if ( req.bulk )
+    query.lean();
+  */
 
-    if( !data )
+  log.trace( 'Executing the query' );
+  query.exec( req.wrap( function( err, data ) {
+    if ( err ) return next( err );
+    log.trace( 'Query executed' );
+
+    if ( !data ) {
       return next( new ObjectNotFoundError( ObjectNotFoundError.OBJECT_NOT_FOUND, 'Object not fond in the db', APIError.SERVER_ERROR ) );
+    }
 
 
     // The suffling is not a mongoose operation so it must be done when the data is available.
-    if( req.query.shuffle ) {
+    if ( req.query.shuffle && !req.bulk ) {
       log.trace( 'Shuffling data' );
       var shuffleFields = String( req.query.shuffle );
 
       // if not specified, shuffle the data field
-      if( shuffleFields==='true' )
+      if ( shuffleFields === 'true' )
         shuffleFields = [ 'objects' ];
 
-      if( !_.isArray( shuffleFields ) )
+      if ( !_.isArray( shuffleFields ) )
         shuffleFields = [ shuffleFields ];
 
-      // Dhuffle each `shuffleFields`
+      // Shuffle each `shuffleFields`
       _.each( shuffleFields, function( field ) {
-        if( _.isArray( data[ field ] ) )
+        if ( _.isArray( data[ field ] ) )
           data[ field ] = _.shuffle( data[ field ] );
       } );
     }
 
-    // Return
-    res.json( data );
+    if ( _.isArray( data ) ) {
+      data = _.map( data, function( e ) {
+        return e.toObject( {
+          getters: true
+        } );
+      } );
+      log.trace( 'Data ready, sending...' );
+      res.json( data );
+    } else {
+      log.trace( 'Data ready, sending...' );
+      res.json( data.toObject( {
+        getters: true
+      } ) );
+    }
   } ) );
 };
 
@@ -212,8 +237,8 @@ var logRequest = function( req, res, next ) {
 // --
 // Missing API function
 var missingAPI = function( req, res, next ) {
-  var msg = 'The endPoint '+req.method+' '+req.path+' does not exist';
-  log.error(msg);
+  var msg = 'The endPoint ' + req.method + ' ' + req.path + ' does not exist';
+  log.error( msg );
   return next( new MissingAPIError( MissingAPIError.API_MISSING, msg, APIError.NOT_IMPLEMENTED ) );
 };
 
@@ -231,15 +256,15 @@ var bindApi = function( app ) {
     sync: true
   };
   glob( '*.js', options, function( err, apis ) {
-    if( err ) return log.error( err );
+    if ( err ) return log.error( err );
 
-    if( !apis ) return log.debug( 'No API loaded' );
+    if ( !apis ) return log.debug( 'No API loaded' );
 
     _.each( apis, function( apiFile ) {
       var match = apiFile.match( /(.*)\.js/i );
 
       // Grab the API name from the file name.
-      var apiName = match[1];
+      var apiName = match[ 1 ];
       log.trace( 'Loading %s API', apiName );
 
       apiFile = path.join( __dirname, '..', apiBasePath, apiFile );
@@ -262,11 +287,11 @@ var bindApi = function( app ) {
       ];
 
       // Additional API middlewares
-      if( API.checks ) {
+      if ( API.checks ) {
         _.each( API.checks, function( checkName ) {
-          var checkFile = path.join( __dirname, '..', apiBasePath, 'checks', checkName+'.js' );
+          var checkFile = path.join( __dirname, '..', apiBasePath, 'checks', checkName + '.js' );
 
-          if( !fs.existsSync( checkFile ) ) {
+          if ( !fs.existsSync( checkFile ) ) {
             log.error( 'Unable to load api check function "%s" for "%s %s", fileName: %s', checkName, API.method, apiName, checkFile );
             return; // skip current API check
           }
@@ -281,7 +306,7 @@ var bindApi = function( app ) {
       }
 
       // Generate API endpoint
-      var apiUrl = '/'+apiUrlPath+'/'+API.url;
+      var apiUrl = '/' + apiUrlPath + '/' + API.url;
       log.debug( 'Adding api endPoint "%s %s" to %s', API.method, apiUrl, apiName );
 
       // Let the `app` listen to this endpoint
@@ -296,7 +321,7 @@ var bindApi = function( app ) {
   } );
 
   // Handle random call to the `api/*` endpoint
-  app.all( '/'+apiUrlPath+'/*', missingAPI );
+  app.all( '/' + apiUrlPath + '/*', missingAPI );
 
   // Error middleware used to handle API errors properly
   app.use( errorHandler );

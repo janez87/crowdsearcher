@@ -1,0 +1,72 @@
+extends ../layout
+
+block append css
+  style.
+    i.info {
+     cursor: help;
+    }
+
+block append lateScripts
+  script.
+    var $btnSend = $( '.submit' );
+    var $form = $( '#form' );
+
+    function sendData( evt ) {
+      evt.preventDefault();
+      $form.prop( 'action', this.href );
+      $form.submit();
+      return false;
+    }
+
+    $( 'i.info' ).click( function() {
+      wizardTutorial( true );
+    } );
+
+block header
+  ul.nav.nav-tabs.nav-justified
+    //for page, idx in pageList
+    // li(class=idx===index? 'active':'')
+    //    a.text-muted= pageMap[page]
+    li#tutorial_task(class=0===index? 'active':'' data-intro="Here you define the type of task to be performed..", data-step="1")
+      a.text-muted Task
+    li#tutorial_object(class=1===index? 'active':'' data-intro="..then you define the objects of the task", data-step="2")
+      a.text-muted Object
+    li#tutorial_execution(class=2===index? 'active':'' data-intro="Here you specify where you want to execute your task", data-step="3")
+      a.text-muted Execution
+    li#tutorial_invitation(class=3===index? 'active':'' data-intro="..and how to invite the perfomer", data-step="4")
+      a.text-muted Invitation
+    li(class=4===index? 'active':'')
+      a.text-muted Adaptation
+    li#tutorial_review(class=5===index? 'active':'')
+      a.text-muted Review
+  hr
+
+  form#form(method='POST')
+    block inputData
+      input(type='hidden', name='name', value=pageList[index]||'add_operations')
+      input.wzData(type='hidden', name='data', value='null')
+
+  .row
+    .col-md-4
+      .btn-group
+        if prevPage
+          a(href='manage/wizard/'+prevPage).btn.btn-primary Prev
+        else
+          a(href='#', disabled).btn.btn-default Prev
+
+        if pageList[index]=='gt_declaration'
+          a(href='manage/wizard/add_operations').btn.btn-default Add operations
+
+    .col-md-4.text-center
+      block wizardTitle
+        h2 #{pageMap[ pageList[index] ]} <i class="fa fa-info-circle info" title="Start tutorial"></i>
+
+    .col-md-4.text-right
+      .btn-group
+        if pageList[index]=='task_type'
+          a(href='manage/wizard/add_operations').submit.btn.btn-default Add operations
+
+        if nextPage
+          a#tutorial_next(href='manage/wizard/'+nextPage).submit.btn.btn-primary Next
+        else
+          a(href='#', disabled).btn.btn-default Next

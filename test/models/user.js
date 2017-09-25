@@ -3,7 +3,7 @@
 // aLoad libraries
 var mongo = require('mongoose');
 var crypto = require('crypto');
-var _ = require('underscore');
+let _ = require( 'lodash' );
 
 // Import Mongo Classes and Objects
 var Schema = mongo.Schema;

@@ -1,0 +1,42 @@
+extends layout
+
+include ../includes/metadata
+include ../includes/status
+
+block header
+  .row
+    .col-md-4
+      h1 Object details
+    .col-md-4.text-center
+      h3: +printStatus( object.status )
+      code= moment( object[ object.status.toLowerCase()+'Date' ] ).format( 'YYYY-MM-DD HH:mm' )
+    .col-md-4.text-right
+      code= object._id
+      p
+      .btn-group
+        a.btn.btn-sm.btn-info(href='manage/object/'+object._id+'/controlmart')
+          i.fa.fa-table
+          |  Mart
+  hr
+
+block content
+  .row
+    .col-md-4
+      .btn-group
+        a.btn.btn-sm.btn-default(href='manage/task/'+object.task)
+          i.fa.fa-folder-open
+          |  Task
+    .col-md-4.text-center
+      if !object.closed
+        a.btn.btn-sm.btn-info(
+          href='#',
+          data-destination,
+          data-action='close',
+          data-id=object._id,
+          data-entity='object',
+          data-method='POST') Close
+    .col-md-4.text-right
+  hr
+
+  h3 Data content:
+  pre= JSON.stringify( object.data, null, 2)

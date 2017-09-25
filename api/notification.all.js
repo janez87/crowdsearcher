@@ -1,13 +1,15 @@
 
-// Load libraries
-var _ = require( 'underscore' );
+'use strict';
+let _ = require( 'lodash' );
 var util = require( 'util' );
+var CS = require( '../core' );
 
 // Use a child logger
-var log = common.log.child( { component: 'Notification API' } );
+var log = CS.log.child( { component: 'Notification API' } );
 
 // Import models
-var Task = common.models.task;
+var Task = CS.models.task;
+var Platform = CS.models.platform;
 
 // Generate custom error `NotificationError` that inherits
 // from `APIError`
@@ -39,16 +41,17 @@ var API = {
 API.logic = function notificationAPI( req, res, next ) {
   var taskId = req.params.task;
   var platform = req.params.platform;
+  var method = req.method;
 
-  log.trace( 'Got notification for %s task %s', platform, taskId );
+  log.trace( 'Got %s notification for %s task %s', method, platform, taskId );
 
-  var platform = common.platforms[ platform ];
+  var platform = CS.platforms[ platform ];
   if( !platform ) {
     log.warn( 'Platform not implemented' );
     return res.send( 'BAD_PLATFORM' );
   }
 
-  if( !_.isFunction( platform.remote ) ) {
+  if( !_.isFunction( platform.notify ) ) {
     log.warn( 'Platform notification handler not implemented' );
     return res.send( 'BAD_PLATFORM_HANDLER' );
   }
@@ -66,9 +69,11 @@ API.logic = function notificationAPI( req, res, next ) {
       return res.send( 'BAD_TASK_ID' );
     }
 
+    // Pass the task to the request.
     req.task = task;
 
-    return platform.remote( req, res, next );
+    // Give the control over the response to the notify handler.
+    return platform.notify( req, res, next );
   } ) );
 };
 

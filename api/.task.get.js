@@ -1,10 +1,10 @@
 
 
-// Load libraries
+'use strict';
 var util = require( 'util' );
 
 // Use a child logger
-//var log = common.log.child( { component: 'Get Task' } );
+//var log = CS.log.child( { component: 'Get Task' } );
 
 // Generate custom error `GetTaskError` that inherits
 // from `APIError`
@@ -58,7 +58,7 @@ API.logic = function getTask( req, res, next ) {
 
     if( shuffle )
       taskObject.objects = _.shuffle( taskObject.objects );
-    
+
     // Return the object
     res.json( taskObject );
   };
@@ -70,7 +70,7 @@ API.logic = function getTask( req, res, next ) {
       populate = [ populate ];
 
     log.trace( 'Populate: %j', populate );
-    
+
     task
     .populate( {
       path: populate.join( ' ' ),

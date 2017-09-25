@@ -1,0 +1,15 @@
+{
+  "verbose": true,
+  "delay": 10,
+  "ignore": [
+    ".git",
+    "node_modules/**/node_modules",
+    "docs/*",
+    "test/*",
+    "uploads/*",
+    "logs/*",
+    "views/*",
+    "public/*"
+  ],
+  "ext": "js json"
+}

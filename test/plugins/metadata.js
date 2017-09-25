@@ -1,7 +1,7 @@
 
 
-// Load libraries
-var _ = require('underscore');
+'use strict';
+let _ = require( 'lodash' );
 
 
 module.exports = exports = function metadataPlugin( schema ) {
@@ -19,7 +19,7 @@ module.exports = exports = function metadataPlugin( schema ) {
   } );
 
 
-  // We need to disable verisioning because 
+  // We need to disable verisioning because
   //schema.set( 'versionKey', false );
 
   schema.methods.haveMetadata = function( key ) {

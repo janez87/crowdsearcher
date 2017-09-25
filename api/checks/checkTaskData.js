@@ -1,12 +1,13 @@
 
 
-// Load libraries
+'use strict';
 var _  = require('underscore');
 var util  = require('util');
 var async  = require('async');
+var CS = require( '../../core' );
 
 // Import a child Logger
-var log = common.log.child( { component: 'Check Task Data' } );
+var log = CS.log.child( { component: 'Check Task Data' } );
 
 // Generate custom error `CheckTaskDataError` that inherits
 // from `APIError`
@@ -55,7 +56,7 @@ exports = module.exports = function checkTaskData( req, res, next ) {
   var index;
   for( index=0; index<task.operations.length; index++ ) {
     var typeName = task.operations[ index ].name.toLowerCase();
-    if( _.isUndefined( common.operations[ typeName ] ) ) {
+    if( _.isUndefined( CS.operations[ typeName ] ) ) {
       return next( new CheckTaskDataError( CheckTaskDataError.TASK_TYPE_NOT_AVAILABLE, 'Task type "'+typeName+'" not available', APIError.BAD_REQUEST ) );
     }
   }
@@ -80,13 +81,13 @@ exports = module.exports = function checkTaskData( req, res, next ) {
 
     // Check if the platform exists
     var platformName = platform.name.toLowerCase();
-    if( _.isUndefined( common.platforms[ platformName ] ) )
+    if( _.isUndefined( CS.platforms[ platformName ] ) )
       return next( new CheckTaskDataError( CheckTaskDataError.TASK_PLATFORM_NOT_AVAILABLE, 'Platform "'+platformName+'" not available', APIError.BAD_REQUEST ) );
   }
 
 
   var checkPlatform = function( platformObj, callback ) {
-    var platformImpl = common.platforms[ platformObj.name ];
+    var platformImpl = CS.platforms[ platformObj.name ];
     var params = platformObj.params;
 
     // if the platform implementation have a `check` function then call it with the params

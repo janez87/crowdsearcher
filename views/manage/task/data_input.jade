@@ -1,0 +1,106 @@
+ul.nav.nav-tabs
+  li.active: a(href='#data_external', data-toggle='tab') External file
+  li: a(href='#data_manual', data-toggle='tab') Manual input
+
+.tab-content
+  #data_external.tab-pane.active
+    .form-group
+      label.col-md-4(for='data_file_input') Select input file:
+      .col-md-8
+        input#data_file_input(type='file')
+  #data_manual.tab-pane
+    h3 Insert data
+    table.table.table-bordered.table-hover.table-condensed
+      thead
+        tr#data_header_list
+          td: button.btn.btn-sm.btn-success#btn_add_field Add field 
+            i.fa.fa-plus
+      tbody#data_rows
+      tfoot
+        tr#data_input_list
+          td: button.btn.btn-sm.btn-success#btn_add_row Add row 
+            i.fa.fa-plus
+
+script.
+  // Handle data row remove click
+  $( '#data_rows' ).on( 'click', '.remove', function ( evt ) {
+    var $tr = $( this ).closest( 'tr' );
+    $tr.slideUp().remove();
+  } );
+  // Handle header remove click
+  $( '#data_header_list' ).on( 'click', '.remove', function ( evt ) {
+    var index = $( this ).closest( 'td' ).index()+1;
+    $( 'td', $( this ).closest( 'table.table' ) ).remove( ':nth-child('+index+')' );
+  } );
+  
+
+  // Handle add row click
+  $( '#btn_add_row' ).on( 'click', function ( evt ) {
+    var $headers = $( '#data_header_list' );
+    var $inputs = $( 'input', '#data_input_list' );
+    var $rows = $( '#data_rows' );
+
+    var $tr = $( '<tr></tr>' );
+    $tr.append( '<td><button type="button" title="Remove" class="btn btn-sm btn-danger remove"><i class="fa fa-trash-o"></i></button></td>' )
+    
+    $inputs.each( function() {
+      $tr.append( '<td data-value="'+this.value+'">'+this.value+'</td>' );
+    } );
+    $rows.append( $tr );
+  } );
+  // Handle add field click
+  $( '#btn_add_field' ).on( 'click', function ( evt ) {
+    var $headers = $( '#data_header_list' );
+    var $footer = $( '#data_input_list' );
+
+    var $field = $( '<td><div class="input-group"><div class="input-group-btn">'
+      +'<button type="button" title="Remove" class="btn btn-sm btn-danger remove"><i class="fa fa-trash-o"></i></button>'
+      +'</div><input type="text" placeholder="Insert field name" value="Field name" class="form-control input-sm"/></div></td>' );
+    $headers.append( $field );
+
+    var $fieldInput = $( '<td><input type="text" placeholder="Insert field value" class="form-control input-sm"/></td>' );
+    $footer.append( $fieldInput );
+  } );
+  // Add a field
+  $( '#btn_add_field' ).click();
+
+
+  $( '#data_file_input' ).on( 'change', function ( evt ) {
+    var $file = $( this );
+    try {
+      var reader = new FileReader();
+      reader.onerror = function() { warnNoty( 'Unable to read the file' ); };
+      reader.onabort = function() { warnNoty( 'FileReader stopped' ); };
+      reader.onloadstart = function() {
+        noty( {
+          type: 'info',
+          text: 'Reading file...',
+          timeout: 2500
+        } );
+      };
+      reader.onload = function ( evt ) {
+        try {
+          var json = JSON.parse( evt.target.result );
+          if( !$.isArray( json.data ) )
+            throw new Error( 'No array data field present' );
+
+
+          $file.attr( 'data-json', JSON.stringify( json.data ) );
+
+          noty( {
+            type: 'success',
+            text: 'Reading complete, added '+json.data.length+' objets',
+            timeout: 2500
+          } );
+        } catch( err ) {
+          $.noty.closeAll();
+          warnNoty( 'Cannot parse the JSON file, make sure it contains a <code>data</code> field with an array of <b>CS objects</b>' );
+        }
+      };
+
+      reader.readAsText( evt.target.files[0] );
+    } catch( err ) {
+      $.noty.closeAll();
+      warnNoty( 'Cannot check input file, sorry...' );
+    }
+  } );

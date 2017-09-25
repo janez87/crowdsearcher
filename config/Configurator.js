@@ -1,175 +1,155 @@
-/* global -common */
+'use strict';
+// Load system modules
+let url = require( 'url' );
+let path = require( 'path' );
 
-// Module loading
-var _  = require('underscore');
-var fs  = require('fs');
-var url = require('url');
-var util  = require('util');
-var path = require( 'path' );
-var async = require('async');
-var nconf = require( 'nconf' );
+// Load modules
+let _ = require( 'lodash' );
+let mkdirp = require( 'mkdirp' );
+let Promise = require( 'bluebird' );
+let Logger = require( 'bunyan' );
 
+// Load my modules
+let CS = require( '../core' );
 
-/*
-var hotswap = require('hotswap');
+// Constant declaration
+const CONFIG = require( './configuration.json' );
+const LOG_FILE_NAME = 'cs_volog.jlog';
 
-hotswap.configure({
-  extensions: {'.js': 'js', '.node': 'node'}
-  //watch: true,
-  //autoreload: true
-});
+// Module variables declaration
 
-hotswap.on( 'swap', function( file ) {
-  console.log( '\n\n' );
-  console.log( '-------------\t\tSTART SWAPPING MODULE\t\t-------------' );
-  console.log( file );
-  console.log( '-------------\t\tEND SWAPPING MODULE\t\t-------------' );
-  console.log( '\n\n' );
-});
+// Module functions declaration
 
-*/
-var EventEmitter = require( 'events' ).EventEmitter;
+// Module class declaration
+class Configurator {
+  constructor( app ) {
+    console.log( 'Called Configurator' );
 
-// Export global shortcuts
-var common = {};
-GLOBAL.common = common;
+    this.app = app;
+    this.config = CONFIG;
 
-
-var Configurator = function( app ) {
-  console.log( 'Called Configurator' );
-  this.FILE = 'configuration.json';
-  this.OVERRIDE = 'override.json';
-  this.app = app;
-};
-util.inherits( Configurator, EventEmitter );
-
-Configurator.prototype.load = function() {
-  console.log( 'Loading configurations' );
-  var _this = this;
-
-  // Load all configuration
-  async.series( [
-    _.bind( this.configUnderscore, this ),
-    _.bind( this.configNconf, this ),
-    _.bind( this.configLogger, this ),
-    _.bind( this.configMongo, this ),
-    _.bind( this.configPassport, this ),
-    _.bind( this.configCommonFunctions, this ),
-    _.bind( this.configOperations, this ),
-    _.bind( this.configPlatforms, this ),
-    _.bind( this.configStrategies, this )
-  ], function( err, results ) {
-    if( err ) {
-      _this.emit( 'error', err );
-    } else {
-      _this.emit( 'ready', results );
-    }
-  } );
-};
-
-Configurator.prototype.getPort = function() {
-  return nconf.get( 'webserver:port' );
-};
-
-
-// Configuration functions
-Configurator.prototype.configUnderscore = function( callback ) {
-  console.log( 'Configuring underscore' );
-
-  // underscore string
-  _.str = require('underscore.string');
-  _.mixin(_.str.exports());
-
-
-  _.mixin( {
-    isError: util.isError
-  } );
-
-  callback();
-};
-
-Configurator.prototype.configNconf = function( callback ) {
-  var CONFIGURATION_FILE = path.join( __dirname, this.FILE );
-  var OVERRIDE_FILE = path.join( __dirname, this.OVERRIDE );
-  try {
-    console.log( 'Configuring nconf' );
-    // Load configuration with nconf
-    nconf.argv();
-    nconf.env();
-    nconf.file( 'user', OVERRIDE_FILE );
-    nconf.file( 'global', CONFIGURATION_FILE );
-
-    // Fix external Applicaiton address
-    var externalAddress = nconf.get( 'webserver:externalAddress' );
-    if( !_.isString( externalAddress ) ) {
-      externalAddress = _.clone( nconf.get( 'webserver' ) );
-      externalAddress.protocol = 'http';
-
-      nconf.set( 'webserver:externalAddress', url.format( externalAddress )+'/' );
-    }
-    console.log( 'External address:', nconf.get( 'webserver:externalAddress' ) );
-
-
-    callback();
-  } catch( err ) {
-    console.error( 'Nconf configuration error', err );
-    callback( err );
+    // Import methods
+    this._initMongo = require( './configMongo' );
+    this._initRedis = require( './configRedis' );
+    this._initPassport = require( './configPassport' );
+    this._initOperations = require( './configOperations' );
+    this._initTaskTypes = require( './configTaskTypes' );
+    this._initStrategies = require( './configStrategies' );
+    this._initPlatforms = require( './configPlatforms' );
+    this._initActiveJobs = require( './configActiveJobs' );
   }
-};
-
-Configurator.prototype.configCommonFunctions = function( callback ) {
-  var log = common.log;
-  var scriptConfig = nconf.get( 'scripts' );
-  var scriptPath = path.join( __dirname, '..', scriptConfig.path );
-  var defaultPath = path.join( scriptPath, scriptConfig[ 'default' ] );
-  var userPath = path.join( scriptPath, scriptConfig.user || '' );
-
-  common.getScript = function( name, user, callback ) {
-    log.trace( 'Getting the script "%s"', name );
-
-    log.trace( 'Try user (%s) script "%s"', user, name );
-
-      // Try user
-    var file = path.join( userPath, user, name )+'.js';
-    log.trace( file );
-    fs.readFile( file, function( err, data ) {
-      if( err ) {
-        log.debug( 'User script not found "%s", getting in default', name );
-
-        // Fallback to default
-        file = path.join( defaultPath, name )+'.js';
-        log.trace( file );
-        fs.readFile( file, callback );
-      } else {
-        log.trace( 'Returning user script' );
-        callback( err, data );
-      }
-    } );
-  };
-
-  // Default script list
-  common.getDefaultScripts = function( callback ) {
-    var path = defaultPath;
-    fs.readdir( path, callback );
-  };
-
-  // User script list
-  common.getUserScripts = function( user, callback ) {
-    var path = path.join( userPath, user );
-    fs.readdir( path, callback );
-  };
-
-  callback();
-};
-
-// Load Configuration functions
-Configurator.prototype.configLogger = require( './configLogger' );
-Configurator.prototype.configMongo = require( './configMongo' );
-Configurator.prototype.configPassport = require( './configPassport' );
-Configurator.prototype.configOperations = require( './configOperations' );
-Configurator.prototype.configStrategies = require( './configStrategies' );
-Configurator.prototype.configPlatforms = require( './configPlatforms' );
 
 
-// Export the webserver configuration
+  load() {
+    console.log( 'Loading configurations' );
+
+    // Use override if present
+    try {
+      let override = require( './override.json' );
+      this.config = _.assign( {}, CONFIG, override );
+    } catch( e ) {
+      console.log( 'Override file not present' )
+    }
+
+    let externalAddress = this.externalAddress;
+    // if we don't have an external address use the server address
+    if ( !_.isString( externalAddress ) ) {
+      externalAddress = url.format( this.webserver ) + '/';
+      this.config.webserver.externalAddress = externalAddress;
+    }
+    console.log( 'External address: %s', this.externalAddress );
+
+    return Promise
+    .bind( this )
+    .then( this._initLogger )
+    .then( this._initMongo )
+    .then( this._initRedis )
+    .then( this._initPassport )
+    .then( this._initOperations )
+    .then( this._initPlatforms )
+    .then( this._initStrategies )
+    .then( this._initTaskTypes )
+    .then( this._initActiveJobs )
+    ;
+  }
+
+
+  _initLogger() {
+    console.log( 'Configuring logger' );
+    let loggerConfig = this.get( 'logger' );
+
+    let logPath = path.resolve( __dirname, '..', loggerConfig.path || 'logs' );
+
+    return mkdirp
+    // Crete folder if missing
+    .mkdirpAsync( logPath )
+    .then( ()=> {
+      let logFile = path.resolve( logPath, LOG_FILE_NAME );
+      let streams = [
+        // Console logger
+        {
+          stream: process.stdout,
+          level: 'trace',
+        },
+        // File logger
+        {
+          type: 'rotating-file',
+          path: logFile,
+          period: '1d',
+          count: 5,
+          level: 'trace',
+        },
+      ];
+
+      let log = Logger.createLogger( {
+        name: 'CrowdSearcher',
+        streams: streams,
+        serializers: {
+          err: Logger.stdSerializers.err
+        }
+      } );
+
+
+      return log;
+    } )
+    .then( log=> {
+      log.debug( 'Logger started' );
+      // Add the logger to the CS shortcuts
+      CS.log = log;
+    } )
+    ;
+  }
+
+  // Get configuration
+  get( prop ) {
+    return _.get( this.config, prop );
+  }
+  // "Getters" and getters
+  getPort() {
+    return this.port;
+  }
+  get port() {
+    return this.get( 'webserver.port' );
+  }
+  getProtocol() {
+    return this.protocol;
+  }
+  get protocol() {
+    return this.get( 'webserver.protocol' );
+  }
+  getExternalAddress() {
+    return this.externalAddress;
+  }
+  get externalAddress() {
+    return this.get( 'webserver.externalAddress' );
+  }
+  get webserver() {
+    return this.get( 'webserver' );
+  }
+}
+
+// Module initialization (at first load)
+mkdirp = Promise.promisifyAll( mkdirp, { multiArgs: true } );
+
+// Module exports
 exports = module.exports = Configurator;

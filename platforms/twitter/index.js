@@ -1,100 +1,85 @@
 /* jshint camelcase: false */
 
-// Load libraries
-var domain = require( 'domain' );
-var nconf = require('nconf');
-
-var Twit = require('twit');
+'use strict';
+var nconf = require( 'nconf' );
+var Twit = require( 'twit' );
+var CS = require( '../../core' );
 
 // Create a custom logger
-var log = common.log.child( { component: 'Facebook' } );
+var log = CS.log.child( {
+  component: 'Twitter'
+} );
 
-function execute( task, microtask, execution, config, callback ) {
-  return callback( new Error( 'Not implemented' ) );
-}
-
-
-function retrieve( task, microtask, config, cronJob ) {
-  log.trace( 'Job running' );
-  log.trace( 'Task: %s', task._id );
-  log.trace( 'Microtask: %s', microtask._id );
-  log.trace( 'Microtask metadata: %j', microtask.metadata );
-  log.trace( 'Config: %j', config );
-  log.trace( 'CronJob: %j', cronJob );
-
-}
+var request = require( 'request' );
 
 
-function create( task, microtask, config, callback ) {
-  log.warn('Not implemented');
-  return callback();
-}
-
-function invite(data, config, callback){
-  log.trace('Using the configuration %j',config);
-
-  var d = domain.createDomain();
-
-  d.on('error',callback);
-
-  var task = data.task;
-  var strategyName = config.strategyName;
-
-
+function invite( params, task, data, callback ) {
   // Task url
-  var url = nconf.get('webserver:externalAddress') + nconf.get('api:urlPath') + '/landing?task='+task._id;
+  var url = nconf.get( 'webserver:externalAddress' ) + nconf.get( 'api:urlPath' ) + '/landing?task=' + task._id;
 
-  var message = 'I just posted a task on CrowdSearcher\n'+url;
+  var twit = new Twit( {
+    consumer_key: params.consumerKey,
+    consumer_secret: params.consumerSecret,
+    access_token: params.token,
+    access_token_secret: params.tokenSecret
+  } );
 
-  if(strategyName === 'ANNOUNCEMENT'){
 
-    var twit = new Twit({
-      consumer_key: config.clientID,
-      consumer_secret: config.clientSecret,
-      access_token: config.token,
-      access_token_secret: config.tokenSecret
-    });
+  // Generate short url
+  request( {
+    url: 'http://is.gd/create.php',
+    json: true,
+    qs: {
+      format: 'json',
+      url: url
+    }
+  }, function( err, res, body ) {
+    if ( err ) log.warn( err );
 
-    twit.post('statuses/update', { status: message, includes_entities:true }, function(err, reply) {
-      if (err) return callback(err);
+    url = body.shorturl || url;
 
-      log.trace('Message posted on twitter');
-      log.trace(reply);
+    // Make configurable
+    var message = 'I just posted a task on CrowdSearcher\n' + url;
 
+    twit.post( 'statuses/update', {
+      status: message,
+      includes_entities: true
+    }, function( err ) {
+      if ( err ) return callback( err );
+
+      log.trace( 'Message posted on twitter' );
       return callback();
-    });
+    } );
 
-  }else{
-    log.error('Strategy %s not supported yet', strategyName);
-    return callback( new Error( 'Strategy not supported yet' ) );
-  }
+  } );
 
 }
 
 var Platform = {
+  name: 'Twitter',
+  description: 'Tweet on your timeline.',
+  image: 'http://www.videocv.org/wp-content/uploads/2012/01/Twitter256x2561-256x256.png',
+
   invite: invite,
-  timed: {
-    expression: '* * * * *',
-    onTick: retrieve
+  hooks: {
+    'OPEN_TASK': invite
   },
-  execute: execute,
-  create: create,
-  params : {
-    clientID:{
-      type:'string',
-      'default':''
-    },
-    clientSecret:{
-      type:'string',
-      'default':''
-    },
-    token: {
-      type: 'string',
+  params: {
+    consumerKey: {
+      type: 'password',
       'default': ''
     },
-    tokenSecret:{
-      type:'string',
-      'default':''
+    consumerSecret: {
+      type: 'password',
+      'default': ''
+    },
+    token: {
+      type: 'password',
+      'default': ''
+    },
+    tokenSecret: {
+      type: 'password',
+      'default': ''
     }
   }
 };

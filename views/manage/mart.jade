@@ -1,0 +1,71 @@
+extends layout
+
+
+mixin printData( row, name )
+  if !_.isUndefined( row[ name ] )
+    a(href='manage/'+name+'/'+row[ name ]) Link
+  else
+    | -
+
+block header
+  h1 Control Mart
+
+
+block append css
+  :stylus
+    .table
+      table-layout: fixed;
+      .link-column
+        text-align center
+        overflow: hidden
+        text-overflow: ellipsis
+
+block append css
+  link(rel='stylesheet', href='stylesheets/jquery.dataTables.css')
+  link(rel='stylesheet', href='stylesheets/dataTables.bootstrap.css')
+
+block append scripts
+  script(src='libs/jquery.dataTables.min.js')
+  script(src='libs/dataTables.bootstrap.js')
+
+block content
+  hr
+  table.table.table-striped.table-hover.table-bordered.table-condensed
+    thead: tr
+      th(title='Job').link-column Job
+      th(title='Task').link-column Task
+      th(title='Microtask').link-column Microtask
+      th(title='Operation').link-column Operation
+      th(title='Platform').link-column Platform
+      th(title='Performer').link-column Performer
+      th(title='Object').link-column Object
+      th(title='Name',width='25%') Name
+      th(title='Data',width='25%') Data
+    tbody
+      if mart && mart.length>0
+        each row in mart
+          tr
+            td.text-center: +printData( row, 'job' )
+            td.text-center: +printData( row, 'task' )
+            td.text-center: +printData( row, 'microtask' )
+            td.text-center: +printData( row, 'operation' )
+            td.text-center: +printData( row, 'platform' )
+            td.text-center: +printData( row, 'performer' )
+            td.text-center: +printData( row, 'object' )
+            td.text-center= row[ 'name' ]
+            td
+              - var data = row.data;
+              if !_.isUndefined( data )
+                if _.isObject( data )
+                  pre= JSON.stringify( data, null, 2 )
+                else
+                  .text-center: code= data
+      else
+        tr.warning: td.text-center(colspan=9)
+          p.text-warning No data present
+  if mart.length>0
+    script.
+      $( 'table' ).dataTable( {
+        bAutoWidth: false
+      } );
+  //pre= JSON.stringify( mart, null, 2 )

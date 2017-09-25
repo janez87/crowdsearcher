@@ -1,20 +1,22 @@
-
-// Load libraries
-var _ = require('underscore');
-var util = require('util');
+'use strict';
+let _ = require( 'lodash' );
+var util = require( 'util' );
+var CS = require( '../../core' );
 
 // Import a child logger
-var log = common.log.child( { component: 'Tag operation' } );
+var log = CS.log.child( {
+  component: 'Tag operation'
+} );
 
 
 // Import the models
-var Annotation = common.models.annotation;
+var Annotation = CS.models.annotation;
 
 // Create the TagError class
-var CSError = require('../../error');
+var CSError = require( '../../core/error' );
 // Create the TagError class
 var TagError = function( id, message ) {
-  TagError.super_.call( this, id, message);
+  TagError.super_.call( this, id, message );
 };
 // Make it subclass Error
 util.inherits( TagError, CSError );
@@ -30,30 +32,23 @@ function checkData( data, operation ) {
   log.debug( 'Checking %j', data );
   log.debug( 'Operation parametes: %j', params );
 
-  if( !_.isArray( data ) )
+  if ( !_.isArray( data ) )
     return new TagError( TagError.TAG_BAD_FORMAT, 'Data not sent as array' );
 }
 
 // Return an Annotation Object
 function create( data, operation, callback ) {
-  log.debug( 'Creating annotations' );
+  log.debug( 'Creating annotation' );
+
   var annotations = [];
-
-  _.each( data, function( answer ) {
-    if( !_.isArray( answer.value ) )
-      answer.value = [ answer.value ];
-
-    log.trace( 'Values: %j', answer.value );
-    _.each( answer.value, function( tag ) {
-      log.trace( 'Creating annotation' );
-      var annotation = new Annotation( {
-        response: tag,
-        object: answer.objectId,
-        operation: operation,
-        creationDate: answer.date
-      } );
-      annotations.push( annotation );
+  _.each( data.response, function( tag ) {
+    var annotation = new Annotation( {
+      response: tag,
+      object: data.object,
+      operation: operation,
+      creationDate: data.date
     } );
+    annotations.push( annotation );
   } );
 
   return callback( null, annotations );
@@ -62,6 +57,10 @@ function create( data, operation, callback ) {
 
 // Define the Operation Object
 var Tag = {
+  name: 'Tag',
+  description: 'Add a set of tags to the object.',
+  image: '',
+
   checkData: checkData,
   create: create
 };

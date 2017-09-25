@@ -1,14 +1,15 @@
 
 
-// Load libraries
+'use strict';
 var _  = require('underscore');
 var util  = require('util');
+var CS = require( '../../core' );
 
 // Import a child Logger
-//var log = common.log.child( { component: 'Check MicroTask ID' } );
+//var log = CS.log.child( { component: 'Check MicroTask ID' } );
 
 // Import the Job Model
-var Microtask = common.models.microtask;
+var Microtask = CS.models.microtask;
 
 // Generate custom error `CheckMicroTaskIdError` that inherits
 // from `APIError`
@@ -46,12 +47,12 @@ exports = module.exports = function checkMicroTaskId( req, res, next ) {
 
     if( !microtask )
       return next( new CheckMicroTaskIdError( CheckMicroTaskIdError.MICROTASK_NOT_FOUND, 'MicroTask not found', APIError.NOT_FOUND ) );
-    
+
     log.trace( 'MicroTask %s ok', id );
 
     // Pass the retrieved microtask
     req.microtask = microtask;
-    
+
     return next();
   } ) );
   */

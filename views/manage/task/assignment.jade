@@ -1,0 +1,43 @@
+include ../../includes/params
+
+.row
+  .col-md-6
+    h3 Available assignment strategies
+    .form-group
+      label(for="assignment_name") Strategy:
+      .input-group
+        select#assignment_name.form-control.input-small(
+          data-toggle='collapse',
+          data-parent='#assignment-params')
+          option(value='',selected) None
+          each assignment in config.assignment
+            option(
+              data-target='#assign-'+assignment.name,
+              value=assignment.name)= assignment.name
+        span.input-group-btn
+          button.btn.btn-small.btn-success.add(
+            data-type='strategy',
+            data-source='#assignment_name',
+            data-target='#assignment_list') Set 
+    hr
+    #assignment-params
+      each assignment in config.assignment
+        div.collapse(id='assign-'+assignment.name)
+          h4 Assignment strategy parameters
+          if !_.isEmpty( assignment.params ) 
+            +printParamsInput( assignment.params, 'assign-'+assignment.name )
+          else
+            blockquote No parameters needed
+  .col-md-6
+    h3 Selected assignment
+    ul#assignment_list.list-group
+
+script.
+  $( '#assignment .add' ).on( 'click', function ( evt ) {
+    var numChild = $( '#assignment_list' ).children().length;
+    if( numChild>0 ) {
+      evt.stopImmediatePropagation();
+      evt.stopPropagation();
+      return false;
+    }
+  } );
